@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CheckSquare, Clock } from 'lucide-react';
+import { X, Zap, Target, Clock, Plus } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 
 interface TaskModalProps {
@@ -47,102 +47,114 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTa
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-md overflow-hidden">
-        {/* Compact Header - Görev için */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <CheckSquare className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                {editingTask ? 'Görevi Düzenle' : 'Hızlı Görev'}
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Basit ve etkili
-              </p>
-            </div>
-          </div>
+      <div className="bg-gradient-to-br from-white via-green-50/20 to-emerald-50/10 dark:from-gray-900 dark:via-gray-800/80 dark:to-green-900/10 
+                      rounded-2xl shadow-2xl border border-white/30 dark:border-gray-700/50 w-full max-w-md 
+                      backdrop-blur-xl overflow-hidden relative">
+        
+        {/* Quick Action Header */}
+        <div className="relative p-6 bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-teal-500/10 border-b border-green-200/30 dark:border-green-700/30">
           <button 
             onClick={handleClose}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+            className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 
+                     hover:bg-gray-100/50 dark:hover:bg-gray-800/50 rounded-lg transition-all duration-200"
           >
             <X className="w-4 h-4" />
           </button>
+          
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl">
+              <Zap className="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                {editingTask ? 'Güncelle' : 'Hızlı Görev'}
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {editingTask ? 'Görevi düzenle' : 'Anında oluştur'}
+              </p>
+            </div>
+          </div>
         </div>
         
-        {/* Compact Body - Görev için daha sıkışık */}
-        <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Görev Başlığı <span className="text-red-500">*</span>
-            </label>
+        {/* Compact Form */}
+        <div className="p-6 space-y-5">
+          {/* Quick Title Input */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <label className="text-sm font-semibold">Ne yapılacak?</label>
+            </div>
             <input
               type="text"
               value={taskData.title}
               onChange={(e) => setTaskData(prev => ({ ...prev, title: e.target.value }))}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500
-                       placeholder-gray-500 dark:placeholder-gray-400"
-              placeholder="Ne yapılacak?"
+              className="w-full px-4 py-3 text-base font-medium border-2 border-gray-200/60 dark:border-gray-700/60 rounded-xl
+                       bg-white/70 dark:bg-gray-800/70 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-3 focus:ring-green-500/30 focus:border-green-400/50 
+                       placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200"
+              placeholder="Örn: Raporu tamamla, alışveriş yap..."
               autoFocus
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Kısa Açıklama
+          {/* Optional Description */}
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              Detay (Opsiyonel)
             </label>
             <textarea
               value={taskData.description}
               onChange={(e) => setTaskData(prev => ({ ...prev, description: e.target.value }))}
-              rows={3}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500
-                       placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-              placeholder="Ek detaylar (opsiyonel)"
+              rows={2}
+              className="w-full px-4 py-2.5 text-sm border border-gray-200/60 dark:border-gray-700/60 rounded-lg
+                       bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400/40 
+                       placeholder-gray-400 dark:placeholder-gray-500 resize-none transition-all duration-200"
+              placeholder="Kısa açıklama ekle..."
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Bitiş Tarihi
-            </label>
-            <div className="relative">
-              <input
-                type="date"
-                value={taskData.dueDate}
-                onChange={(e) => setTaskData(prev => ({ ...prev, dueDate: e.target.value }))}
-                className="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-green-500"
-              />
-              <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+          {/* Date Picker */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <Clock className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <label className="text-sm font-semibold">Ne zaman?</label>
             </div>
+            <input
+              type="date"
+              value={taskData.dueDate}
+              onChange={(e) => setTaskData(prev => ({ ...prev, dueDate: e.target.value }))}
+              className="w-full px-4 py-3 border border-gray-200/60 dark:border-gray-700/60 rounded-xl
+                       bg-white/50 dark:bg-gray-800/50 text-gray-900 dark:text-white
+                       focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400/40 
+                       transition-all duration-200"
+            />
           </div>
         </div>
         
-        {/* Compact Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
-          <button
-            onClick={handleClose}
-            className="px-5 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 
-                     hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors font-medium"
-          >
-            İptal
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!taskData.title.trim()}
-            className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 
-                     disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white 
-                     rounded-lg transition-all font-medium shadow-md hover:shadow-lg
-                     disabled:text-gray-500 dark:disabled:text-gray-400"
-          >
-            {editingTask ? 'Güncelle' : 'Oluştur'}
-          </button>
+        {/* Action Buttons */}
+        <div className="px-6 py-4 bg-gray-50/30 dark:bg-gray-800/30 border-t border-gray-200/30 dark:border-gray-700/30">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleClose}
+              className="flex-1 px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 
+                       text-sm font-medium transition-all duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 rounded-lg"
+            >
+              İptal
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!taskData.title.trim()}
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 
+                       disabled:from-gray-300 disabled:to-gray-400 dark:disabled:from-gray-600 dark:disabled:to-gray-700
+                       disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg transition-all duration-200
+                       shadow-md hover:shadow-lg disabled:shadow-none flex items-center justify-center gap-2
+                       disabled:text-gray-500 dark:disabled:text-gray-400"
+            >
+              <Plus className="w-4 h-4" />
+              {editingTask ? 'Güncelle' : 'Oluştur'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
