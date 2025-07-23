@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Search, Tag, Calendar, FileText, Edit, Trash2 } from 'lucide-react';
+import { Plus, Tag, Calendar, FileText, Edit, Trash2, Pin } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 
 export const Notes: React.FC = () => {
-  const { notes, loading, addNote, updateNote, deleteNote, searchNotes } = useNotes();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { notes, loading, addNote, updateNote, deleteNote, pinNote } = useNotes();
   const [selectedTag, setSelectedTag] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
@@ -14,7 +13,17 @@ export const Notes: React.FC = () => {
     tags: [] as string[]
   });
 
-  const filteredNotes = searchNotes(searchTerm, selectedTag);
+  // Filter by selected tag only
+  const filteredNotes = selectedTag 
+    ? notes.filter(note => {
+        try {
+          const tags = JSON.parse(note.tags || '[]') as string[];
+          return tags.includes(selectedTag);
+        } catch {
+          return false;
+        }
+      })
+    : notes;
   const allTags = Array.from(new Set(notes.flatMap(note => {
     try {
       return JSON.parse(note.tags || '[]') as string[];
@@ -91,21 +100,8 @@ export const Notes: React.FC = () => {
         </button>
       </div>
 
-      {/* Arama ve Filtreleme */}
+      {/* Filtreleme */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Notlarda ara..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-gray-600 rounded-lg
-                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-          />
-        </div>
-        
         <div className="relative">
           <Tag className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <select
@@ -127,7 +123,11 @@ export const Notes: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredNotes.length > 0 ? (
           filteredNotes.map((note) => (
-            <div key={note.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div 
+              key={note.id} 
+              data-note-id={note.id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
               <div className="flex items-start justify-between mb-3">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
                   {note.title}
@@ -180,7 +180,7 @@ export const Notes: React.FC = () => {
           <div className="col-span-full flex flex-col items-center justify-center py-12">
             <FileText className="w-12 h-12 text-gray-400 mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-center">
-              {searchTerm || selectedTag ? 'Arama kriterlerinize uygun not bulunamadı' : 'Henüz not eklenmemiş'}
+              {selectedTag ? 'Seçili etikete uygun not bulunamadı' : 'Henüz not eklenmemiş'}
             </p>
           </div>
         )}

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Calendar, CheckSquare, Clock, Plus, TrendingUp, Search, Pin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, CheckSquare, Clock, Plus, TrendingUp, Pin } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 
@@ -7,42 +7,10 @@ export const Dashboard: React.FC = () => {
   const { tasks, loading: tasksLoading, toggleTask, addTask, getTaskStats, pinTask } = useTasks();
   const { notes, loading: notesLoading, pinNote } = useNotes();
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   const stats = getTaskStats();
   
-  // Arama filtreleme
-  const filteredTasks = useMemo(() => {
-    if (!searchQuery.trim()) return tasks;
-    const query = searchQuery.toLowerCase();
-    return tasks.filter(task => 
-      task.title.toLowerCase().includes(query) ||
-      (task.description && task.description.toLowerCase().includes(query))
-    );
-  }, [tasks, searchQuery]);
-
-  const filteredNotes = useMemo(() => {
-    if (!searchQuery.trim()) return notes;
-    const query = searchQuery.toLowerCase();
-    return notes.filter(note => {
-      const titleMatch = note.title.toLowerCase().includes(query);
-      const contentMatch = note.content.toLowerCase().includes(query);
-      let tagsMatch = false;
-      
-      if (note.tags) {
-        try {
-          const parsedTags = JSON.parse(note.tags) as string[];
-          tagsMatch = parsedTags.some(tag => tag.toLowerCase().includes(query));
-        } catch {
-          tagsMatch = false;
-        }
-      }
-      
-      return titleMatch || contentMatch || tagsMatch;
-    });
-  }, [notes, searchQuery]);
-
-  const todayTasks = filteredTasks.filter(task => {
+  const todayTasks = tasks.filter(task => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
@@ -50,7 +18,7 @@ export const Dashboard: React.FC = () => {
     return task.dueDate && task.dueDate >= today && task.dueDate < tomorrow;
   });
 
-  const recentNotes = filteredNotes.slice(0, searchQuery.trim() ? filteredNotes.length : 3);
+  const recentNotes = notes.slice(0, 3);
 
   const currentDate = new Date().toLocaleDateString('tr-TR', {
     weekday: 'long',
@@ -97,20 +65,6 @@ export const Dashboard: React.FC = () => {
           <Calendar className="w-4 h-4" />
           {currentDate}
         </p>
-      </div>
-
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Notlar ve görevlerde ara..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-        </div>
       </div>
 
       {/* Statistics Cards */}
