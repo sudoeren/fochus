@@ -36,7 +36,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({ isOpen, onClose, onNavigat
       icon: <Plus className="w-4 h-4" />,
       action: async () => {
         const title = query.trim() || 'Yeni Not';
-        await addNote({ title, content: '', tags: [] });
+        await addNote({ title, content: '' });
         onNavigate('notes');
         onClose();
       }
@@ -158,14 +158,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({ isOpen, onClose, onNavigat
     notes.forEach(note => {
       const titleMatch = note.title.toLowerCase().includes(queryLower);
       const contentMatch = note.content.toLowerCase().includes(queryLower);
-      let tagsMatch = false;
-      
-      try {
-        const tags = JSON.parse(note.tags || '[]') as string[];
-        tagsMatch = tags.some(tag => tag.toLowerCase().includes(queryLower));
-      } catch {}
 
-      if (titleMatch || contentMatch || tagsMatch) {
+      if (titleMatch || contentMatch) {
         results.push({
           id: `note-${note.id}`,
           title: note.title,
@@ -335,7 +329,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({ isOpen, onClose, onNavigat
                 <button
                   onClick={() => {
                     const title = query.trim();
-                    addNote({ title, content: '', tags: [] });
+                    addNote({ title, content: '' });
                     onNavigate('notes');
                     onClose();
                   }}

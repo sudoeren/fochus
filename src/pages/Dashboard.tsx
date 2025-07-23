@@ -4,7 +4,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 
 export const Dashboard: React.FC = () => {
-  const { tasks, loading: tasksLoading, toggleTask, addTask, getTaskStats, pinTask } = useTasks();
+  const { tasks, loading: tasksLoading, toggleTask, addTask, getTaskStats } = useTasks();
   const { notes, loading: notesLoading, pinNote } = useNotes();
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -224,23 +224,6 @@ export const Dashboard: React.FC = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                     {note.content.substring(0, 100)}...
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    {(() => {
-                      try {
-                        const tags = JSON.parse(note.tags || '[]') as string[];
-                        return tags.map((tag: string, index: number) => (
-                          <span 
-                            key={index}
-                            className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ));
-                      } catch {
-                        return null;
-                      }
-                    })()}
-                  </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                     {note.createdAt.toLocaleDateString('tr-TR')}
                   </p>

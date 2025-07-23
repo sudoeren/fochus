@@ -4,9 +4,9 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  tags: string[];
   createdAt: Date;
   updatedAt: Date;
+  isPinned: boolean;
 }
 
 export type TaskStatus = 'PENDING' | 'COMPLETED' | 'POSTPONED';

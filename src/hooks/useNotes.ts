@@ -16,7 +16,6 @@ export const useNotes = () => {
         id: note.id,
         title: note.title,
         content: note.content,
-        tags: JSON.parse(note.tags),
         isPinned: note.isPinned || false,
         createdAt: new Date(note.createdAt),
         updatedAt: new Date(note.updatedAt)
@@ -35,19 +34,18 @@ export const useNotes = () => {
   }, []);
 
   // Add new note
-  const addNote = async (noteData: { title: string; content: string; tags: string[] }) => {
+  const addNote = async (noteData: { title: string; content: string }) => {
     try {
       const newNote = await window.electronAPI.database.createNote({
         title: noteData.title,
         content: noteData.content,
-        tags: noteData.tags
+        tags: []
       });
       
       const formattedNote: Note = {
         id: newNote.id,
         title: newNote.title,
         content: newNote.content,
-        tags: JSON.parse(newNote.tags),
         isPinned: newNote.isPinned || false,
         createdAt: new Date(newNote.createdAt),
         updatedAt: new Date(newNote.updatedAt)
@@ -62,19 +60,18 @@ export const useNotes = () => {
   };
 
   // Update note
-  const updateNote = async (id: string, noteData: { title: string; content: string; tags: string[] }) => {
+  const updateNote = async (id: string, noteData: { title: string; content: string }) => {
     try {
       const updatedNote = await window.electronAPI.database.updateNote(id, {
         title: noteData.title,
         content: noteData.content,
-        tags: noteData.tags
+        tags: []
       });
       
       const formattedNote: Note = {
         id: updatedNote.id,
         title: updatedNote.title,
         content: updatedNote.content,
-        tags: JSON.parse(updatedNote.tags),
         isPinned: updatedNote.isPinned || false,
         createdAt: new Date(updatedNote.createdAt),
         updatedAt: new Date(updatedNote.updatedAt)
@@ -111,7 +108,6 @@ export const useNotes = () => {
         id: updatedNote.id,
         title: updatedNote.title,
         content: updatedNote.content,
-        tags: JSON.parse(updatedNote.tags),
         isPinned: updatedNote.isPinned,
         createdAt: new Date(updatedNote.createdAt),
         updatedAt: new Date(updatedNote.updatedAt)
@@ -129,7 +125,7 @@ export const useNotes = () => {
   };
 
   // Search notes
-  const searchNotes = (searchTerm: string, selectedTag?: string) => {
+  const searchNotes = (searchTerm: string) => {
     let filtered = notes;
 
     if (searchTerm) {
@@ -137,10 +133,6 @@ export const useNotes = () => {
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    }
-
-    if (selectedTag) {
-      filtered = filtered.filter(note => note.tags.includes(selectedTag));
     }
 
     return filtered;

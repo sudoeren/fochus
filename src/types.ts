@@ -32,7 +32,6 @@ export interface Note {
   id: string;
   title: string;
   content: string;
-  tags: string; // JSON string olarak saklanıyor
   isPinned?: boolean;
   isDeleted?: boolean;
   deletedAt?: Date;

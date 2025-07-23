@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, Clock, CheckCircle, Circle, Edit, Trash2, Pin } from 'lucide-react';
+import { Plus, Calendar, Clock, CheckCircle, Circle, Edit, Trash2, Pin, X } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 
 export const Tasks: React.FC = () => {
@@ -243,39 +243,48 @@ export const Tasks: React.FC = () => {
         )}
       </div>
 
-      {/* Add/Edit Task Modal */}
+      {/* Enhanced Add/Edit Task Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {editingTask ? 'Görevi Düzenle' : 'Yeni Görev'}
-              </h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-lg max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {editingTask ? 'Görevi Düzenle' : 'Yeni Görev Oluştur'}
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {editingTask ? 'Mevcut görevinizi düzenleyin' : 'Yeni bir görev ekleyin'}
+                </p>
+              </div>
               <button 
                 onClick={() => {
                   setShowAddModal(false);
                   setEditingTask(null);
                   setNewTask({ title: '', description: '', dueDate: '' });
                 }}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="space-y-4">
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Görev Başlığı *
+                  Görev Başlığı <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={newTask.title}
                   onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                  placeholder="Görev başlığı..."
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
+                           placeholder-gray-500 dark:placeholder-gray-400"
+                  placeholder="Görevinize bir başlık verin..."
+                  autoFocus
                 />
               </div>
               
@@ -286,11 +295,12 @@ export const Tasks: React.FC = () => {
                 <textarea
                   value={newTask.description}
                   onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none"
-                  placeholder="Görev açıklaması..."
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent
+                           placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                  placeholder="Görev hakkında detaylı bilgi (opsiyonel)..."
                 />
               </div>
               
@@ -298,35 +308,41 @@ export const Tasks: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Bitiş Tarihi
                 </label>
-                <input
-                  type="date"
-                  value={newTask.dueDate}
-                  onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-                />
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, dueDate: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
+                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                  />
+                  <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                </div>
               </div>
             </div>
             
-            <div className="flex justify-end gap-3 mt-6">
+            {/* Modal Footer */}
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   setEditingTask(null);
                   setNewTask({ title: '', description: '', dueDate: '' });
                 }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                className="px-6 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 
+                         hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors font-medium"
               >
                 İptal
               </button>
               <button
                 onClick={handleSaveTask}
                 disabled={!newTask.title.trim()}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed
-                         text-white rounded-lg transition-colors"
+                className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 
+                         disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium
+                         disabled:text-gray-500 dark:disabled:text-gray-400"
               >
-                {editingTask ? 'Güncelle' : 'Kaydet'}
+                {editingTask ? 'Görevi Güncelle' : 'Görevi Kaydet'}
               </button>
             </div>
           </div>
