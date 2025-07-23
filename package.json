@@ -1,0 +1,76 @@
+{
+  "name": "fokus",
+  "version": "1.0.0",
+  "description": "Kişisel üretkenlik uygulaması - Not alma, görev yönetimi ve haftalık planlama",
+  "main": "dist-electron/main.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:5173 && npm run dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "tsc -p electron/tsconfig.json && electron dist-electron/main.js",
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build:app": "npm run build && electron-builder",
+    "preview": "vite preview",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
+  },
+  "keywords": [
+    "electron",
+    "react",
+    "typescript",
+    "productivity",
+    "notes",
+    "tasks"
+  ],
+  "author": "Fokus Developer",
+  "license": "MIT",
+  "type": "commonjs",
+  "build": {
+    "appId": "com.fokus.desktop",
+    "productName": "Fokus",
+    "directories": {
+      "output": "dist-app"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "dist-renderer/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "@types/node": "^24.1.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.3",
+    "electron-builder": "^26.0.12",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.5",
+    "wait-on": "^8.0.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.525.0",
+    "prisma": "^6.12.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
