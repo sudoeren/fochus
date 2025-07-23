@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Calendar, CheckSquare, Clock, Plus, TrendingUp, Pin } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 
-export const Dashboard: React.FC = () => {
-  const { tasks, loading: tasksLoading, toggleTask, addTask, getTaskStats } = useTasks();
+interface DashboardProps {
+  onOpenNoteModal: () => void;
+  onOpenTaskModal: () => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onOpenNoteModal, onOpenTaskModal }) => {
+  const { tasks, loading: tasksLoading, toggleTask, getTaskStats } = useTasks();
   const { notes, loading: notesLoading, pinNote } = useNotes();
-  const [newTaskTitle, setNewTaskTitle] = useState('');
 
   const stats = getTaskStats();
   
@@ -26,17 +30,6 @@ export const Dashboard: React.FC = () => {
     month: 'long',
     day: 'numeric'
   });
-
-  const handleAddTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newTaskTitle.trim()) {
-      await addTask({ 
-        title: newTaskTitle.trim(),
-        dueDate: new Date() // Bugün için
-      });
-      setNewTaskTitle('');
-    }
-  };
 
   const handleToggleTask = async (taskId: string) => {
     await toggleTask(taskId);
@@ -121,27 +114,16 @@ export const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Add Task */}
-          <form onSubmit={handleAddTask} className="mb-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                placeholder="Hızlı görev ekle..."
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm
-                         transition-colors duration-200 flex items-center gap-1"
-              >
-                <Plus className="w-4 h-4" />
-                Ekle
-              </button>
-            </div>
-          </form>
+          <div className="mb-4">
+            <button
+              onClick={onOpenTaskModal}
+              className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md
+                       transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Yeni Görev Ekle
+            </button>
+          </div>
 
           <div className="space-y-3">
             {todayTasks.length > 0 ? (
@@ -190,6 +172,18 @@ export const Dashboard: React.FC = () => {
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {notes.length} not
             </span>
+          </div>
+
+          {/* Quick Add Note */}
+          <div className="mb-4">
+            <button
+              onClick={onOpenNoteModal}
+              className="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-md
+                       transition-colors duration-200 flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Yeni Not Ekle
+            </button>
           </div>
 
           <div className="space-y-3">

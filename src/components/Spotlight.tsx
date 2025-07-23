@@ -290,6 +290,19 @@ export const Spotlight: React.FC<SpotlightProps> = ({ isOpen, onClose, onNavigat
     setSelectedIndex(0);
   }, [searchResults.length]);
 
+  // Scroll selected item into view
+  useEffect(() => {
+    if (mode === 'search') {
+      const selectedElement = document.querySelector(`.spotlight-item-${selectedIndex}`);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest' 
+        });
+      }
+    }
+  }, [selectedIndex, mode]);
+
   if (!isOpen) return null;
 
   // Render different modes
@@ -445,14 +458,14 @@ export const Spotlight: React.FC<SpotlightProps> = ({ isOpen, onClose, onNavigat
             </div>
 
             {/* Results */}
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-96 overflow-y-auto scrollbar-hide">
               {searchResults.length > 0 ? (
                 <div className="py-2">
                   {searchResults.map((result, index) => (
                     <button
                       key={result.id}
                       onClick={result.action}
-                      className={`w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
+                      className={`spotlight-item-${index} w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
                         index === selectedIndex 
                           ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500' 
                           : ''

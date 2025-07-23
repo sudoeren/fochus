@@ -77,11 +77,14 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard 
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onOpenTaskModal={() => setShowTaskModal(true)}
+        />;
       case 'notes':
-        return <Notes />;
+        return <Notes onOpenNoteModal={() => setShowNoteModal(true)} />;
       case 'tasks':
-        return <Tasks />;
+        return <Tasks onOpenTaskModal={() => setShowTaskModal(true)} />;
       case 'weekly':
         return <WeeklyPlanner />;
       case 'trash':
@@ -89,7 +92,10 @@ const App: React.FC = () => {
       case 'settings':
         return <Settings />;
       default:
-        return <Dashboard />;
+        return <Dashboard 
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onOpenTaskModal={() => setShowTaskModal(true)}
+        />;
     }
   };
 
