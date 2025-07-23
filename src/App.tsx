@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
+import { NoteModal } from './components/NoteModal';
+import { TaskModal } from './components/TaskModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
 import { Tasks } from './pages/Tasks';
@@ -12,6 +14,8 @@ import { Trash } from './pages/Trash';
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
 
   // Shortcut handler
   useEffect(() => {
@@ -24,10 +28,10 @@ const App: React.FC = () => {
           else if (data === 'weekly') setActiveView('weekly');
           break;
         case 'new-note':
-          setActiveView('notes');
+          setShowNoteModal(true);
           break;
         case 'new-task':
-          setActiveView('tasks');
+          setShowTaskModal(true);
           break;
         case 'search':
           setIsSpotlightOpen(true);
@@ -102,6 +106,17 @@ const App: React.FC = () => {
           isOpen={isSpotlightOpen}
           onClose={() => setIsSpotlightOpen(false)}
           onNavigate={setActiveView}
+        />
+        
+        {/* Global Modals */}
+        <NoteModal 
+          isOpen={showNoteModal}
+          onClose={() => setShowNoteModal(false)}
+        />
+        
+        <TaskModal 
+          isOpen={showTaskModal}
+          onClose={() => setShowTaskModal(false)}
         />
       </div>
     </ThemeProvider>

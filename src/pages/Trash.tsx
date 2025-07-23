@@ -86,6 +86,28 @@ export const Trash: React.FC = () => {
     }
   };
 
+  const clearAllTrash = async () => {
+    if (!confirm('Çöp kutusu tamamen temizlenecek. Tüm öğeler kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?')) {
+      return;
+    }
+
+    try {
+      // Delete all notes
+      await Promise.all(deletedItems.filter(item => item.type === 'note').map(item => 
+        (window.electronAPI.database as any).permanentlyDeleteNote(item.id)
+      ));
+
+      // Delete all tasks
+      await Promise.all(deletedItems.filter(item => item.type === 'task').map(item => 
+        (window.electronAPI.database as any).permanentlyDeleteTask(item.id)
+      ));
+      
+      setDeletedItems([]);
+    } catch (error) {
+      console.error('Error clearing trash:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex items-center justify-center">
@@ -97,14 +119,25 @@ export const Trash: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <Trash2 className="w-8 h-8" />
-          Çöp Kutusu
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Silinen notlar ve görevler burada görünür. Geri yükleyebilir veya kalıcı olarak silebilirsiniz.
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+            <Trash2 className="w-8 h-8" />
+            Çöp Kutusu
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Silinen notlar ve görevler burada görünür. {deletedItems.length} öğe bulundu.
+          </p>
+        </div>
+        {deletedItems.length > 0 && (
+          <button
+            onClick={clearAllTrash}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            Çöp Kutusunu Temizle
+          </button>
+        )}
       </div>
 
       {/* Deleted Items */}

@@ -6,7 +6,7 @@ export const Settings: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
+    <div className="p-6 space-y-6 max-w-4xl max-h-full overflow-y-auto">
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
         Ayarlar
       </h1>
