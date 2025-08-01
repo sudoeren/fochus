@@ -1,33 +1,46 @@
 # Fokus - Kişisel Üretkenlik Uygulaması
 
-Fokus, not alma, günlük görev takibi ve haftalık planlama için geliştirilmiş minimalist bir masaüstü uygulamasıdır. Hızlı, çevrimdışı çalışan ve kullanıcı dostu bir deneyim sunar.
+Fokus, not alma, görev yönetimi ve haftalık planlama için geliştirilmiş modern bir masaüstü uygulamasıdır. Electron + React + TypeScript teknolojileri kullanılarak geliştirilmiştir.
 
-## ✨ Özellikler
+## ✨ Temel Özellikler
 
-### 📝 Notlar
-- Başlık ve içerik alanı
-- Etiket sistemi
-- Tarih damgası
-- Arama ve filtreleme
-- Oluşturma, düzenleme ve silme
+### 📝 Not Yönetimi
+- Başlık ve zengin içerik editörü
+- Etiket sistemi ile kategorizasyon
+- Otomatik tarih damgası
+- Gelişmiş arama ve filtreleme
+- Modal tabanlı düzenleme arayüzü
+- Çöp kutusu ile güvenli silme
 
 ### ✅ Görev Yönetimi
-- Günlük to-do listesi
-- Görev durumları: Bekliyor, Tamamlandı, Ertelendi
-- Hızlı görev ekleme
-- Görev düzenleme ve silme
+- Modern kart tabanlı görev görünümü
+- Görev listeleri ve kategoriler
+- Görev durumu takibi (Bekliyor, Tamamlandı, Ertelendi)
+- Sabitleme özelliği ile önemli görevler
+- Sürükle-bırak ile liste transferi
+- İstatistik kartları ve ilerleme takibi
+
+### 🔍 Spotlight Arama
+- Ctrl+K ile hızlı arama ve komut çalıştırma
+- Navigasyon kısayolları
+- Hızlı görev ve not oluşturma
+- Özelleştirilebilir komut sıralaması
+- Akıllı filtreleme ve öneriler
 
 ### 📅 Haftalık Planlayıcı
-- 7 günlük görünüm
-- Gün bazlı görev listeleri
-- Haftalık özet ve istatistikler
-- Sürükle-bırak sıralama (gelecek sürüm)
+- 7 günlük detaylı görünüm
+- Gün bazlı görev organizasyonu
+- Haftalık özet ve analytics
+- İlerleme çubukları
+- Geçmiş hafta karşılaştırmaları
 
-### 🎨 Tema ve Görünüm
-- Açık ve koyu mod desteği
-- Sistem teması takibi
-- Minimalist tasarım
+### 🎨 Arayüz ve Tema
+- Açık, koyu ve sistem modu desteği
+- Tailwind CSS ile modern tasarım
+- Responsive layout (masaüstü odaklı)
+- Lucide React ikonları
 - Türkçe dil desteği
+- Minimalist ve temiz arayüz
 
 ## 🛠️ Teknolojiler
 
@@ -124,10 +137,38 @@ fokus/
 
 - `Ctrl+N` - Yeni not
 - `Ctrl+T` - Yeni görev
-- `Ctrl+F` - Arama
-- `Ctrl+,` - Ayarlar
+## ⌨️ Klavye Kısayolları
+
+### Genel
+- `Ctrl+K` - Spotlight açık/kapat
+- `Ctrl+N` - Yeni not oluştur
+- `Ctrl+T` - Yeni görev oluştur
+- `Ctrl+,` - Ayarlar sayfası
 - `F11` - Tam ekran
 - `F12` - Geliştirici araçları
+
+### Spotlight İçinde
+- `↑` / `↓` - Yukarı/aşağı hareket
+- `Enter` - Seçili öğeyi aç/çalıştır
+- `Esc` - Spotlight'ı kapat
+
+### Görev Yönetimi
+- `Space` - Görev durumunu değiştir
+- `Delete` - Görevi sil
+- `Ctrl+P` - Görevi sabitle/sabitlemeyi kaldır
+
+## 🎯 Gelecek Özellikler
+
+- [ ] Görevler arası bağımlılık
+- [ ] Pomodoro timer entegrasyonu
+- [ ] Export/import fonksiyonları
+- [ ] Kategori bazlı raporlama
+- [ ] Widget modu
+- [ ] Bulut senkronizasyonu (isteğe bağlı)
+- [ ] Markdown not desteği
+- [ ] Klavye kısayolları kişiselleştirme
+- [ ] Otomatik yedekleme
+- [ ] Bildirim sistemi
 
 ## 🔧 Geliştirme
 
@@ -141,20 +182,20 @@ fokus/
 ### Hata Raporlama
 Hataları Issues sekmesinden rapor edebilirsiniz.
 
-## 📄 Lisans
+## � Bilinen Sorunlar
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+Şu anda bilinen kritik sorun bulunmamaktadır. Sorun yaşarsanız GitHub Issues bölümünden bildirebilirsiniz.
 
-## 🎯 Gelecek Özellikler (Roadmap)
+## �📄 Lisans
 
-- [ ] Bildirim sistemi
-- [ ] Veri import/export
-- [ ] Markdown not desteği
-- [ ] Sürükle-bırak görev sıralama
-- [ ] Görev kategorileri
-- [ ] Klavye kısayolları kişiselleştirme
-- [ ] Otomatik yedekleme
+Bu proje MIT lisansı altında dağıtılmaktadır. Detaylar için [LICENSE](LICENSE) dosyasını inceleyin.
+
+## 👤 Geliştirici
+
+Fokus, kişisel üretkenliği artırmak için modern teknolojilerle geliştirilmiş bir uygulamadır.
 
 ---
 
 **Fokus** ile üretkenliğinizi artırın! 🚀
+
+*Son güncelleme: Aralık 2024*

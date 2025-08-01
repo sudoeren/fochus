@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Plus, Trash2, Pin, Calendar } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
+import { EmptyState } from '../components/EmptyState';
 
 interface NotesProps {
   onOpenNoteModal: () => void;
@@ -127,25 +128,14 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
             </div>
           ))
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-full flex items-center justify-center mb-6">
-              <Plus className="w-12 h-12 text-blue-500 dark:text-blue-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Henüz notunuz yok
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
-              İlk notunuzu oluşturarak düşüncelerinizi kaydetmeye başlayın. Notlarınızı etiketleyebilir ve sabitleyebilirsiniz.
-            </p>
-            <button
-              onClick={onOpenNoteModal}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                       text-white px-6 py-3 rounded-lg inline-flex items-center gap-2 transition-all duration-200 
-                       shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-              <Plus className="w-5 h-5" />
-              İlk Notumu Oluştur
-            </button>
+          <div className="col-span-full">
+            <EmptyState
+              type="notes"
+              title="Henüz notunuz yok"
+              description="İlk notunuzu oluşturarak düşüncelerinizi kaydetmeye başlayın. Notlarınızı etiketleyebilir ve sabitleyebilirsiniz."
+              actionText="İlk Notumu Oluştur"
+              onAction={onOpenNoteModal}
+            />
           </div>
         )}
       </div>

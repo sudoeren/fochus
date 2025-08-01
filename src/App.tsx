@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
-import { Spotlight } from './components/Spotlight';
+import { SpotlightNew } from './components/SpotlightNew';
 import { NoteModal } from './components/NoteModal';
 import { TaskModal } from './components/TaskModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
-import { Tasks } from './pages/Tasks';
+import { TasksNew } from './pages/Tasks_new';
 import { WeeklyPlanner } from './pages/WeeklyPlanner';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
@@ -16,6 +16,17 @@ const App: React.FC = () => {
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<any>(null);
+
+  const handleEditTask = (task: any) => {
+    setEditingTask(task);
+    setShowTaskModal(true);
+  };
+
+  const closeTaskModal = () => {
+    setShowTaskModal(false);
+    setEditingTask(null);
+  };
 
   // Shortcut handler
   useEffect(() => {
@@ -80,11 +91,15 @@ const App: React.FC = () => {
         return <Dashboard 
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
+          onEditTask={handleEditTask}
         />;
       case 'notes':
         return <Notes onOpenNoteModal={() => setShowNoteModal(true)} />;
       case 'tasks':
-        return <Tasks onOpenTaskModal={() => setShowTaskModal(true)} />;
+        return <TasksNew 
+          onOpenTaskModal={() => setShowTaskModal(true)}
+          onEditTask={handleEditTask}
+        />;
       case 'weekly':
         return <WeeklyPlanner />;
       case 'trash':
@@ -108,21 +123,32 @@ const App: React.FC = () => {
         </main>
         
         {/* Spotlight */}
-        <Spotlight 
+        <SpotlightNew 
           isOpen={isSpotlightOpen}
           onClose={() => setIsSpotlightOpen(false)}
           onNavigate={setActiveView}
+          onCreateNote={() => setShowNoteModal(true)}
+          onCreateTask={() => setShowTaskModal(true)}
         />
         
         {/* Global Modals */}
         <NoteModal 
           isOpen={showNoteModal}
           onClose={() => setShowNoteModal(false)}
+          onEscapeToSpotlight={() => {
+            setShowNoteModal(false);
+            setIsSpotlightOpen(true);
+          }}
         />
         
         <TaskModal 
           isOpen={showTaskModal}
-          onClose={() => setShowTaskModal(false)}
+          onClose={closeTaskModal}
+          editingTask={editingTask}
+          onEscapeToSpotlight={() => {
+            closeTaskModal();
+            setIsSpotlightOpen(true);
+          }}
         />
       </div>
     </ThemeProvider>

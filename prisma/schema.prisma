@@ -11,33 +11,84 @@ datasource db {
 }
 
 model Note {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  tags      String   // JSON string olarak saklanacak
-  isPinned  Boolean  @default(false)
-  isDeleted Boolean  @default(false)
-  deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  content       String   // Rich text HTML content
+  plainContent  String?  // Plain text for search
+  tags          String   // JSON string olarak saklanacak
+  isPinned      Boolean  @default(false)
+  isDeleted     Boolean  @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reminderAt    DateTime?
+  hasReminder   Boolean  @default(false)
 }
 
 model Task {
-  id          String     @id @default(cuid())
+  id            String         @id @default(cuid())
+  title         String
+  description   String?
+  status        TaskStatus     @default(PENDING)
+  dueDate       DateTime?
+  isCompleted   Boolean        @default(false)
+  isPinned      Boolean        @default(false)
+  isDeleted     Boolean        @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  parentId      String?        // Alt görevler için
+  parent        Task?          @relation("TaskHierarchy", fields: [parentId], references: [id])
+  subtasks      Task[]         @relation("TaskHierarchy")
+  order         Int            @default(0)
+  reminderAt    DateTime?
+  hasReminder   Boolean        @default(false)
+  
+  // Task Lists
+  listId        String?
+  list          TaskList?      @relation(fields: [listId], references: [id])
+  
+  // Recurring task fields
+  isRecurring   Boolean        @default(false)
+  recurringType RecurringType?
+  recurringInterval Int?       // Her X günde/haftada/ayda
+  recurringDays String?        // JSON array - hangi günlerde (haftalık için)
+  lastCompleted DateTime?
+  nextDue       DateTime?
+}
+
+model TaskList {
+  id          String   @id @default(cuid())
   title       String
   description String?
-  status      TaskStatus @default(PENDING)
-  dueDate     DateTime?
-  isCompleted Boolean    @default(false)
-  isPinned    Boolean    @default(false)
-  isDeleted   Boolean    @default(false)
-  deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  color       String   @default("#3B82F6") // Hex color
+  order       Int      @default(0)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tasks       Task[]
+}
+
+model RecurringPattern {
+  id            String        @id @default(cuid())
+  taskId        String        @unique
+  type          RecurringType
+  interval      Int           @default(1)
+  daysOfWeek    String?       // JSON array for weekly patterns
+  dayOfMonth    Int?          // For monthly patterns
+  endDate       DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum TaskStatus {
   PENDING
   COMPLETED
   POSTPONED
+}
+
+enum RecurringType {
+  DAILY
+  WEEKLY
+  MONTHLY
 }

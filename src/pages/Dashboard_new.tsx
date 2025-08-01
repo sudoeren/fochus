@@ -7,7 +7,10 @@ import {
   Award,
   Clock,
   TrendingUp,
-  Edit3
+  Edit3,
+  Sun,
+  Moon,
+  Coffee
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
@@ -26,7 +29,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onEditTask 
 }) => {
   const { tasks, toggleTask, loading: tasksLoading } = useTasks();
-  const { notes, loading: notesLoading } = useNotes();
+  const { notes, togglePin, loading: notesLoading } = useNotes();
   const [showQuickActions, setShowQuickActions] = useState(false);
 
   // Current date
@@ -74,6 +77,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleToggleTask = async (taskId: string) => {
     await toggleTask(taskId);
+  };
+
+  const handlePinNote = async (noteId: string, isPinned: boolean) => {
+    await togglePin(noteId);
   };
 
   if (tasksLoading || notesLoading) {

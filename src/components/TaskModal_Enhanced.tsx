@@ -9,10 +9,9 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   editingTask?: any;
-  onEscapeToSpotlight?: () => void; // ESC ile Spotlight'a dönme
 }
 
-export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTask, onEscapeToSpotlight }) => {
+export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTask }) => {
   const { addTask, updateTask } = useTasks();
   const [activeTab, setActiveTab] = useState('basic');
   const [taskData, setTaskData] = useState({
@@ -49,28 +48,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTa
       setActiveTab('basic');
     }
   }, [isOpen, editingTask]);
-
-  // ESC tuşu ile Spotlight'a dönme
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        e.preventDefault();
-        if (onEscapeToSpotlight) {
-          onEscapeToSpotlight(); // Spotlight'a dön
-        } else {
-          onClose(); // Normal kapanma
-        }
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onEscapeToSpotlight, onClose]);
 
   const handleSave = async () => {
     if (!taskData.title.trim()) return;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical } from 'lucide-react';
+import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical, Search, Grid3X3 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
@@ -10,12 +10,16 @@ interface TasksNewProps {
   onEditTask: (task: any) => void;
 }
 
-export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
+export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
   const { tasks, loading, deleteTask, toggleTask, pinTask } = useTasks();
   const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'completed'>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
 
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -83,7 +87,7 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
   };
 
   const getTasksByList = (listId: string | null) => {
-    return tasks.filter(task => task.listId === listId && !task.isDeleted);
+    return tasks.filter(task => (task as any).listId === listId && !task.isDeleted);
   };
 
   const uncategorizedTasks = getTasksByList(null);
@@ -97,32 +101,109 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
   }
 
   return (
-    <div className="p-6 max-w-full overflow-x-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Görevlerim</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {taskLists.length} liste, {tasks.filter(t => !t.isDeleted).length} görev
-          </p>
+    <div className="p-6 max-w-full">
+      {/* Modern Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Görevlerim</h1>
+            <div className="flex items-center gap-6 text-sm">
+              <span className="text-gray-600 dark:text-gray-400">
+                {taskLists.length} liste
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                {tasks.filter(t => !t.isDeleted && !t.isCompleted).length} bekleyen görev
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                {tasks.filter(t => !t.isDeleted && t.isCompleted).length} tamamlanan
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('board')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all ${
+                  viewMode === 'board' 
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+                Kanban
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all ${
+                  viewMode === 'list' 
+                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                Liste
+              </button>
+            </div>
+
+            {/* New Buttons */}
+            <button
+              onClick={() => setShowListModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              Yeni Liste
+            </button>
+            <button
+              onClick={onOpenTaskModal}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
+            >
+              <Plus className="w-4 h-4" />
+              Yeni Görev
+            </button>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => setShowListModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+
+        {/* Search and Filters Bar */}
+        <div className="flex items-center gap-4 mb-6">
+          {/* Search */}
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Görevlerde ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          {/* Filter Dropdown */}
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as any)}
+            className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-300"
           >
-            <List className="w-4 h-4" />
-            Yeni Liste
-          </button>
-          <button
-            onClick={onOpenTaskModal}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            <option value="all">Tüm Görevler</option>
+            <option value="pending">Bekleyen</option>
+            <option value="completed">Tamamlanan</option>
+          </select>
+
+          {/* Sort Dropdown */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-300"
           >
-            <Plus className="w-4 h-4" />
-            Yeni Görev
-          </button>
+            <option value="date">Tarihe Göre</option>
+            <option value="priority">Önceliğe Göre</option>
+            <option value="name">İsme Göre</option>
+          </select>
         </div>
       </div>
 
+      {/* Task Lists Content */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex gap-6 overflow-x-auto pb-4">
           {/* Uncategorized Tasks */}

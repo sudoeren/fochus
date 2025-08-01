@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Task } from '../types';
+import { Task } from '../types/index';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -18,10 +18,21 @@ export const useTasks = () => {
         description: task.description,
         isCompleted: task.isCompleted,
         isPinned: task.isPinned || false,
+        isDeleted: task.isDeleted || false,
+        listId: task.listId,
         status: task.status,
         createdAt: new Date(task.createdAt),
         updatedAt: new Date(task.updatedAt),
-        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+        order: task.order || 0,
+        hasReminder: task.hasReminder || false,
+        isRecurring: task.isRecurring || false,
+        recurringType: task.recurringType,
+        recurringInterval: task.recurringInterval,
+        recurringDays: task.recurringDays,
+        reminderAt: task.reminderAt ? new Date(task.reminderAt) : undefined,
+        lastCompleted: task.lastCompleted ? new Date(task.lastCompleted) : undefined,
+        nextDue: task.nextDue ? new Date(task.nextDue) : undefined
       }));
       
       setTasks(formattedTasks);
@@ -53,7 +64,19 @@ export const useTasks = () => {
         status: newTask.status as any,
         createdAt: new Date(newTask.createdAt),
         updatedAt: new Date(newTask.updatedAt),
-        dueDate: newTask.dueDate ? new Date(newTask.dueDate) : undefined
+        dueDate: newTask.dueDate ? new Date(newTask.dueDate) : undefined,
+        isPinned: newTask.isPinned || false,
+        isDeleted: newTask.isDeleted || false,
+        listId: newTask.listId,
+        order: newTask.order || 0,
+        hasReminder: newTask.hasReminder || false,
+        isRecurring: newTask.isRecurring || false,
+        recurringType: newTask.recurringType,
+        recurringInterval: newTask.recurringInterval,
+        recurringDays: newTask.recurringDays,
+        reminderAt: newTask.reminderAt ? new Date(newTask.reminderAt) : undefined,
+        lastCompleted: newTask.lastCompleted ? new Date(newTask.lastCompleted) : undefined,
+        nextDue: newTask.nextDue ? new Date(newTask.nextDue) : undefined
       };
       
       setTasks(prev => [formattedTask, ...prev]);
@@ -77,7 +100,19 @@ export const useTasks = () => {
         status: updatedTask.status as any,
         createdAt: new Date(updatedTask.createdAt),
         updatedAt: new Date(updatedTask.updatedAt),
-        dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined
+        dueDate: updatedTask.dueDate ? new Date(updatedTask.dueDate) : undefined,
+        isPinned: updatedTask.isPinned || false,
+        isDeleted: updatedTask.isDeleted || false,
+        listId: updatedTask.listId,
+        order: updatedTask.order || 0,
+        hasReminder: updatedTask.hasReminder || false,
+        isRecurring: updatedTask.isRecurring || false,
+        recurringType: updatedTask.recurringType,
+        recurringInterval: updatedTask.recurringInterval,
+        recurringDays: updatedTask.recurringDays,
+        reminderAt: updatedTask.reminderAt ? new Date(updatedTask.reminderAt) : undefined,
+        lastCompleted: updatedTask.lastCompleted ? new Date(updatedTask.lastCompleted) : undefined,
+        nextDue: updatedTask.nextDue ? new Date(updatedTask.nextDue) : undefined
       };
       
       setTasks(prev => prev.map(task => 
@@ -189,6 +224,29 @@ export const useTasks = () => {
     }
   };
 
+  // Reorder tasks
+  const reorderTasks = async (startIndex: number, endIndex: number) => {
+    try {
+      const result = Array.from(tasks);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+      
+      // Update local state immediately for better UX
+      setTasks(result);
+      
+      // Update order in database
+      const updatePromises = result.map((task, index) => 
+        window.electronAPI.database.updateTask(task.id, { order: index })
+      );
+      
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error('Error reordering tasks:', error);
+      // Reload tasks if there's an error
+      loadTasks();
+    }
+  };
+
   return {
     tasks,
     loading,
@@ -197,6 +255,7 @@ export const useTasks = () => {
     deleteTask,
     toggleTask,
     pinTask,
+    reorderTasks,
     getTasksByFilter,
     getTaskStats,
     loadTasks

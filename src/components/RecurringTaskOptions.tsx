@@ -1,0 +1,243 @@
+import React, { useState } from 'react';
+import { Calendar, Clock, Repeat, X } from 'lucide-react';
+import { RecurringType } from '../types';
+
+interface RecurringTaskOptionsProps {
+  isRecurring: boolean;
+  recurringType?: RecurringType;
+  recurringInterval?: number;
+  recurringDays?: number[];
+  endDate?: Date;
+  onToggleRecurring: (enabled: boolean) => void;
+  onUpdatePattern: (pattern: {
+    type: RecurringType;
+    interval: number;
+    daysOfWeek?: number[];
+    endDate?: Date;
+  }) => void;
+  className?: string;
+}
+
+const dayNames = [
+  { id: 0, name: 'Paz', short: 'P' },
+  { id: 1, name: 'Pzt', short: 'P' },
+  { id: 2, name: 'Sal', short: 'S' },
+  { id: 3, name: 'Çar', short: 'Ç' },
+  { id: 4, name: 'Per', short: 'P' },
+  { id: 5, name: 'Cum', short: 'C' },
+  { id: 6, name: 'Cmt', short: 'C' }
+];
+
+export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
+  isRecurring,
+  recurringType = 'DAILY',
+  recurringInterval = 1,
+  recurringDays = [],
+  endDate,
+  onToggleRecurring,
+  onUpdatePattern,
+  className = ""
+}) => {
+  const [localType, setLocalType] = useState<RecurringType>(recurringType);
+  const [localInterval, setLocalInterval] = useState(recurringInterval);
+  const [localDays, setLocalDays] = useState<number[]>(recurringDays);
+  const [localEndDate, setLocalEndDate] = useState<string>(
+    endDate ? endDate.toISOString().split('T')[0] : ''
+  );
+
+  const handleTypeChange = (type: RecurringType) => {
+    setLocalType(type);
+    if (type === 'WEEKLY' && localDays.length === 0) {
+      setLocalDays([new Date().getDay()]);
+    }
+    updatePattern(type, localInterval, localDays, localEndDate);
+  };
+
+  const handleIntervalChange = (interval: number) => {
+    setLocalInterval(interval);
+    updatePattern(localType, interval, localDays, localEndDate);
+  };
+
+  const toggleDay = (dayId: number) => {
+    const newDays = localDays.includes(dayId)
+      ? localDays.filter(d => d !== dayId)
+      : [...localDays, dayId].sort();
+    
+    setLocalDays(newDays);
+    updatePattern(localType, localInterval, newDays, localEndDate);
+  };
+
+  const handleEndDateChange = (dateStr: string) => {
+    setLocalEndDate(dateStr);
+    updatePattern(localType, localInterval, localDays, dateStr);
+  };
+
+  const updatePattern = (type: RecurringType, interval: number, days: number[], endDateStr: string) => {
+    onUpdatePattern({
+      type,
+      interval,
+      daysOfWeek: type === 'WEEKLY' ? days : undefined,
+      endDate: endDateStr ? new Date(endDateStr) : undefined
+    });
+  };
+
+  const getIntervalLabel = () => {
+    switch (localType) {
+      case 'DAILY':
+        return localInterval === 1 ? 'gün' : 'günde bir';
+      case 'WEEKLY':
+        return localInterval === 1 ? 'hafta' : 'haftada bir';
+      case 'MONTHLY':
+        return localInterval === 1 ? 'ay' : 'ayda bir';
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <div className={`space-y-4 ${className}`}>
+      {/* Toggle recurring */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Repeat className="w-4 h-4 text-blue-500" />
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Tekrarlanan Görev
+          </span>
+        </div>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => onToggleRecurring(e.target.checked)}
+            className="sr-only peer"
+          />
+          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      {isRecurring && (
+        <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+          {/* Recurring type */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Tekrarlama Türü
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => handleTypeChange('DAILY')}
+                className={`p-2 text-xs rounded border transition-colors ${
+                  localType === 'DAILY'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Günlük
+              </button>
+              <button
+                onClick={() => handleTypeChange('WEEKLY')}
+                className={`p-2 text-xs rounded border transition-colors ${
+                  localType === 'WEEKLY'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Haftalık
+              </button>
+              <button
+                onClick={() => handleTypeChange('MONTHLY')}
+                className={`p-2 text-xs rounded border transition-colors ${
+                  localType === 'MONTHLY'
+                    ? 'bg-blue-500 text-white border-blue-500'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                Aylık
+              </button>
+            </div>
+          </div>
+
+          {/* Interval */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Aralık
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Her</span>
+              <input
+                type="number"
+                min="1"
+                max="365"
+                value={localInterval}
+                onChange={(e) => handleIntervalChange(parseInt(e.target.value) || 1)}
+                className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">{getIntervalLabel()}</span>
+            </div>
+          </div>
+
+          {/* Weekly days selection */}
+          {localType === 'WEEKLY' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                Günler
+              </label>
+              <div className="grid grid-cols-7 gap-1">
+                {dayNames.map((day) => (
+                  <button
+                    key={day.id}
+                    onClick={() => toggleDay(day.id)}
+                    className={`p-2 text-xs rounded border transition-colors ${
+                      localDays.includes(day.id)
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {day.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* End date */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Bitiş Tarihi (İsteğe bağlı)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={localEndDate}
+                onChange={(e) => handleEndDateChange(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              />
+              {localEndDate && (
+                <button
+                  onClick={() => handleEndDateChange('')}
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <Clock className="w-4 h-4" />
+              <span className="text-sm font-medium">Özet:</span>
+            </div>
+            <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+              {localType === 'DAILY' && `Her ${localInterval} günde bir tekrarlanır`}
+              {localType === 'WEEKLY' && `Her ${localInterval} haftada bir ${localDays.map(d => dayNames[d].name).join(', ')} günlerinde tekrarlanır`}
+              {localType === 'MONTHLY' && `Her ${localInterval} ayda bir tekrarlanır`}
+              {localEndDate && ` (${new Date(localEndDate).toLocaleDateString('tr-TR')} tarihine kadar)`}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
