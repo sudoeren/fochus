@@ -60,7 +60,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenNoteModal, onOpenTas
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
-          {getGreeting()}, <span className="text-blue-500">Fokus</span>
+          {getGreeting()}, <span className="text-blue-500">Eren</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-2">
           <Calendar className="w-5 h-5" />
