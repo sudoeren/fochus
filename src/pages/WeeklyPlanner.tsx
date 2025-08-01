@@ -48,32 +48,32 @@ export const WeeklyPlanner: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
           Haftalık Planlayıcı
         </h1>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigateWeek('prev')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <span className="text-lg font-medium text-gray-900 dark:text-white min-w-[200px] text-center">
+            <span className="text-base sm:text-lg font-medium text-gray-900 dark:text-white min-w-[180px] sm:min-w-[200px] text-center">
               {weekStart.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
             </span>
             <button
               onClick={() => navigateWeek('next')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
             </button>
           </div>
           <button
             onClick={() => setCurrentWeek(new Date())}
-            className="btn btn-secondary px-4 py-2 text-sm"
+            className="btn btn-secondary px-3 sm:px-4 py-2 text-xs sm:text-sm"
           >
             Bu Hafta
           </button>
@@ -81,7 +81,7 @@ export const WeeklyPlanner: React.FC = () => {
       </div>
 
       {/* Haftalık Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 sm:gap-4">
         {weekDays.map((day, index) => {
           const dayTasks = getTasksForDay(day);
           const isCurrentDay = isToday(day);

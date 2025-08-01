@@ -48,34 +48,35 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Enhanced Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1 min-w-0 flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Notlarım
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span>{notes.length} not</span>
-            <span>•</span>
-            <span>Ctrl+K ile arama yapabilirsiniz</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="text-xs sm:text-sm">Ctrl+K ile arama yapabilirsiniz</span>
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenNoteModal}
             className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                     text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all duration-200 
-                     shadow-md hover:shadow-lg transform hover:scale-105"
+                     text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center gap-2 transition-all duration-200 
+                     shadow-md hover:shadow-lg transform hover:scale-105 text-sm sm:text-base flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
-            Yeni Not Ekle
+            <span className="hidden sm:inline">Yeni Not Ekle</span>
+            <span className="sm:hidden">Yeni Not</span>
           </button>
         </div>
       </div>
 
       {/* Notes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {sortedNotes.length > 0 ? (
           sortedNotes.map((note) => (
             <div

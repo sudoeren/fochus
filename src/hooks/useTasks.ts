@@ -79,7 +79,7 @@ export const useTasks = () => {
         nextDue: newTask.nextDue ? new Date(newTask.nextDue) : undefined
       };
       
-      setTasks(prev => [formattedTask, ...prev]);
+      await loadTasks(); // Auto-refresh after adding
       return formattedTask;
     } catch (error) {
       console.error('Error adding task:', error);
@@ -115,10 +115,7 @@ export const useTasks = () => {
         nextDue: updatedTask.nextDue ? new Date(updatedTask.nextDue) : undefined
       };
       
-      setTasks(prev => prev.map(task => 
-        task.id === id ? formattedTask : task
-      ));
-      
+      await loadTasks(); // Auto-refresh after updating
       return formattedTask;
     } catch (error) {
       console.error('Error updating task:', error);
@@ -130,7 +127,7 @@ export const useTasks = () => {
   const deleteTask = async (id: string) => {
     try {
       await window.electronAPI.database.deleteTask(id);
-      setTasks(prev => prev.filter(task => task.id !== id));
+      await loadTasks(); // Auto-refresh after deleting
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;

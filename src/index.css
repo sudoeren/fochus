@@ -10,6 +10,17 @@
   body {
     @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    /* Improve touch scrolling */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile-first responsive design */
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Custom scrollbar styles */
@@ -45,23 +56,23 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-600 disabled:pointer-events-none disabled:opacity-50;
   }
   
   .btn-primary {
-    @apply bg-primary-600 text-white shadow hover:bg-primary-700;
+    @apply bg-gray-600 text-white shadow hover:bg-gray-700;
   }
   
   .btn-secondary {
-    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700;
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700;
   }
   
   .btn-ghost {
-    @apply hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300;
   }
   
   .card {
-    @apply rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm;
+    @apply rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm;
   }
 
   /* Hide scrollbar but keep functionality */

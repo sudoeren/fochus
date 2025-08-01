@@ -28,6 +28,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getDeletedTasks: () => ipcRenderer.invoke('db-get-deleted-tasks'),
     restoreTask: (id: string) => ipcRenderer.invoke('db-restore-task', id),
     permanentlyDeleteTask: (id: string) => ipcRenderer.invoke('db-permanently-delete-task', id),
+
+    // Task Lists
+    getTaskLists: () => ipcRenderer.invoke('db-get-task-lists'),
+    createTaskList: (data: any) => ipcRenderer.invoke('db-create-task-list', data),
+    updateTaskList: (id: string, data: any) => ipcRenderer.invoke('db-update-task-list', id, data),
+    deleteTaskList: (id: string) => ipcRenderer.invoke('db-delete-task-list', id),
   },
 
   // Shortcut handlers
@@ -35,6 +41,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('shortcut-new-note', () => callback('new-note'));
     ipcRenderer.on('shortcut-new-task', () => callback('new-task'));
     ipcRenderer.on('shortcut-search', () => callback('search'));
+    ipcRenderer.on('shortcut-spotlight', () => callback('spotlight'));
     ipcRenderer.on('shortcut-navigate', (_, page) => callback('navigate', page));
   },
   
@@ -42,6 +49,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.removeAllListeners('shortcut-new-note');
     ipcRenderer.removeAllListeners('shortcut-new-task'); 
     ipcRenderer.removeAllListeners('shortcut-search');
+    ipcRenderer.removeAllListeners('shortcut-spotlight');
     ipcRenderer.removeAllListeners('shortcut-navigate');
   }
 });
@@ -61,6 +69,10 @@ declare global {
         createTask: (data: any) => Promise<any>;
         updateTask: (id: string, data: any) => Promise<any>;
         deleteTask: (id: string) => Promise<void>;
+        getTaskLists: () => Promise<any[]>;
+        createTaskList: (data: any) => Promise<any>;
+        updateTaskList: (id: string, data: any) => Promise<any>;
+        deleteTaskList: (id: string) => Promise<void>;
       };
     };
   }

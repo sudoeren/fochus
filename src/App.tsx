@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
-import { SpotlightNew } from './components/SpotlightNew';
+import { Spotlight } from './components/Spotlight';
 import { NoteModal } from './components/NoteModal';
 import { TaskModal } from './components/TaskModal';
 import { Dashboard } from './pages/Dashboard';
@@ -47,6 +47,9 @@ const App: React.FC = () => {
         case 'search':
           setIsSpotlightOpen(true);
           break;
+        case 'spotlight':
+          setIsSpotlightOpen(true);
+          break;
       }
     };
 
@@ -89,6 +92,7 @@ const App: React.FC = () => {
     switch (activeView) {
       case 'dashboard':
         return <Dashboard 
+          onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
@@ -108,6 +112,7 @@ const App: React.FC = () => {
         return <Settings />;
       default:
         return <Dashboard 
+          onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
         />;
@@ -116,19 +121,21 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
         <Sidebar activeView={activeView} onViewChange={setActiveView} />
-        <main className="flex-1 overflow-hidden">
-          {renderView()}
+        <main className="flex-1 overflow-hidden lg:ml-0">
+          <div className="h-full overflow-auto">
+            {renderView()}
+          </div>
         </main>
         
         {/* Spotlight */}
-        <SpotlightNew 
+        <Spotlight 
           isOpen={isSpotlightOpen}
           onClose={() => setIsSpotlightOpen(false)}
           onNavigate={setActiveView}
-          onCreateNote={() => setShowNoteModal(true)}
-          onCreateTask={() => setShowTaskModal(true)}
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onOpenTaskModal={() => setShowTaskModal(true)}
         />
         
         {/* Global Modals */}

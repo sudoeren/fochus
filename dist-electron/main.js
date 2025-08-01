@@ -117,6 +117,12 @@ function setupGlobalShortcuts() {
             mainWindow.webContents.send('shortcut-navigate', 'weekly');
         }
     });
+    // Ctrl+K: Spotlight
+    electron_1.globalShortcut.register('CommandOrControl+K', () => {
+        if (mainWindow) {
+            mainWindow.webContents.send('shortcut-spotlight');
+        }
+    });
 }
 // Menu creation
 function createMenu() {
@@ -417,6 +423,83 @@ function setupDatabaseHandlers() {
         }
         catch (error) {
             console.error('Error permanently deleting task:', error);
+            throw error;
+        }
+    });
+    // Task List handlers
+    electron_1.ipcMain.handle('db-get-task-lists', async () => {
+        try {
+            return await prisma.taskList.findMany({
+                where: { isDeleted: false },
+                include: {
+                    tasks: {
+                        where: { isDeleted: false },
+                        orderBy: { order: 'asc' }
+                    }
+                },
+                orderBy: { order: 'asc' }
+            });
+        }
+        catch (error) {
+            console.error('Error getting task lists:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('db-create-task-list', async (_event, data) => {
+        try {
+            // Get max order
+            const maxOrderResult = await prisma.taskList.aggregate({
+                where: { isDeleted: false },
+                _max: { order: true }
+            });
+            const maxOrder = maxOrderResult._max.order || -1;
+            return await prisma.taskList.create({
+                data: {
+                    title: data.title,
+                    description: data.description,
+                    color: data.color || '#6B7280',
+                    order: maxOrder + 1
+                },
+                include: {
+                    tasks: {
+                        where: { isDeleted: false },
+                        orderBy: { order: 'asc' }
+                    }
+                }
+            });
+        }
+        catch (error) {
+            console.error('Error creating task list:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('db-update-task-list', async (_event, id, data) => {
+        try {
+            return await prisma.taskList.update({
+                where: { id },
+                data,
+                include: {
+                    tasks: {
+                        where: { isDeleted: false },
+                        orderBy: { order: 'asc' }
+                    }
+                }
+            });
+        }
+        catch (error) {
+            console.error('Error updating task list:', error);
+            throw error;
+        }
+    });
+    electron_1.ipcMain.handle('db-delete-task-list', async (_event, id) => {
+        try {
+            return await prisma.taskList.update({
+                where: { id },
+                data: { isDeleted: true }
+            });
+        }
+        catch (error) {
+            console.error('Error deleting task list:', error);
             throw error;
         }
     });

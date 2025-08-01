@@ -26,18 +26,25 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
         getDeletedTasks: () => electron_1.ipcRenderer.invoke('db-get-deleted-tasks'),
         restoreTask: (id) => electron_1.ipcRenderer.invoke('db-restore-task', id),
         permanentlyDeleteTask: (id) => electron_1.ipcRenderer.invoke('db-permanently-delete-task', id),
+        // Task Lists
+        getTaskLists: () => electron_1.ipcRenderer.invoke('db-get-task-lists'),
+        createTaskList: (data) => electron_1.ipcRenderer.invoke('db-create-task-list', data),
+        updateTaskList: (id, data) => electron_1.ipcRenderer.invoke('db-update-task-list', id, data),
+        deleteTaskList: (id) => electron_1.ipcRenderer.invoke('db-delete-task-list', id),
     },
     // Shortcut handlers
     onShortcut: (callback) => {
         electron_1.ipcRenderer.on('shortcut-new-note', () => callback('new-note'));
         electron_1.ipcRenderer.on('shortcut-new-task', () => callback('new-task'));
         electron_1.ipcRenderer.on('shortcut-search', () => callback('search'));
+        electron_1.ipcRenderer.on('shortcut-spotlight', () => callback('spotlight'));
         electron_1.ipcRenderer.on('shortcut-navigate', (_, page) => callback('navigate', page));
     },
     removeAllListeners: () => {
         electron_1.ipcRenderer.removeAllListeners('shortcut-new-note');
         electron_1.ipcRenderer.removeAllListeners('shortcut-new-task');
         electron_1.ipcRenderer.removeAllListeners('shortcut-search');
+        electron_1.ipcRenderer.removeAllListeners('shortcut-spotlight');
         electron_1.ipcRenderer.removeAllListeners('shortcut-navigate');
     }
 });

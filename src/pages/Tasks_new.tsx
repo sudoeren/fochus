@@ -97,44 +97,44 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
   }
 
   return (
-    <div className="p-6 max-w-full overflow-x-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-8 max-w-full overflow-x-auto bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Görevlerim</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {taskLists.length} liste, {tasks.filter(t => !t.isDeleted).length} görev
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Görevlerim</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
+            {taskLists.length} liste • {tasks.filter(t => !t.isDeleted).length} görev
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <button
             onClick={() => setShowListModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md"
           >
-            <List className="w-4 h-4" />
-            Yeni Liste
+            <List className="w-5 h-5" />
+            <span className="font-medium">Yeni Liste</span>
           </button>
           <button
             onClick={onOpenTaskModal}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all hover:scale-105"
           >
-            <Plus className="w-4 h-4" />
-            Yeni Görev
+            <Plus className="w-5 h-5" />
+            <span className="font-medium">Yeni Görev</span>
           </button>
         </div>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="flex gap-8 overflow-x-auto pb-6">
           {/* Uncategorized Tasks */}
-          <div className="flex-shrink-0 w-80">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-shrink-0 w-96">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 h-fit">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded bg-gray-400"></div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
+                    <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-gray-400 to-gray-600"></div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
                   </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
                     {uncategorizedTasks.length}
                   </span>
                 </div>
@@ -145,7 +145,7 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-4 min-h-32 transition-colors ${
+                    className={`p-6 min-h-40 transition-colors ${
                       snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                     }`}
                   >
@@ -155,89 +155,89 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border transition-all hover:shadow-md ${
-                              snapshot.isDragging ? 'shadow-lg rotate-2' : ''
+                            className={`mb-4 p-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl border-2 border-transparent transition-all hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 ${
+                              snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105 border-blue-300 dark:border-blue-600' : ''
                             } ${
                               task.isCompleted ? 'opacity-75' : ''
                             }`}
                           >
-                            <div className="flex items-start gap-3">
+                            <div className="flex items-start gap-4">
                               <div
                                 {...provided.dragHandleProps}
-                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
+                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing p-1"
                               >
-                                <GripVertical className="w-4 h-4" />
+                                <GripVertical className="w-5 h-5" />
                               </div>
                               
                               <button
                                 onClick={() => handleToggleTask(task.id)}
-                                className={`mt-1 transition-colors ${getStatusColor(task)}`}
+                                className={`mt-1 transition-all hover:scale-110 ${getStatusColor(task)}`}
                               >
                                 {task.isCompleted ? (
-                                  <CheckCircle className="w-4 h-4" />
+                                  <CheckCircle className="w-6 h-6" />
                                 ) : (
-                                  <Circle className="w-4 h-4" />
+                                  <Circle className="w-6 h-6" />
                                 )}
                               </button>
                               
                               <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-medium ${
+                                <h4 className={`text-base font-semibold ${
                                   task.isCompleted 
                                     ? 'line-through text-gray-500 dark:text-gray-400' 
                                     : 'text-gray-900 dark:text-white'
                                 }`}>
                                   {task.isPinned && (
-                                    <Pin className="w-3 h-3 text-yellow-500 inline mr-1" />
+                                    <Pin className="w-4 h-4 text-yellow-500 inline mr-2" />
                                   )}
                                   {task.title}
                                 </h4>
                                 {task.description && (
-                                  <p className={`text-xs mt-1 ${
+                                  <p className={`text-sm mt-2 ${
                                     task.isCompleted 
                                       ? 'line-through text-gray-400 dark:text-gray-500' 
                                       : 'text-gray-600 dark:text-gray-300'
                                   }`}>
-                                    {task.description.length > 60 
-                                      ? task.description.substring(0, 60) + '...' 
+                                    {task.description.length > 80 
+                                      ? task.description.substring(0, 80) + '...' 
                                       : task.description}
                                   </p>
                                 )}
                                 
                                 {task.dueDate && (
-                                  <div className={`flex items-center gap-1 text-xs mt-2 ${
+                                  <div className={`flex items-center gap-2 text-sm mt-3 ${
                                     task.isCompleted 
                                       ? 'text-gray-400 dark:text-gray-500'
                                       : new Date(task.dueDate) < new Date()
                                         ? 'text-red-500 dark:text-red-400'
                                         : 'text-gray-500 dark:text-gray-400'
                                   }`}>
-                                    <Calendar className="w-3 h-3" />
+                                    <Calendar className="w-4 h-4" />
                                     <span>{formatDate(new Date(task.dueDate))}</span>
                                   </div>
                                 )}
                                 
-                                <div className="flex gap-1 mt-2">
+                                <div className="flex gap-2 mt-4">
                                   <button
                                     onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                    className={`p-1 text-xs transition-colors ${
+                                    className={`p-2 rounded-lg transition-all hover:scale-105 ${
                                       task.isPinned 
-                                        ? 'text-yellow-500 hover:text-yellow-600' 
-                                        : 'text-gray-400 hover:text-yellow-500'
+                                        ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 hover:text-yellow-600' 
+                                        : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
                                     }`}
                                   >
-                                    <Pin className="w-3 h-3" />
+                                    <Pin className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => onEditTask(task)}
-                                    className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                                    className="p-2 rounded-lg text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105"
                                   >
-                                    <Edit3 className="w-3 h-3" />
+                                    <Edit3 className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleDeleteTask(task.id)}
-                                    className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105"
                                   >
-                                    <Trash2 className="w-3 h-3" />
+                                    <Trash2 className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>

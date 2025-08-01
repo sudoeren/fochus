@@ -51,7 +51,7 @@ export const useNotes = () => {
         updatedAt: new Date(newNote.updatedAt)
       };
       
-      setNotes(prev => [formattedNote, ...prev]);
+      await loadNotes(); // Auto-refresh after adding
       return formattedNote;
     } catch (error) {
       console.error('Error adding note:', error);
@@ -77,10 +77,7 @@ export const useNotes = () => {
         updatedAt: new Date(updatedNote.updatedAt)
       };
       
-      setNotes(prev => prev.map(note => 
-        note.id === id ? formattedNote : note
-      ));
-      
+      await loadNotes(); // Auto-refresh after updating
       return formattedNote;
     } catch (error) {
       console.error('Error updating note:', error);
@@ -92,7 +89,7 @@ export const useNotes = () => {
   const deleteNote = async (id: string) => {
     try {
       await window.electronAPI.database.deleteNote(id);
-      setNotes(prev => prev.filter(note => note.id !== id));
+      await loadNotes(); // Auto-refresh after deleting
     } catch (error) {
       console.error('Error deleting note:', error);
       throw error;

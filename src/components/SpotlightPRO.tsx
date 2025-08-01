@@ -30,7 +30,6 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(isOpen);
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Update ref when isOpen changes
   useEffect(() => {
@@ -143,23 +142,10 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     );
   }, [query, commands]);
 
-  // Reset selection when search query changes
+  // Reset selection when filtered commands change
   useEffect(() => {
     setSelectedIndex(0);
-    // Clear refs array when filtering changes
-    itemRefs.current = [];
-  }, [query]);
-
-  // Scroll selected item into view
-  useEffect(() => {
-    if (itemRefs.current[selectedIndex]) {
-      itemRefs.current[selectedIndex]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'nearest'
-      });
-    }
-  }, [selectedIndex]);
+  }, [filteredCommands]);
 
   // Reset state when opening
   useEffect(() => {
@@ -193,15 +179,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         e.preventDefault();
         e.stopPropagation();
         setSelectedIndex(prev => {
-          // Get current filtered commands inline to avoid dependency issues
-          const searchTerm = query.toLowerCase().trim();
-          const currentFiltered = !searchTerm ? commands : commands.filter(command => 
-            command.label.toLowerCase().includes(searchTerm) ||
-            command.description.toLowerCase().includes(searchTerm) ||
-            command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
-          );
-          const newIndex = prev >= currentFiltered.length - 1 ? 0 : prev + 1;
-          console.log('🎯 Arrow down, new index:', newIndex, 'of', currentFiltered.length);
+          const newIndex = prev >= filteredCommands.length - 1 ? 0 : prev + 1;
+          console.log('🎯 Arrow down, new index:', newIndex);
           return newIndex;
         });
         break;
@@ -210,15 +189,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         e.preventDefault();
         e.stopPropagation();
         setSelectedIndex(prev => {
-          // Get current filtered commands inline to avoid dependency issues
-          const searchTerm = query.toLowerCase().trim();
-          const currentFiltered = !searchTerm ? commands : commands.filter(command => 
-            command.label.toLowerCase().includes(searchTerm) ||
-            command.description.toLowerCase().includes(searchTerm) ||
-            command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
-          );
-          const newIndex = prev <= 0 ? currentFiltered.length - 1 : prev - 1;
-          console.log('🎯 Arrow up, new index:', newIndex, 'of', currentFiltered.length);
+          const newIndex = prev <= 0 ? filteredCommands.length - 1 : prev - 1;
+          console.log('🎯 Arrow up, new index:', newIndex);
           return newIndex;
         });
         break;
@@ -226,28 +198,17 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       case 'Enter':
         e.preventDefault();
         e.stopPropagation();
-        // Get current filtered commands inline
-        const searchTerm = query.toLowerCase().trim();
-        const currentFiltered = !searchTerm ? commands : commands.filter(command => 
-          command.label.toLowerCase().includes(searchTerm) ||
-          command.description.toLowerCase().includes(searchTerm) ||
-          command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
-        );
-        
-        setSelectedIndex(current => {
-          if (currentFiltered[current]) {
-            console.log('🎯 Executing:', currentFiltered[current].label);
-            currentFiltered[current].action();
-          }
-          return current;
-        });
+        if (filteredCommands[selectedIndex]) {
+          console.log('🎯 Executing:', filteredCommands[selectedIndex].label);
+          filteredCommands[selectedIndex].action();
+        }
         break;
 
       case 'Tab':
         e.preventDefault(); // Prevent tab navigation
         break;
     }
-  }, [onClose, query, commands]);
+  }, [filteredCommands, selectedIndex, onClose]);
 
   // Setup keyboard event listeners
   useEffect(() => {
@@ -297,7 +258,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         </div>
 
         {/* Results */}
-        <div className="max-h-[60vh] overflow-y-auto scroll-smooth">
+        <div className="max-h-[60vh] overflow-y-auto">
           {filteredCommands.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -319,9 +280,6 @@ export const Spotlight: React.FC<SpotlightProps> = ({
                 return (
                   <div
                     key={command.id}
-                    ref={(el) => {
-                      itemRefs.current[index] = el;
-                    }}
                     onClick={() => command.action()}
                     className={`relative flex items-center gap-4 px-6 py-4 cursor-pointer transition-all duration-150 ${
                       isSelected

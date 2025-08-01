@@ -39,13 +39,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   // Today's tasks
   const todayTasks = tasks.filter(task => {
-    const taskDate = new Date(task.dueDate || new Date()).toDateString();
+    if (!task.dueDate) return false; // dueDate olmayan görevler bugünün görevleri değil
+    const taskDate = new Date(task.dueDate).toDateString();
     const today = new Date().toDateString();
     return taskDate === today;
   });
-
-  // Recent notes (last 4)
-  const recentNotes = notes.slice(0, 4);
 
   // Pinned notes
   const pinnedNotes = notes.filter(note => note.isPinned);
@@ -88,17 +86,17 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Modern Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              {greeting.text} <span className="text-2xl">{greeting.icon}</span>
+      <div className="mb-6 lg:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              {greeting.text} <span className="text-xl sm:text-2xl">{greeting.icon}</span>
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              {currentDate}
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 flex items-center gap-2">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="truncate">{currentDate}</span>
             </p>
           </div>
           
@@ -106,15 +104,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="relative">
             <button
               onClick={() => setShowQuickActions(!showQuickActions)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-sm sm:text-base"
             >
-              <Plus className="w-5 h-5" />
-              <span className="font-medium">Hızlı Eylemler</span>
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline font-medium">Hızlı Eylemler</span>
+              <span className="sm:hidden font-medium">Ekle</span>
             </button>
             
             {/* Quick Actions Dropdown */}
             {showQuickActions && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50">
+              <div className="absolute right-0 top-full mt-2 w-48 sm:w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50">
                 <div className="p-4 space-y-2">
                   <button
                     onClick={() => {
@@ -167,15 +166,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-              <CheckSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <CheckSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.total}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.total}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Toplam Görev</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Toplam Görev</h3>
           <div className="flex items-center gap-2">
             <span className="text-xs text-green-600 dark:text-green-400 font-medium">
               {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}% tamamlandı
@@ -183,44 +182,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-              <Award className="w-6 h-6 text-green-600 dark:text-green-400" />
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.completed}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.completed}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tamamlanan</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Tamamlanan</h3>
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-green-500" />
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
             <span className="text-xs text-green-600 dark:text-green-400 font-medium">Harika!</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-              <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.pending}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.pending}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bekleyen</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Bekleyen</h3>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-amber-500" />
+            <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" />
             <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Devam et!</span>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
-              <Pin className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+              <Pin className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalNotes}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{stats.totalNotes}</span>
           </div>
-          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Toplam Not</h3>
+          <h3 className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Toplam Not</h3>
           <div className="flex items-center gap-2">
-            <Pin className="w-4 h-4 text-purple-500" />
+            <Pin className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
             <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
               {pinnedNotes.length} sabitlenmiş
             </span>
@@ -229,7 +228,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Today's Tasks */}
         <div className="lg:col-span-2">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -248,11 +247,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             
             {todayTasks.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {todayTasks.slice(0, 5).map((task) => (
                   <div 
                     key={task.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
+                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
                   >
                     <button
                       onClick={() => handleToggleTask(task.id)}
@@ -312,7 +311,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Pin className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                Son Notlar
+                Sabitlenmiş Notlar
               </h2>
               <button
                 onClick={() => onNavigate('notes')}
@@ -323,9 +322,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </button>
             </div>
             
-            {recentNotes.length > 0 ? (
+            {pinnedNotes.length > 0 ? (
               <div className="space-y-3">
-                {recentNotes.map((note) => (
+                {pinnedNotes.map((note) => (
                   <div 
                     key={note.id}
                     className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group"

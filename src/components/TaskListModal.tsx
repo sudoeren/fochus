@@ -9,14 +9,14 @@ interface TaskListModalProps {
 }
 
 const colorOptions = [
-  { name: 'Mavi', value: '#3B82F6' },
-  { name: 'Yeşil', value: '#10B981' },
-  { name: 'Mor', value: '#8B5CF6' },
-  { name: 'Kırmızı', value: '#EF4444' },
-  { name: 'Sarı', value: '#F59E0B' },
-  { name: 'Pembe', value: '#EC4899' },
-  { name: 'Turuncu', value: '#F97316' },
-  { name: 'Gri', value: '#6B7280' }
+  { name: 'Gri', value: '#6B7280' },
+  { name: 'Mavi', value: '#64748B' },
+  { name: 'Yeşil', value: '#059669' },
+  { name: 'Mor', value: '#7C3AED' },
+  { name: 'Kırmızı', value: '#DC2626' },
+  { name: 'Sarı', value: '#D97706' },
+  { name: 'Pembe', value: '#DB2777' },
+  { name: 'Lacivert', value: '#1E40AF' }
 ];
 
 export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
@@ -24,7 +24,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
   const [listData, setListData] = useState({
     title: '',
     description: '',
-    color: '#3B82F6'
+    color: '#6B7280'
   });
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
       setListData({
         title: editingList?.title || '',
         description: editingList?.description || '',
-        color: editingList?.color || '#3B82F6'
+        color: editingList?.color || '#6B7280'
       });
     }
   }, [isOpen, editingList]);

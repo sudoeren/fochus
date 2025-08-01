@@ -1,23 +1,47 @@
 # Fokus - Kişisel Üretkenlik Uygulaması
 
-Fokus, not alma, görev yönetimi ve haftalık planlama için geliştirilmiş modern bir masaüstü uygulamasıdır. Electron + React + TypeScript teknolojileri kullanılarak geliştirilmiştir.
+Electron.js + React + TypeScript + Tailwind CSS + Prisma teknolojileri kullanılarak geliştirilmiş modern bir masaüstü üretkenlik uygulaması.
 
-## ✨ Temel Özellikler
+## ✨ Özellikler
 
 ### 📝 Not Yönetimi
-- Başlık ve zengin içerik editörü
-- Etiket sistemi ile kategorizasyon
-- Otomatik tarih damgası
-- Gelişmiş arama ve filtreleme
-- Modal tabanlı düzenleme arayüzü
-- Çöp kutusu ile güvenli silme
+- Başlık, içerik, etiketler ve tarih damgası ile kapsamlı not tutma
+- Not sabitleme ve arama özellikleri
+- Markdown desteği
+- Tema uyumlu tasarım
 
 ### ✅ Görev Yönetimi
-- Modern kart tabanlı görev görünümü
-- Görev listeleri ve kategoriler
-- Görev durumu takibi (Bekliyor, Tamamlandı, Ertelendi)
-- Sabitleme özelliği ile önemli görevler
-- Sürükle-bırak ile liste transferi
+- Günlük to-do listesi ve durum takibi
+- Görev düzenleme ve tamamlama özellikleri
+- Öncelik seviyeleri
+- Tarih bazlı filtreleme
+
+### 📅 Haftalık Planlayıcı
+- 7 günlük görünüm
+- Görev planlama ve takip
+- Drag & drop desteği (gelecek güncelleme)
+
+### 🔍 Spotlight Arama
+- **Ctrl+K** ile hızlı komut arayıcısı
+- Sayfa navigasyonu ve hızlı eylemler
+- Özelleştirilebilir komut sıralaması
+- Arama geçmişi ve kullanım istatistikleri
+
+### 🎨 Tema Sistemi
+- Açık/Koyu/Sistem modu
+- Gerçek zamanlı tema değişimi
+- Tüm bileşenler için uyumlu renkler
+
+### 📱 Responsive Tasarım
+- **Mobile-first** yaklaşım
+- Telefon, tablet ve masaüstü uyumlu
+- Responsive sidebar navigasyon
+- Touch-friendly arayüz
+
+### 💾 Çevrimdışı Çalışma
+- SQLite veritabanı
+- Yerel veri depolama
+- Hızlı performans
 - İstatistik kartları ve ilerleme takibi
 
 ### 🔍 Spotlight Arama
