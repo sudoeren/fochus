@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../types/index';
+import { refreshAllTasks, triggerInstantRefresh } from '../utils/refreshUtils';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -35,7 +36,17 @@ export const useTasks = () => {
         nextDue: task.nextDue ? new Date(task.nextDue) : undefined
       }));
       
-      setTasks(formattedTasks);
+      // Order değerine göre sırala, sonra pinned görevleri en üste al
+      const sortedTasks = formattedTasks.sort((a, b) => {
+        // Pinned görevler önce
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        // Sonra order değerine göre sırala
+        return (a.order || 0) - (b.order || 0);
+      });
+      
+      setTasks(sortedTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
     } finally {
@@ -44,7 +55,22 @@ export const useTasks = () => {
   };
 
   useEffect(() => {
+    // İlk yüklemede tasks'ları al
     loadTasks();
+
+    // INSTANT refresh event listener
+    const handleInstantRefresh = () => {
+      console.log('⚡ INSTANT refresh - Tasks yeniden yükleniyor...');
+      loadTasks();
+    };
+
+    // Custom event for instant refresh
+    window.addEventListener('refresh-tasks', handleInstantRefresh);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('refresh-tasks', handleInstantRefresh);
+    };
   }, []);
 
   // Add new task
@@ -79,7 +105,10 @@ export const useTasks = () => {
         nextDue: newTask.nextDue ? new Date(newTask.nextDue) : undefined
       };
       
-      await loadTasks(); // Auto-refresh after adding
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
+      await loadTasks(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
       return formattedTask;
     } catch (error) {
       console.error('Error adding task:', error);
@@ -115,7 +144,10 @@ export const useTasks = () => {
         nextDue: updatedTask.nextDue ? new Date(updatedTask.nextDue) : undefined
       };
       
-      await loadTasks(); // Auto-refresh after updating
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
+      await loadTasks(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
       return formattedTask;
     } catch (error) {
       console.error('Error updating task:', error);
@@ -126,8 +158,11 @@ export const useTasks = () => {
   // Delete task
   const deleteTask = async (id: string) => {
     try {
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
       await window.electronAPI.database.deleteTask(id);
-      await loadTasks(); // Auto-refresh after deleting
+      await loadTasks(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;
@@ -153,26 +188,43 @@ export const useTasks = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    let filteredTasks: Task[] = [];
+
     switch (filter) {
       case 'pending':
-        return tasks.filter(task => !task.isCompleted);
+        filteredTasks = tasks.filter(task => !task.isCompleted);
+        break;
       case 'completed':
-        return tasks.filter(task => task.isCompleted);
+        filteredTasks = tasks.filter(task => task.isCompleted);
+        break;
       case 'today':
-        return tasks.filter(task => 
+        filteredTasks = tasks.filter(task => 
           task.dueDate && 
           task.dueDate >= today && 
           task.dueDate < tomorrow
         );
+        break;
       case 'overdue':
-        return tasks.filter(task => 
+        filteredTasks = tasks.filter(task => 
           task.dueDate && 
           task.dueDate < today && 
           !task.isCompleted
         );
+        break;
       default:
-        return tasks;
+        filteredTasks = tasks;
+        break;
     }
+
+    // Filtrelenmiş görevleri de sırala (pinned görevler önce, sonra order)
+    return filteredTasks.sort((a, b) => {
+      // Pinned görevler önce
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      
+      // Sonra order değerine göre sırala
+      return (a.order || 0) - (b.order || 0);
+    });
   };
 
   // Get task statistics
@@ -221,26 +273,65 @@ export const useTasks = () => {
     }
   };
 
-  // Reorder tasks
-  const reorderTasks = async (startIndex: number, endIndex: number) => {
+  // Reorder tasks - SADECE 'ALL' FILTER IÇIN ÇALIŞIR
+  const reorderTasks = async (startIndex: number, endIndex: number, currentFilter: string = 'all') => {
+    console.log('🔄 reorderTasks çağrıldı:', { startIndex, endIndex, currentFilter });
+    
+    // Sadece 'all' filter'da drag-drop yapılabilir
+    if (currentFilter !== 'all') {
+      console.warn('⚠️ Drag-drop sadece "Hepsi" görünümünde çalışır!');
+      return;
+    }
+    
     try {
-      const result = Array.from(tasks);
-      const [removed] = result.splice(startIndex, 1);
-      result.splice(endIndex, 0, removed);
+      // 1. Tüm görevleri al (filtresiz)
+      const allTasks = [...tasks].sort((a, b) => (a.order || 0) - (b.order || 0));
+      console.log('📋 Başlangıç sıralaması:', allTasks.map((t, i) => `${i}: ${t.title} (order: ${t.order})`));
       
-      // Update local state immediately for better UX
-      setTasks(result);
+      // 2. Yerel state'i hemen güncelle (immediate feedback)
+      const newTasks = Array.from(allTasks);
+      const [movedTask] = newTasks.splice(startIndex, 1);
+      newTasks.splice(endIndex, 0, movedTask);
       
-      // Update order in database
-      const updatePromises = result.map((task, index) => 
-        window.electronAPI.database.updateTask(task.id, { order: index })
-      );
+      console.log('📋 Yeni sıralama:', newTasks.map((t, i) => `${i}: ${t.title}`));
       
-      await Promise.all(updatePromises);
+      // 3. Hemen local state'i güncelle
+      setTasks(newTasks);
+      
+      // 4. Veritabanındaki order değerlerini güncelle
+      console.log('💾 Veritabanı güncellemesi başlıyor...');
+      
+      const updatePromises = newTasks.map(async (task, index) => {
+        if (task.order !== index) {
+          console.log(`📝 Task "${task.title}" order: ${task.order} -> ${index}`);
+          try {
+            await window.electronAPI.database.updateTask(task.id, { order: index });
+            return true;
+          } catch (err) {
+            console.error(`❌ Task ${task.id} order güncellenemedi:`, err);
+            return false;
+          }
+        }
+        return true;
+      });
+      
+      const results = await Promise.all(updatePromises);
+      const failedUpdates = results.filter(r => !r).length;
+      
+      if (failedUpdates > 0) {
+        console.warn(`⚠️ ${failedUpdates} task order güncellenemedi`);
+      }
+      
+      // 5. Başarılı olduğundan emin olmak için tekrar yükle
+      console.log('🔄 Tasks reload ediliyor...');
+      await loadTasks();
+      
+      console.log('✅ reorderTasks tamamlandı!');
     } catch (error) {
-      console.error('Error reordering tasks:', error);
-      // Reload tasks if there's an error
-      loadTasks();
+      console.error('❌ reorderTasks HATASI:', error);
+      // Hata durumunda görevleri yeniden yükle
+      console.log('🔄 Hata sonrası reload...');
+      await loadTasks();
     }
   };
 

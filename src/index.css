@@ -16,6 +16,21 @@
     -webkit-overflow-scrolling: touch;
   }
 
+  /* Scrollbar hiding utility */
+  .scrollbar-hide {
+    /* Firefox */
+    scrollbar-width: none;
+    /* Safari and Chrome */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Touch optimization */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
   /* Mobile-first responsive design */
   html, body, #root {
     height: 100%;

@@ -103,18 +103,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   className = ""
 }) => {
   return (
-    <div className={`flex flex-col items-center justify-center py-16 px-4 text-center ${className}`}>
+    <div className={`flex flex-col items-center justify-center py-8 sm:py-12 lg:py-16 px-4 text-center ${className}`}>
       {/* Illustration */}
-      <div className="mb-6">
+      <div className="mb-6 sm:mb-8 transform scale-90 sm:scale-100">
         {getIllustration(type)}
       </div>
 
       {/* Content */}
-      <div className="max-w-md">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="max-w-sm sm:max-w-md w-full">
+        <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
           {title}
         </h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 leading-relaxed px-2">
           {description}
         </p>
 
@@ -122,7 +122,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         {actionText && onAction && (
           <button
             onClick={onAction}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-4 sm:py-4 
+                     bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl 
+                     transition-all duration-200 shadow-sm hover:shadow-md active:scale-95
+                     text-sm sm:text-base touch-manipulation min-h-[48px] w-full sm:w-auto"
           >
             <Plus className="w-5 h-5" />
             {actionText}
@@ -132,14 +135,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       {/* Tips based on type */}
       {type === 'notes' && (
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 max-w-md">
-          <div className="flex items-start gap-3">
-            <Lightbulb className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 max-w-sm sm:max-w-md mx-auto">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 mt-0.5 flex-shrink-0" />
             <div className="text-left">
-              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+              <h4 className="text-xs sm:text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
                 İpucu
               </h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
                 Notlarınızı etiketleyerek daha kolay organize edebilir ve hızlıca bulabilirsiniz.
               </p>
             </div>
@@ -148,14 +151,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       )}
 
       {type === 'tasks' && (
-        <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 max-w-md">
-          <div className="flex items-start gap-3">
-            <Lightbulb className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 max-w-sm sm:max-w-md mx-auto">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mt-0.5 flex-shrink-0" />
             <div className="text-left">
-              <h4 className="text-sm font-medium text-green-900 dark:text-green-100 mb-1">
+              <h4 className="text-xs sm:text-sm font-medium text-green-900 dark:text-green-100 mb-1">
                 İpucu
               </h4>
-              <p className="text-sm text-green-700 dark:text-green-300">
+              <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 leading-relaxed">
                 Görevlerinize tarih ve hatırlatıcı ekleyerek hiçbirini kaçırmayın.
               </p>
             </div>
@@ -164,14 +167,14 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       )}
 
       {type === 'search' && (
-        <div className="mt-8 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 max-w-md">
-          <div className="flex items-start gap-3">
-            <Lightbulb className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 max-w-sm sm:max-w-md mx-auto">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 flex-shrink-0" />
             <div className="text-left">
-              <h4 className="text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
+              <h4 className="text-xs sm:text-sm font-medium text-orange-900 dark:text-orange-100 mb-1">
                 İpucu
               </h4>
-              <p className="text-sm text-orange-700 dark:text-orange-300">
+              <p className="text-xs sm:text-sm text-orange-700 dark:text-orange-300 leading-relaxed">
                 Ctrl+K tuşuna basarak hızlı arama yapabilir, not ve görevlerinizde gezinebilirsiniz.
               </p>
             </div>

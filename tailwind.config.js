@@ -6,6 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      screens: {
+        'xxs': '350px',
+        'xs': '475px',
+      },
       colors: {
         primary: {
           50: '#f8fafc',
@@ -18,6 +22,9 @@ module.exports = {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
+        },
+        gray: {
+          900: 'rgb(32, 32, 32)', // Özel koyu tema rengi
         }
       }
     },

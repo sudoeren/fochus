@@ -10,6 +10,7 @@ import { TasksNew } from './pages/Tasks_new';
 import { WeeklyPlanner } from './pages/WeeklyPlanner';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
+import { setupFastPolling } from './utils/refreshUtils';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -30,6 +31,9 @@ const App: React.FC = () => {
 
   // Shortcut handler
   useEffect(() => {
+    // Setup FAST polling system for instant updates
+    setupFastPolling();
+    
     const handleShortcut = (event: string, data?: any) => {
       switch (event) {
         case 'navigate':

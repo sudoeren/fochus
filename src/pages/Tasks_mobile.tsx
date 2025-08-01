@@ -10,7 +10,7 @@ interface TasksProps {
 }
 
 export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { tasks, loading, deleteTask, toggleTask, pinTask, reorderTasks, getTasksByFilter, loadTasks } = useTasks();
+  const { tasks, loading, deleteTask, toggleTask, pinTask, reorderTasks, getTasksByFilter } = useTasks();
   const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'completed' | 'today' | 'overdue'>('all');
 
   const filteredTasks = getTasksByFilter(activeFilter);
@@ -37,37 +37,22 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
     await pinTask(taskId, !isPinned);
   };
 
-  // FIX: Drag-drop sorununu düzeltelim - FILTER AWARE
-  const handleDragEnd = async (result: DropResult) => {
-    console.log('🎯 DRAG END:', result, 'Current filter:', activeFilter);
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
     
-    if (!result.destination) {
-      console.log('❌ Destination yok, işlem iptal');
-      return;
-    }
+    const startIndex = result.source.index;
+    const endIndex = result.destination.index;
     
-    if (result.source.index === result.destination.index) {
-      console.log('❌ Aynı pozisyon, işlem iptal');
-      return;
-    }
+    if (startIndex === endIndex) return;
     
-    // Sadece 'all' filtresi aktifken drag-drop yapılabilir
-    if (activeFilter !== 'all') {
-      console.warn('⚠️ Drag-drop sadece "Hepsi" görünümünde kullanılabilir!');
-      alert('Sürükleme özelliği sadece "Hepsi" görünümünde kullanılabilir.');
-      return;
-    }
+    const sourceTask = filteredTasks[startIndex];
+    const destinationTask = filteredTasks[endIndex];
     
-    console.log(`� Sürükleme: ${result.source.index} -> ${result.destination.index}`);
+    const sourceIndexInAllTasks = tasks.findIndex(task => task.id === sourceTask.id);
+    const destinationIndexInAllTasks = tasks.findIndex(task => task.id === destinationTask.id);
     
-    try {
-      // Filter bilgisi ile reorderTasks'i çağır
-      await reorderTasks(result.source.index, result.destination.index, activeFilter);
-      console.log('✅ DRAG-DROP başarılı!');
-    } catch (error) {
-      console.error('❌ DRAG-DROP HATASI:', error);
-      // Hata durumunda reload
-      await loadTasks();
+    if (sourceIndexInAllTasks !== -1 && destinationIndexInAllTasks !== -1) {
+      reorderTasks(sourceIndexInAllTasks, destinationIndexInAllTasks);
     }
   };
 
@@ -79,8 +64,9 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('tr-TR', {
-      day: '2-digit',
-      month: '2-digit'
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
@@ -94,10 +80,10 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* ULTRA MOBILE Container */}
-      <div className="p-1 xxs:p-2 xs:p-3 sm:p-4 space-y-2 xxs:space-y-3 max-w-7xl mx-auto">
+      {/* Ultra Mobile Container */}
+      <div className="p-2 xxs:p-3 xs:p-4 space-y-2 xxs:space-y-3 max-w-7xl mx-auto">
         
-        {/* ULTRA COMPACT Header */}
+        {/* Ultra Compact Header */}
         <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center justify-between gap-2">
           <div className="space-y-1 min-w-0 flex-1">
             <h1 className="text-lg xxs:text-xl xs:text-2xl font-bold text-gray-900 dark:text-white">
@@ -136,7 +122,7 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
           </button>
         </div>
 
-        {/* ULTRA COMPACT Filter Tabs */}
+        {/* Ultra Compact Filter Tabs */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-1 xxs:p-2 shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
             {filterOptions.map((filter) => (
@@ -169,36 +155,20 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
           </div>
         </div>
 
-        {/* Drag-drop warning for filtered views */}
-        {activeFilter !== 'all' && filteredTasks.length > 0 && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-            <p className="text-xs text-amber-700 dark:text-amber-300 text-center">
-              Sürükleme özelliği sadece "Hepsi" görünümünde kullanılabilir.
-            </p>
-          </div>
-        )}
-
-        {/* ULTRA MOBILE Tasks List */}
+        {/* Ultra Mobile Tasks List */}
         <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="tasks" type="TASK" isDropDisabled={activeFilter !== 'all'}>
+          <Droppable droppableId="tasks" type="TASK">
             {(provided, snapshot) => (
               <div 
                 className={`space-y-1 xxs:space-y-2 transition-colors duration-200 ${
-                  snapshot.isDraggingOver && activeFilter === 'all' 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' 
-                    : ''
+                  snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2' : ''
                 }`}
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
                 {filteredTasks.length > 0 ? (
                   filteredTasks.map((task, index) => (
-                    <Draggable 
-                      key={task.id} 
-                      draggableId={task.id} 
-                      index={index}
-                      isDragDisabled={activeFilter !== 'all'}
-                    >
+                    <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided, snapshot) => (
                         <div 
                           ref={provided.innerRef}
@@ -207,23 +177,21 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
                                     border-gray-200 dark:border-gray-700 p-2 xxs:p-3 
                                     transition-all duration-200 touch-manipulation ${
                             snapshot.isDragging ? 'shadow-lg rotate-1 scale-105 z-50' : 'hover:shadow-md active:scale-[0.98]'
-                          } ${activeFilter !== 'all' ? 'cursor-default' : ''}`}
+                          }`}
                         >
                           <div className="flex items-start gap-1 xxs:gap-2">
-                            {/* Drag Handle - Only show when draggable */}
-                            {activeFilter === 'all' && (
-                              <div
-                                {...provided.dragHandleProps}
-                                className="mt-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 
-                                         cursor-grab active:cursor-grabbing flex-shrink-0 touch-none
-                                         p-1 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 
-                                         transition-colors touch-manipulation"
-                              >
-                                <GripVertical className="w-3 h-3" />
-                              </div>
-                            )}
+                            {/* Ultra Small Drag Handle */}
+                            <div
+                              {...provided.dragHandleProps}
+                              className="mt-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 
+                                       cursor-grab active:cursor-grabbing flex-shrink-0 touch-none
+                                       p-1 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 
+                                       transition-colors touch-manipulation"
+                            >
+                              <GripVertical className="w-3 h-3" />
+                            </div>
                             
-                            {/* Complete Toggle */}
+                            {/* Ultra Small Complete Toggle */}
                             <button
                               onClick={() => handleToggleTask(task.id)}
                               className={`mt-0.5 transition-colors flex-shrink-0 p-1 -m-1 rounded 
@@ -264,7 +232,7 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
                                     )}
                                   </div>
                                   
-                                  {/* Action Buttons */}
+                                  {/* Ultra Small Action Buttons */}
                                   <div className="flex gap-0.5 flex-shrink-0">
                                     <button
                                       onClick={() => handlePinTask(task.id, task.isPinned || false)}
@@ -296,19 +264,36 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
                                   </div>
                                 </div>
                                 
-                                {/* Meta Info */}
-                                {task.dueDate && (
-                                  <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                {/* Ultra Compact Meta Info */}
+                                <div className="flex flex-wrap items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                                  {task.dueDate && (
                                     <div className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium ${
                                       new Date(task.dueDate) < new Date() && !task.isCompleted
                                         ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                         : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                                     }`}>
                                       <Calendar className="w-2.5 h-2.5" />
-                                      <span>{formatDate(new Date(task.dueDate))}</span>
+                                      <span>
+                                        {new Date(task.dueDate).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })}
+                                      </span>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
+                                  {task.category && task.category !== 'personal' && (
+                                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                                                   px-1.5 py-0.5 rounded text-xs">
+                                      {task.category}
+                                    </span>
+                                  )}
+                                  {task.priority && task.priority !== 'medium' && (
+                                    <span className={`px-1.5 py-0.5 rounded text-xs ${
+                                      task.priority === 'high' 
+                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                                    }`}>
+                                      {task.priority === 'high' ? 'Y' : 'D'}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -331,7 +316,7 @@ export const Tasks: React.FC<TasksProps> = ({ onOpenTaskModal, onEditTask }) => 
                         ? 'İlk görevinizi oluşturarak üretkenliğinizi artırmaya başlayın.'
                         : `Bu filtre için henüz görev bulunmuyor.`
                     }
-                    actionText="Yeni Görev Ekle"
+                    actionText={activeFilter === 'all' ? 'İlk Görevimi Oluştur' : 'Yeni Görev Ekle'}
                     onAction={onOpenTaskModal}
                   />
                 )}

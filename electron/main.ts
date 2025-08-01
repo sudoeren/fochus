@@ -364,6 +364,17 @@ function setupDatabaseHandlers() {
       if (data.isCompleted !== undefined) updateData.isCompleted = data.isCompleted;
       if (data.status !== undefined) updateData.status = data.status;
       if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+      if (data.order !== undefined) updateData.order = data.order; // ORDER FIELD EKLENDİ!
+      if (data.isPinned !== undefined) updateData.isPinned = data.isPinned;
+      if (data.listId !== undefined) updateData.listId = data.listId;
+      if (data.priority !== undefined) updateData.priority = data.priority;
+      if (data.hasReminder !== undefined) updateData.hasReminder = data.hasReminder;
+      if (data.reminderAt !== undefined) updateData.reminderAt = data.reminderAt ? new Date(data.reminderAt) : null;
+      if (data.isRecurring !== undefined) updateData.isRecurring = data.isRecurring;
+      if (data.recurringType !== undefined) updateData.recurringType = data.recurringType;
+      if (data.recurringInterval !== undefined) updateData.recurringInterval = data.recurringInterval;
+      if (data.recurringDays !== undefined) updateData.recurringDays = data.recurringDays;
+      if (data.recurringEndDate !== undefined) updateData.recurringEndDate = data.recurringEndDate ? new Date(data.recurringEndDate) : null;
 
       return await prisma.task.update({
         where: { id },

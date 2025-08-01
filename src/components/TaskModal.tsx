@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckSquare, Clock, Repeat, Plus, ChevronDown } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
+import { useTaskLists } from '../hooks/useTaskLists';
 import { notificationService } from '../services/NotificationService';
 
 type RecurringType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
@@ -14,12 +15,14 @@ interface TaskModalProps {
 
 export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTask, onEscapeToSpotlight }) => {
   const { addTask, updateTask } = useTasks();
+  const { taskLists, loading: listsLoading } = useTaskLists();
   const [activeTab, setActiveTab] = useState('basic');
   const [taskData, setTaskData] = useState({
     title: '',
     description: '',
     dueDate: '',
     priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
+    listId: null as string | null, // Liste seçimi için
     hasReminder: false,
     reminderAt: undefined as Date | undefined,
     isRecurring: false,
@@ -37,6 +40,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTa
         description: editingTask?.description || '',
         dueDate: editingTask?.dueDate ? editingTask.dueDate.toISOString().split('T')[0] : '',
         priority: editingTask?.priority || 'MEDIUM',
+        listId: editingTask?.listId || null, // Liste ID'sini set et
         hasReminder: editingTask?.hasReminder || false,
         reminderAt: editingTask?.reminderAt ? new Date(editingTask.reminderAt) : undefined,
         isRecurring: editingTask?.isRecurring || false,
@@ -81,6 +85,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTa
         description: taskData.description,
         dueDate: taskData.dueDate ? new Date(taskData.dueDate) : undefined,
         priority: taskData.priority,
+        listId: taskData.listId, // Liste ID'sini gönder
         hasReminder: taskData.hasReminder,
         reminderAt: taskData.reminderAt,
         isRecurring: taskData.isRecurring,
@@ -256,6 +261,40 @@ export const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, editingTa
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>
                 </div>
+              </div>
+
+              {/* Task List Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Liste Seçimi
+                </label>
+                <div className="relative">
+                  <select
+                    value={taskData.listId || ''}
+                    onChange={(e) => setTaskData(prev => ({ ...prev, listId: e.target.value || null }))}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                    disabled={listsLoading}
+                  >
+                    <option value="">Varsayılan (Genel Görevler)</option>
+                    {taskLists.map((list) => (
+                      <option key={list.id} value={list.id}>
+                        {list.title}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+                {taskData.listId && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: taskLists.find(list => list.id === taskData.listId)?.color || '#3B82F6' }}
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {taskLists.find(list => list.id === taskData.listId)?.title}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}

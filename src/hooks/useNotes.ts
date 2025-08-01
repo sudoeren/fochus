@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Note } from '../types';
+import { refreshAllNotes, triggerInstantRefresh } from '../utils/refreshUtils';
 
 export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -30,7 +31,22 @@ export const useNotes = () => {
   };
 
   useEffect(() => {
+    // İlk yüklemede notes'ları al
     loadNotes();
+
+    // INSTANT refresh event listener
+    const handleInstantRefresh = () => {
+      console.log('⚡ INSTANT refresh - Notes yeniden yükleniyor...');
+      loadNotes();
+    };
+
+    // Custom event for instant refresh
+    window.addEventListener('refresh-notes', handleInstantRefresh);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('refresh-notes', handleInstantRefresh);
+    };
   }, []);
 
   // Add new note
@@ -51,7 +67,10 @@ export const useNotes = () => {
         updatedAt: new Date(newNote.updatedAt)
       };
       
-      await loadNotes(); // Auto-refresh after adding
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
+      await loadNotes(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
       return formattedNote;
     } catch (error) {
       console.error('Error adding note:', error);
@@ -77,7 +96,10 @@ export const useNotes = () => {
         updatedAt: new Date(updatedNote.updatedAt)
       };
       
-      await loadNotes(); // Auto-refresh after updating
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
+      await loadNotes(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
       return formattedNote;
     } catch (error) {
       console.error('Error updating note:', error);
@@ -88,8 +110,11 @@ export const useNotes = () => {
   // Delete note
   const deleteNote = async (id: string) => {
     try {
+      // ULTRA FAST refresh - hemen tetikle!
+      triggerInstantRefresh(); // Hemen global refresh
       await window.electronAPI.database.deleteNote(id);
-      await loadNotes(); // Auto-refresh after deleting
+      await loadNotes(); // Local refresh
+      triggerInstantRefresh(); // Bir kez daha global refresh
     } catch (error) {
       console.error('Error deleting note:', error);
       throw error;
