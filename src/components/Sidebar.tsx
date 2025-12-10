@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   FileText, 
@@ -11,9 +11,14 @@ import {
   Menu, 
   X,
   Search,
-  PlusCircle,
-  Plus
+  Plus,
+  Sun,
+  Moon,
+  Monitor,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
+import { useTheme } from './ThemeProvider';
 
 interface SidebarProps {
   activeView: string;
@@ -24,39 +29,15 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { 
-    id: 'dashboard', 
-    label: 'Dashboard', 
-    icon: Home
-  },
-  { 
-    id: 'notes', 
-    label: 'Notlar', 
-    icon: FileText
-  },
-  { 
-    id: 'tasks', 
-    label: 'Görevler', 
-    icon: CheckSquare
-  },
-  { 
-    id: 'weekly', 
-    label: 'Haftalık Plan', 
-    icon: Calendar
-  },
+  { id: 'dashboard', label: 'Dashboard', icon: Home },
+  { id: 'notes', label: 'Notlar', icon: FileText },
+  { id: 'tasks', label: 'Görevler', icon: CheckSquare },
+  { id: 'weekly', label: 'Haftalık Plan', icon: Calendar },
 ];
 
 const bottomItems = [
-  { 
-    id: 'trash', 
-    label: 'Çöp Kutusu', 
-    icon: Trash2
-  },
-  { 
-    id: 'settings', 
-    label: 'Ayarlar', 
-    icon: Settings
-  },
+  { id: 'trash', label: 'Çöp Kutusu', icon: Trash2 },
+  { id: 'settings', label: 'Ayarlar', icon: Settings },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -66,19 +47,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenNoteModal,
   onOpenTaskModal
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    // Persist collapse state
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
-  // Auto expand on hover if collapsed
-  const shouldExpand = !isCollapsed || isHovered;
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
+  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="w-4 h-4" />;
+    if (theme === 'dark') return <Moon className="w-4 h-4" />;
+    return <Monitor className="w-4 h-4" />;
+  };
+
+  const cycleTheme = () => {
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
+  };
 
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-center text-gray-600 dark:text-gray-400 shadow-lg hover:shadow-xl transition-all duration-200"
+        className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg text-gray-600 dark:text-zinc-400 shadow-md"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -86,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -95,54 +95,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div 
         className={`
           fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
-          bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          h-full flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:shadow-none
+          bg-white dark:bg-black border-r border-gray-200 dark:border-zinc-800
+          h-full flex flex-col transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          ${shouldExpand ? 'w-[280px]' : 'w-[80px] lg:w-[80px]'}
+          ${isCollapsed ? 'w-[72px]' : 'w-[260px]'}
         `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Mobile Close Button */}
         <button
           onClick={() => setIsMobileMenuOpen(false)}
-          className="lg:hidden absolute top-4 right-4 w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          className="lg:hidden absolute top-4 right-4 p-2 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
 
-        {/* Collapse Toggle Button (Desktop) */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={`
-            hidden lg:flex absolute -right-3 top-8 w-6 h-6 bg-white dark:bg-gray-800 
-            border border-gray-200 dark:border-gray-700 rounded-full 
-            items-center justify-center text-gray-400 dark:text-gray-500
-            hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800
-            transition-all duration-200 z-10 shadow-sm
-          `}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="w-3 h-3" />
-          ) : (
-            <ChevronLeft className="w-3 h-3" />
-          )}
-        </button>
-
-        {/* 1. Header Area */}
-        <div className="p-6 pb-2">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
-              <span className="text-white font-bold text-xl">F</span>
+        {/* 1. Header & Logo */}
+        <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-zinc-900">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-8 h-8 bg-zinc-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white dark:text-black font-bold text-lg">F</span>
             </div>
-            
-            <div className={`transition-all duration-200 overflow-hidden ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-none">Fokus</h1>
-              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Pro</span>
+            <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
+              <span className="font-bold text-lg text-gray-900 dark:text-white tracking-tight">Fokus</span>
             </div>
           </div>
+        </div>
 
-          {/* Search Button / Spotlight Trigger */}
+        {/* 2. Spotlight & Quick Actions */}
+        <div className="p-3 space-y-2">
           <button
             onClick={() => {
               onOpenSpotlight();
@@ -150,79 +130,58 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             className={`
               w-full flex items-center gap-3 px-3 py-2.5 
-              bg-gray-100 dark:bg-gray-800/50 
-              border border-transparent hover:border-gray-200 dark:hover:border-gray-700
-              hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm
-              text-gray-500 dark:text-gray-400 rounded-xl transition-all duration-200 group
-              ${!shouldExpand ? 'justify-center px-0' : ''}
+              bg-gray-50 dark:bg-zinc-900 
+              hover:bg-gray-100 dark:hover:bg-zinc-800
+              text-gray-500 dark:text-zinc-400 
+              border border-gray-200 dark:border-zinc-800
+              rounded-xl transition-all duration-200 group
+              ${isCollapsed ? 'justify-center' : ''}
             `}
-            title="Hızlı Ara (Ctrl+K)"
+            title="Ara (Ctrl+K)"
           >
-            <Search className="w-5 h-5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-            <span className={`text-sm font-medium truncate transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
-              Hızlı Ara...
+            <Search className="w-4 h-4 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+            <span className={`text-sm font-medium transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+              Ara...
             </span>
-            {shouldExpand && (
-              <kbd className="ml-auto hidden xl:inline-block px-1.5 py-0.5 text-[10px] font-bold bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-gray-400">
-                ⌘K
+            {!isCollapsed && (
+              <kbd className="ml-auto text-[10px] font-mono bg-white dark:bg-zinc-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-zinc-700">
+                Ctrl K
               </kbd>
             )}
           </button>
-        </div>
 
-        {/* 2. Quick Actions */}
-        <div className={`px-4 py-2 transition-all duration-200 ${shouldExpand ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-          <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-2">
-            Oluştur
-          </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex gap-2">
             <button
-              onClick={() => {
-                onOpenNoteModal();
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+              onClick={onOpenTaskModal}
+              className={`
+                flex-1 flex items-center justify-center gap-2 py-2.5
+                bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400
+                hover:bg-blue-100 dark:hover:bg-blue-900/30
+                rounded-xl transition-colors
+              `}
+              title="Yeni Görev"
             >
-              <FileText className="w-5 h-5" />
-              <span className="text-xs font-medium">Not</span>
+              <CheckSquare className="w-4 h-4" />
+              {!isCollapsed && <span className="text-sm font-medium">Görev</span>}
             </button>
             <button
-              onClick={() => {
-                onOpenTaskModal();
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex flex-col items-center gap-1 p-2 rounded-xl bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors"
-            >
-              <CheckSquare className="w-5 h-5" />
-              <span className="text-xs font-medium">Görev</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Divider if collapsed */}
-        {!shouldExpand && (
-          <div className="px-4 py-2 flex flex-col gap-2 items-center">
-             <button
-              onClick={() => {
-                onOpenNoteModal();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+              onClick={onOpenNoteModal}
+              className={`
+                flex-1 flex items-center justify-center gap-2 py-2.5
+                bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400
+                hover:bg-amber-100 dark:hover:bg-amber-900/30
+                rounded-xl transition-colors
+              `}
               title="Yeni Not"
             >
-              <Plus className="w-5 h-5" />
+              <FileText className="w-4 h-4" />
+              {!isCollapsed && <span className="text-sm font-medium">Not</span>}
             </button>
           </div>
-        )}
+        </div>
 
-        {/* 3. Main Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1 custom-scrollbar">
-          {shouldExpand && (
-            <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-3 mt-2">
-              Menü
-            </div>
-          )}
-          
+        {/* 3. Navigation */}
+        <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -235,32 +194,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md shadow-gray-200 dark:shadow-none' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium' 
+                    : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-zinc-200'
                   }
-                  ${!shouldExpand ? 'justify-center px-0' : ''}
+                  ${isCollapsed ? 'justify-center' : ''}
                 `}
               >
-                <Icon className={`
-                  w-5 h-5 transition-colors
-                  ${isActive ? 'text-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
-                `} />
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
                 
-                <span className={`font-medium whitespace-nowrap transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
+                <span className={`text-sm transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
                   {item.label}
                 </span>
 
-                {/* Tooltip */}
-                {!shouldExpand && (
+                {/* Tooltip for collapsed state */}
+                {isCollapsed && (
                   <div className="
-                    absolute left-full ml-3 px-3 py-1.5 
-                    bg-gray-900 dark:bg-white text-white dark:text-gray-900 
+                    absolute left-full ml-3 px-2.5 py-1.5 
+                    bg-zinc-900 dark:bg-zinc-800 text-white 
                     text-xs font-medium rounded-lg whitespace-nowrap 
                     opacity-0 group-hover:opacity-100 
-                    transition-opacity duration-200 pointer-events-none z-50 shadow-xl
-                    translate-x-2 group-hover:translate-x-0 transform
+                    transition-opacity duration-200 pointer-events-none z-50
+                    translate-x-2 group-hover:translate-x-0
                   ">
                     {item.label}
                   </div>
@@ -270,9 +226,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
 
-        {/* 4. Bottom Actions (Settings, Trash) */}
-        <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
-           {bottomItems.map((item) => {
+        {/* 4. Footer Actions (Settings, Trash, Theme, Collapse) */}
+        <div className="p-3 border-t border-gray-100 dark:border-zinc-900 space-y-1">
+          {bottomItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             
@@ -284,36 +240,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   setIsMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
+                  w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' 
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200'
+                    ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium' 
+                    : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-zinc-200'
                   }
-                  ${!shouldExpand ? 'justify-center px-0' : ''}
+                  ${isCollapsed ? 'justify-center' : ''}
                 `}
               >
-                <Icon className={`w-5 h-5 ${item.id === 'trash' ? 'group-hover:text-red-500' : ''}`} />
-                
-                <span className={`font-medium whitespace-nowrap transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
+                <Icon className="w-5 h-5" />
+                <span className={`text-sm transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
                   {item.label}
                 </span>
-
-                 {/* Tooltip */}
-                 {!shouldExpand && (
-                  <div className="
-                    absolute left-full ml-3 px-3 py-1.5 
-                    bg-gray-900 dark:bg-white text-white dark:text-gray-900 
-                    text-xs font-medium rounded-lg whitespace-nowrap 
-                    opacity-0 group-hover:opacity-100 
-                    transition-opacity duration-200 pointer-events-none z-50 shadow-xl
-                    translate-x-2 group-hover:translate-x-0 transform
-                  ">
+                
+                {isCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50">
                     {item.label}
                   </div>
                 )}
               </button>
             );
           })}
+
+          <div className="h-px bg-gray-100 dark:bg-zinc-900 my-2" />
+
+          {/* Theme & Collapse Controls */}
+          <div className={`flex items-center gap-2 ${isCollapsed ? 'flex-col' : ''}`}>
+            {/* Theme Switcher */}
+            <button
+              onClick={cycleTheme}
+              className={`
+                flex items-center justify-center gap-3 p-2.5 rounded-xl
+                text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 
+                hover:text-gray-900 dark:hover:text-white transition-colors
+                ${isCollapsed ? 'w-full' : 'flex-1'}
+              `}
+              title={`Tema: ${theme === 'light' ? 'Açık' : theme === 'dark' ? 'Koyu' : 'Sistem'}`}
+            >
+              {getThemeIcon()}
+              {!isCollapsed && <span className="text-sm">Tema</span>}
+            </button>
+
+            {/* Collapse Toggle */}
+            <button
+              onClick={toggleCollapse}
+              className={`
+                hidden lg:flex items-center justify-center p-2.5 rounded-xl
+                text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 
+                hover:text-gray-900 dark:hover:text-white transition-colors
+                ${isCollapsed ? 'w-full' : ''}
+              `}
+              title={isCollapsed ? "Genişlet" : "Daralt"}
+            >
+              {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
     </>
