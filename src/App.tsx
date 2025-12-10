@@ -4,6 +4,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
 import { NoteModal } from './components/NoteModal';
 import { TaskModal } from './components/TaskModal';
+import { PomodoroModal } from './components/PomodoroModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
 import { TasksNew } from './pages/Tasks_new';
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showPomodoroModal, setShowPomodoroModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
 
   const handleEditTask = (task: any) => {
@@ -100,6 +102,7 @@ const App: React.FC = () => {
           onOpenSpotlight={() => setIsSpotlightOpen(true)}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
+          onOpenPomodoro={() => setShowPomodoroModal(true)}
         />
         <main className="flex-1 overflow-hidden lg:ml-0">
           <div className="h-full overflow-auto">
@@ -134,6 +137,11 @@ const App: React.FC = () => {
             closeTaskModal();
             setIsSpotlightOpen(true);
           }}
+        />
+
+        <PomodoroModal
+          isOpen={showPomodoroModal}
+          onClose={() => setShowPomodoroModal(false)}
         />
       </div>
     </ThemeProvider>

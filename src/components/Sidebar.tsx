@@ -16,9 +16,11 @@ import {
   Moon,
   Monitor,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Timer
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
+import { usePomodoro } from '../hooks/usePomodoro';
 
 interface SidebarProps {
   activeView: string;
@@ -26,6 +28,7 @@ interface SidebarProps {
   onOpenSpotlight: () => void;
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
+  onOpenPomodoro?: () => void;
 }
 
 const menuItems = [
@@ -45,15 +48,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onViewChange,
   onOpenSpotlight,
   onOpenNoteModal,
-  onOpenTaskModal
+  onOpenTaskModal,
+  onOpenPomodoro
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    // Persist collapse state
     const saved = localStorage.getItem('sidebarCollapsed');
     return saved ? JSON.parse(saved) : false;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  
+  // Pomodoro Mini Status
+  const { isActive, formatTime, timeLeft, mode } = usePomodoro();
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed));
@@ -216,8 +222,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
 
-        {/* 4. Footer Actions */}
+        {/* 4. Footer Actions & Pomodoro */}
         <div className="p-3 border-t border-gray-100 dark:border-zinc-900 space-y-1 flex-shrink-0">
+          
+          {/* Pomodoro Mini Widget */}
+          <button
+            onClick={onOpenPomodoro}
+            className={`
+              w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative mb-2
+              ${isActive 
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30' 
+                : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-zinc-200'
+              }
+              ${isCollapsed ? 'justify-center px-0' : ''}
+            `}
+            title="Pomodoro Zamanlayıcı"
+          >
+            <div className="relative">
+              <Timer className={`w-5 h-5 flex-shrink-0 ${isActive ? 'animate-pulse' : ''}`} />
+              {isActive && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-black"></span>
+              )}
+            </div>
+            
+            <span className={`text-sm font-mono font-medium transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+              {formatTime(timeLeft)}
+            </span>
+          </button>
+
           {bottomItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
