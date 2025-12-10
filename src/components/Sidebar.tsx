@@ -99,6 +99,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           h-full flex flex-col transition-all duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${isCollapsed ? 'w-[72px]' : 'w-[260px]'}
+          overflow-x-hidden
         `}
       >
         {/* Mobile Close Button */}
@@ -110,19 +111,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
 
         {/* 1. Header & Logo */}
-        <div className="h-16 flex items-center px-4 border-b border-gray-100 dark:border-zinc-900">
+        <div className={`h-16 flex items-center border-b border-gray-100 dark:border-zinc-900 flex-shrink-0 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-8 h-8 bg-zinc-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white dark:text-black font-bold text-lg">F</span>
             </div>
-            <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
-              <span className="font-bold text-lg text-gray-900 dark:text-white tracking-tight">Fokus</span>
+            <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+              <span className="font-bold text-lg text-gray-900 dark:text-white tracking-tight whitespace-nowrap">Fokus</span>
             </div>
           </div>
         </div>
 
         {/* 2. Spotlight & Quick Actions */}
-        <div className="p-3 space-y-2">
+        <div className="p-3 space-y-2 flex-shrink-0">
           <button
             onClick={() => {
               onOpenSpotlight();
@@ -135,12 +136,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               text-gray-500 dark:text-zinc-400 
               border border-gray-200 dark:border-zinc-800
               rounded-xl transition-all duration-200 group
-              ${isCollapsed ? 'justify-center' : ''}
+              ${isCollapsed ? 'justify-center px-0' : ''}
             `}
             title="Ara (Ctrl+K)"
           >
             <Search className="w-4 h-4 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-            <span className={`text-sm font-medium transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+            <span className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
               Ara...
             </span>
             {!isCollapsed && (
@@ -150,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </button>
 
-          <div className="flex gap-2">
+          <div className={`flex gap-2 ${isCollapsed ? 'flex-col' : ''}`}>
             <button
               onClick={onOpenTaskModal}
               className={`
@@ -158,11 +159,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400
                 hover:bg-blue-100 dark:hover:bg-blue-900/30
                 rounded-xl transition-colors
+                ${isCollapsed ? 'w-full' : ''}
               `}
               title="Yeni Görev"
             >
               <CheckSquare className="w-4 h-4" />
-              {!isCollapsed && <span className="text-sm font-medium">Görev</span>}
+              {!isCollapsed && <span className="text-sm font-medium whitespace-nowrap">Görev</span>}
             </button>
             <button
               onClick={onOpenNoteModal}
@@ -171,17 +173,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400
                 hover:bg-amber-100 dark:hover:bg-amber-900/30
                 rounded-xl transition-colors
+                ${isCollapsed ? 'w-full' : ''}
               `}
               title="Yeni Not"
             >
               <FileText className="w-4 h-4" />
-              {!isCollapsed && <span className="text-sm font-medium">Not</span>}
+              {!isCollapsed && <span className="text-sm font-medium whitespace-nowrap">Not</span>}
             </button>
           </div>
         </div>
 
         {/* 3. Navigation */}
-        <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-2 px-3 space-y-1 scrollbar-hide">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -199,35 +202,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium' 
                     : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-zinc-200'
                   }
-                  ${isCollapsed ? 'justify-center' : ''}
+                  ${isCollapsed ? 'justify-center px-0' : ''}
                 `}
+                title={isCollapsed ? item.label : undefined}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+                <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
                 
-                <span className={`text-sm transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+                <span className={`text-sm transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
                   {item.label}
                 </span>
-
-                {/* Tooltip for collapsed state */}
-                {isCollapsed && (
-                  <div className="
-                    absolute left-full ml-3 px-2.5 py-1.5 
-                    bg-zinc-900 dark:bg-zinc-800 text-white 
-                    text-xs font-medium rounded-lg whitespace-nowrap 
-                    opacity-0 group-hover:opacity-100 
-                    transition-opacity duration-200 pointer-events-none z-50
-                    translate-x-2 group-hover:translate-x-0
-                  ">
-                    {item.label}
-                  </div>
-                )}
               </button>
             );
           })}
         </div>
 
-        {/* 4. Footer Actions (Settings, Trash, Theme, Collapse) */}
-        <div className="p-3 border-t border-gray-100 dark:border-zinc-900 space-y-1">
+        {/* 4. Footer Actions */}
+        <div className="p-3 border-t border-gray-100 dark:border-zinc-900 space-y-1 flex-shrink-0">
           {bottomItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -245,19 +235,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     ? 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium' 
                     : 'text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-zinc-200'
                   }
-                  ${isCollapsed ? 'justify-center' : ''}
+                  ${isCollapsed ? 'justify-center px-0' : ''}
                 `}
+                title={isCollapsed ? item.label : undefined}
               >
-                <Icon className="w-5 h-5" />
-                <span className={`text-sm transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className={`text-sm transition-all duration-300 whitespace-nowrap overflow-hidden ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
                   {item.label}
                 </span>
-                
-                {isCollapsed && (
-                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none z-50">
-                    {item.label}
-                  </div>
-                )}
               </button>
             );
           })}
@@ -278,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               title={`Tema: ${theme === 'light' ? 'Açık' : theme === 'dark' ? 'Koyu' : 'Sistem'}`}
             >
               {getThemeIcon()}
-              {!isCollapsed && <span className="text-sm">Tema</span>}
+              {!isCollapsed && <span className="text-sm whitespace-nowrap">Tema</span>}
             </button>
 
             {/* Collapse Toggle */}
