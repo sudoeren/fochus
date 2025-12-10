@@ -1,10 +1,11 @@
-import { Task, Note, TaskList } from '../types';
+import { Task, Note, TaskList, PomodoroSession } from '../types';
 
 const STORAGE_KEYS = {
   TASKS: 'fokus_tasks',
   NOTES: 'fokus_notes',
   TASK_LISTS: 'fokus_task_lists',
-  SETTINGS: 'fokus_settings'
+  SETTINGS: 'fokus_settings',
+  POMODORO_SESSIONS: 'fokus_pomodoro_sessions'
 };
 
 const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -16,7 +17,7 @@ const getStoredData = <T>(key: string): T[] => {
     if (!data) return [];
     return JSON.parse(data, (key, value) => {
       // Convert date strings back to Date objects
-      if (key.endsWith('At') || key === 'dueDate' || key === 'lastCompleted' || key === 'nextDue') {
+      if (key.endsWith('At') || key === 'dueDate' || key === 'lastCompleted' || key === 'nextDue' || key === 'startTime' || key === 'endTime') {
         return value ? new Date(value) : undefined;
       }
       return value;
@@ -59,6 +60,7 @@ export const storageService = {
         recurringType: null,
         recurringInterval: null,
         recurringDays: null,
+        linkedNoteId: null,
         ...data
       } as Task;
       tasks.push(newTask);
@@ -208,6 +210,27 @@ export const storageService = {
          lists[index].isDeleted = true;
          setStoredData(STORAGE_KEYS.TASK_LISTS, lists);
        }
+    }
+  },
+  // Pomodoro
+  pomodoro: {
+    getAll: async (): Promise<PomodoroSession[]> => {
+      return getStoredData<PomodoroSession>(STORAGE_KEYS.POMODORO_SESSIONS);
+    },
+    saveSession: async (session: Partial<PomodoroSession>): Promise<PomodoroSession> => {
+      const sessions = getStoredData<PomodoroSession>(STORAGE_KEYS.POMODORO_SESSIONS);
+      const newSession: PomodoroSession = {
+        id: generateId(),
+        startTime: session.startTime || new Date(),
+        endTime: session.endTime || new Date(),
+        duration: session.duration || 0,
+        mode: session.mode || 'work',
+        completed: session.completed || false
+      } as PomodoroSession;
+      
+      sessions.push(newSession);
+      setStoredData(STORAGE_KEYS.POMODORO_SESSIONS, sessions);
+      return newSession;
     }
   }
 };

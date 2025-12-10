@@ -31,6 +31,16 @@ export interface Task {
   reminderAt?: Date;
   lastCompleted?: Date;
   nextDue?: Date;
+  linkedNoteId?: string | null; // New field for Note-Task linking
+}
+
+export interface PomodoroSession {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number; // in seconds
+  mode: 'work' | 'shortBreak' | 'longBreak';
+  completed: boolean;
 }
 
 export interface AppSettings {

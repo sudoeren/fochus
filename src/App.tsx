@@ -11,6 +11,7 @@ import { TasksNew } from './pages/Tasks_new';
 import { WeeklyPlanner } from './pages/WeeklyPlanner';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
+import { Stats } from './pages/Stats';
 import { setupFastPolling } from './utils/refreshUtils';
 
 const App: React.FC = () => {
@@ -80,6 +81,8 @@ const App: React.FC = () => {
         />;
       case 'weekly':
         return <WeeklyPlanner />;
+      case 'stats':
+        return <Stats />;
       case 'trash':
         return <Trash />;
       case 'settings':

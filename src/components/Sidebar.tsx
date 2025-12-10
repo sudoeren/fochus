@@ -17,7 +17,8 @@ import {
   Monitor,
   PanelLeftClose,
   PanelLeftOpen,
-  Timer
+  Timer,
+  BarChart
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
@@ -36,6 +37,7 @@ const menuItems = [
   { id: 'notes', label: 'Notlar', icon: FileText },
   { id: 'tasks', label: 'Görevler', icon: CheckSquare },
   { id: 'weekly', label: 'Haftalık Plan', icon: Calendar },
+  { id: 'stats', label: 'İstatistikler', icon: BarChart },
 ];
 
 const bottomItems = [

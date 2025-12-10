@@ -55,8 +55,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
-  const formatText = (command: string) => {
-    execCommand(command);
+  const formatText = (command: string, value?: string) => {
+    execCommand(command, value);
   };
 
   const toolbar = [
@@ -76,6 +76,59 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { divider: true },
     { icon: Link, command: 'link', title: 'Link Ekle' }
   ];
+
+  // Simple Markdown-like auto-formatting
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    handleContentChange();
+    
+    const selection = window.getSelection();
+    if (!selection || !selection.anchorNode) return;
+
+    const anchorNode = selection.anchorNode;
+    const text = anchorNode.textContent || '';
+    
+    // Check for markdown triggers only if we are at the end of a pattern
+    if (text.endsWith(' ')) {
+      let command = '';
+      let value = '';
+      let triggerLength = 0;
+
+      if (text === '# ') {
+        command = 'formatBlock';
+        value = 'H1';
+        triggerLength = 2;
+      } else if (text === '## ') {
+        command = 'formatBlock';
+        value = 'H2';
+        triggerLength = 3;
+      } else if (text === '- ' || text === '* ') {
+        command = 'insertUnorderedList';
+        triggerLength = 2;
+      } else if (text === '1. ') {
+        command = 'insertOrderedList';
+        triggerLength = 3;
+      } else if (text === '> ') {
+        command = 'formatBlock';
+        value = 'blockquote';
+        triggerLength = 2;
+      } else if (text === '``` ') {
+        command = 'formatBlock';
+        value = 'pre';
+        triggerLength = 4;
+      }
+
+      if (command) {
+        // Remove the trigger characters
+        const range = document.createRange();
+        range.setStart(anchorNode, 0);
+        range.setEnd(anchorNode, triggerLength);
+        range.deleteContents();
+
+        // Execute format command
+        execCommand(command, value);
+      }
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Handle keyboard shortcuts
@@ -102,13 +155,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className={`relative border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden ${className}`}>
+    <div className={`relative border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 ${className}`}>
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600 flex-wrap">
+      <div className="flex items-center gap-1 p-2 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 flex-wrap">
         {toolbar.map((item, index) => {
           if (item.divider) {
             return (
-              <div key={index} className="w-px h-6 bg-gray-300 dark:bg-gray-500 mx-1" />
+              <div key={index} className="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1" />
             );
           }
 
@@ -121,11 +174,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 if (item.command === 'link') {
                   insertLink();
                 } else {
-                  formatText(item.command!);
+                  formatText(item.command!, item.value);
                 }
               }}
               title={item.title}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors"
+              className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
             >
               <Icon className="w-4 h-4" />
             </button>
@@ -137,10 +190,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div
         ref={editorRef}
         contentEditable
-        onInput={handleContentChange}
+        onInput={handleInput}
         onKeyDown={handleKeyDown}
-        className="min-h-[200px] p-4 focus:outline-none text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 rich-text-editor"
-        style={{ 
+        className="min-h-[200px] p-4 focus:outline-none text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 rich-text-editor"
+        style={{
           wordBreak: 'break-word',
           overflowWrap: 'break-word'
         }}
