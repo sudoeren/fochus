@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ArrowRight, Home, BookOpen, CheckSquare, Calendar, Settings, Plus, Hash } from 'lucide-react';
+import { Search, ArrowRight, Home, BookOpen, CheckSquare, Calendar, Settings, Plus, Hash, X, Command } from 'lucide-react';
 
 interface SpotlightProps {
   isOpen: boolean;
@@ -9,7 +9,7 @@ interface SpotlightProps {
   onOpenTaskModal?: () => void;
 }
 
-interface Command {
+interface CommandItem {
   id: string;
   label: string;
   icon: React.ComponentType<any>;
@@ -38,12 +38,12 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   }, [isOpen]);
 
   // Define commands with actions
-  const commands: Command[] = [
+  const commands: CommandItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: Home,
-      description: 'Ana sayfa ve genel bakış',
+      description: 'Genel bakış ve özet',
       keywords: ['dashboard', 'ana', 'home', 'anasayfa', 'genel'],
       category: 'navigation',
       action: () => {
@@ -55,7 +55,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       id: 'notes',
       label: 'Notlar',
       icon: BookOpen,
-      description: 'Notlarınızı görüntüleyin ve düzenleyin',
+      description: 'Not defterine git',
       keywords: ['notes', 'notlar', 'note', 'yazı', 'döküman'],
       category: 'navigation',
       action: () => {
@@ -67,7 +67,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       id: 'tasks',
       label: 'Görevler',
       icon: CheckSquare,
-      description: 'Görevlerinizi yönetin ve takip edin',
+      description: 'Görev listesini aç',
       keywords: ['tasks', 'görevler', 'task', 'todo', 'yapılacak'],
       category: 'navigation',
       action: () => {
@@ -77,9 +77,9 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     },
     {
       id: 'weekly',
-      label: 'Haftalık Planlayıcı',
+      label: 'Haftalık Plan',
       icon: Calendar,
-      description: 'Haftalık planınızı görüntüleyin',
+      description: 'Takvim görünümü',
       keywords: ['weekly', 'haftalık', 'planner', 'takvim', 'plan'],
       category: 'navigation',
       action: () => {
@@ -91,7 +91,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       id: 'settings',
       label: 'Ayarlar',
       icon: Settings,
-      description: 'Uygulama ayarlarını yapılandırın',
+      description: 'Uygulama tercihleri',
       keywords: ['settings', 'ayarlar', 'config', 'konfigürasyon'],
       category: 'navigation',
       action: () => {
@@ -101,9 +101,9 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     },
     {
       id: 'new-note',
-      label: 'Yeni Not Oluştur',
+      label: 'Yeni Not',
       icon: Plus,
-      description: 'Hızlıca yeni bir not ekleyin',
+      description: 'Yeni bir not oluştur',
       keywords: ['yeni', 'not', 'oluştur', 'ekle', 'new', 'note', 'create'],
       category: 'actions',
       action: () => {
@@ -115,9 +115,9 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     },
     {
       id: 'new-task',
-      label: 'Yeni Görev Oluştur',
+      label: 'Yeni Görev',
       icon: Plus,
-      description: 'Hızlıca yeni bir görev ekleyin',
+      description: 'Yeni bir görev ekle',
       keywords: ['yeni', 'görev', 'oluştur', 'ekle', 'new', 'task', 'create'],
       category: 'actions',
       action: () => {
@@ -175,58 +175,44 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     }
   }, [isOpen]);
 
-  // Keyboard navigation with proper event handling
+  // Keyboard navigation
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isOpenRef.current) return;
-
-    console.log('🎯 Spotlight Key:', e.key);
 
     switch (e.key) {
       case 'Escape':
         e.preventDefault();
-        e.stopPropagation();
-        console.log('🎯 Closing spotlight');
         onClose();
         break;
 
       case 'ArrowDown':
         e.preventDefault();
-        e.stopPropagation();
         setSelectedIndex(prev => {
-          // Get current filtered commands inline to avoid dependency issues
           const searchTerm = query.toLowerCase().trim();
           const currentFiltered = !searchTerm ? commands : commands.filter(command => 
             command.label.toLowerCase().includes(searchTerm) ||
             command.description.toLowerCase().includes(searchTerm) ||
             command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
           );
-          const newIndex = prev >= currentFiltered.length - 1 ? 0 : prev + 1;
-          console.log('🎯 Arrow down, new index:', newIndex, 'of', currentFiltered.length);
-          return newIndex;
+          return prev >= currentFiltered.length - 1 ? 0 : prev + 1;
         });
         break;
 
       case 'ArrowUp':
         e.preventDefault();
-        e.stopPropagation();
         setSelectedIndex(prev => {
-          // Get current filtered commands inline to avoid dependency issues
           const searchTerm = query.toLowerCase().trim();
           const currentFiltered = !searchTerm ? commands : commands.filter(command => 
             command.label.toLowerCase().includes(searchTerm) ||
             command.description.toLowerCase().includes(searchTerm) ||
             command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
           );
-          const newIndex = prev <= 0 ? currentFiltered.length - 1 : prev - 1;
-          console.log('🎯 Arrow up, new index:', newIndex, 'of', currentFiltered.length);
-          return newIndex;
+          return prev <= 0 ? currentFiltered.length - 1 : prev - 1;
         });
         break;
 
       case 'Enter':
         e.preventDefault();
-        e.stopPropagation();
-        // Get current filtered commands inline
         const searchTerm = query.toLowerCase().trim();
         const currentFiltered = !searchTerm ? commands : commands.filter(command => 
           command.label.toLowerCase().includes(searchTerm) ||
@@ -234,84 +220,89 @@ export const Spotlight: React.FC<SpotlightProps> = ({
           command.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm))
         );
         
-        setSelectedIndex(current => {
-          if (currentFiltered[current]) {
-            console.log('🎯 Executing:', currentFiltered[current].label);
-            currentFiltered[current].action();
-          }
-          return current;
-        });
-        break;
-
-      case 'Tab':
-        e.preventDefault(); // Prevent tab navigation
+        if (currentFiltered[selectedIndex]) {
+          currentFiltered[selectedIndex].action();
+        }
         break;
     }
-  }, [onClose, query, commands]);
+  }, [onClose, query, commands, selectedIndex]);
 
   // Setup keyboard event listeners
   useEffect(() => {
     if (!isOpen) return;
-
-    document.addEventListener('keydown', handleKeyDown, { capture: true });
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, { capture: true });
-    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-start justify-center pt-[12vh] px-4 sm:px-6"
+      className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center pt-[15vh] px-4 sm:px-6 transition-all duration-200"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden animate-in slide-in-from-top-4 duration-200"
+        className="
+          w-full max-w-2xl 
+          bg-white dark:bg-zinc-900 
+          rounded-2xl shadow-2xl 
+          border border-gray-200 dark:border-zinc-800 
+          overflow-hidden 
+          animate-in slide-in-from-top-4 fade-in duration-200
+        "
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with Search */}
-        <div className="flex items-center gap-4 p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <Search className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-4 p-5 border-b border-gray-200 dark:border-zinc-800">
+          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+            <Search className="w-5 h-5 text-gray-400 dark:text-zinc-500" />
           </div>
           <input
             ref={inputRef}
             type="text"
-            placeholder="Komut veya sayfa arayın..."
+            placeholder="Ne yapmak istersiniz?"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none text-lg font-medium"
+            className="
+              flex-1 bg-transparent 
+              text-gray-900 dark:text-white 
+              placeholder-gray-400 dark:placeholder-zinc-500 
+              outline-none text-xl font-medium
+            "
             autoComplete="off"
             spellCheck={false}
           />
-          {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              ×
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                className="p-1 rounded-md text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+            <div className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded-md text-xs font-medium text-gray-500 dark:text-zinc-400 border border-gray-200 dark:border-zinc-700">
+              Esc
+            </div>
+          </div>
         </div>
 
         {/* Results */}
-        <div className="max-h-[60vh] overflow-y-auto scroll-smooth">
+        <div className="max-h-[50vh] overflow-y-auto scrollbar-hide py-2">
           {filteredCommands.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <Hash className="w-8 h-8 text-gray-400" />
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-50 dark:bg-zinc-800/50 flex items-center justify-center">
+                <Command className="w-8 h-8 text-gray-300 dark:text-zinc-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-200 mb-1">
                 Sonuç bulunamadı
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Farklı anahtar kelimeler deneyin
+              <p className="text-sm text-gray-500 dark:text-zinc-500">
+                Farklı bir komut deneyin
               </p>
             </div>
           ) : (
-            <div className="py-2">
+            <div className="px-2 space-y-1">
               {filteredCommands.map((command, index) => {
                 const Icon = command.icon;
                 const isSelected = index === selectedIndex;
@@ -323,49 +314,49 @@ export const Spotlight: React.FC<SpotlightProps> = ({
                       itemRefs.current[index] = el;
                     }}
                     onClick={() => command.action()}
-                    className={`relative flex items-center gap-4 px-6 py-4 cursor-pointer transition-all duration-150 ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-l-4 border-blue-500'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                    }`}
+                    className={`
+                      relative flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-150
+                      ${isSelected 
+                        ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md' 
+                        : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800'
+                      }
+                    `}
                   >
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 ${
-                      isSelected
-                        ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white scale-105 shadow-lg'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}>
-                      <Icon className="w-6 h-6" />
+                    <div className={`
+                      w-10 h-10 rounded-lg flex items-center justify-center transition-colors
+                      ${isSelected 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400'
+                      }
+                    `}>
+                      <Icon className="w-5 h-5" />
                     </div>
                     
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className={`font-semibold text-lg leading-tight ${
-                        isSelected 
-                          ? 'text-blue-700 dark:text-blue-300' 
-                          : 'text-gray-900 dark:text-gray-100'
-                      }`}>
+                      <div className={`font-medium text-base ${isSelected ? 'text-white' : 'text-gray-900 dark:text-zinc-100'}`}>
                         {command.label}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <div className={`text-sm truncate ${isSelected ? 'text-blue-100' : 'text-gray-500 dark:text-zinc-500'}`}>
                         {command.description}
                       </div>
                     </div>
                     
                     {/* Category Badge */}
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      command.category === 'navigation'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                    }`}>
-                      {command.category === 'navigation' ? 'Gezinti' : 'Eylem'}
+                    <div className={`
+                      px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider
+                      ${isSelected
+                        ? 'bg-white/20 text-white'
+                        : 'bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500'
+                      }
+                    `}>
+                      {command.category === 'navigation' ? 'Git' : 'Yap'}
                     </div>
                     
                     {/* Arrow for selected */}
                     {isSelected && (
-                      <div className="flex items-center gap-2">
-                        <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                      </div>
+                      <ArrowRight className="w-5 h-5 text-white animate-pulse" />
                     )}
                   </div>
                 );
@@ -375,39 +366,20 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <kbd className="px-2 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-xs font-mono shadow-sm">
-                    ↑
-                  </kbd>
-                  <kbd className="px-2 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-xs font-mono shadow-sm">
-                    ↓
-                  </kbd>
-                </div>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Gezin
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <kbd className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-xs font-mono shadow-sm">
-                  Enter
-                </kbd>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Seç
-                </span>
-              </div>
+        <div className="px-5 py-3 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 flex items-center justify-between text-xs text-gray-500 dark:text-zinc-500">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md font-mono">↑</kbd>
+              <kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md font-mono">↓</kbd>
+              <span>Gezin</span>
             </div>
-            <div className="flex items-center gap-2">
-              <kbd className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-xs font-mono shadow-sm">
-                Esc
-              </kbd>
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Kapat
-              </span>
+            <div className="flex items-center gap-1.5">
+              <kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-md font-mono">↵</kbd>
+              <span>Seç</span>
             </div>
+          </div>
+          <div>
+            <span className="font-medium text-gray-900 dark:text-zinc-300">Fokus</span> Spotlight
           </div>
         </div>
       </div>

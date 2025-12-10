@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Plus, Trash2, Pin, Calendar } from 'lucide-react';
+import React from 'react';
+import { Plus, Trash2, Pin, Calendar, MoreHorizontal } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { EmptyState } from '../components/EmptyState';
 
@@ -17,11 +17,8 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  useEffect(() => {
-    // Notes sayfalandığında otomatik olarak notları yükle
-  }, []);
-
-  const handleDeleteNote = async (noteId: string) => {
+  const handleDeleteNote = async (e: React.MouseEvent, noteId: string) => {
+    e.stopPropagation();
     if (window.confirm('Bu notu silmek istediğinizden emin misiniz?')) {
       try {
         await deleteNote(noteId);
@@ -31,7 +28,8 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
     }
   };
 
-  const handlePinNote = async (noteId: string, isPinned: boolean) => {
+  const handlePinNote = async (e: React.MouseEvent, noteId: string, isPinned: boolean) => {
+    e.stopPropagation();
     try {
       await pinNote(noteId, !isPinned);
     } catch (error) {
@@ -41,99 +39,126 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Notlar yükleniyor...</div>
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="flex items-center gap-3 text-gray-500 dark:text-zinc-400">
+          <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+          <span>Notlar yükleniyor...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-      {/* Enhanced Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-gray-50 dark:bg-black">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div className="space-y-1 min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
             Notlarım
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-            <span>{notes.length} not</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="text-xs sm:text-sm">Ctrl+K ile arama yapabilirsiniz</span>
-          </p>
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-zinc-400">
+            <span className="font-medium bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md text-gray-900 dark:text-zinc-200">
+              {notes.length}
+            </span>
+            <span>not bulundu</span>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenNoteModal}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                     text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center gap-2 transition-all duration-200 
-                     shadow-md hover:shadow-lg transform hover:scale-105 text-sm sm:text-base flex-shrink-0"
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-200 font-medium shadow-sm hover:shadow-md active:scale-95"
           >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Yeni Not Ekle</span>
-            <span className="sm:hidden">Yeni Not</span>
+            <Plus className="w-5 h-5" />
+            <span className="hidden sm:inline">Yeni Not</span>
+            <span className="sm:hidden">Ekle</span>
           </button>
         </div>
       </div>
 
       {/* Notes Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {sortedNotes.length > 0 ? (
           sortedNotes.map((note) => (
             <div
               key={note.id}
               data-note-id={note.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow relative group"
+              className={`
+                group relative flex flex-col p-5 h-[280px]
+                bg-white dark:bg-zinc-900 
+                rounded-2xl border border-gray-200 dark:border-zinc-800
+                hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-lg dark:hover:shadow-zinc-900/50
+                transition-all duration-300 cursor-default
+                ${note.isPinned ? 'ring-2 ring-amber-500/20 dark:ring-amber-500/10' : ''}
+              `}
             >
-              {/* Pin Button */}
-              <button
-                onClick={() => handlePinNote(note.id, note.isPinned || false)}
-                className={`absolute top-3 right-3 p-1.5 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 ${
-                  note.isPinned 
-                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 opacity-100' 
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500'
-                }`}
-                title={note.isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
-              >
-                <Pin className={`w-3 h-3 ${note.isPinned ? 'fill-current' : ''}`} />
-              </button>
-
-              {/* Note Content */}
-              <div className="pr-8">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 flex items-center gap-2">
-                  {note.isPinned && (
-                    <Pin className="w-3 h-3 text-yellow-500 fill-current flex-shrink-0" />
-                  )}
+              {/* Card Header */}
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white line-clamp-1 pr-8">
                   {note.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-4">
-                  {note.content || 'İçerik yok...'}
-                </p>
                 
-                {/* Date */}
-                <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  {note.createdAt.toLocaleDateString('tr-TR')}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Actions (visible on hover) */}
+                <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white dark:bg-zinc-900 pl-2">
                   <button
-                    onClick={() => handleDeleteNote(note.id)}
-                    className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                    onClick={(e) => handlePinNote(e, note.id, note.isPinned || false)}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      note.isPinned 
+                        ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' 
+                        : 'text-gray-400 hover:text-amber-500 hover:bg-gray-100 dark:hover:bg-zinc-800'
+                    }`}
+                    title={note.isPinned ? 'Sabitlemeyi kaldır' : 'Sabitle'}
+                  >
+                    <Pin className={`w-4 h-4 ${note.isPinned ? 'fill-current' : ''}`} />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteNote(e, note.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Sil"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
+                
+                {/* Always visible pin icon if pinned (when not hovering) */}
+                {note.isPinned && (
+                  <div className="absolute top-4 right-4 text-amber-500 group-hover:opacity-0 transition-opacity duration-200">
+                    <Pin className="w-4 h-4 fill-current" />
+                  </div>
+                )}
+              </div>
+
+              {/* Card Content */}
+              <div className="flex-1 overflow-hidden relative">
+                <p className="text-gray-600 dark:text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap break-words">
+                  {note.content || 'İçerik yok...'}
+                </p>
+                {/* Gradient fade at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-zinc-900 to-transparent pointer-events-none" />
+              </div>
+              
+              {/* Card Footer */}
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs text-gray-400 dark:text-zinc-500">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  {note.createdAt.toLocaleDateString('tr-TR', { 
+                    day: 'numeric', 
+                    month: 'long' 
+                  })}
+                </div>
+                
+                {/* Etiketler gelecekte buraya eklenebilir */}
+                {/* <div className="flex gap-1">
+                  <span className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded text-[10px]">#iş</span>
+                </div> */}
               </div>
             </div>
           ))
         ) : (
-          <div className="col-span-full">
+          <div className="col-span-full py-12">
             <EmptyState
               type="notes"
               title="Henüz notunuz yok"
-              description="İlk notunuzu oluşturarak düşüncelerinizi kaydetmeye başlayın. Notlarınızı etiketleyebilir ve sabitleyebilirsiniz."
+              description="İlk notunuzu oluşturarak düşüncelerinizi kaydetmeye başlayın."
               actionText="İlk Notumu Oluştur"
               onAction={onOpenNoteModal}
             />

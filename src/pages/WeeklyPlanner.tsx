@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, CheckSquare, Clock } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 
 export const WeeklyPlanner: React.FC = () => {
@@ -48,32 +48,37 @@ export const WeeklyPlanner: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-          Haftalık Planlayıcı
-        </h1>
-        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => navigateWeek('prev')}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
-            </button>
-            <span className="text-base sm:text-lg font-medium text-gray-900 dark:text-white min-w-[180px] sm:min-w-[200px] text-center">
-              {weekStart.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
-            </span>
-            <button
-              onClick={() => navigateWeek('next')}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
-            </button>
+    <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-gray-50 dark:bg-black">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-1">
+            Haftalık Planlayıcı
+          </h1>
+          <p className="text-gray-600 dark:text-zinc-400">
+            Görevlerinizi haftalık olarak planlayın ve takip edin
+          </p>
+        </div>
+        
+        <div className="flex items-center bg-white dark:bg-zinc-900 p-1 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+          <button
+            onClick={() => navigateWeek('prev')}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-600 dark:text-zinc-400 transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="px-4 py-1 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px] text-center border-x border-gray-100 dark:border-zinc-800 mx-1">
+            {weekStart.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
           </div>
           <button
+            onClick={() => navigateWeek('next')}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-600 dark:text-zinc-400 transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
             onClick={() => setCurrentWeek(new Date())}
-            className="btn btn-secondary px-3 sm:px-4 py-2 text-xs sm:text-sm"
+            className="ml-2 px-3 py-1.5 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 text-xs font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
           >
             Bu Hafta
           </button>
@@ -81,75 +86,71 @@ export const WeeklyPlanner: React.FC = () => {
       </div>
 
       {/* Haftalık Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 mb-8">
         {weekDays.map((day, index) => {
           const dayTasks = getTasksForDay(day);
           const isCurrentDay = isToday(day);
 
           return (
-            <div key={day.toISOString()} className="space-y-2">
+            <div key={day.toISOString()} className="flex flex-col h-full min-h-[300px]">
               {/* Gün Başlığı */}
-              <div className={`text-center p-3 rounded-lg ${
-                isCurrentDay 
-                  ? 'bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300' 
-                  : 'bg-gray-50 dark:bg-gray-800'
-              }`}>
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                  {dayNames[index]}
-                </div>
-                <div className={`text-lg font-bold ${
-                  isCurrentDay 
-                    ? 'text-primary-600 dark:text-primary-400' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {day.getDate()}
+              <div className={`
+                p-3 rounded-t-xl border-x border-t border-gray-200 dark:border-zinc-800
+                ${isCurrentDay 
+                  ? 'bg-blue-600 text-white dark:border-blue-600' 
+                  : 'bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100'
+                }
+              `}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm font-medium ${isCurrentDay ? 'text-blue-100' : 'text-gray-500 dark:text-zinc-500'}`}>
+                    {dayNames[index].slice(0, 3)}
+                  </span>
+                  <span className={`text-lg font-bold ${isCurrentDay ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+                    {day.getDate()}
+                  </span>
                 </div>
               </div>
 
-              {/* Görevler */}
-              <div className="space-y-2 min-h-[200px]">
+              {/* Görev Alanı */}
+              <div className={`
+                flex-1 p-3 border-x border-b border-gray-200 dark:border-zinc-800 rounded-b-xl
+                space-y-2 bg-gray-50/50 dark:bg-black/50
+                ${isCurrentDay ? 'border-blue-200 dark:border-blue-900/30' : ''}
+              `}>
                 {dayTasks.map(task => (
                   <div
                     key={task.id}
-                    className={`card p-3 cursor-pointer hover:shadow-md transition-shadow ${
-                      task.isCompleted 
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-                        : 'bg-white dark:bg-gray-800'
-                    }`}
+                    className={`
+                      p-3 rounded-lg border text-left transition-all
+                      ${task.isCompleted
+                        ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/30 opacity-75'
+                        : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 hover:border-blue-300 dark:hover:border-zinc-700 shadow-sm'
+                      }
+                    `}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                            {task.dueDate ? new Date(task.dueDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                          </span>
-                        </div>
-                        <h3 className={`text-sm font-medium ${
-                          task.isCompleted 
-                            ? 'line-through text-gray-500 dark:text-gray-400' 
-                            : 'text-gray-900 dark:text-white'
-                        }`}>
-                          {task.title}
-                        </h3>
-                        {task.description && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {task.description}
-                          </p>
-                        )}
+                    <h4 className={`text-sm font-medium mb-1 line-clamp-2 ${
+                      task.isCompleted 
+                        ? 'text-green-800 dark:text-green-400 line-through' 
+                        : 'text-gray-900 dark:text-zinc-200'
+                    }`}>
+                      {task.title}
+                    </h4>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-gray-500 dark:text-zinc-500">
+                        <Clock className="w-3 h-3" />
+                        <span>
+                          {task.dueDate ? new Date(task.dueDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                        </span>
                       </div>
-                      <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreHorizontal className="w-3 h-3 text-gray-400" />
-                      </button>
                     </div>
                   </div>
                 ))}
                 
-                {/* Görev Ekleme Butonu */}
-                <button className="w-full p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-300 hover:text-primary-500 transition-colors group">
-                  <div className="flex items-center justify-center space-x-2">
-                    <Plus className="w-4 h-4" />
-                    <span className="text-sm">Görev Ekle</span>
-                  </div>
+                {/* Boş Durum / Ekle Butonu */}
+                <button className="w-full py-3 px-2 border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-lg text-gray-400 dark:text-zinc-600 hover:border-blue-400 dark:hover:border-blue-700 hover:text-blue-500 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2 group">
+                  <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-medium">Ekle</span>
                 </button>
               </div>
             </div>
@@ -158,33 +159,43 @@ export const WeeklyPlanner: React.FC = () => {
       </div>
 
       {/* Haftalık Özet */}
-      <div className="card p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Haftalık Özet
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {weeklyTasks.length}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+              <CheckSquare className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Toplam Görev
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-zinc-500">Toplam Görev</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{weeklyTasks.length}</p>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {weeklyTasks.filter(task => task.isCompleted).length}
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+              <CheckSquare className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Tamamlanan
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-zinc-500">Tamamlanan</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {weeklyTasks.filter(task => task.isCompleted).length}
+              </p>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {weeklyTasks.filter(task => !task.isCompleted).length}
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-200 dark:border-zinc-800">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+              <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Bekleyen
+            <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-zinc-500">Bekleyen</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {weeklyTasks.filter(task => !task.isCompleted).length}
+              </p>
             </div>
           </div>
         </div>

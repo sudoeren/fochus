@@ -93,7 +93,7 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      <div className="flex h-screen bg-gray-50 dark:bg-black overflow-hidden">
         <Sidebar 
           activeView={activeView} 
           onViewChange={setActiveView} 

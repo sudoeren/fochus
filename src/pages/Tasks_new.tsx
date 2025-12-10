@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical } from 'lucide-react';
+import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical, CheckSquare } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
@@ -76,12 +76,6 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
     }
   };
 
-  const getStatusColor = (task: any) => {
-    if (task.isCompleted) return 'text-green-500';
-    if (task.dueDate && new Date(task.dueDate) < new Date()) return 'text-red-500';
-    return 'text-gray-400 hover:text-blue-500';
-  };
-
   const getTasksByList = (listId: string | null) => {
     return tasks.filter(task => task.listId === listId && !task.isDeleted);
   };
@@ -97,44 +91,48 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
   }
 
   return (
-    <div className="p-8 max-w-full overflow-x-auto bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-full overflow-x-auto min-h-screen bg-gray-50 dark:bg-black">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Görevlerim</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-            {taskLists.length} liste • {tasks.filter(t => !t.isDeleted).length} görev
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Görevlerim</h1>
+          <p className="text-gray-600 dark:text-zinc-400 mt-1 flex items-center gap-2">
+            <span className="font-medium text-gray-900 dark:text-white">{taskLists.length}</span> liste
+            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-700"></span>
+            <span className="font-medium text-gray-900 dark:text-white">{tasks.filter(t => !t.isDeleted).length}</span> görev
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setShowListModal(true)}
-            className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-200 rounded-xl border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all shadow-sm font-medium"
           >
-            <List className="w-5 h-5" />
-            <span className="font-medium">Yeni Liste</span>
+            <List className="w-4 h-4" />
+            <span>Liste Ekle</span>
           </button>
           <button
             onClick={onOpenTaskModal}
-            className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm font-medium"
           >
-            <Plus className="w-5 h-5" />
-            <span className="font-medium">Yeni Görev</span>
+            <Plus className="w-4 h-4" />
+            <span>Görev Ekle</span>
           </button>
         </div>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-8 overflow-x-auto pb-6">
+        <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
           {/* Uncategorized Tasks */}
-          <div className="flex-shrink-0 w-96">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 h-fit">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-shrink-0 w-80 sm:w-96">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-200 dark:border-zinc-800 h-fit flex flex-col max-h-[calc(100vh-12rem)]">
+              <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-gray-400 to-gray-600"></div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-500 dark:text-zinc-400">
+                      <CheckSquare className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
                   </div>
-                  <span className="text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
+                  <span className="text-xs font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 px-2 py-1 rounded-md">
                     {uncategorizedTasks.length}
                   </span>
                 </div>
@@ -145,8 +143,8 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-6 min-h-40 transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                    className={`p-3 overflow-y-auto flex-1 transition-colors ${
+                      snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-zinc-800/50' : ''
                     }`}
                   >
                     {uncategorizedTasks.map((task, index) => (
@@ -155,90 +153,90 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`mb-4 p-5 bg-gray-50 dark:bg-gray-700/50 rounded-xl border-2 border-transparent transition-all hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 ${
-                              snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105 border-blue-300 dark:border-blue-600' : ''
+                            className={`group mb-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all ${
+                              snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-2 z-50' : ''
                             } ${
-                              task.isCompleted ? 'opacity-75' : ''
+                              task.isCompleted ? 'opacity-60' : ''
                             }`}
                           >
-                            <div className="flex items-start gap-4">
+                            <div className="flex items-start gap-3">
                               <div
                                 {...provided.dragHandleProps}
-                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing p-1"
+                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
                               >
-                                <GripVertical className="w-5 h-5" />
+                                <GripVertical className="w-4 h-4" />
                               </div>
                               
                               <button
                                 onClick={() => handleToggleTask(task.id)}
-                                className={`mt-1 transition-all hover:scale-110 ${getStatusColor(task)}`}
+                                className="mt-0.5 flex-shrink-0 transition-all hover:scale-110"
                               >
                                 {task.isCompleted ? (
-                                  <CheckCircle className="w-6 h-6" />
+                                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                    <CheckCircle className="w-3.5 h-3.5 text-white" />
+                                  </div>
                                 ) : (
-                                  <Circle className="w-6 h-6" />
+                                  <div className="w-5 h-5 border-2 border-gray-300 dark:border-zinc-600 rounded-full hover:border-green-500 transition-colors"></div>
                                 )}
                               </button>
                               
                               <div className="flex-1 min-w-0">
-                                <h4 className={`text-base font-semibold ${
+                                <h4 className={`text-sm font-medium ${
                                   task.isCompleted 
-                                    ? 'line-through text-gray-500 dark:text-gray-400' 
+                                    ? 'line-through text-gray-500 dark:text-zinc-500' 
                                     : 'text-gray-900 dark:text-white'
                                 }`}>
                                   {task.isPinned && (
-                                    <Pin className="w-4 h-4 text-yellow-500 inline mr-2" />
+                                    <Pin className="w-3.5 h-3.5 text-amber-500 inline mr-1.5 fill-current" />
                                   )}
                                   {task.title}
                                 </h4>
+                                
                                 {task.description && (
-                                  <p className={`text-sm mt-2 ${
-                                    task.isCompleted 
-                                      ? 'line-through text-gray-400 dark:text-gray-500' 
-                                      : 'text-gray-600 dark:text-gray-300'
-                                  }`}>
-                                    {task.description.length > 80 
-                                      ? task.description.substring(0, 80) + '...' 
-                                      : task.description}
+                                  <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1 line-clamp-2">
+                                    {task.description}
                                   </p>
                                 )}
                                 
-                                {task.dueDate && (
-                                  <div className={`flex items-center gap-2 text-sm mt-3 ${
-                                    task.isCompleted 
-                                      ? 'text-gray-400 dark:text-gray-500'
-                                      : new Date(task.dueDate) < new Date()
-                                        ? 'text-red-500 dark:text-red-400'
-                                        : 'text-gray-500 dark:text-gray-400'
-                                  }`}>
-                                    <Calendar className="w-4 h-4" />
-                                    <span>{formatDate(new Date(task.dueDate))}</span>
+                                <div className="flex items-center justify-between mt-3">
+                                  {task.dueDate ? (
+                                    <div className={`flex items-center gap-1.5 text-xs ${
+                                      task.isCompleted 
+                                        ? 'text-gray-400 dark:text-zinc-600'
+                                        : new Date(task.dueDate) < new Date()
+                                          ? 'text-red-500 dark:text-red-400'
+                                          : 'text-gray-500 dark:text-zinc-500'
+                                    }`}>
+                                      <Calendar className="w-3 h-3" />
+                                      <span>{formatDate(new Date(task.dueDate))}</span>
+                                    </div>
+                                  ) : <div></div>}
+                                  
+                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => handlePinTask(task.id, task.isPinned || false)}
+                                      className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors ${
+                                        task.isPinned ? 'text-amber-500' : 'text-gray-400 dark:text-zinc-500 hover:text-amber-500'
+                                      }`}
+                                      title={task.isPinned ? "Sabitlemeyi kaldır" : "Sabitle"}
+                                    >
+                                      <Pin className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => onEditTask(task)}
+                                      className="p-1 text-gray-400 dark:text-zinc-500 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                                      title="Düzenle"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteTask(task.id)}
+                                      className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                                      title="Sil"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
-                                )}
-                                
-                                <div className="flex gap-2 mt-4">
-                                  <button
-                                    onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                    className={`p-2 rounded-lg transition-all hover:scale-105 ${
-                                      task.isPinned 
-                                        ? 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 hover:text-yellow-600' 
-                                        : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                                    }`}
-                                  >
-                                    <Pin className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => onEditTask(task)}
-                                    className="p-2 rounded-lg text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105"
-                                  >
-                                    <Edit3 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteTask(task.id)}
-                                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -249,8 +247,8 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                     {provided.placeholder}
                     
                     {uncategorizedTasks.length === 0 && (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Circle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-zinc-600">
+                        <CheckSquare className="w-8 h-8 mb-2 opacity-50" />
                         <p className="text-sm">Bu listede görev yok</p>
                       </div>
                     )}
@@ -265,50 +263,60 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
             const listTasks = getTasksByList(list.id);
             
             return (
-              <div key={list.id} className="flex-shrink-0 w-80">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div key={list.id} className="flex-shrink-0 w-80 sm:w-96">
+                <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-200 dark:border-zinc-800 h-fit flex flex-col max-h-[calc(100vh-12rem)]">
+                  <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-4 h-4 rounded" 
+                          className="w-3 h-8 rounded-full" 
                           style={{ backgroundColor: list.color }}
                         ></div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{list.title}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[180px]" title={list.title}>
+                          {list.title}
+                        </h3>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="text-xs font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 px-2 py-1 rounded-md">
                           {listTasks.length}
                         </span>
-                        <div className="relative">
+                        <div className="relative group/menu">
                           <button
                             onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                           >
                             <MoreVertical className="w-4 h-4" />
                           </button>
                           
                           {activeListMenu === list.id && (
-                            <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10 py-1 min-w-32">
-                              <button
-                                onClick={() => handleEditList(list)}
-                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                              >
-                                Düzenle
-                              </button>
-                              <button
-                                onClick={() => handleDeleteList(list.id)}
-                                className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                              >
-                                Sil
-                              </button>
-                            </div>
+                            <>
+                              <div 
+                                className="fixed inset-0 z-10"
+                                onClick={() => setActiveListMenu(null)}
+                              />
+                              <div className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg z-20 py-1 min-w-[140px] animate-in fade-in zoom-in-95 duration-100">
+                                <button
+                                  onClick={() => handleEditList(list)}
+                                  className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  Düzenle
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteList(list.id)}
+                                  className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Sil
+                                </button>
+                              </div>
+                            </>
                           )}
                         </div>
                       </div>
                     </div>
                     {list.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{list.description}</p>
+                      <p className="text-xs text-gray-500 dark:text-zinc-500 mt-2 line-clamp-2">{list.description}</p>
                     )}
                   </div>
 
@@ -317,8 +325,8 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`p-4 min-h-32 transition-colors ${
-                          snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                        className={`p-3 overflow-y-auto flex-1 transition-colors ${
+                          snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-zinc-800/50' : ''
                         }`}
                       >
                         {listTasks.map((task, index) => (
@@ -327,90 +335,90 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className={`mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border transition-all hover:shadow-md ${
-                                  snapshot.isDragging ? 'shadow-lg rotate-2' : ''
+                                className={`group mb-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all ${
+                                  snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-2 z-50' : ''
                                 } ${
-                                  task.isCompleted ? 'opacity-75' : ''
+                                  task.isCompleted ? 'opacity-60' : ''
                                 }`}
                               >
                                 <div className="flex items-start gap-3">
                                   <div
                                     {...provided.dragHandleProps}
-                                    className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
+                                    className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
                                   >
                                     <GripVertical className="w-4 h-4" />
                                   </div>
                                   
                                   <button
                                     onClick={() => handleToggleTask(task.id)}
-                                    className={`mt-1 transition-colors ${getStatusColor(task)}`}
+                                    className="mt-0.5 flex-shrink-0 transition-all hover:scale-110"
                                   >
                                     {task.isCompleted ? (
-                                      <CheckCircle className="w-4 h-4" />
+                                      <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-3.5 h-3.5 text-white" />
+                                      </div>
                                     ) : (
-                                      <Circle className="w-4 h-4" />
+                                      <div className="w-5 h-5 border-2 border-gray-300 dark:border-zinc-600 rounded-full hover:border-green-500 transition-colors"></div>
                                     )}
                                   </button>
                                   
                                   <div className="flex-1 min-w-0">
                                     <h4 className={`text-sm font-medium ${
                                       task.isCompleted 
-                                        ? 'line-through text-gray-500 dark:text-gray-400' 
+                                        ? 'line-through text-gray-500 dark:text-zinc-500' 
                                         : 'text-gray-900 dark:text-white'
                                     }`}>
                                       {task.isPinned && (
-                                        <Pin className="w-3 h-3 text-yellow-500 inline mr-1" />
+                                        <Pin className="w-3.5 h-3.5 text-amber-500 inline mr-1.5 fill-current" />
                                       )}
                                       {task.title}
                                     </h4>
+                                    
                                     {task.description && (
-                                      <p className={`text-xs mt-1 ${
-                                        task.isCompleted 
-                                          ? 'line-through text-gray-400 dark:text-gray-500' 
-                                          : 'text-gray-600 dark:text-gray-300'
-                                      }`}>
-                                        {task.description.length > 60 
-                                          ? task.description.substring(0, 60) + '...' 
-                                          : task.description}
+                                      <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1 line-clamp-2">
+                                        {task.description}
                                       </p>
                                     )}
                                     
-                                    {task.dueDate && (
-                                      <div className={`flex items-center gap-1 text-xs mt-2 ${
-                                        task.isCompleted 
-                                          ? 'text-gray-400 dark:text-gray-500'
-                                          : new Date(task.dueDate) < new Date()
-                                            ? 'text-red-500 dark:text-red-400'
-                                            : 'text-gray-500 dark:text-gray-400'
-                                      }`}>
-                                        <Calendar className="w-3 h-3" />
-                                        <span>{formatDate(new Date(task.dueDate))}</span>
+                                    <div className="flex items-center justify-between mt-3">
+                                      {task.dueDate ? (
+                                        <div className={`flex items-center gap-1.5 text-xs ${
+                                          task.isCompleted 
+                                            ? 'text-gray-400 dark:text-zinc-600'
+                                            : new Date(task.dueDate) < new Date()
+                                              ? 'text-red-500 dark:text-red-400'
+                                              : 'text-gray-500 dark:text-zinc-500'
+                                        }`}>
+                                          <Calendar className="w-3 h-3" />
+                                          <span>{formatDate(new Date(task.dueDate))}</span>
+                                        </div>
+                                      ) : <div></div>}
+                                      
+                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                          onClick={() => handlePinTask(task.id, task.isPinned || false)}
+                                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors ${
+                                            task.isPinned ? 'text-amber-500' : 'text-gray-400 dark:text-zinc-500 hover:text-amber-500'
+                                          }`}
+                                          title={task.isPinned ? "Sabitlemeyi kaldır" : "Sabitle"}
+                                        >
+                                          <Pin className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={() => onEditTask(task)}
+                                          className="p-1 text-gray-400 dark:text-zinc-500 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                                          title="Düzenle"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDeleteTask(task.id)}
+                                          className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
+                                          title="Sil"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                       </div>
-                                    )}
-                                    
-                                    <div className="flex gap-1 mt-2">
-                                      <button
-                                        onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                        className={`p-1 text-xs transition-colors ${
-                                          task.isPinned 
-                                            ? 'text-yellow-500 hover:text-yellow-600' 
-                                            : 'text-gray-400 hover:text-yellow-500'
-                                        }`}
-                                      >
-                                        <Pin className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => onEditTask(task)}
-                                        className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                                      >
-                                        <Edit3 className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
                                     </div>
                                   </div>
                                 </div>
@@ -421,8 +429,8 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                         {provided.placeholder}
                         
                         {listTasks.length === 0 && (
-                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <Circle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-zinc-600">
+                            <Circle className="w-8 h-8 mb-2 opacity-50" />
                             <p className="text-sm">Bu listede görev yok</p>
                           </div>
                         )}
@@ -435,13 +443,15 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
           })}
 
           {/* Add New List Placeholder */}
-          <div className="flex-shrink-0 w-80">
+          <div className="flex-shrink-0 w-80 sm:w-96">
             <button
               onClick={() => setShowListModal(true)}
-              className="w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+              className="w-full h-[calc(100vh-12rem)] border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-2xl hover:border-blue-500 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-all group flex flex-col items-center justify-center text-gray-500 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-zinc-300"
             >
-              <Plus className="w-8 h-8 mb-2" />
-              <span className="text-sm font-medium">Yeni Liste Ekle</span>
+              <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Plus className="w-6 h-6" />
+              </div>
+              <span className="font-medium">Yeni Liste Ekle</span>
             </button>
           </div>
         </div>

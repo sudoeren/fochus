@@ -118,7 +118,7 @@ export const Trash: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 min-h-screen bg-gray-50 dark:bg-black">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -126,7 +126,7 @@ export const Trash: React.FC = () => {
             <Trash2 className="w-8 h-8" />
             Çöp Kutusu
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-zinc-400">
             Silinen notlar ve görevler burada görünür. {deletedItems.length} öğe bulundu.
           </p>
         </div>
@@ -147,7 +147,7 @@ export const Trash: React.FC = () => {
           deletedItems.map((item) => (
             <div 
               key={`${item.type}-${item.id}`}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+              className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 p-6"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -159,7 +159,7 @@ export const Trash: React.FC = () => {
                     }`}>
                       {item.type === 'note' ? 'Not' : 'Görev'}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-gray-500 dark:text-zinc-500">
                       {item.deletedAt.toLocaleDateString('tr-TR')} {item.deletedAt.toLocaleTimeString('tr-TR')}
                     </span>
                   </div>
@@ -169,13 +169,13 @@ export const Trash: React.FC = () => {
                   </h3>
                   
                   {item.content && (
-                    <p className="text-gray-600 dark:text-gray-300 line-clamp-3">
+                    <p className="text-gray-600 dark:text-zinc-400 line-clamp-3">
                       {item.content.substring(0, 200)}...
                     </p>
                   )}
                   
                   {item.description && (
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-600 dark:text-zinc-400">
                       {item.description}
                     </p>
                   )}
@@ -202,11 +202,11 @@ export const Trash: React.FC = () => {
           ))
         ) : (
           <div className="text-center py-12">
-            <Trash2 className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <Trash2 className="w-16 h-16 text-gray-300 dark:text-zinc-700 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Çöp kutusu boş
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500 dark:text-zinc-500">
               Silinen öğeler burada görünecek
             </p>
           </div>

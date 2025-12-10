@@ -4,11 +4,11 @@
 
 @layer base {
   * {
-    @apply border-gray-200 dark:border-gray-700;
+    @apply border-gray-200 dark:border-zinc-800;
   }
   
   body {
-    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+    @apply bg-white dark:bg-black text-gray-900 dark:text-zinc-100;
     font-feature-settings: "rlig" 1, "calt" 1;
     /* Prevent horizontal scrolling on mobile */
     overflow-x: hidden;
@@ -48,11 +48,11 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+    @apply bg-gray-300 dark:bg-zinc-700 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-500;
+    @apply bg-gray-400 dark:bg-zinc-600;
   }
 
   /* Hide scrollbar for Firefox */
@@ -64,30 +64,30 @@
   /* Dark mode scrollbar for Firefox */
   @media (prefers-color-scheme: dark) {
     * {
-      scrollbar-color: rgb(75 85 99) transparent;
+      scrollbar-color: rgb(63 63 70) transparent;
     }
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-gray-600 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 dark:focus-visible:ring-zinc-600 disabled:pointer-events-none disabled:opacity-50;
   }
   
   .btn-primary {
-    @apply bg-gray-600 text-white shadow hover:bg-gray-700;
+    @apply bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow hover:bg-zinc-800 dark:hover:bg-zinc-200;
   }
   
   .btn-secondary {
-    @apply bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700;
+    @apply bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 shadow-sm hover:bg-gray-200 dark:hover:bg-zinc-700;
   }
   
   .btn-ghost {
-    @apply hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300;
+    @apply hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-zinc-300;
   }
   
   .card {
-    @apply rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm;
+    @apply rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 shadow-sm;
   }
 
   /* Hide scrollbar but keep functionality */
@@ -142,13 +142,13 @@
   
   /* Dark mode styles for rich text editor */
   .dark .rich-text-editor[contenteditable="true"] blockquote {
-    border-left-color: #374151;
-    color: #9ca3af;
+    border-left-color: #3f3f46; /* zinc-700 */
+    color: #a1a1aa; /* zinc-400 */
   }
   
   .dark .rich-text-editor[contenteditable="true"] pre {
-    background-color: #374151;
-    color: #f3f4f6;
+    background-color: #27272a; /* zinc-800 */
+    color: #f4f4f5; /* zinc-100 */
   }
   
   .dark .rich-text-editor[contenteditable="true"] a {
@@ -156,6 +156,6 @@
   }
 
   .dark .rich-text-editor[contenteditable="true"]:empty:before {
-    color: #6b7280;
+    color: #71717a; /* zinc-500 */
   }
 }
