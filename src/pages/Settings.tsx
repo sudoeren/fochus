@@ -464,7 +464,7 @@ export const Settings: React.FC = () => {
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
               <div className="text-gray-500 dark:text-gray-400 mb-1">Platform</div>
-              <div className="font-bold text-lg text-gray-900 dark:text-white">Electron</div>
+              <div className="font-bold text-lg text-gray-900 dark:text-white">Web</div>
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
               <div className="text-gray-500 dark:text-gray-400 mb-1">Framework</div>
@@ -472,13 +472,13 @@ export const Settings: React.FC = () => {
             </div>
             <div className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
               <div className="text-gray-500 dark:text-gray-400 mb-1">Database</div>
-              <div className="font-bold text-lg text-gray-900 dark:text-white">SQLite</div>
+              <div className="font-bold text-lg text-gray-900 dark:text-white">LocalStorage</div>
             </div>
           </div>
           
           <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              <strong className="text-gray-900 dark:text-white">Fokus</strong>, kişisel üretkenliğinizi artırmak için tasarlanmış modern bir masaüstü uygulamasıdır. 
+              <strong className="text-gray-900 dark:text-white">Fokus</strong>, kişisel üretkenliğinizi artırmak için tasarlanmış modern bir web uygulamasıdır. 
               Notlar, görevler ve planlama araçlarını tek bir yerde birleştirir. Bu ayarlar sayfasından uygulamanızı 
               tamamen kişiselleştirebilir ve iş akışınızı optimize edebilirsiniz.
             </p>

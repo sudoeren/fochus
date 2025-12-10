@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    outDir: 'dist-renderer',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   resolve: {

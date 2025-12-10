@@ -1,28 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Note } from '../types';
 import { refreshAllNotes, triggerInstantRefresh } from '../utils/refreshUtils';
+import { storageService } from '../services/storage';
 
 export const useNotes = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Load notes from database
+  // Load notes from storage
   const loadNotes = async () => {
     try {
       setLoading(true);
-      const dbNotes = await window.electronAPI.database.getNotes();
-      
-      // Convert database format to app format
-      const formattedNotes: Note[] = dbNotes.map((note: any) => ({
-        id: note.id,
-        title: note.title,
-        content: note.content,
-        isPinned: note.isPinned || false,
-        createdAt: new Date(note.createdAt),
-        updatedAt: new Date(note.updatedAt)
-      }));
-      
-      setNotes(formattedNotes);
+      const dbNotes = await storageService.notes.getAll();
+      setNotes(dbNotes);
     } catch (error) {
       console.error('Error loading notes:', error);
     } finally {
@@ -52,26 +42,16 @@ export const useNotes = () => {
   // Add new note
   const addNote = async (noteData: { title: string; content: string }) => {
     try {
-      const newNote = await window.electronAPI.database.createNote({
+      const newNote = await storageService.notes.create({
         title: noteData.title,
         content: noteData.content,
-        tags: []
       });
-      
-      const formattedNote: Note = {
-        id: newNote.id,
-        title: newNote.title,
-        content: newNote.content,
-        isPinned: newNote.isPinned || false,
-        createdAt: new Date(newNote.createdAt),
-        updatedAt: new Date(newNote.updatedAt)
-      };
       
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadNotes(); // Local refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
-      return formattedNote;
+      return newNote;
     } catch (error) {
       console.error('Error adding note:', error);
       throw error;
@@ -81,26 +61,16 @@ export const useNotes = () => {
   // Update note
   const updateNote = async (id: string, noteData: { title: string; content: string }) => {
     try {
-      const updatedNote = await window.electronAPI.database.updateNote(id, {
+      const updatedNote = await storageService.notes.update(id, {
         title: noteData.title,
         content: noteData.content,
-        tags: []
       });
-      
-      const formattedNote: Note = {
-        id: updatedNote.id,
-        title: updatedNote.title,
-        content: updatedNote.content,
-        isPinned: updatedNote.isPinned || false,
-        createdAt: new Date(updatedNote.createdAt),
-        updatedAt: new Date(updatedNote.updatedAt)
-      };
       
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadNotes(); // Local refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
-      return formattedNote;
+      return updatedNote;
     } catch (error) {
       console.error('Error updating note:', error);
       throw error;
@@ -112,7 +82,7 @@ export const useNotes = () => {
     try {
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
-      await window.electronAPI.database.deleteNote(id);
+      await storageService.notes.delete(id);
       await loadNotes(); // Local refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
     } catch (error) {
@@ -124,22 +94,13 @@ export const useNotes = () => {
   // Pin/unpin note
   const pinNote = async (id: string, isPinned: boolean) => {
     try {
-      const updatedNote = await (window.electronAPI.database as any).pinNote(id, isPinned);
-      
-      const formattedNote: Note = {
-        id: updatedNote.id,
-        title: updatedNote.title,
-        content: updatedNote.content,
-        isPinned: updatedNote.isPinned,
-        createdAt: new Date(updatedNote.createdAt),
-        updatedAt: new Date(updatedNote.updatedAt)
-      };
+      const updatedNote = await storageService.notes.pin(id, isPinned);
       
       setNotes(prev => prev.map(note => 
-        note.id === id ? formattedNote : note
+        note.id === id ? updatedNote : note
       ));
       
-      return formattedNote;
+      return updatedNote;
     } catch (error) {
       console.error('Error pinning note:', error);
       throw error;

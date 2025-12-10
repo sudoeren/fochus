@@ -33,29 +33,6 @@ const App: React.FC = () => {
   useEffect(() => {
     // Setup FAST polling system for instant updates
     setupFastPolling();
-    
-    const handleShortcut = (event: string, data?: any) => {
-      switch (event) {
-        case 'navigate':
-          if (data === 'home') setActiveView('dashboard');
-          else if (data === 'notes') setActiveView('notes');
-          else if (data === 'tasks') setActiveView('tasks');
-          else if (data === 'weekly') setActiveView('weekly');
-          break;
-        case 'new-note':
-          setShowNoteModal(true);
-          break;
-        case 'new-task':
-          setShowTaskModal(true);
-          break;
-        case 'search':
-          setIsSpotlightOpen(true);
-          break;
-        case 'spotlight':
-          setIsSpotlightOpen(true);
-          break;
-      }
-    };
 
     // Global keyboard shortcuts
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
@@ -67,27 +44,18 @@ const App: React.FC = () => {
       // Cmd+N / Ctrl+N for new note
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
-        handleShortcut('new-note');
+        setShowNoteModal(true);
       }
       // Cmd+T / Ctrl+T for new task
       if ((e.metaKey || e.ctrlKey) && e.key === 't') {
         e.preventDefault();
-        handleShortcut('new-task');
+        setShowTaskModal(true);
       }
     };
-
-    // Register shortcut listener
-    if (window.electronAPI && 'onShortcut' in window.electronAPI) {
-      (window.electronAPI as any).onShortcut(handleShortcut);
-    }
 
     document.addEventListener('keydown', handleGlobalKeyDown);
 
     return () => {
-      // Cleanup listeners
-      if (window.electronAPI && 'removeAllListeners' in window.electronAPI) {
-        (window.electronAPI as any).removeAllListeners();
-      }
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, []);
@@ -126,7 +94,13 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
-        <Sidebar activeView={activeView} onViewChange={setActiveView} />
+        <Sidebar 
+          activeView={activeView} 
+          onViewChange={setActiveView} 
+          onOpenSpotlight={() => setIsSpotlightOpen(true)}
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onOpenTaskModal={() => setShowTaskModal(true)}
+        />
         <main className="flex-1 overflow-hidden lg:ml-0">
           <div className="h-full overflow-auto">
             {renderView()}

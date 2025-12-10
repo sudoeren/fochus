@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, RotateCcw, X } from 'lucide-react';
+import { storageService } from '../services/storage';
 
 interface DeletedItem {
   id: string;
@@ -22,23 +23,23 @@ export const Trash: React.FC = () => {
     setLoading(true);
     try {
       // Load deleted notes
-      const deletedNotes = await (window.electronAPI.database as any).getDeletedNotes();
-      const formattedNotes: DeletedItem[] = deletedNotes.map((note: any) => ({
+      const deletedNotes = await storageService.notes.getDeleted();
+      const formattedNotes: DeletedItem[] = deletedNotes.map((note) => ({
         id: note.id,
         title: note.title,
         content: note.content,
         type: 'note' as const,
-        deletedAt: new Date(note.deletedAt)
+        deletedAt: new Date(note.deletedAt!)
       }));
 
       // Load deleted tasks
-      const deletedTasks = await (window.electronAPI.database as any).getDeletedTasks();
-      const formattedTasks: DeletedItem[] = deletedTasks.map((task: any) => ({
+      const deletedTasks = await storageService.tasks.getDeleted();
+      const formattedTasks: DeletedItem[] = deletedTasks.map((task) => ({
         id: task.id,
         title: task.title,
         description: task.description,
         type: 'task' as const,
-        deletedAt: new Date(task.deletedAt)
+        deletedAt: new Date(task.deletedAt!)
       }));
 
       // Combine and sort by deletion date
@@ -57,9 +58,9 @@ export const Trash: React.FC = () => {
   const restoreItem = async (item: DeletedItem) => {
     try {
       if (item.type === 'note') {
-        await (window.electronAPI.database as any).restoreNote(item.id);
+        await storageService.notes.restore(item.id);
       } else {
-        await (window.electronAPI.database as any).restoreTask(item.id);
+        await storageService.tasks.restore(item.id);
       }
       
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
@@ -75,9 +76,9 @@ export const Trash: React.FC = () => {
 
     try {
       if (item.type === 'note') {
-        await (window.electronAPI.database as any).permanentlyDeleteNote(item.id);
+        await storageService.notes.permanentlyDelete(item.id);
       } else {
-        await (window.electronAPI.database as any).permanentlyDeleteTask(item.id);
+        await storageService.tasks.permanentlyDelete(item.id);
       }
       
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
@@ -94,12 +95,12 @@ export const Trash: React.FC = () => {
     try {
       // Delete all notes
       await Promise.all(deletedItems.filter(item => item.type === 'note').map(item => 
-        (window.electronAPI.database as any).permanentlyDeleteNote(item.id)
+        storageService.notes.permanentlyDelete(item.id)
       ));
 
       // Delete all tasks
       await Promise.all(deletedItems.filter(item => item.type === 'task').map(item => 
-        (window.electronAPI.database as any).permanentlyDeleteTask(item.id)
+        storageService.tasks.permanentlyDelete(item.id)
       ));
       
       setDeletedItems([]);

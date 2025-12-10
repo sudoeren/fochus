@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react';
-
-export interface TaskList {
-  id: string;
-  title: string;
-  description?: string;
-  color: string;
-  order: number;
-  isDeleted: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  tasks?: any[];
-}
+import { TaskList } from '../types';
+import { storageService } from '../services/storage';
 
 export const useTaskLists = () => {
   const [taskLists, setTaskLists] = useState<TaskList[]>([]);
@@ -19,13 +9,8 @@ export const useTaskLists = () => {
   const fetchTaskLists = async () => {
     try {
       setLoading(true);
-      const lists = await window.electronAPI.database.getTaskLists();
-      const formattedLists = lists.map(list => ({
-        ...list,
-        createdAt: new Date(list.createdAt),
-        updatedAt: new Date(list.updatedAt)
-      }));
-      setTaskLists(formattedLists);
+      const lists = await storageService.taskLists.getAll();
+      setTaskLists(lists);
     } catch (error) {
       console.error('Error fetching task lists:', error);
     } finally {
@@ -35,20 +20,14 @@ export const useTaskLists = () => {
 
   const addTaskList = async (data: { title: string; description?: string; color?: string }) => {
     try {
-      const newList = await window.electronAPI.database.createTaskList({
+      const newList = await storageService.taskLists.create({
         title: data.title,
         description: data.description,
         color: data.color || '#3B82F6'
       });
       
-      const formattedList = {
-        ...newList,
-        createdAt: new Date(newList.createdAt),
-        updatedAt: new Date(newList.updatedAt)
-      };
-      
       await fetchTaskLists(); // Auto-refresh after adding
-      return formattedList;
+      return newList;
     } catch (error) {
       console.error('Error adding task list:', error);
       throw error;
@@ -57,14 +36,9 @@ export const useTaskLists = () => {
 
   const updateTaskList = async (id: string, data: Partial<TaskList>) => {
     try {
-      const updatedList = await window.electronAPI.database.updateTaskList(id, data);
-      const formattedList = {
-        ...updatedList,
-        createdAt: new Date(updatedList.createdAt),
-        updatedAt: new Date(updatedList.updatedAt)
-      };
+      const updatedList = await storageService.taskLists.update(id, data);
       await fetchTaskLists(); // Auto-refresh after updating
-      return formattedList;
+      return updatedList;
     } catch (error) {
       console.error('Error updating task list:', error);
       throw error;
@@ -73,7 +47,7 @@ export const useTaskLists = () => {
 
   const deleteTaskList = async (id: string) => {
     try {
-      await window.electronAPI.database.deleteTaskList(id);
+      await storageService.taskLists.delete(id);
       await fetchTaskLists(); // Auto-refresh after deleting
     } catch (error) {
       console.error('Error deleting task list:', error);
@@ -85,7 +59,7 @@ export const useTaskLists = () => {
     try {
       // Update order for all lists
       for (let i = 0; i < reorderedLists.length; i++) {
-        await window.electronAPI.database.updateTaskList(reorderedLists[i].id, { order: i });
+        await storageService.taskLists.update(reorderedLists[i].id, { order: i });
       }
       await fetchTaskLists(); // Auto-refresh after reordering
     } catch (error) {
@@ -96,7 +70,7 @@ export const useTaskLists = () => {
 
   const moveTaskToList = async (taskId: string, targetListId: string | null) => {
     try {
-      await window.electronAPI.database.updateTask(taskId, { listId: targetListId });
+      await storageService.tasks.update(taskId, { listId: targetListId });
       // Refresh lists to update task counts
       await fetchTaskLists();
     } catch (error) {

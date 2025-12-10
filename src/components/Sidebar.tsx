@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
-import { Home, FileText, CheckSquare, Calendar, Settings, Trash2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { 
+  Home, 
+  FileText, 
+  CheckSquare, 
+  Calendar, 
+  Settings, 
+  Trash2, 
+  ChevronLeft, 
+  ChevronRight, 
+  Menu, 
+  X,
+  Search,
+  PlusCircle,
+  Plus
+} from 'lucide-react';
 
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
+  onOpenSpotlight: () => void;
+  onOpenNoteModal: () => void;
+  onOpenTaskModal: () => void;
 }
 
 const menuItems = [
@@ -42,11 +59,18 @@ const bottomItems = [
   },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ 
+  activeView, 
+  onViewChange,
+  onOpenSpotlight,
+  onOpenNoteModal,
+  onOpenTaskModal
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Auto expand on hover if collapsed
   const shouldExpand = !isCollapsed || isHovered;
 
   return (
@@ -67,14 +91,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <div 
         className={`
           fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
-          bg-white/80 dark:bg-gray-900/90 backdrop-blur-lg border-r border-gray-200/50 dark:border-gray-700/50 
-          h-full flex flex-col transition-all duration-300 ease-in-out
+          bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
+          h-full flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:shadow-none
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          ${shouldExpand ? 'w-64' : 'w-16 lg:w-16'}
+          ${shouldExpand ? 'w-[280px]' : 'w-[80px] lg:w-[80px]'}
         `}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -87,15 +111,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
           <X className="w-4 h-4" />
         </button>
 
-        {/* Desktop Toggle Button */}
+        {/* Collapse Toggle Button (Desktop) */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={`
-            hidden lg:block absolute -right-3 top-6 w-6 h-6 bg-white dark:bg-gray-800 
+            hidden lg:flex absolute -right-3 top-8 w-6 h-6 bg-white dark:bg-gray-800 
             border border-gray-200 dark:border-gray-700 rounded-full 
-            flex items-center justify-center text-gray-400 dark:text-gray-500
-            hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700
-            transition-all duration-200 z-10 shadow-sm hover:shadow-md
+            items-center justify-center text-gray-400 dark:text-gray-500
+            hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-800
+            transition-all duration-200 z-10 shadow-sm
           `}
         >
           {isCollapsed ? (
@@ -105,27 +129,100 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
           )}
         </button>
 
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex items-center">
-            {/* Logo */}
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
-              <span className="text-white font-bold text-lg">F</span>
+        {/* 1. Header Area */}
+        <div className="p-6 pb-2">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+              <span className="text-white font-bold text-xl">F</span>
             </div>
             
-            {/* Title */}
-            <div className={`
-              ml-3 transition-all duration-200 ease-in-out overflow-hidden
-              ${shouldExpand ? 'opacity-100 max-w-none' : 'opacity-0 max-w-0 ml-0'}
-            `}>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Fokus</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Kişisel Üretkenlik</p>
+            <div className={`transition-all duration-200 overflow-hidden ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-none">Fokus</h1>
+              <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">Pro</span>
             </div>
+          </div>
+
+          {/* Search Button / Spotlight Trigger */}
+          <button
+            onClick={() => {
+              onOpenSpotlight();
+              setIsMobileMenuOpen(false);
+            }}
+            className={`
+              w-full flex items-center gap-3 px-3 py-2.5 
+              bg-gray-100 dark:bg-gray-800/50 
+              border border-transparent hover:border-gray-200 dark:hover:border-gray-700
+              hover:bg-white dark:hover:bg-gray-800 hover:shadow-sm
+              text-gray-500 dark:text-gray-400 rounded-xl transition-all duration-200 group
+              ${!shouldExpand ? 'justify-center px-0' : ''}
+            `}
+            title="Hızlı Ara (Ctrl+K)"
+          >
+            <Search className="w-5 h-5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+            <span className={`text-sm font-medium truncate transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
+              Hızlı Ara...
+            </span>
+            {shouldExpand && (
+              <kbd className="ml-auto hidden xl:inline-block px-1.5 py-0.5 text-[10px] font-bold bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 text-gray-400">
+                ⌘K
+              </kbd>
+            )}
+          </button>
+        </div>
+
+        {/* 2. Quick Actions */}
+        <div className={`px-4 py-2 transition-all duration-200 ${shouldExpand ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
+          <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-2">
+            Oluştur
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                onOpenNoteModal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex flex-col items-center gap-1 p-2 rounded-xl bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              <span className="text-xs font-medium">Not</span>
+            </button>
+            <button
+              onClick={() => {
+                onOpenTaskModal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex flex-col items-center gap-1 p-2 rounded-xl bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <CheckSquare className="w-5 h-5" />
+              <span className="text-xs font-medium">Görev</span>
+            </button>
           </div>
         </div>
 
-        {/* Main Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        {/* Divider if collapsed */}
+        {!shouldExpand && (
+          <div className="px-4 py-2 flex flex-col gap-2 items-center">
+             <button
+              onClick={() => {
+                onOpenNoteModal();
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+              title="Yeni Not"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* 3. Main Navigation */}
+        <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1 custom-scrollbar">
+          {shouldExpand && (
+            <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2 px-3 mt-2">
+              Menü
+            </div>
+          )}
+          
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
@@ -138,39 +235,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
                   setIsMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center px-3 py-2.5 rounded-xl text-left group relative
-                  transition-all duration-200
+                  w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/30 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-md shadow-gray-200 dark:shadow-none' 
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }
+                  ${!shouldExpand ? 'justify-center px-0' : ''}
                 `}
               >
-                {/* Icon */}
                 <Icon className={`
-                  w-5 h-5 flex-shrink-0 transition-colors duration-200
-                  ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}
+                  w-5 h-5 transition-colors
+                  ${isActive ? 'text-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'}
                 `} />
                 
-                {/* Label */}
-                <span className={`
-                  ml-3 font-medium transition-all duration-200 ease-in-out overflow-hidden whitespace-nowrap
-                  ${shouldExpand ? 'opacity-100 max-w-none' : 'opacity-0 max-w-0 ml-0'}
-                `}>
+                <span className={`font-medium whitespace-nowrap transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
                   {item.label}
                 </span>
-                
-                {/* Active indicator */}
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-4 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
-                )}
-                
-                {/* Tooltip for collapsed state */}
+
+                {/* Tooltip */}
                 {!shouldExpand && (
                   <div className="
-                    absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 
-                    text-sm rounded-md whitespace-nowrap z-50 opacity-0 group-hover:opacity-100 
-                    transition-opacity duration-200 pointer-events-none
+                    absolute left-full ml-3 px-3 py-1.5 
+                    bg-gray-900 dark:bg-white text-white dark:text-gray-900 
+                    text-xs font-medium rounded-lg whitespace-nowrap 
+                    opacity-0 group-hover:opacity-100 
+                    transition-opacity duration-200 pointer-events-none z-50 shadow-xl
+                    translate-x-2 group-hover:translate-x-0 transform
                   ">
                     {item.label}
                   </div>
@@ -178,11 +268,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
               </button>
             );
           })}
-        </nav>
+        </div>
 
-        {/* Bottom Navigation */}
-        <div className="px-3 py-4 border-t border-gray-200/50 dark:border-gray-700/50 space-y-1">
-          {bottomItems.map((item) => {
+        {/* 4. Bottom Actions (Settings, Trash) */}
+        <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
+           {bottomItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeView === item.id;
             
@@ -194,39 +284,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
                   setIsMobileMenuOpen(false);
                 }}
                 className={`
-                  w-full flex items-center px-3 py-2.5 rounded-xl text-left group relative
-                  transition-all duration-200
+                  w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/30 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' 
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200'
                   }
+                  ${!shouldExpand ? 'justify-center px-0' : ''}
                 `}
               >
-                {/* Icon */}
-                <Icon className={`
-                  w-5 h-5 flex-shrink-0 transition-colors duration-200
-                  ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}
-                `} />
+                <Icon className={`w-5 h-5 ${item.id === 'trash' ? 'group-hover:text-red-500' : ''}`} />
                 
-                {/* Label */}
-                <span className={`
-                  ml-3 font-medium transition-all duration-200 ease-in-out overflow-hidden whitespace-nowrap
-                  ${shouldExpand ? 'opacity-100 max-w-none' : 'opacity-0 max-w-0 ml-0'}
-                `}>
+                <span className={`font-medium whitespace-nowrap transition-all duration-200 ${shouldExpand ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'}`}>
                   {item.label}
                 </span>
-                
-                {/* Active indicator */}
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-4 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
-                )}
-                
-                {/* Tooltip for collapsed state */}
-                {!shouldExpand && (
+
+                 {/* Tooltip */}
+                 {!shouldExpand && (
                   <div className="
-                    absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200 
-                    text-sm rounded-md whitespace-nowrap z-50 opacity-0 group-hover:opacity-100 
-                    transition-opacity duration-200 pointer-events-none
+                    absolute left-full ml-3 px-3 py-1.5 
+                    bg-gray-900 dark:bg-white text-white dark:text-gray-900 
+                    text-xs font-medium rounded-lg whitespace-nowrap 
+                    opacity-0 group-hover:opacity-100 
+                    transition-opacity duration-200 pointer-events-none z-50 shadow-xl
+                    translate-x-2 group-hover:translate-x-0 transform
                   ">
                     {item.label}
                   </div>
@@ -234,18 +314,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) =>
               </button>
             );
           })}
-        </div>
-
-        {/* Footer */}
-        <div className={`
-          p-3 border-t border-gray-200/50 dark:border-gray-700/50 transition-all duration-200
-          ${shouldExpand ? 'opacity-100' : 'opacity-0'}
-        `}>
-          {shouldExpand && (
-            <div className="text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Fokus v1.0.0</p>
-            </div>
-          )}
         </div>
       </div>
     </>
