@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, RotateCcw, X } from 'lucide-react';
 import { storageService } from '../services/storage';
+import { EmptyState } from '../components/EmptyState';
 
 interface DeletedItem {
   id: string;
@@ -201,15 +202,11 @@ export const Trash: React.FC = () => {
             </div>
           ))
         ) : (
-          <div className="text-center py-12">
-            <Trash2 className="w-16 h-16 text-gray-300 dark:text-zinc-700 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Çöp kutusu boş
-            </h3>
-            <p className="text-gray-500 dark:text-zinc-500">
-              Silinen öğeler burada görünecek
-            </p>
-          </div>
+          <EmptyState
+            type="trash"
+            title="Çöp kutusu boş"
+            description="Silinen notlar ve görevler burada görünür. Şu an için her şey temiz!"
+          />
         )}
       </div>
     </div>

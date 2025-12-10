@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
+import { EmptyState } from '../components/EmptyState';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -247,9 +248,13 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                     {provided.placeholder}
                     
                     {uncategorizedTasks.length === 0 && (
-                      <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-zinc-600">
-                        <CheckSquare className="w-8 h-8 mb-2 opacity-50" />
-                        <p className="text-sm">Bu listede görev yok</p>
+                      <div className="py-8">
+                        <EmptyState
+                          type="tasks"
+                          title=""
+                          description="Bu listede henüz görev yok"
+                          className="py-4"
+                        />
                       </div>
                     )}
                   </div>
@@ -429,9 +434,13 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
                         {provided.placeholder}
                         
                         {listTasks.length === 0 && (
-                          <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-zinc-600">
-                            <Circle className="w-8 h-8 mb-2 opacity-50" />
-                            <p className="text-sm">Bu listede görev yok</p>
+                          <div className="py-8">
+                            <EmptyState
+                              type="tasks"
+                              title=""
+                              description="Bu listede henüz görev yok"
+                              className="py-4"
+                            />
                           </div>
                         )}
                       </div>
