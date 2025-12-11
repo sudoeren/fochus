@@ -121,9 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* 1. Header & Logo */}
         <div className={`h-16 flex items-center border-b border-gray-100 dark:border-zinc-900 flex-shrink-0 ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 bg-zinc-900 dark:bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white dark:text-black font-bold text-lg">F</span>
-            </div>
+            <img src="/logo.svg" alt="Fokus Logo" className="w-8 h-8 rounded-lg shadow-sm flex-shrink-0" />
             <div className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'}`}>
               <span className="font-bold text-lg text-gray-900 dark:text-white tracking-tight whitespace-nowrap">Fokus</span>
             </div>

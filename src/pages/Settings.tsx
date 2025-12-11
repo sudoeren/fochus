@@ -412,9 +412,7 @@ export const Settings: React.FC = () => {
               </div>
 
               <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 p-8 text-center">
-                <div className="w-20 h-20 bg-zinc-900 dark:bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <span className="text-white dark:text-black font-bold text-4xl">F</span>
-                </div>
+                <img src="/logo.svg" alt="Fokus Logo" className="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg" />
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Fokus</h3>
                 <p className="text-gray-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">
                   Modern, hızlı ve odak odaklı kişisel üretkenlik asistanı.
