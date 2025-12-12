@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
-import { NoteModal } from './components/NoteModal';
-import { TaskModal } from './components/TaskModal';
+import { NewNoteWindow } from './components/NewNoteWindow';
+import { NewTaskWindow } from './components/NewTaskWindow';
 import { PomodoroModal } from './components/PomodoroModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<any>(null); // keeping any for flexibility as per existing code
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <Dashboard 
+        return <Dashboard
           onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
@@ -96,7 +96,7 @@ const App: React.FC = () => {
       case 'notes':
         return <Notes onOpenNoteModal={() => setShowNoteModal(true)} />;
       case 'tasks':
-        return <TasksNew 
+        return <TasksNew
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
         />;
@@ -111,7 +111,7 @@ const App: React.FC = () => {
       case 'profile':
         return <Profile onLogout={handleLogout} />;
       default:
-        return <Dashboard 
+        return <Dashboard
           onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
@@ -130,9 +130,9 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <div className="flex h-screen bg-gray-50 dark:bg-black overflow-hidden">
-        <Sidebar 
-          activeView={activeView} 
-          onViewChange={setActiveView} 
+        <Sidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
           onOpenSpotlight={() => setIsSpotlightOpen(true)}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
@@ -143,34 +143,27 @@ const App: React.FC = () => {
             {renderView()}
           </div>
         </main>
-        
+
         {/* Spotlight */}
-        <Spotlight 
+        <Spotlight
           isOpen={isSpotlightOpen}
           onClose={() => setIsSpotlightOpen(false)}
           onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
         />
-        
-        {/* Global Modals */}
-        <NoteModal 
+
+        {/* Global Modals - NEW WINDOWS */}
+        <NewNoteWindow
           isOpen={showNoteModal}
           onClose={() => setShowNoteModal(false)}
-          onEscapeToSpotlight={() => {
-            setShowNoteModal(false);
-            setIsSpotlightOpen(true);
-          }}
+        // initialData can be added if needed for editing
         />
-        
-        <TaskModal 
+
+        <NewTaskWindow
           isOpen={showTaskModal}
           onClose={closeTaskModal}
-          editingTask={editingTask}
-          onEscapeToSpotlight={() => {
-            closeTaskModal();
-            setIsSpotlightOpen(true);
-          }}
+          initialData={editingTask}
         />
 
         <PomodoroModal

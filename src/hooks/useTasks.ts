@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../types/index';
-import { refreshAllTasks, triggerInstantRefresh } from '../utils/refreshUtils';
+import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { storageService } from '../services/storage';
 
 export const useTasks = () => {
@@ -11,18 +11,18 @@ export const useTasks = () => {
   const loadTasks = async () => {
     try {
       setLoading(true);
-      const dbTasks = await storageService.tasks.getAll();
-      
+      const dbTasks = await storageService.tasks.getAll() as unknown as Task[];
+
       // Order değerine göre sırala, sonra pinned görevleri en üste al
       const sortedTasks = dbTasks.sort((a, b) => {
         // Pinned görevler önce
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
-        
+
         // Sonra order değerine göre sırala
         return (a.order || 0) - (b.order || 0);
       });
-      
+
       setTasks(sortedTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
@@ -51,15 +51,10 @@ export const useTasks = () => {
   }, []);
 
   // Add new task
-  const addTask = async (taskData: { title: string; description?: string; dueDate?: Date; listId?: string }) => {
+  const addTask = async (taskData: Partial<Task>) => {
     try {
-      const newTask = await storageService.tasks.create({
-        title: taskData.title,
-        description: taskData.description,
-        dueDate: taskData.dueDate,
-        listId: taskData.listId
-      });
-      
+      const newTask = await storageService.tasks.create(taskData as any);
+
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadTasks(); // Local refresh
@@ -74,8 +69,8 @@ export const useTasks = () => {
   // Update task
   const updateTask = async (id: string, taskData: Partial<Task>) => {
     try {
-      const updatedTask = await storageService.tasks.update(id, taskData);
-      
+      const updatedTask = await storageService.tasks.update(id, taskData as any);
+
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadTasks(); // Local refresh
@@ -116,7 +111,7 @@ export const useTasks = () => {
   const getTasksByFilter = (filter: 'all' | 'pending' | 'completed' | 'today' | 'overdue') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -130,16 +125,16 @@ export const useTasks = () => {
         filteredTasks = tasks.filter(task => task.isCompleted);
         break;
       case 'today':
-        filteredTasks = tasks.filter(task => 
-          task.dueDate && 
-          task.dueDate >= today && 
+        filteredTasks = tasks.filter(task =>
+          task.dueDate &&
+          task.dueDate >= today &&
           task.dueDate < tomorrow
         );
         break;
       case 'overdue':
-        filteredTasks = tasks.filter(task => 
-          task.dueDate && 
-          task.dueDate < today && 
+        filteredTasks = tasks.filter(task =>
+          task.dueDate &&
+          task.dueDate < today &&
           !task.isCompleted
         );
         break;
@@ -153,7 +148,7 @@ export const useTasks = () => {
       // Pinned görevler önce
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      
+
       // Sonra order değerine göre sırala
       return (a.order || 0) - (b.order || 0);
     });
@@ -164,18 +159,18 @@ export const useTasks = () => {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter(task => task.isCompleted).length;
     const pendingTasks = totalTasks - completedTasks;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayTasks = tasks.filter(task => 
-      task.dueDate && 
-      task.dueDate >= today && 
+    const todayTasks = tasks.filter(task =>
+      task.dueDate &&
+      task.dueDate >= today &&
       task.dueDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
     ).length;
-    
-    const overdueTasks = tasks.filter(task => 
-      task.dueDate && 
-      task.dueDate < today && 
+
+    const overdueTasks = tasks.filter(task =>
+      task.dueDate &&
+      task.dueDate < today &&
       !task.isCompleted
     ).length;
 
@@ -192,10 +187,10 @@ export const useTasks = () => {
   // Pin/unpin task
   const pinTask = async (id: string, isPinned: boolean) => {
     try {
-      const updatedTask = await storageService.tasks.pin(id, isPinned);
-      setTasks(prev => 
-        prev.map(task => 
-          task.id === id 
+      const updatedTask = await storageService.tasks.pin(id, isPinned) as unknown as Task;
+      setTasks(prev =>
+        prev.map(task =>
+          task.id === id
             ? updatedTask
             : task
         )
@@ -208,25 +203,25 @@ export const useTasks = () => {
   // Reorder tasks - SADECE 'ALL' FILTER IÇIN ÇALIŞIR
   const reorderTasks = async (startIndex: number, endIndex: number, currentFilter: string = 'all') => {
     console.log('🔄 reorderTasks çağrıldı:', { startIndex, endIndex, currentFilter });
-    
+
     // Sadece 'all' filter'da drag-drop yapılabilir
     if (currentFilter !== 'all') {
       console.warn('⚠️ Drag-drop sadece "Hepsi" görünümünde çalışır!');
       return;
     }
-    
+
     try {
       // 1. Tüm görevleri al (filtresiz)
       const allTasks = [...tasks].sort((a, b) => (a.order || 0) - (b.order || 0));
-      
+
       // 2. Yerel state'i hemen güncelle (immediate feedback)
       const newTasks = Array.from(allTasks);
       const [movedTask] = newTasks.splice(startIndex, 1);
       newTasks.splice(endIndex, 0, movedTask);
-      
+
       // 3. Hemen local state'i güncelle
       setTasks(newTasks);
-      
+
       // 4. Veritabanındaki order değerlerini güncelle
       const updatePromises = newTasks.map(async (task, index) => {
         if (task.order !== index) {
@@ -240,10 +235,10 @@ export const useTasks = () => {
         }
         return true;
       });
-      
+
       await Promise.all(updatePromises);
       await loadTasks();
-      
+
     } catch (error) {
       console.error('❌ reorderTasks HATASI:', error);
       await loadTasks();

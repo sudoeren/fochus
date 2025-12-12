@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Note } from '../types';
-import { refreshAllNotes, triggerInstantRefresh } from '../utils/refreshUtils';
+import { Note } from '../types/index';
+import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { storageService } from '../services/storage';
 
 export const useNotes = () => {
@@ -11,7 +11,7 @@ export const useNotes = () => {
   const loadNotes = async () => {
     try {
       setLoading(true);
-      const dbNotes = await storageService.notes.getAll();
+      const dbNotes = await storageService.notes.getAll() as unknown as Note[];
       setNotes(dbNotes);
     } catch (error) {
       console.error('Error loading notes:', error);
@@ -40,13 +40,10 @@ export const useNotes = () => {
   }, []);
 
   // Add new note
-  const addNote = async (noteData: { title: string; content: string }) => {
+  const addNote = async (noteData: Partial<Note>) => {
     try {
-      const newNote = await storageService.notes.create({
-        title: noteData.title,
-        content: noteData.content,
-      });
-      
+      const newNote = await storageService.notes.create(noteData as any);
+
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadNotes(); // Local refresh
@@ -59,13 +56,10 @@ export const useNotes = () => {
   };
 
   // Update note
-  const updateNote = async (id: string, noteData: { title: string; content: string }) => {
+  const updateNote = async (id: string, noteData: Partial<Note>) => {
     try {
-      const updatedNote = await storageService.notes.update(id, {
-        title: noteData.title,
-        content: noteData.content,
-      });
-      
+      const updatedNote = await storageService.notes.update(id, noteData as any);
+
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await loadNotes(); // Local refresh
@@ -94,12 +88,12 @@ export const useNotes = () => {
   // Pin/unpin note
   const pinNote = async (id: string, isPinned: boolean) => {
     try {
-      const updatedNote = await storageService.notes.pin(id, isPinned);
-      
-      setNotes(prev => prev.map(note => 
+      const updatedNote = await storageService.notes.pin(id, isPinned) as unknown as Note;
+
+      setNotes(prev => prev.map(note =>
         note.id === id ? updatedNote : note
       ));
-      
+
       return updatedNote;
     } catch (error) {
       console.error('Error pinning note:', error);
@@ -112,7 +106,7 @@ export const useNotes = () => {
     let filtered = notes;
 
     if (searchTerm) {
-      filtered = filtered.filter(note => 
+      filtered = filtered.filter(note =>
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase())
       );
