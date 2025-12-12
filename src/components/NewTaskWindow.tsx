@@ -92,13 +92,13 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
 
                 {/* Body */}
                 <div className="p-6 space-y-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 group">
                         <input
                             type="text"
                             placeholder="Ne yapılması gerekiyor?"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full text-xl font-medium bg-transparent border-none placeholder-zinc-400 dark:placeholder-zinc-600 focus:ring-0 p-0"
+                            className="w-full text-xl font-medium bg-transparent border-b border-transparent focus:border-zinc-200 dark:focus:border-zinc-700 placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 px-0 py-2 transition-colors"
                             autoFocus
                         />
                     </div>
@@ -108,7 +108,7 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
                             placeholder="Detaylar, notlar..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full min-h-[100px] text-base resize-none bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-4 border-none placeholder-zinc-400 dark:placeholder-zinc-500 focus:ring-1 focus:ring-blue-500/50"
+                            className="w-full min-h-[120px] text-base resize-none bg-zinc-50 dark:bg-zinc-800/40 rounded-xl p-4 border border-transparent focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-200 dark:focus:border-zinc-700 placeholder-zinc-400 dark:placeholder-zinc-500 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/20 transition-all"
                         />
                     </div>
 

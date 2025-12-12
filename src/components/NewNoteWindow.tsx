@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Pin, Palette, Save } from 'lucide-react';
+import { X, Pin, Palette, Save, Maximize2 } from 'lucide-react';
 import { Note } from '../types/index';
 import { useNotes } from '../hooks/useNotes';
 import clsx from 'clsx';
@@ -8,6 +8,7 @@ interface NewNoteWindowProps {
     isOpen: boolean;
     onClose: () => void;
     initialData?: Partial<Note>;
+    onExpand?: (id: string) => void;
 }
 
 const NOTE_COLORS = [
@@ -19,7 +20,7 @@ const NOTE_COLORS = [
     { id: 'red', bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-200 dark:border-red-800/30' },
 ];
 
-export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, initialData }) => {
+export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, initialData, onExpand }) => {
     const { addNote, updateNote } = useNotes();
 
     const [title, setTitle] = useState('');
@@ -32,11 +33,8 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
         if (isOpen) {
             if (initialData) {
                 setTitle(initialData.title || '');
-                // content field in Note type is `content`
-                setTitle(initialData.title || '');
                 setContent(initialData.content || '');
                 setIsPinned(initialData.isPinned || false);
-                // Note color is not yet in data model, so defaults
                 setSelectedColor(NOTE_COLORS[0]);
             } else {
                 setTitle('');
@@ -49,6 +47,48 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
 
     if (!isOpen) return null;
 
+    const handleExpand = async () => {
+        try {
+            let noteId = initialData?.id;
+
+            // If we have content, save it first
+            if (title.trim() || content.trim()) {
+                if (noteId) {
+                    await updateNote(noteId, {
+                        title,
+                        content,
+                        isPinned,
+                    });
+                } else {
+                    const newNote = await addNote({
+                        title,
+                        content,
+                        isPinned,
+                        tags: [],
+                        plainContent: content
+                    });
+                    noteId = newNote.id;
+                }
+            } else if (!noteId) {
+                // Create empty note to expand
+                const newNote = await addNote({
+                    title: '',
+                    content: '',
+                    isPinned: false,
+                    tags: [],
+                    plainContent: ''
+                });
+                noteId = newNote.id;
+            }
+
+            if (onExpand && noteId) {
+                onExpand(noteId);
+            }
+        } catch (error) {
+            console.error('Error expanding note:', error);
+        }
+    };
+
     const handleSave = async () => {
         if (!title.trim() && !content.trim()) return;
 
@@ -58,15 +98,14 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                     title,
                     content,
                     isPinned,
-                    // Colors/tags not supported in update yet unless Note type extended
                 });
             } else {
                 await addNote({
                     title,
                     content,
                     isPinned,
-                    tags: [], // Default empty tags
-                    plainContent: content // Simple plain content for now as we use textarea
+                    tags: [],
+                    plainContent: content
                 });
             }
             onClose();
@@ -97,6 +136,15 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                         </h2>
                     </div>
                     <div className="flex items-center gap-1">
+                        {onExpand && (
+                            <button
+                                onClick={handleExpand}
+                                className="p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                title="Tam Ekran"
+                            >
+                                <Maximize2 size={20} />
+                            </button>
+                        )}
                         <button
                             onClick={() => setIsPinned(!isPinned)}
                             className={clsx(
@@ -125,7 +173,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                         placeholder="Başlık"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-2xl font-bold bg-transparent border-none placeholder-zinc-400/70 dark:placeholder-zinc-600 focus:ring-0 p-0"
+                        className="w-full text-2xl font-bold bg-transparent border-b border-transparent focus:border-black/10 dark:focus:border-white/10 placeholder-zinc-400/70 dark:placeholder-zinc-600 focus:outline-none focus:ring-0 px-0 py-2 transition-colors"
                         autoFocus
                     />
 
@@ -133,7 +181,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                         placeholder="Notunuzu buraya yazın..."
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full min-h-[300px] flex-1 text-lg leading-relaxed resize-none bg-transparent border-none placeholder-zinc-400/50 dark:placeholder-zinc-600 focus:ring-0 p-0"
+                        className="w-full min-h-[300px] flex-1 text-lg leading-relaxed resize-none bg-transparent border-none placeholder-zinc-400/50 dark:placeholder-zinc-600 focus:outline-none focus:ring-0 p-0"
                     />
                 </div>
 

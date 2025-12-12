@@ -14,6 +14,7 @@ import { Trash } from './pages/Trash';
 import { Stats } from './pages/Stats';
 import { Login } from './pages/Login';
 import { Profile } from './pages/Profile';
+import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null); // keeping any for flexibility as per existing code
+  const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -93,6 +95,14 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
         />;
+      case 'note-editor':
+        return <NoteEditorPage
+          noteId={editingNoteId}
+          onBack={() => {
+            setActiveView('dashboard');
+            setEditingNoteId(undefined);
+          }}
+        />;
       case 'notes':
         return <Notes onOpenNoteModal={() => setShowNoteModal(true)} />;
       case 'tasks':
@@ -157,7 +167,11 @@ const App: React.FC = () => {
         <NewNoteWindow
           isOpen={showNoteModal}
           onClose={() => setShowNoteModal(false)}
-        // initialData can be added if needed for editing
+          onExpand={(id) => {
+            setEditingNoteId(id);
+            setActiveView('note-editor');
+            setShowNoteModal(false);
+          }}
         />
 
         <NewTaskWindow
