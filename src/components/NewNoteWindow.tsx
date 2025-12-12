@@ -35,7 +35,8 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                 setTitle(initialData.title || '');
                 setContent(initialData.content || '');
                 setIsPinned(initialData.isPinned || false);
-                setSelectedColor(NOTE_COLORS[0]);
+                const color = NOTE_COLORS.find(c => c.id === initialData.color) || NOTE_COLORS[0];
+                setSelectedColor(color);
             } else {
                 setTitle('');
                 setContent('');
@@ -49,34 +50,25 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
 
     const handleExpand = async () => {
         try {
-            let noteId = initialData?.id;
+            let noteId = initialData?.id; // Use let since we might assign it from newNote
 
-            // If we have content, save it first
-            if (title.trim() || content.trim()) {
-                if (noteId) {
-                    await updateNote(noteId, {
-                        title,
-                        content,
-                        isPinned,
-                    });
-                } else {
-                    const newNote = await addNote({
-                        title,
-                        content,
-                        isPinned,
-                        tags: [],
-                        plainContent: content
-                    });
-                    noteId = newNote.id;
-                }
-            } else if (!noteId) {
-                // Create empty note to expand
+            if (noteId) {
+                // Always update existing note before expanding to ensure consistency
+                await updateNote(noteId, {
+                    title,
+                    content,
+                    isPinned,
+                    color: selectedColor.id
+                });
+            } else {
+                // Create new note (even if empty, as user wants to enter editor)
                 const newNote = await addNote({
-                    title: '',
-                    content: '',
-                    isPinned: false,
-                    tags: [],
-                    plainContent: ''
+                    title,
+                    content,
+                    isPinned,
+                    tags: [], // Default tags
+                    plainContent: content, // Approximation for now
+                    color: selectedColor.id
                 });
                 noteId = newNote.id;
             }
@@ -98,6 +90,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                     title,
                     content,
                     isPinned,
+                    color: selectedColor.id
                 });
             } else {
                 await addNote({
@@ -105,7 +98,8 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                     content,
                     isPinned,
                     tags: [],
-                    plainContent: content
+                    plainContent: content,
+                    color: selectedColor.id
                 });
             }
             onClose();

@@ -5,15 +5,26 @@ import {
     Clock,
     Tag,
     Trash2,
-    X
+    X,
+    Palette
 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
+import clsx from 'clsx';
 
 interface NoteEditorPageProps {
     noteId?: string;
     onBack: () => void;
 }
+
+const NOTE_COLORS = [
+    { id: 'default', bg: 'bg-white dark:bg-zinc-950', border: 'border-zinc-200 dark:border-zinc-800' },
+    { id: 'yellow', bg: 'bg-yellow-50 dark:bg-yellow-900/10', border: 'border-yellow-200 dark:border-yellow-800/30' },
+    { id: 'green', bg: 'bg-green-50 dark:bg-green-900/10', border: 'border-green-200 dark:border-green-800/30' },
+    { id: 'blue', bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-200 dark:border-blue-800/30' },
+    { id: 'purple', bg: 'bg-purple-50 dark:bg-purple-900/10', border: 'border-purple-200 dark:border-purple-800/30' },
+    { id: 'red', bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-200 dark:border-red-800/30' },
+];
 
 export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }) => {
     const { notes, addNote, updateNote, deleteNote } = useNotes();
@@ -22,6 +33,8 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     const [plainContent, setPlainContent] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
+    const [selectedColor, setSelectedColor] = useState(NOTE_COLORS[0]);
+    const [showColorPicker, setShowColorPicker] = useState(false);
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [loadedNoteId, setLoadedNoteId] = useState<string | null>(null);
 
@@ -34,6 +47,10 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 setContent(existingNote.content);
                 setPlainContent(existingNote.plainContent || '');
                 setTags(existingNote.tags || []);
+
+                const color = NOTE_COLORS.find(c => c.id === existingNote.color) || NOTE_COLORS[0];
+                setSelectedColor(color);
+
                 setLastSaved(existingNote.updatedAt);
                 setLoadedNoteId(noteId);
             }
@@ -52,6 +69,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     content,
                     plainContent,
                     tags,
+                    color: selectedColor.id,
                     updatedAt: new Date()
                 });
             } else {
@@ -60,6 +78,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     content,
                     plainContent,
                     tags,
+                    color: selectedColor.id,
                     isPinned: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -100,16 +119,20 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
             }
         }, 30000);
         return () => clearInterval(interval);
-    }, [title, content, plainContent, tags]);
+    }, [title, content, plainContent, tags, selectedColor]);
 
     return (
-        <div className="h-full flex flex-col bg-slate-50 dark:bg-zinc-950">
+        <div className={clsx("h-full flex flex-col transition-colors duration-300", selectedColor.bg)}>
             {/* Header */}
-            <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+            <header className={clsx(
+                "sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b backdrop-blur-md transition-colors duration-300",
+                selectedColor.bg.replace('bg-', 'bg-opacity-80 '),
+                selectedColor.border
+            )}>
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
-                        className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 transition-colors"
+                        className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-colors"
                         title="Geri"
                     >
                         <ArrowLeft className="w-5 h-5" />
@@ -127,7 +150,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {/* Tags Display/Edit Area could go here or in body. Let's put simplified actions here. */}
                     {noteId && (
                         <button
                             onClick={handleDelete}
@@ -138,7 +160,35 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                         </button>
                     )}
 
-                    <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-2" />
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowColorPicker(!showColorPicker)}
+                            className="p-2 rounded-lg text-zinc-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                            title="Renk Değiştir"
+                        >
+                            <Palette className="w-5 h-5" />
+                        </button>
+                        {showColorPicker && (
+                            <div className="absolute right-0 top-full mt-2 p-2 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-700 flex gap-2 animate-in fade-in slide-in-from-top-2 z-50">
+                                {NOTE_COLORS.map((color) => (
+                                    <button
+                                        key={color.id}
+                                        className={clsx(
+                                            "w-6 h-6 rounded-full border border-black/10 dark:border-white/10 ring-offset-2 ring-offset-white dark:ring-offset-zinc-800 transition-all",
+                                            color.bg.replace('/10', ''),
+                                            selectedColor.id === color.id && "ring-2 ring-zinc-400"
+                                        )}
+                                        onClick={() => {
+                                            setSelectedColor(color);
+                                            setShowColorPicker(false);
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="w-px h-6 bg-black/10 dark:bg-white/10 mx-2" />
 
                     <button
                         onClick={handleSave}
