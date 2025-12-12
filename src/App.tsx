@@ -12,6 +12,8 @@ import { WeeklyPlanner } from './pages/WeeklyPlanner';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
 import { Stats } from './pages/Stats';
+import { Login } from './pages/Login';
+import { Profile } from './pages/Profile';
 import { setupFastPolling } from './utils/refreshUtils';
 
 const App: React.FC = () => {
@@ -21,6 +23,25 @@ const App: React.FC = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const auth = localStorage.getItem('isAuthenticated');
+    if (auth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    localStorage.setItem('isAuthenticated', 'true');
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    setActiveView('dashboard');
+  };
 
   const handleEditTask = (task: any) => {
     setEditingTask(task);
@@ -87,6 +108,8 @@ const App: React.FC = () => {
         return <Trash />;
       case 'settings':
         return <Settings />;
+      case 'profile':
+        return <Profile onLogout={handleLogout} />;
       default:
         return <Dashboard 
           onNavigate={setActiveView}
@@ -95,6 +118,14 @@ const App: React.FC = () => {
         />;
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <ThemeProvider>
+        <Login onLogin={handleLogin} />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>

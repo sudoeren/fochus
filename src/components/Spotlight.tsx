@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ArrowRight, Home, BookOpen, CheckSquare, Calendar, Settings, Plus, Hash, X, Command } from 'lucide-react';
+import { Search, ArrowRight, Home, BookOpen, CheckSquare, Calendar, Settings, Plus, Hash, X, Command, User } from 'lucide-react';
 
 interface SpotlightProps {
   isOpen: boolean;
@@ -96,6 +96,18 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       category: 'navigation',
       action: () => {
         onNavigate('settings');
+        onClose();
+      }
+    },
+    {
+      id: 'profile',
+      label: 'Profilim',
+      icon: User,
+      description: 'Kullanıcı profili ve hesap',
+      keywords: ['profile', 'profil', 'hesap', 'account', 'user', 'kullanıcı'],
+      category: 'navigation',
+      action: () => {
+        onNavigate('profile');
         onClose();
       }
     },

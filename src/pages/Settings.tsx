@@ -35,6 +35,7 @@ const defaultSpotlightOrder: SpotlightItem[] = [
   { id: 'tasks', label: 'Görevler', enabled: true },
   { id: 'weekly', label: 'Haftalık Planlayıcı', enabled: true },
   { id: 'settings', label: 'Ayarlar', enabled: true },
+  { id: 'profile', label: 'Profilim', enabled: true },
   { id: 'new-note', label: 'Yeni Not Oluştur', enabled: true },
   { id: 'new-task', label: 'Yeni Görev Oluştur', enabled: true },
 ];

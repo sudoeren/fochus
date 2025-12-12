@@ -18,7 +18,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Timer,
-  BarChart
+  BarChart,
+  User
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
@@ -43,6 +44,7 @@ const menuItems = [
 const bottomItems = [
   { id: 'trash', label: 'Çöp Kutusu', icon: Trash2 },
   { id: 'settings', label: 'Ayarlar', icon: Settings },
+  { id: 'profile', label: 'Profilim', icon: User },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
