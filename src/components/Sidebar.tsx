@@ -259,24 +259,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="flex gap-2 w-full">
                   <button 
                     onClick={toggleTimer}
-                    className="flex-1 h-10 bg-white text-zinc-900 rounded-xl flex items-center justify-center font-bold text-sm hover:bg-zinc-200 transition-all active:scale-95 shadow-lg"
+                    className="flex-1 h-10 bg-white text-zinc-900 rounded-xl flex items-center justify-center font-bold text-sm hover:bg-zinc-200 transition-all active:scale-95 shadow-none"
                   >
                     {isActive ? <Pause className="w-4 h-4 fill-current mr-1" /> : <Play className="w-4 h-4 fill-current mr-1" />}
                     {isActive ? "Duraklat" : "Başlat"}
                   </button>
                   <button 
                     onClick={resetTimer}
-                    className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white active:scale-95"
+                    className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white active:scale-95 shadow-none"
                   >
                     <RotateCcw className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Progress Bar at bottom */}
-                <div className="absolute bottom-0 left-0 h-1 bg-zinc-800 w-full">
+                <div className="absolute bottom-0 left-0 h-1 w-full">
                    <div 
                      className="h-full bg-indigo-500 transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                     style={{ width: `${progress}%` }}
+                     style={{ width: `${progress * 100}%` }}
                    />
                 </div>
               </div>

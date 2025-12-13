@@ -66,7 +66,11 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           {/* Timer Display with SVG Ring */}
           <div className="relative mb-10 group cursor-default">
             {/* Background Ring */}
-            <svg className="w-72 h-72 transform -rotate-90" viewBox="0 0 260 260">
+            <svg 
+              className="w-64 h-64" 
+              viewBox="0 0 260 260"
+              style={{ transform: 'rotate(-90deg)' }}
+            >
               <circle
                 cx="130"
                 cy="130"
@@ -93,20 +97,20 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
 
             {/* Time Text */}
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className={`text-6xl font-mono font-bold tracking-tighter tabular-nums text-gray-900 dark:text-white mb-2 ${isActive ? 'animate-pulse' : ''}`} style={{ animationDuration: '2s' }}>
+              <div className={`text-5xl font-mono font-bold tracking-tighter tabular-nums text-gray-900 dark:text-white mb-2 ${isActive ? 'animate-pulse' : ''}`} style={{ animationDuration: '2s' }}>
                 {formatTime(timeLeft)}
               </div>
-              <div className={`text-sm font-medium uppercase tracking-widest ${getThemeColor()} opacity-80`}>
+              <div className={`text-xs font-bold uppercase tracking-[0.2em] ${getThemeColor()} opacity-80`}>
                 {mode === 'work' ? 'ODAKLAN' : mode === 'shortBreak' ? 'KISA MOLA' : 'UZUN MOLA'}
               </div>
             </div>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-6 mb-10">
+          <div className="flex items-center justify-center gap-6 mb-10">
             <button
               onClick={resetTimer}
-              className="p-4 rounded-full text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
+              className="w-14 h-14 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
               title="Sıfırla"
             >
               <RotateCcw className="w-6 h-6" />
@@ -116,7 +120,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
               onClick={toggleTimer}
               className={`
                 w-20 h-20 flex items-center justify-center rounded-[2rem] 
-                text-white shadow-xl shadow-gray-200 dark:shadow-none 
+                text-white 
                 transition-all duration-300 hover:scale-105 active:scale-95
                 ${getBgColor()}
               `}
@@ -127,9 +131,6 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                 <Play className="w-8 h-8 fill-current ml-1" />
               )}
             </button>
-
-            {/* Placeholder for balance */}
-            <div className="w-14 h-14" /> 
           </div>
 
           {/* Mode Segmented Control */}
