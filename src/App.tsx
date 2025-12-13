@@ -13,7 +13,6 @@ import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
 import { Stats } from './pages/Stats';
 import { Login } from './pages/Login';
-import { Profile } from './pages/Profile';
 import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
 
@@ -37,12 +36,6 @@ const App: React.FC = () => {
   const handleLogin = () => {
     localStorage.setItem('isAuthenticated', 'true');
     setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    setIsAuthenticated(false);
-    setActiveView('dashboard');
   };
 
   const handleEditTask = (task: any) => {
@@ -118,8 +111,6 @@ const App: React.FC = () => {
         return <Trash />;
       case 'settings':
         return <Settings />;
-      case 'profile':
-        return <Profile onLogout={handleLogout} />;
       default:
         return <Dashboard
           onNavigate={setActiveView}

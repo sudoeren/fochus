@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical, CheckSquare } from 'lucide-react';
+import { Plus, Calendar, CheckCircle2, Circle, Trash2, Pin, GripVertical, Edit3, MoreHorizontal, Layout, CheckSquare } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
 import { EmptyState } from '../components/EmptyState';
+import { cn } from '../lib/utils';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -27,50 +28,12 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
     if (diffDays === 0) return 'Bugün';
     if (diffDays === 1) return 'Yarın';
     if (diffDays === -1) return 'Dün';
-    if (diffDays < -1) return `${Math.abs(diffDays)} gün önce`;
-    if (diffDays > 1) return `${diffDays} gün sonra`;
-    
     return taskDate.toLocaleDateString('tr-TR');
-  };
-
-  const handleToggleTask = async (id: string) => {
-    await toggleTask(id);
-  };
-
-  const handlePinTask = async (id: string, currentPinned: boolean) => {
-    await pinTask(id, !currentPinned);
-  };
-
-  const handleDeleteTask = async (id: string) => {
-    if (confirm('Bu görevi silmek istediğinizden emin misiniz?')) {
-      await deleteTask(id);
-    }
-  };
-
-  const handleDeleteList = async (listId: string) => {
-    if (confirm('Bu listeyi silmek istediğinizden emin misiniz? İçindeki görevler "Kategorisiz" bölümüne taşınacak.')) {
-      await deleteTaskList(listId);
-      setActiveListMenu(null);
-    }
-  };
-
-  const handleEditList = (list: any) => {
-    setEditingList(list);
-    setShowListModal(true);
-    setActiveListMenu(null);
-  };
-
-  const closeListModal = () => {
-    setShowListModal(false);
-    setEditingList(null);
   };
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
-
     const { source, destination, draggableId } = result;
-
-    // If moving between lists
     if (source.droppableId !== destination.droppableId) {
       const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
       await moveTaskToList(draggableId, targetListId);
@@ -85,393 +48,285 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
 
   if (loading || listsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="h-full flex items-center justify-center">
+         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-full overflow-x-auto min-h-screen bg-gray-50 dark:bg-black">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Görevlerim</h1>
-          <p className="text-gray-600 dark:text-zinc-400 mt-1 flex items-center gap-2">
-            <span className="font-medium text-gray-900 dark:text-white">{taskLists.length}</span> liste
-            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-700"></span>
-            <span className="font-medium text-gray-900 dark:text-white">{tasks.filter(t => !t.isDeleted).length}</span> görev
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowListModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-200 rounded-xl border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all shadow-sm font-medium"
-          >
-            <List className="w-4 h-4" />
-            <span>Liste Ekle</span>
-          </button>
-          <button
-            onClick={onOpenTaskModal}
-            className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-sm font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Görev Ekle</span>
-          </button>
-        </div>
-      </div>
-
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {/* Uncategorized Tasks */}
-          <div className="flex-shrink-0 w-80 sm:w-96">
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-200 dark:border-zinc-800 h-fit flex flex-col max-h-[calc(100vh-12rem)]">
-              <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex-shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-500 dark:text-zinc-400">
-                      <CheckSquare className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
-                  </div>
-                  <span className="text-xs font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 px-2 py-1 rounded-md">
-                    {uncategorizedTasks.length}
-                  </span>
-                </div>
-              </div>
-
-              <Droppable droppableId="uncategorized">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`p-3 overflow-y-auto flex-1 transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-zinc-800/50' : ''
-                    }`}
-                  >
-                    {uncategorizedTasks.map((task, index) => (
-                      <Draggable key={task.id} draggableId={task.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`group mb-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all ${
-                              snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-2 z-50' : ''
-                            } ${
-                              task.isCompleted ? 'opacity-60' : ''
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div
-                                {...provided.dragHandleProps}
-                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
-                              >
-                                <GripVertical className="w-4 h-4" />
-                              </div>
-                              
-                              <button
-                                onClick={() => handleToggleTask(task.id)}
-                                className="mt-0.5 flex-shrink-0 transition-all hover:scale-110"
-                              >
-                                {task.isCompleted ? (
-                                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                    <CheckCircle className="w-3.5 h-3.5 text-white" />
-                                  </div>
-                                ) : (
-                                  <div className="w-5 h-5 border-2 border-gray-300 dark:border-zinc-600 rounded-full hover:border-green-500 transition-colors"></div>
-                                )}
-                              </button>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-medium ${
-                                  task.isCompleted 
-                                    ? 'line-through text-gray-500 dark:text-zinc-500' 
-                                    : 'text-gray-900 dark:text-white'
-                                }`}>
-                                  {task.isPinned && (
-                                    <Pin className="w-3.5 h-3.5 text-amber-500 inline mr-1.5 fill-current" />
-                                  )}
-                                  {task.title}
-                                </h4>
-                                
-                                {task.description && (
-                                  <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1 line-clamp-2">
-                                    {task.description}
-                                  </p>
-                                )}
-                                
-                                <div className="flex items-center justify-between mt-3">
-                                  {task.dueDate ? (
-                                    <div className={`flex items-center gap-1.5 text-xs ${
-                                      task.isCompleted 
-                                        ? 'text-gray-400 dark:text-zinc-600'
-                                        : new Date(task.dueDate) < new Date()
-                                          ? 'text-red-500 dark:text-red-400'
-                                          : 'text-gray-500 dark:text-zinc-500'
-                                    }`}>
-                                      <Calendar className="w-3 h-3" />
-                                      <span>{formatDate(new Date(task.dueDate))}</span>
-                                    </div>
-                                  ) : <div></div>}
-                                  
-                                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                      onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                      className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors ${
-                                        task.isPinned ? 'text-amber-500' : 'text-gray-400 dark:text-zinc-500 hover:text-amber-500'
-                                      }`}
-                                      title={task.isPinned ? "Sabitlemeyi kaldır" : "Sabitle"}
-                                    >
-                                      <Pin className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                      onClick={() => onEditTask(task)}
-                                      className="p-1 text-gray-400 dark:text-zinc-500 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                                      title="Düzenle"
-                                    >
-                                      <Edit3 className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteTask(task.id)}
-                                      className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                                      title="Sil"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                    
-                    {uncategorizedTasks.length === 0 && (
-                      <div className="py-8">
-                        <EmptyState
-                          type="tasks"
-                          title=""
-                          description="Bu listede henüz görev yok"
-                          className="py-4"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Droppable>
+    <div className="h-full flex flex-col bg-zinc-50/50 dark:bg-black">
+      {/* Header */}
+      <div className="flex-none p-6 lg:p-8 border-b border-zinc-200/50 dark:border-zinc-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-[1800px] mx-auto w-full">
+          <div>
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-1">Görevlerim</h1>
+            <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm">
+              <span className="font-semibold text-zinc-900 dark:text-white">{taskLists.length}</span> liste
+              <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+              <span className="font-semibold text-zinc-900 dark:text-white">{tasks.filter(t => !t.isDeleted).length}</span> görev
             </div>
           </div>
-
-          {/* Task Lists */}
-          {taskLists.map((list) => {
-            const listTasks = getTasksByList(list.id);
-            
-            return (
-              <div key={list.id} className="flex-shrink-0 w-80 sm:w-96">
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-200 dark:border-zinc-800 h-fit flex flex-col max-h-[calc(100vh-12rem)]">
-                  <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-3 h-8 rounded-full" 
-                          style={{ backgroundColor: list.color }}
-                        ></div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[180px]" title={list.title}>
-                          {list.title}
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 px-2 py-1 rounded-md">
-                          {listTasks.length}
-                        </span>
-                        <div className="relative group/menu">
-                          <button
-                            onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                          
-                          {activeListMenu === list.id && (
-                            <>
-                              <div 
-                                className="fixed inset-0 z-10"
-                                onClick={() => setActiveListMenu(null)}
-                              />
-                              <div className="absolute right-0 top-full mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-lg z-20 py-1 min-w-[140px] animate-in fade-in zoom-in-95 duration-100">
-                                <button
-                                  onClick={() => handleEditList(list)}
-                                  className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                  Düzenle
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteList(list.id)}
-                                  className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                  Sil
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    {list.description && (
-                      <p className="text-xs text-gray-500 dark:text-zinc-500 mt-2 line-clamp-2">{list.description}</p>
-                    )}
-                  </div>
-
-                  <Droppable droppableId={list.id}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`p-3 overflow-y-auto flex-1 transition-colors ${
-                          snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-zinc-800/50' : ''
-                        }`}
-                      >
-                        {listTasks.map((task, index) => (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                className={`group mb-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all ${
-                                  snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-2 z-50' : ''
-                                } ${
-                                  task.isCompleted ? 'opacity-60' : ''
-                                }`}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div
-                                    {...provided.dragHandleProps}
-                                    className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 rounded hover:bg-gray-100 dark:hover:bg-zinc-800"
-                                  >
-                                    <GripVertical className="w-4 h-4" />
-                                  </div>
-                                  
-                                  <button
-                                    onClick={() => handleToggleTask(task.id)}
-                                    className="mt-0.5 flex-shrink-0 transition-all hover:scale-110"
-                                  >
-                                    {task.isCompleted ? (
-                                      <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                                        <CheckCircle className="w-3.5 h-3.5 text-white" />
-                                      </div>
-                                    ) : (
-                                      <div className="w-5 h-5 border-2 border-gray-300 dark:border-zinc-600 rounded-full hover:border-green-500 transition-colors"></div>
-                                    )}
-                                  </button>
-                                  
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className={`text-sm font-medium ${
-                                      task.isCompleted 
-                                        ? 'line-through text-gray-500 dark:text-zinc-500' 
-                                        : 'text-gray-900 dark:text-white'
-                                    }`}>
-                                      {task.isPinned && (
-                                        <Pin className="w-3.5 h-3.5 text-amber-500 inline mr-1.5 fill-current" />
-                                      )}
-                                      {task.title}
-                                    </h4>
-                                    
-                                    {task.description && (
-                                      <p className="text-xs text-gray-500 dark:text-zinc-500 mt-1 line-clamp-2">
-                                        {task.description}
-                                      </p>
-                                    )}
-                                    
-                                    <div className="flex items-center justify-between mt-3">
-                                      {task.dueDate ? (
-                                        <div className={`flex items-center gap-1.5 text-xs ${
-                                          task.isCompleted 
-                                            ? 'text-gray-400 dark:text-zinc-600'
-                                            : new Date(task.dueDate) < new Date()
-                                              ? 'text-red-500 dark:text-red-400'
-                                              : 'text-gray-500 dark:text-zinc-500'
-                                        }`}>
-                                          <Calendar className="w-3 h-3" />
-                                          <span>{formatDate(new Date(task.dueDate))}</span>
-                                        </div>
-                                      ) : <div></div>}
-                                      
-                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                          onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                          className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors ${
-                                            task.isPinned ? 'text-amber-500' : 'text-gray-400 dark:text-zinc-500 hover:text-amber-500'
-                                          }`}
-                                          title={task.isPinned ? "Sabitlemeyi kaldır" : "Sabitle"}
-                                        >
-                                          <Pin className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button
-                                          onClick={() => onEditTask(task)}
-                                          className="p-1 text-gray-400 dark:text-zinc-500 hover:text-blue-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                                          title="Düzenle"
-                                        >
-                                          <Edit3 className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button
-                                          onClick={() => handleDeleteTask(task.id)}
-                                          className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded transition-colors"
-                                          title="Sil"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                        
-                        {listTasks.length === 0 && (
-                          <div className="py-8">
-                            <EmptyState
-                              type="tasks"
-                              title=""
-                              description="Bu listede henüz görev yok"
-                              className="py-4"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </Droppable>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Add New List Placeholder */}
-          <div className="flex-shrink-0 w-80 sm:w-96">
-            <button
+          <div className="flex items-center gap-3">
+             <button
               onClick={() => setShowListModal(true)}
-              className="w-full h-[calc(100vh-12rem)] border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-2xl hover:border-blue-500 dark:hover:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-all group flex flex-col items-center justify-center text-gray-500 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-zinc-300"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm font-medium"
             >
-              <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6" />
-              </div>
-              <span className="font-medium">Yeni Liste Ekle</span>
+              <Layout className="w-4 h-4" />
+              <span>Liste Ekle</span>
+            </button>
+            <button
+              onClick={onOpenTaskModal}
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-lg shadow-zinc-900/10 font-medium active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Görev Ekle</span>
             </button>
           </div>
         </div>
-      </DragDropContext>
+      </div>
 
-      {/* Task List Modal */}
+      {/* Kanban Board */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="h-full flex px-6 lg:px-8 py-8 gap-6 min-w-max">
+            
+            {/* Uncategorized List */}
+            <div className="flex-shrink-0 w-80 lg:w-96 flex flex-col">
+               <div className="flex items-center justify-between mb-4 px-1">
+                 <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                      <CheckSquare className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-bold text-zinc-900 dark:text-white">Genel</h3>
+                 </div>
+                 <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full text-xs font-bold">
+                   {uncategorizedTasks.length}
+                 </span>
+               </div>
+               
+               <div className="flex-1 bg-zinc-100/50 dark:bg-zinc-900/30 rounded-3xl p-3 border border-zinc-200/50 dark:border-zinc-800/50">
+                <Droppable droppableId="uncategorized">
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        "h-full overflow-y-auto pr-2 custom-scrollbar transition-colors rounded-2xl",
+                        snapshot.isDraggingOver && "bg-zinc-200/50 dark:bg-zinc-800/50"
+                      )}
+                    >
+                      {uncategorizedTasks.map((task, index) => (
+                        <TaskCard 
+                          key={task.id} 
+                          task={task} 
+                          index={index} 
+                          onEdit={onEditTask}
+                          onToggle={toggleTask}
+                          onDelete={deleteTask}
+                          onPin={pinTask}
+                        />
+                      ))}
+                      {provided.placeholder}
+                      {uncategorizedTasks.length === 0 && (
+                        <div className="h-32 flex flex-col items-center justify-center text-zinc-400">
+                           <p className="text-sm">Görev yok</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Droppable>
+               </div>
+            </div>
+
+            {/* Custom Lists */}
+            {taskLists.map((list) => {
+              const listTasks = getTasksByList(list.id);
+              return (
+                <div key={list.id} className="flex-shrink-0 w-80 lg:w-96 flex flex-col">
+                  {/* List Header */}
+                   <div className="flex items-center justify-between mb-4 px-1">
+                     <div className="flex items-center gap-3">
+                        <div className="w-2 h-8 rounded-full" style={{ backgroundColor: list.color }} />
+                        <h3 className="font-bold text-zinc-900 dark:text-white truncate max-w-[160px]">
+                          {list.title}
+                        </h3>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full text-xs font-bold">
+                          {listTasks.length}
+                        </span>
+                        <div className="relative">
+                          <button
+                            onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
+                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </button>
+                          {activeListMenu === list.id && (
+                             <>
+                              <div className="fixed inset-0 z-10" onClick={() => setActiveListMenu(null)} />
+                              <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95">
+                                <button
+                                  onClick={() => {
+                                    setEditingList(list);
+                                    setShowListModal(true);
+                                    setActiveListMenu(null);
+                                  }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-center gap-2"
+                                >
+                                  <Edit3 className="w-4 h-4" /> Düzenle
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if(confirm('Listeyi silmek istediğinize emin misiniz?')) deleteTaskList(list.id);
+                                  }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                                >
+                                  <Trash2 className="w-4 h-4" /> Sil
+                                </button>
+                              </div>
+                             </>
+                          )}
+                        </div>
+                     </div>
+                   </div>
+
+                   {/* List Body */}
+                   <div className="flex-1 bg-zinc-100/50 dark:bg-zinc-900/30 rounded-3xl p-3 border border-zinc-200/50 dark:border-zinc-800/50">
+                    <Droppable droppableId={list.id}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={cn(
+                            "h-full overflow-y-auto pr-2 custom-scrollbar transition-colors rounded-2xl",
+                            snapshot.isDraggingOver && "bg-zinc-200/50 dark:bg-zinc-800/50"
+                          )}
+                        >
+                          {listTasks.map((task, index) => (
+                            <TaskCard 
+                              key={task.id} 
+                              task={task} 
+                              index={index} 
+                              onEdit={onEditTask}
+                              onToggle={toggleTask}
+                              onDelete={deleteTask}
+                              onPin={pinTask}
+                            />
+                          ))}
+                          {provided.placeholder}
+                          {listTasks.length === 0 && (
+                            <div className="h-32 flex flex-col items-center justify-center text-zinc-400">
+                               <p className="text-sm opacity-50">Görev sürükleyin</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Droppable>
+                   </div>
+                </div>
+              );
+            })}
+
+            {/* Add List Button */}
+            <div className="flex-shrink-0 w-80 lg:w-96 flex flex-col pt-12">
+               <button
+                  onClick={() => setShowListModal(true)}
+                  className="h-full max-h-[500px] border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl flex flex-col items-center justify-center gap-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all group"
+               >
+                  <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Plus className="w-8 h-8" />
+                  </div>
+                  <span className="font-semibold">Yeni Liste Ekle</span>
+               </button>
+            </div>
+            
+          </div>
+        </DragDropContext>
+      </div>
+
       <TaskListModal
         isOpen={showListModal}
-        onClose={closeListModal}
+        onClose={() => {
+          setShowListModal(false);
+          setEditingList(null);
+        }}
         editingList={editingList}
       />
     </div>
+  );
+};
+
+// Extracted Task Card Component for cleaner code
+const TaskCard = ({ task, index, onEdit, onToggle, onDelete, onPin }: any) => {
+  return (
+    <Draggable draggableId={task.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={cn(
+            "group relative mb-3 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all duration-200",
+            snapshot.isDragging ? "shadow-2xl ring-2 ring-indigo-500 rotate-2 z-50 cursor-grabbing" : "hover:border-indigo-300 dark:hover:border-zinc-600 hover:shadow-lg hover:shadow-indigo-500/5 cursor-grab",
+            task.isCompleted && "opacity-60 bg-zinc-50 dark:bg-zinc-900/50"
+          )}
+        >
+          <div className="flex items-start gap-3">
+             <button
+              onClick={() => onToggle(task.id)}
+              className="mt-1 flex-shrink-0"
+             >
+               {task.isCompleted ? (
+                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+               ) : (
+                 <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600 hover:text-emerald-500 transition-colors" />
+               )}
+             </button>
+
+             <div className="flex-1 min-w-0">
+               <div className="flex items-start justify-between gap-2">
+                 <h4 className={cn(
+                   "text-sm font-semibold leading-relaxed",
+                   task.isCompleted ? "line-through text-zinc-500" : "text-zinc-900 dark:text-zinc-100"
+                 )}>
+                   {task.title}
+                 </h4>
+                 {task.isPinned && <Pin className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 fill-current" />}
+               </div>
+               
+               {task.description && (
+                 <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{task.description}</p>
+               )}
+
+               <div className="flex items-center justify-between mt-3">
+                  {task.dueDate ? (
+                    <div className={cn(
+                      "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md bg-zinc-50 dark:bg-zinc-800",
+                      new Date(task.dueDate) < new Date() && !task.isCompleted ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-zinc-500"
+                    )}>
+                      <Calendar className="w-3 h-3" />
+                      {new Date(task.dueDate).toLocaleDateString('tr-TR')}
+                    </div>
+                  ) : <div />}
+
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => onEdit(task)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-indigo-500 transition-colors">
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => onPin(task.id, !task.isPinned)} className={cn("p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors", task.isPinned ? "text-amber-500" : "text-zinc-400 hover:text-amber-500")}>
+                      <Pin className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => onDelete(task.id)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+               </div>
+             </div>
+          </div>
+        </div>
+      )}
+    </Draggable>
   );
 };

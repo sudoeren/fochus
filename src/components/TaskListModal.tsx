@@ -1,153 +1,161 @@
-import React, { useState, useEffect } from 'react';
-import { X, Palette } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Plus, List, Palette, Layout, Calendar } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useTaskLists } from '../hooks/useTaskLists';
 
 interface TaskListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  editingList?: any;
+  editingList?: any; // Replace with proper type
 }
 
-const colorOptions = [
-  { name: 'Gri', value: '#6B7280' },
-  { name: 'Mavi', value: '#64748B' },
-  { name: 'Yeşil', value: '#059669' },
-  { name: 'Mor', value: '#7C3AED' },
-  { name: 'Kırmızı', value: '#DC2626' },
-  { name: 'Sarı', value: '#D97706' },
-  { name: 'Pembe', value: '#DB2777' },
-  { name: 'Lacivert', value: '#1E40AF' }
-];
-
-export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
-  const { addTaskList, updateTaskList } = useTaskLists();
-  const [listData, setListData] = useState({
-    title: '',
-    description: '',
-    color: '#6B7280'
-  });
-
-  useEffect(() => {
-    if (isOpen) {
-      setListData({
-        title: editingList?.title || '',
-        description: editingList?.description || '',
-        color: editingList?.color || '#6B7280'
-      });
-    }
-  }, [isOpen, editingList]);
-
-  const handleSave = async () => {
-    if (!listData.title.trim()) return;
-
-    try {
-      if (editingList) {
-        await updateTaskList(editingList.id, listData);
-      } else {
-        await addTaskList(listData);
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error saving task list:', error);
-    }
-  };
-
-  const handleClose = () => {
-    setListData({ title: '', description: '', color: '#3B82F6' });
-    onClose();
-  };
+export const TaskListModal: React.FC<TaskListModalProps> = ({
+  isOpen,
+  onClose,
+  editingList
+}) => {
+  const [title, setTitle] = useState(editingList?.title || '');
+  const [color, setColor] = useState(editingList?.color || 'blue');
+  const [icon, setIcon] = useState(editingList?.icon || 'list');
+  const { createTaskList, updateTaskList } = useTaskLists();
 
   if (!isOpen) return null;
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingList) {
+        await updateTaskList.mutateAsync({
+          id: editingList.id,
+          data: { title, color, icon }
+        });
+      } else {
+        await createTaskList.mutateAsync({
+          title,
+          color,
+          icon
+        });
+      }
+      onClose();
+      setTitle('');
+    } catch (error) {
+      console.error('Failed to save list:', error);
+    }
+  };
+
+  const colors = [
+    { id: 'blue', class: 'bg-blue-500' },
+    { id: 'red', class: 'bg-red-500' },
+    { id: 'green', class: 'bg-green-500' },
+    { id: 'yellow', class: 'bg-yellow-500' },
+    { id: 'purple', class: 'bg-purple-500' },
+    { id: 'pink', class: 'bg-pink-500' },
+    { id: 'indigo', class: 'bg-indigo-500' },
+    { id: 'orange', class: 'bg-orange-500' },
+  ];
+
+  const icons = [
+    { id: 'list', icon: List },
+    { id: 'calendar', icon: Calendar },
+    { id: 'layout', icon: Layout },
+    { id: 'palette', icon: Palette },
+  ];
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {editingList ? 'Liste Düzenle' : 'Yeni Liste Oluştur'}
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      
+      <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl transform transition-all overflow-hidden border border-zinc-200 dark:border-zinc-800">
+        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+            {editingList ? 'Listeyi Düzenle' : 'Yeni Liste'}
           </h2>
-          <button
-            onClick={handleClose}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
           >
-            <X className="w-5 h-5" />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+          {/* Title Input */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Liste Adı
             </label>
             <input
               type="text"
-              value={listData.title}
-              onChange={(e) => setListData(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Liste adını girin..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Örn: Alışveriş, Projeler..."
+              className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               autoFocus
+              required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Açıklama (Opsiyonel)
+          {/* Color Selection */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Renk Teması
             </label>
-            <textarea
-              value={listData.description}
-              onChange={(e) => setListData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Liste açıklaması..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-              rows={3}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              <Palette className="w-4 h-4 inline mr-2" />
-              Renk Seçin
-            </label>
-            <div className="grid grid-cols-4 gap-3">
-              {colorOptions.map((color) => (
+            <div className="flex flex-wrap gap-3">
+              {colors.map((c) => (
                 <button
-                  key={color.value}
-                  onClick={() => setListData(prev => ({ ...prev, color: color.value }))}
-                  className={`relative w-12 h-12 rounded-lg border-2 transition-all hover:scale-105 ${
-                    listData.color === color.value 
-                      ? 'border-gray-900 dark:border-white shadow-lg' 
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                >
-                  {listData.color === color.value && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-gray-900"></div>
-                      </div>
-                    </div>
+                  key={c.id}
+                  type="button"
+                  onClick={() => setColor(c.id)}
+                  className={cn(
+                    "w-10 h-10 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900",
+                    c.class,
+                    color === c.id ? "ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-900 scale-110" : ""
                   )}
-                </button>
+                />
               ))}
             </div>
           </div>
-        </div>
 
-        <div className="flex gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={handleClose}
-            className="flex-1 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-          >
-            İptal
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!listData.title.trim()}
-            className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-lg transition-colors disabled:cursor-not-allowed"
-          >
-            {editingList ? 'Güncelle' : 'Oluştur'}
-          </button>
-        </div>
+          {/* Icon Selection */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              İkon
+            </label>
+            <div className="flex gap-3">
+              {icons.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setIcon(item.id)}
+                    className={cn(
+                      "p-3 rounded-xl transition-all border",
+                      icon === item.id 
+                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400" 
+                        : "bg-zinc-50 dark:bg-zinc-800/50 border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+                    )}
+                  >
+                    <Icon size={20} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-zinc-900/10"
+            >
+              <Plus size={20} />
+              {editingList ? 'Değişiklikleri Kaydet' : 'Listeyi Oluştur'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
