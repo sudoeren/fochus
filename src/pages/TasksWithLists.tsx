@@ -83,7 +83,12 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
   const getTasksByList = (listId: string | null) => {
     return tasks.filter(task => {
-      const matchesList = (task as any).listId === listId && !task.isDeleted;
+      // Handle Uncategorized (null listId) vs Specific List
+      const isListMatch = listId
+        ? (task as any).listId === listId
+        : !(task as any).listId; // Check for null or undefined
+
+      const matchesList = isListMatch && !task.isDeleted;
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = activeTab === 'completed' ? task.isCompleted : !task.isCompleted;
 
@@ -167,7 +172,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
           <div className="flex h-full gap-8">
 
             {/* Uncategorized List */}
-            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50">
+            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-800/50">
               <div className="p-5 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
@@ -192,7 +197,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`group relative mb-3 p-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
+                            className={`group relative mb-3 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
                               } ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
                           >
                             {/* Drag Handle (Hidden but active area usually, or visible on hover) */}
@@ -273,7 +278,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             {taskLists.map((list) => {
               const listTasks = getTasksByList(list.id);
               return (
-                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 group/list">
+                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-800/50 group/list">
                   <div className="p-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: list.color }}></div>
