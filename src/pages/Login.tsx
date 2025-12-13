@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Zap, Moon, Sun } from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
+import { useTheme } from '../components/ThemeProvider';
 
 interface LoginProps {
   onLogin: () => void;
@@ -11,6 +12,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -102,15 +104,24 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen flex bg-zinc-50 dark:bg-black transition-colors duration-300">
+      
+      {/* Theme Switcher - Absolute Position */}
+      <button
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className="absolute top-6 right-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
+      >
+        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      </button>
+
       {/* Left Side - Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-900 dark:bg-black items-center justify-center transition-colors duration-500">
         {/* Abstract Light Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Top light beam */}
-          <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-white/[0.03] rounded-full blur-[120px]" />
+          <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-500/20 dark:bg-white/[0.03] rounded-full blur-[120px] transition-colors duration-500" />
           
           {/* Bottom ambient glow */}
-          <div className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-zinc-800/20 rounded-full blur-[100px]" />
+          <div className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-500/20 dark:bg-zinc-800/20 rounded-full blur-[100px] transition-colors duration-500" />
           
           {/* Sharp streak of light */}
           <div className="absolute top-0 right-0 w-[2px] h-screen bg-gradient-to-b from-transparent via-white/20 to-transparent opacity-50 rotate-12 transform origin-top-right" />
@@ -118,38 +129,38 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         
         <div className="relative z-10 p-16 max-w-2xl text-white">
           <div className="flex items-center gap-4 mb-16">
-            <div className="h-14 w-14 bg-white text-black rounded-2xl flex items-center justify-center shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
-              <span className="text-3xl font-bold">F</span>
+            <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] p-3">
+              <img src="/logo.svg" alt="Fokus Logo" className="w-full h-full object-contain" />
             </div>
             <span className="text-4xl font-bold tracking-tight text-white/90">FOKUS</span>
           </div>
 
-          <h1 className="text-6xl font-bold leading-tight mb-8 tracking-tight">
+          <h1 className="text-6xl font-bold leading-tight mb-8 tracking-tight text-white">
             Karanlığın <br />
             içindeki <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 dark:from-white dark:to-zinc-500 transition-all duration-500">
               ışık.
             </span>
           </h1>
           
           <div className="space-y-10 text-zinc-400 mt-12">
             <div className="flex items-center gap-6 group">
-              <div className="p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 group-hover:border-white/20 transition-colors">
+              <div className="p-4 bg-white/5 dark:bg-zinc-900/50 rounded-2xl border border-white/10 dark:border-zinc-800 group-hover:border-white/20 transition-colors">
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-white text-xl font-medium mb-1">Zihni Sustur</h3>
-                <p className="font-light text-zinc-500">Gürültüden uzaklaş, sadece yapman gerekene odaklan.</p>
+                <p className="font-light text-zinc-400 dark:text-zinc-500">Gürültüden uzaklaş, sadece yapman gerekene odaklan.</p>
               </div>
             </div>
 
             <div className="flex items-center gap-6 group">
-              <div className="p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 group-hover:border-white/20 transition-colors">
+              <div className="p-4 bg-white/5 dark:bg-zinc-900/50 rounded-2xl border border-white/10 dark:border-zinc-800 group-hover:border-white/20 transition-colors">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-white text-xl font-medium mb-1">Akışı Yakala</h3>
-                <p className="font-light text-zinc-500">Hedefinle arandaki tüm engelleri kaldır.</p>
+                <p className="font-light text-zinc-400 dark:text-zinc-500">Hedefinle arandaki tüm engelleri kaldır.</p>
               </div>
             </div>
           </div>
@@ -157,17 +168,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-zinc-50 dark:bg-black relative">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white dark:bg-zinc-950 relative transition-colors duration-500">
          {/* Subtle background effects for the form side too */}
          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20 dark:opacity-10">
-            <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-white/5 rounded-full blur-[90px] animate-pulse-slow" />
-            <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-zinc-700/5 rounded-full blur-[80px] animate-pulse-slow delay-500" />
+            <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-500/10 dark:bg-white/5 rounded-full blur-[90px] animate-pulse-slow transition-colors duration-500" />
+            <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-purple-500/10 dark:bg-zinc-700/5 rounded-full blur-[80px] animate-pulse-slow delay-500 transition-colors duration-500" />
          </div>
-        <div className="w-full max-w-md relative z-10 p-6 sm:p-8 bg-white dark:bg-zinc-950 rounded-3xl shadow-xl border border-zinc-100 dark:border-zinc-800">
+        
+        <div className="w-full max-w-md relative z-10 p-6 sm:p-8 bg-zinc-50 dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 transition-colors duration-500">
           <div className="text-center mb-10">
             <div className="lg:hidden flex justify-center mb-6">
-              <div className="h-12 w-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-xl font-bold">F</span>
+              <div className="h-16 w-16 bg-white dark:bg-black rounded-2xl flex items-center justify-center shadow-lg p-3">
+                <img src="/logo.svg" alt="Fokus Logo" className="w-full h-full object-contain" />
               </div>
             </div>
             <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
@@ -181,7 +193,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-900/20 text-red-400 rounded-xl text-sm font-medium border border-red-800">
+            <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium border border-red-200 dark:border-red-800">
               {error}
             </div>
           )}
@@ -198,7 +210,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     type="text"
                     required
                     autoFocus
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-white/20 focus:border-indigo-500 dark:focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                     placeholder="Adınız Soyadınız"
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
@@ -217,7 +229,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     type="text"
                     required
                     autoFocus={isRegister}
-                    className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-white/20 focus:border-indigo-500 dark:focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                     placeholder="kullaniciadi"
                     value={formData.username}
                     onChange={e => setFormData({...formData, username: e.target.value})}
@@ -237,7 +249,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       type="password"
                       required
                       autoFocus={isRegister}
-                      className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
+                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-white/20 focus:border-indigo-500 dark:focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({...formData, password: e.target.value})}
@@ -253,7 +265,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       <input
                         type="password"
                         required
-                        className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
+                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-white/20 focus:border-indigo-500 dark:focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                         placeholder="••••••••"
                         value={formData.confirmPassword}
                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
@@ -269,7 +281,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={handlePrevStep}
-                  className="px-6 py-3.5 bg-zinc-800 text-zinc-400 rounded-xl font-medium hover:bg-zinc-700 transition-colors border border-zinc-700"
+                  className="px-6 py-3.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors border border-zinc-300 dark:border-zinc-700"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -278,7 +290,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 py-3.5 bg-white text-black rounded-xl font-bold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-200"
+                className="flex-1 py-3.5 bg-indigo-600 dark:bg-white text-white dark:text-black rounded-xl font-bold hover:bg-indigo-700 dark:hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 dark:shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -299,8 +311,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <div 
                   key={s}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    s === step ? 'w-8 bg-white' : 
-                    s < step ? 'w-2 bg-zinc-600' : 'w-2 bg-zinc-800'
+                    s === step ? 'w-8 bg-indigo-600 dark:bg-white' : 
+                    s < step ? 'w-2 bg-zinc-400 dark:bg-zinc-600' : 'w-2 bg-zinc-200 dark:bg-zinc-800'
                   }`}
                 />
               ))}
@@ -308,15 +320,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-zinc-800" />
+            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
             <span className="text-xs text-zinc-500 uppercase font-medium">veya</span>
-            <div className="h-px flex-1 bg-zinc-800" />
+            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
           </div>
 
           <div className="mt-6 space-y-4">
             <button
               onClick={handleGuestLogin}
-              className="w-full py-3.5 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-xl font-medium hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 shadow-md shadow-zinc-800/10"
+              className="w-full py-3.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-xl font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               Misafir Olarak Devam Et
             </button>
@@ -325,7 +337,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {isRegister ? 'Zaten hesabınız var mı?' : 'Hesabınız yok mu?'}
               <button
                 onClick={toggleMode}
-                className="ml-2 font-medium text-white hover:underline"
+                className="ml-2 font-medium text-indigo-600 dark:text-white hover:underline"
               >
                 {isRegister ? 'Giriş Yap' : 'Kayıt Ol'}
               </button>
