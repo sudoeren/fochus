@@ -4,17 +4,16 @@ import {
   FileText, 
   CheckSquare, 
   Calendar, 
+  BarChart2, 
   Settings, 
   Trash2, 
-  Search,
-  Timer,
-  BarChart,
-  Plus,
-  Play,
-  Pause,
+  Search, 
+  Plus, 
+  Play, 
+  Pause, 
   RotateCcw,
-  Briefcase,
-  ChevronRight
+  Clock,
+  LayoutGrid
 } from 'lucide-react';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
@@ -29,12 +28,12 @@ interface SidebarProps {
   onOpenPomodoro: () => void;
 }
 
-const mainNav = [
+const navItems = [
   { id: 'dashboard', label: 'Genel Bakış', icon: Home },
   { id: 'tasks', label: 'Görevler', icon: CheckSquare },
   { id: 'notes', label: 'Notlar', icon: FileText },
   { id: 'weekly', label: 'Takvim', icon: Calendar },
-  { id: 'stats', label: 'İstatistik', icon: BarChart },
+  { id: 'stats', label: 'Raporlar', icon: BarChart2 },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -42,206 +41,176 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onViewChange,
   onOpenSpotlight,
   onOpenNoteModal,
-  onOpenTaskModal
+  onOpenTaskModal,
+  onOpenPomodoro
 }) => {
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer } = usePomodoro();
   const { tasks } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const currentTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted).slice(0, 3);
+  // Active tasks for widget
+  const activeTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted).slice(0, 3);
 
   return (
     <>
-      {/* Mobile Toggle Trigger */}
+      {/* Mobile Toggle */}
       <button 
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-zinc-900 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-800"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md rounded-xl shadow-sm border border-zinc-200/50 dark:border-zinc-800/50"
       >
-        <div className="w-5 h-0.5 bg-zinc-800 dark:bg-zinc-200 mb-1" />
-        <div className="w-5 h-0.5 bg-zinc-800 dark:bg-zinc-200 mb-1" />
-        <div className="w-3 h-0.5 bg-zinc-800 dark:bg-zinc-200" />
+        <LayoutGrid className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
       </button>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar Container */}
-      <aside 
-        className={cn(
-          "fixed top-4 bottom-4 left-4 z-40 w-[280px] flex flex-col transition-transform duration-300 ease-spring",
-          "lg:translate-x-0", 
-          mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+16px)] lg:translate-x-0"
-        )}
-      >
-        <div className={cn(
-          "h-full flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] border border-zinc-200 dark:border-zinc-800 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 overflow-hidden relative",
-        )}>
+      <aside className={cn(
+        "fixed top-4 bottom-4 left-4 z-40 w-[260px] flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+        "lg:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+20px)] lg:translate-x-0"
+      )}>
+        
+        {/* Main Panel */}
+        <div className="h-full flex flex-col bg-zinc-50/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-[24px] border border-white/20 dark:border-zinc-800 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 overflow-hidden ring-1 ring-zinc-900/5">
           
-          {/* 1. Header (Logo) */}
-          <div className="h-20 flex items-center px-6 shrink-0">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 bg-zinc-900 dark:bg-white rounded-xl flex items-center justify-center text-white dark:text-zinc-900 font-bold text-xl shadow-lg shrink-0">
+          {/* 1. Header Area */}
+          <div className="pt-6 px-6 pb-2 shrink-0">
+            {/* Logo */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-zinc-900 dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-zinc-900 font-bold shadow-md shadow-zinc-900/10">
                 F
               </div>
               <span className="font-bold text-lg text-zinc-900 dark:text-white tracking-tight">FOCHUS</span>
             </div>
-          </div>
 
-          {/* 2. Quick Actions */}
-          <div className="px-4 mb-4 space-y-3">
+            {/* Global Search */}
             <button
               onClick={onOpenSpotlight}
-              className="w-full flex items-center gap-3 px-3 py-2.5 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group text-zinc-500 dark:text-zinc-400"
-              title="Ara ( / )"
+              className="w-full flex items-center gap-3 px-3 py-2.5 bg-white dark:bg-black/20 rounded-xl border border-zinc-200/50 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10 transition-all group shadow-sm"
             >
-              <Search className="w-4 h-4 shrink-0 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-              <span className="text-sm font-medium">Ara...</span>
-              <kbd className="ml-auto text-[10px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded px-1.5 py-0.5 opacity-50">/</kbd>
+              <Search className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300" />
+              <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300">Ara...</span>
+              <kbd className="ml-auto text-[10px] font-sans text-zinc-300 dark:text-zinc-600">/</kbd>
             </button>
-
-            <div className="flex gap-2">
-              <button 
-                onClick={onOpenTaskModal}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 active:scale-95"
-              >
-                <Plus className="w-3.5 h-3.5" /> Görev Ekle
-              </button>
-              <button 
-                onClick={onOpenNoteModal}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-xl text-xs font-bold transition-all active:scale-95"
-              >
-                <Plus className="w-3.5 h-3.5" /> Not Ekle
-              </button>
-            </div>
           </div>
 
-          {/* 3. Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1 custom-scrollbar">
-            {mainNav.map(item => {
+          {/* 2. Navigation */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-0.5 custom-scrollbar">
+            {/* Main Items */}
+            {navItems.map((item) => {
               const Icon = item.icon;
               const active = activeView === item.id;
-              
               return (
                 <button
                   key={item.id}
                   onClick={() => { onViewChange(item.id); setMobileOpen(false); }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
+                    "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 relative group",
                     active 
-                      ? "text-zinc-900 dark:text-white font-semibold bg-zinc-100 dark:bg-zinc-800/50"
-                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      ? "text-zinc-900 dark:text-white bg-white dark:bg-white/10 shadow-sm shadow-zinc-200/50 dark:shadow-none" 
+                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-white/5"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 shrink-0 transition-colors", active ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
-                  <span>{item.label}</span>
-                  {active && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-                  )}
+                  <Icon className={cn("w-4 h-4 transition-colors", active ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300")} />
+                  {item.label}
                 </button>
               );
             })}
 
-            <div className="my-4 border-t border-zinc-100 dark:border-zinc-800 mx-2" />
+            <div className="h-4" />
 
-            {/* Settings & Trash */}
+            {/* Quick Actions Title */}
+            <div className="px-3 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1 opacity-70">
+              Hızlı İşlem
+            </div>
+
+            {/* Add Buttons */}
+            <button
+              onClick={onOpenTaskModal}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-all group"
+            >
+              <div className="w-4 h-4 rounded flex items-center justify-center border border-zinc-300 dark:border-zinc-700 group-hover:border-zinc-400 dark:group-hover:border-zinc-500">
+                <Plus className="w-3 h-3" />
+              </div>
+              Yeni Görev
+            </button>
+            <button
+              onClick={onOpenNoteModal}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-all group"
+            >
+              <div className="w-4 h-4 rounded flex items-center justify-center border border-zinc-300 dark:border-zinc-700 group-hover:border-zinc-400 dark:group-hover:border-zinc-500">
+                <Plus className="w-3 h-3" />
+              </div>
+              Yeni Not
+            </button>
+
+            <div className="h-4" />
+
+            {/* Secondary Items */}
             <button
               onClick={() => { onViewChange('settings'); setMobileOpen(false); }}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
-                activeView === 'settings' 
-                  ? "text-zinc-900 dark:text-white font-semibold bg-zinc-100 dark:bg-zinc-800/50" 
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
-              )}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-all"
             >
-              <Settings className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'settings' ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
-              <span>Ayarlar</span>
-              {activeView === 'settings' && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-              )}
+              <Settings className="w-4 h-4 text-zinc-400" />
+              Ayarlar
             </button>
             <button
               onClick={() => { onViewChange('trash'); setMobileOpen(false); }}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
-                activeView === 'trash' 
-                  ? "text-zinc-900 dark:text-white font-semibold bg-zinc-100 dark:bg-zinc-800/50" 
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
-              )}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/50 dark:hover:bg-white/5 transition-all"
             >
-              <Trash2 className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'trash' ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
-              <span>Çöp Kutusu</span>
-              {activeView === 'trash' && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-              )}
+              <Trash2 className="w-4 h-4 text-zinc-400" />
+              Çöp Kutusu
             </button>
-          </nav>
+          </div>
 
-          {/* 4. Widgets Area (Current Tasks & Pomodoro) - INTEGRATED LOOK */}
-          <div className="mt-auto bg-zinc-50/80 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800">
+          {/* 3. Footer / Widgets */}
+          <div className="p-4 space-y-4">
             
-            {/* Current Tasks Widget */}
-            <div className="px-4 pt-4 pb-2">
-              <div className="flex items-center justify-between mb-2 px-1">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Briefcase className="w-3 h-3" /> Görevler
-                </span>
-                <button onClick={() => onViewChange('tasks')} className="p-1 rounded-md text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              {currentTasks.length > 0 ? (
-                <ul className="space-y-1">
-                  {currentTasks.map(task => (
-                    <li key={task.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-colors group cursor-default">
-                      <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 group-hover:scale-125 transition-transform" />
-                      <span className="truncate text-xs font-medium text-zinc-600 dark:text-zinc-300">{task.title}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="text-center py-3 text-zinc-400 text-xs italic bg-white/50 dark:bg-zinc-800/50 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700">
-                  Aktif görev yok
+            {/* Active Tasks Widget (Minimal) */}
+            {activeTasks.length > 0 && (
+              <div className="bg-white/50 dark:bg-white/5 rounded-xl p-3 border border-zinc-100 dark:border-white/5">
+                <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  <Clock className="w-3 h-3" />
+                  Sırada
                 </div>
-              )}
-            </div>
+                <div className="space-y-1.5">
+                  {activeTasks.map(task => (
+                    <div key={task.id} className="text-xs font-medium text-zinc-700 dark:text-zinc-300 truncate pl-2 border-l-2 border-indigo-500/50">
+                      {task.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            {/* Pomodoro Widget - INTEGRATED */}
-            <div className="p-4 pt-2">
-              <div className="bg-zinc-900 dark:bg-black rounded-xl p-4 text-white shadow-lg relative overflow-hidden group">
-                {/* Background Pulse Effect */}
-                {isActive && (
-                  <div className="absolute inset-0 bg-indigo-500/20 animate-pulse" />
-                )}
+            {/* Pomodoro (Integrated) */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative bg-zinc-900 dark:bg-black rounded-2xl p-4 text-white shadow-xl flex flex-col items-center">
+                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">TIMER</div>
+                <div className="text-3xl font-mono font-bold tracking-tight mb-3 tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-400">
+                  {formatTime(timeLeft)}
+                </div>
                 
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="text-3xl font-mono font-bold tracking-tight mb-3 tabular-nums">
-                    {formatTime(timeLeft)}
-                  </div>
-                  <div className="flex gap-2 w-full">
-                    <button 
-                      onClick={toggleTimer}
-                      className={cn(
-                        "flex-1 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all active:scale-95",
-                        isActive 
-                          ? "bg-red-500 hover:bg-red-600 text-white" 
-                          : "bg-white text-zinc-900 hover:bg-zinc-200"
-                      )}
-                    >
-                      {isActive ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
-                      {isActive ? "Dur" : "Başla"}
-                    </button>
-                    <button 
-                      onClick={resetTimer}
-                      className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white active:scale-95"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2 w-full">
+                  <button 
+                    onClick={toggleTimer}
+                    className="flex-1 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  >
+                    {isActive ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  </button>
+                  <button 
+                    onClick={resetTimer}
+                    className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors text-zinc-400 hover:text-white"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
