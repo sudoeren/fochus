@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, User, Key, Shield, Zap, ArrowLeft } from 'lucide-react';
+import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Calendar, BarChart2, Layers, Zap } from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
 
 interface LoginProps {
@@ -103,44 +103,53 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex bg-zinc-50 dark:bg-black transition-colors duration-300">
       {/* Left Side - Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-900 items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-[100px]" />
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black items-center justify-center">
+        {/* Abstract Light Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Top light beam */}
+          <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-white/[0.03] rounded-full blur-[120px]" />
+          
+          {/* Bottom ambient glow */}
+          <div className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-zinc-800/20 rounded-full blur-[100px]" />
+          
+          {/* Sharp streak of light */}
+          <div className="absolute top-0 right-0 w-[2px] h-screen bg-gradient-to-b from-transparent via-white/20 to-transparent opacity-50 rotate-12 transform origin-top-right" />
         </div>
         
-        <div className="relative z-10 p-12 max-w-2xl text-white">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="h-12 w-12 bg-white text-zinc-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-white/20">
-              <span className="text-2xl font-bold">F</span>
+        <div className="relative z-10 p-16 max-w-2xl text-white">
+          <div className="flex items-center gap-4 mb-16">
+            <div className="h-14 w-14 bg-white text-black rounded-2xl flex items-center justify-center shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)]">
+              <span className="text-3xl font-bold">F</span>
             </div>
-            <span className="text-3xl font-bold tracking-tight">FOCHUS</span>
+            <span className="text-4xl font-bold tracking-tight text-white/90">FOKUS</span>
           </div>
 
-          <h1 className="text-5xl font-bold leading-tight mb-8">
-            Odaklanmanın <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">
-              en saf hali.
+          <h1 className="text-6xl font-bold leading-tight mb-8 tracking-tight">
+            Karanlığın <br />
+            içindeki <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+              ışık.
             </span>
           </h1>
           
-          <div className="space-y-6 text-zinc-400">
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-zinc-800/50 rounded-lg">
-                <Zap className="w-6 h-6 text-yellow-400" />
+          <div className="space-y-10 text-zinc-400 mt-12">
+            <div className="flex items-center gap-6 group">
+              <div className="p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 group-hover:border-white/20 transition-colors">
+                <Zap className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-white font-medium mb-1">Yüksek Verimlilik</h3>
-                <p>Pomodoro tekniği ve akıllı görev yönetimi ile zamanı yönetin.</p>
+                <h3 className="text-white text-xl font-medium mb-1">Zihni Sustur</h3>
+                <p className="font-light text-zinc-500">Gürültüden uzaklaş, sadece yapman gerekene odaklan.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4">
-              <div className="p-2 bg-zinc-800/50 rounded-lg">
-                <Shield className="w-6 h-6 text-emerald-400" />
+
+            <div className="flex items-center gap-6 group">
+              <div className="p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 group-hover:border-white/20 transition-colors">
+                <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-white font-medium mb-1">Gizlilik Odaklı</h3>
-                <p>Verileriniz cihazınızda güvende. İster bulutta, ister yerelde.</p>
+                <h3 className="text-white text-xl font-medium mb-1">Akışı Yakala</h3>
+                <p className="font-light text-zinc-500">Hedefinle arandaki tüm engelleri kaldır.</p>
               </div>
             </div>
           </div>
