@@ -20,8 +20,10 @@ interface DashboardProps {
   onNavigate: (view: string) => void;
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
-  onEditTask: (task: any) => void;
-  onOpenSpotlight: () => void;
+  onEditTask?: (task: any) => void;
+  onOpenSpotlight?: () => void;
+  bgImage: string;
+  onBgChange: (newBg: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
@@ -29,7 +31,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenNoteModal, 
   onOpenTaskModal,
   onEditTask,
-  onOpenSpotlight 
+  onOpenSpotlight,
+  bgImage,
+  onBgChange
 }) => {
   const { tasks } = useTasks();
   const { notes } = useNotes();
@@ -51,21 +55,33 @@ export const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const pendingTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted);
+  
+  const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
 
   return (
     <div className="h-full w-full relative">
-      {/* BACKGROUND IMAGE - Only visible on Dashboard, covers entire screen including sidebar area */}
+      {/* BACKGROUND IMAGE - Controlled by bgImage prop */}
       <div className="fixed inset-0 z-[-1]">
-        <img 
-          src="/light.png" 
-          alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover dark:hidden transition-opacity duration-500" 
-        />
-        <img 
-          src="/dark.png" 
-          alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover hidden dark:block transition-opacity duration-500" 
-        />
+        {isCustomBg ? (
+          <img 
+            src={bgImage} 
+            alt="Custom Background" 
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100" 
+          />
+        ) : (
+          <>
+            <img 
+              src="/light.png" 
+              alt="Background" 
+              className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'light' ? 'opacity-100' : 'opacity-0')} 
+            />
+            <img 
+              src="/dark.png" 
+              alt="Background" 
+              className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'dark' ? 'opacity-100' : 'opacity-0')} 
+            />
+          </>
+        )}
         {/* Overlay for readability */}
         <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
       </div>
@@ -73,17 +89,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="p-8 lg:p-12 pb-24 overflow-y-auto custom-scrollbar h-full">
         <div className="max-w-[1200px] mx-auto flex flex-col gap-12">
         
-        {/* Header Section - Clock & Greeting */}
-        <div className="flex flex-col items-start gap-2 animate-in slide-in-from-left duration-700">
-          <h1 className="text-8xl lg:text-9xl font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono">
-            {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-          </h1>
-          <div className="flex items-center gap-3">
-            <div className="h-px w-12 bg-zinc-900/50 dark:bg-white/50" />
-            <span className="text-2xl font-light text-zinc-700 dark:text-zinc-200 uppercase tracking-widest">
-              {getGreeting()}
-            </span>
+        {/* Header Section - Clock & Greeting & BG Toggle */}
+        <div className="flex items-start justify-between animate-in slide-in-from-left duration-700">
+          <div className="flex flex-col items-start gap-2">
+            <h1 className="text-8xl lg:text-9xl font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono">
+              {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+            </h1>
+            <div className="flex items-center gap-3">
+              <div className="h-px w-12 bg-zinc-900/50 dark:bg-white/50" />
+              <span className="text-2xl font-light text-zinc-700 dark:text-zinc-200 uppercase tracking-widest">
+                {getGreeting()}
+              </span>
+            </div>
           </div>
+          
+          {/* Quick Background Toggle */}
+          <button 
+            onClick={() => onBgChange(bgImage === 'light' ? 'dark' : 'light')}
+            className="p-3 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 hover:bg-white/30 dark:hover:bg-black/30 transition-all text-zinc-800 dark:text-zinc-200"
+            title="Arka Planı Değiştir"
+          >
+            {bgImage === 'light' ? <MoreHorizontal className="w-6 h-6" /> : <MoreHorizontal className="w-6 h-6 text-white" />}
+          </button>
         </div>
 
         {/* Main Unified Glass Frame (Bento Grid Container) */}

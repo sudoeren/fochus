@@ -22,7 +22,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 // --- Tab Component ---
 const SettingsTab = ({ 
@@ -55,15 +54,15 @@ const SettingsTab = ({
 // 1. Profile Section
 const ProfileSection = () => {
   const userData = {
-    name: "Metehan Kaya",
-    email: "metehan@fochus.app",
+    name: "Kullanıcı",
+    email: "kullanici@fochus.app",
     role: "Pro Üye",
-    joinDate: "12 Aralık 2023",
-    avatar: "M"
+    joinDate: "Bugün",
+    avatar: "K"
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
       <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 border border-zinc-100 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-10 group-hover:opacity-20 transition-opacity" />
         
@@ -93,56 +92,47 @@ const ProfileSection = () => {
              </div>
            </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-zinc-100 dark:border-zinc-800 pt-8">
-           <div className="text-center p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50">
-             <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">142</div>
-             <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Görev</div>
-           </div>
-           <div className="text-center p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50">
-             <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">56</div>
-             <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Not</div>
-           </div>
-           <div className="text-center p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50">
-             <div className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">38s</div>
-             <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Odak</div>
-           </div>
-        </div>
       </div>
-
-      <button className="w-full py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2">
-        <LogOut className="w-5 h-5" />
-        Oturumu Kapat
-      </button>
     </div>
   );
 };
 
 // 2. Appearance Section
-const AppearanceSection = () => {
+const AppearanceSection = ({ bgImage, onBgChange }: { bgImage: string, onBgChange: (bg: string) => void }) => {
   const { theme, setTheme } = useTheme();
 
-  const ThemeCard = ({ id, label, icon: Icon, previewColors }: any) => (
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          onBgChange(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const ThemeCard = ({ id, label, icon: Icon, previewColors, isActive, onClick }: any) => (
     <button
-      onClick={() => setTheme(id)}
+      onClick={onClick}
       className={cn(
-        "relative group flex flex-col items-center p-6 rounded-3xl border-2 transition-all duration-300",
-        theme === id 
+        "relative group flex flex-col items-center p-4 rounded-3xl border-2 transition-all duration-300 w-full",
+        isActive 
           ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-500/10 scale-[1.02] shadow-xl shadow-indigo-500/10" 
           : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg"
       )}
     >
-      <div className="w-full aspect-video rounded-2xl bg-zinc-100 dark:bg-zinc-800 mb-6 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
-        {/* Mock Interface Preview */}
+      <div className="w-full aspect-video rounded-2xl bg-zinc-100 dark:bg-zinc-800 mb-4 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
         <div className={cn("absolute top-2 left-2 right-2 h-4 rounded-full opacity-50", previewColors.nav)} />
         <div className="absolute top-8 left-2 w-1/4 bottom-2 rounded-xl opacity-30 bg-zinc-400" />
         <div className="absolute top-8 right-2 left-[30%] h-12 rounded-xl opacity-80" style={{background: previewColors.primary}} />
-        <div className="absolute top-24 right-2 left-[30%] bottom-2 rounded-xl opacity-40 bg-zinc-300" />
         
-        {theme === id && (
+        {isActive && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 backdrop-blur-[1px]">
             <div className="bg-indigo-600 text-white p-2 rounded-full shadow-lg transform scale-110">
-              <Check className="w-6 h-6" />
+              <Check className="w-4 h-4" />
             </div>
           </div>
         )}
@@ -150,67 +140,113 @@ const AppearanceSection = () => {
 
       <div className="flex items-center gap-3">
         <div className={cn(
-          "p-2.5 rounded-xl transition-colors",
-          theme === id ? "bg-indigo-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
+          "p-2 rounded-xl transition-colors",
+          isActive ? "bg-indigo-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
         )}>
-          <Icon className="w-5 h-5" />
+          <Icon className="w-4 h-4" />
         </div>
-        <span className="font-bold text-lg text-zinc-900 dark:text-white">{label}</span>
+        <span className="font-bold text-sm text-zinc-900 dark:text-white">{label}</span>
       </div>
     </button>
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="text-center mb-10">
-        <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Arayüz Teması</h3>
-        <p className="text-zinc-500">Çalışma ortamınızın nasıl görüneceğini seçin.</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      
+      {/* App Theme */}
+      <div>
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Uygulama Teması</h3>
+          <p className="text-sm text-zinc-500">Arayüz renklerinizi seçin.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ThemeCard 
+            isActive={theme === 'light'}
+            onClick={() => setTheme('light')}
+            label="Açık Mod" 
+            icon={Sun} 
+            previewColors={{ nav: 'bg-zinc-200', primary: '#4f46e5' }} 
+          />
+          <ThemeCard 
+            isActive={theme === 'dark'}
+            onClick={() => setTheme('dark')}
+            label="Koyu Mod" 
+            icon={Moon} 
+            previewColors={{ nav: 'bg-zinc-700', primary: '#6366f1' }} 
+          />
+          <ThemeCard 
+            isActive={theme === 'system'}
+            onClick={() => setTheme('system')}
+            label="Sistem" 
+            icon={Laptop} 
+            previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ThemeCard 
-          id="light" 
-          label="Açık Mod" 
-          icon={Sun} 
-          previewColors={{ nav: 'bg-zinc-200', primary: '#4f46e5' }} 
-        />
-        <ThemeCard 
-          id="dark" 
-          label="Koyu Mod" 
-          icon={Moon} 
-          previewColors={{ nav: 'bg-zinc-700', primary: '#6366f1' }} 
-        />
-        <ThemeCard 
-          id="system" 
-          label="Sistem" 
-          icon={Laptop} 
-          previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
-        />
+      {/* Background Image */}
+      <div>
+        <div className="text-center mb-6">
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Ana Sayfa Arka Planı</h3>
+          <p className="text-sm text-zinc-500">Dashboard'da görünecek görseli seçin veya yükleyin.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ThemeCard 
+            isActive={bgImage === 'light'}
+            onClick={() => onBgChange('light')}
+            label="Aydınlık" 
+            icon={Sun} 
+            previewColors={{ nav: 'bg-sky-200', primary: '#0ea5e9' }} 
+          />
+          <ThemeCard 
+            isActive={bgImage === 'dark'}
+            onClick={() => onBgChange('dark')}
+            label="Karanlık" 
+            icon={Moon} 
+            previewColors={{ nav: 'bg-indigo-900', primary: '#4338ca' }} 
+          />
+          
+          {/* Upload Custom Image */}
+          <div className="relative group w-full">
+             <input 
+               type="file" 
+               accept="image/*" 
+               onChange={handleImageUpload}
+               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+             />
+             <ThemeCard 
+                isActive={bgImage !== 'light' && bgImage !== 'dark'}
+                onClick={() => {}} // Controlled by input
+                label="Görsel Yükle" 
+                icon={Upload} 
+                previewColors={{ nav: 'bg-emerald-200', primary: '#10b981' }} 
+              />
+          </div>
+        </div>
       </div>
+
     </div>
   );
 };
 
 // 3. Spotlight Section
 const SpotlightSection = () => {
-  // Using simple state here for demo, ideally this comes from a context or parent
-  const [items, setItems] = useState([
+  const [items] = useState([
     { id: 'dashboard', label: 'Dashboard', enabled: true },
     { id: 'notes', label: 'Notlar', enabled: true },
     { id: 'tasks', label: 'Görevler', enabled: true },
   ]);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-       <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-[2.5rem] p-10 relative overflow-hidden">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+       <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-[2rem] p-8 relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-left">
-              <h3 className="text-3xl font-bold mb-2">Spotlight Arama</h3>
-              <p className="text-zinc-400 text-lg">
-                <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">⌘</kbd>
-                +
-                <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">K</kbd>
-                ile her şeye ulaşın.
+              <h3 className="text-2xl font-bold mb-2">Spotlight Arama</h3>
+              <p className="text-zinc-400 text-sm">
+                <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">⌘</kbd> + <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">K</kbd>
               </p>
             </div>
             <div className="w-full md:w-1/2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-2xl">
@@ -281,48 +317,46 @@ const DataSection = () => {
   );
 };
 
-// 5. About Section (New)
+// 5. About Section (Updated)
 const AboutSection = () => {
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-zinc-900 dark:bg-black text-white rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-2xl">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
+      <div className="bg-zinc-900 dark:bg-black text-white rounded-[2rem] p-8 text-center relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
         <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl" />
         
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-24 h-24 bg-white text-zinc-900 rounded-3xl flex items-center justify-center text-6xl font-bold shadow-xl mb-6">
+          <div className="w-16 h-16 bg-white text-zinc-900 rounded-2xl flex items-center justify-center text-4xl font-bold shadow-xl mb-4">
             F
           </div>
-          <h2 className="text-5xl font-bold tracking-tight mb-4">FOCHUS</h2>
-          <p className="text-xl text-zinc-400 max-w-lg mx-auto leading-relaxed">
-            Açık kaynaklı, gizlilik odaklı ve minimalist kişisel üretkenlik asistanı.
+          <h2 className="text-3xl font-bold tracking-tight mb-2">FOCHUS</h2>
+          <p className="text-base text-zinc-400 max-w-md mx-auto">
+            Açık kaynaklı, gizlilik odaklı kişisel üretkenlik asistanı.
           </p>
-          <div className="mt-8 flex gap-4">
-            <span className="px-4 py-2 bg-white/10 rounded-full text-sm font-mono border border-white/10">v1.2.0</span>
-            <span className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/20">Stable</span>
+          <div className="mt-6 flex gap-3">
+             <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-mono border border-white/10">v1.2.0</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">Geliştirici</h3>
-          <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
-            Bu proje, modern web teknolojileri kullanılarak geliştirilmiş açık kaynaklı bir inisiyatiftir. Katkıda bulunmak isterseniz GitHub deposunu ziyaret edebilirsiniz.
-          </p>
-          <a href="#" className="inline-flex items-center text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
-            GitHub Profili <ChevronRight className="w-4 h-4 ml-1" />
+      <div className="grid grid-cols-1 gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <div>
+             <h3 className="font-bold text-zinc-900 dark:text-white">Geliştirici & Kaynak Kod</h3>
+             <p className="text-sm text-zinc-500 dark:text-zinc-400">Projeye GitHub üzerinden katkıda bulunun.</p>
+          </div>
+          <a href="#" className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full">
+            <ChevronRight className="w-5 h-5" />
           </a>
         </div>
 
-        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">Lisans</h3>
-          <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
-            FOCHUS, MIT Lisansı altında yayınlanmıştır. Bu, yazılımı özgürce kullanabileceğiniz, değiştirebileceğiniz ve dağıtabileceğiniz anlamına gelir.
-          </p>
-          <a href="#" className="inline-flex items-center text-zinc-900 dark:text-white font-semibold hover:underline">
-            Lisans Detayları <ChevronRight className="w-4 h-4 ml-1" />
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <div>
+             <h3 className="font-bold text-zinc-900 dark:text-white">Lisans (MIT)</h3>
+             <p className="text-sm text-zinc-500 dark:text-zinc-400">Özgür yazılım felsefesiyle geliştirilmiştir.</p>
+          </div>
+          <a href="#" className="p-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full">
+            <ChevronRight className="w-5 h-5" />
           </a>
         </div>
       </div>
@@ -332,13 +366,18 @@ const AboutSection = () => {
 
 // --- Main Page Component ---
 
-export const Settings: React.FC = () => {
+interface SettingsProps {
+  bgImage?: string;
+  onBgChange?: (bg: string) => void;
+}
+
+export const Settings: React.FC<SettingsProps> = ({ bgImage = 'light', onBgChange = () => {} }) => {
   const [activeTab, setActiveTab] = useState('profile');
 
   const renderContent = () => {
     switch(activeTab) {
       case 'profile': return <ProfileSection />;
-      case 'appearance': return <AppearanceSection />;
+      case 'appearance': return <AppearanceSection bgImage={bgImage} onBgChange={onBgChange} />;
       case 'spotlight': return <SpotlightSection />;
       case 'data': return <DataSection />;
       case 'about': return <AboutSection />;
@@ -347,54 +386,54 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-white/50 dark:bg-black p-6 lg:p-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-full flex flex-col bg-white/50 dark:bg-black">
+      
+      {/* Header Area - Fixed at top */}
+      <div className="flex-none pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">Ayarlar</h1>
         
-        {/* Header Area */}
-        <div className="flex flex-col items-center mb-12">
-          <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight mb-8">Ayarlar</h1>
-          
-          {/* Segmented Control Navigation */}
-          <div className="p-1.5 bg-white dark:bg-zinc-900 rounded-full shadow-lg shadow-zinc-200/50 dark:shadow-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex flex-wrap justify-center gap-1">
-            <SettingsTab 
-              active={activeTab === 'profile'} 
-              onClick={() => setActiveTab('profile')} 
-              icon={User} 
-              label="Profil" 
-            />
-            <SettingsTab 
-              active={activeTab === 'appearance'} 
-              onClick={() => setActiveTab('appearance')} 
-              icon={Palette} 
-              label="Görünüm" 
-            />
-            <SettingsTab 
-              active={activeTab === 'spotlight'} 
-              onClick={() => setActiveTab('spotlight')} 
-              icon={Command} 
-              label="Spotlight" 
-            />
-            <SettingsTab 
-              active={activeTab === 'data'} 
-              onClick={() => setActiveTab('data')} 
-              icon={Database} 
-              label="Veri" 
-            />
-            <SettingsTab 
-              active={activeTab === 'about'} 
-              onClick={() => setActiveTab('about')} 
-              icon={Info} 
-              label="Hakkında" 
-            />
-          </div>
+        {/* Segmented Control Navigation */}
+        <div className="p-1 bg-white dark:bg-zinc-900 rounded-full shadow-lg shadow-zinc-200/50 dark:shadow-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex flex-wrap justify-center gap-1">
+          <SettingsTab 
+            active={activeTab === 'profile'} 
+            onClick={() => setActiveTab('profile')} 
+            icon={User} 
+            label="Profil" 
+          />
+          <SettingsTab 
+            active={activeTab === 'appearance'} 
+            onClick={() => setActiveTab('appearance')} 
+            icon={Palette} 
+            label="Görünüm" 
+          />
+          <SettingsTab 
+            active={activeTab === 'spotlight'} 
+            onClick={() => setActiveTab('spotlight')} 
+            icon={Command} 
+            label="Spotlight" 
+          />
+          <SettingsTab 
+            active={activeTab === 'data'} 
+            onClick={() => setActiveTab('data')} 
+            icon={Database} 
+            label="Veri" 
+          />
+          <SettingsTab 
+            active={activeTab === 'about'} 
+            onClick={() => setActiveTab('about')} 
+            icon={Info} 
+            label="Hakkında" 
+          />
         </div>
+      </div>
 
-        {/* Content Area with Animation */}
-        <div className="min-h-[500px] pb-20">
+      {/* Content Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-6 lg:px-10">
+        <div className="max-w-4xl mx-auto py-4">
           {renderContent()}
         </div>
-
       </div>
+
     </div>
   );
 };

@@ -25,6 +25,9 @@ const App: React.FC = () => {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Background Image State
+  const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
 
   useEffect(() => {
     const auth = localStorage.getItem('isAuthenticated');
@@ -32,6 +35,12 @@ const App: React.FC = () => {
       setIsAuthenticated(true);
     }
   }, []);
+  
+  // Persist background choice
+  const handleBgChange = (newBg: string) => {
+    setBgImage(newBg);
+    localStorage.setItem('bgImage', newBg);
+  };
 
   const handleLogin = () => {
     localStorage.setItem('isAuthenticated', 'true');
@@ -84,6 +93,8 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
           onOpenSpotlight={() => setIsSpotlightOpen(true)}
+          bgImage={bgImage}
+          onBgChange={handleBgChange}
         />;
       case 'note-editor':
         return <NoteEditorPage
@@ -107,12 +118,17 @@ const App: React.FC = () => {
       case 'trash':
         return <Trash />;
       case 'settings':
-        return <Settings />;
+        return <Settings 
+          bgImage={bgImage}
+          onBgChange={handleBgChange}
+        />;
       default:
         return <Dashboard
           onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
+          bgImage={bgImage}
+          onBgChange={handleBgChange}
         />;
     }
   };
