@@ -1,356 +1,210 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, 
   Play, 
   Pause, 
-  RotateCcw, 
-  Calendar, 
-  Clock, 
-  CheckCircle2, 
-  StickyNote,
-  ArrowRight,
-  TrendingUp,
+  RotateCcw,
+  CheckSquare,
+  FileText,
+  Clock,
   MoreHorizontal,
-  Layout,
-  Coffee,
-  ListTodo,
-  Timer 
+  ChevronRight,
+  ArrowRight // Added ArrowRight
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 import { usePomodoro } from '../hooks/usePomodoro';
+import { cn } from '../lib/utils';
 
 interface DashboardProps {
-  onNavigate: (page: string) => void;
-  onOpenTaskModal: () => void;
+  onNavigate: (view: string) => void;
   onOpenNoteModal: () => void;
-  onEditTask?: (task: any) => void;
+  onOpenTaskModal: () => void;
+  onEditTask: (task: any) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
   onNavigate, 
-  onOpenTaskModal, 
-  onOpenNoteModal,
+  onOpenNoteModal, 
+  onOpenTaskModal,
   onEditTask 
 }) => {
-  const { tasks, toggleTask, getTaskStats } = useTasks();
+  const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
-  const pomodoro = usePomodoro();
-  const [greeting, setGreeting] = useState('');
+  const { timeLeft, isActive, toggleTimer, resetTimer, formatTime } = usePomodoro();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [focusInput, setFocusInput] = useState(() => localStorage.getItem('dailyFocus') || '');
+  const [isFocusSet, setIsFocusSet] = useState(() => !!localStorage.getItem('dailyFocus'));
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 6) setGreeting('İyi Geceler');
-    else if (hour < 12) setGreeting('Günaydın');
-    else if (hour < 18) setGreeting('İyi Günler');
-    else setGreeting('İyi Akşamlar');
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const today = new Date();
-  const stats = getTaskStats();
-  
-  // Get today's tasks specifically
-  const todayTasks = tasks.filter(t => 
-    !t.isDeleted && t.dueDate && 
-    new Date(t.dueDate).toDateString() === today.toDateString()
-  ).sort((a, b) => {
-    // Completed tasks at bottom
-    if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
-    // Then by time
-    return new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime();
-  });
+  const handleFocusSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (focusInput.trim()) {
+      setIsFocusSet(true);
+      localStorage.setItem('dailyFocus', focusInput);
+    }
+  };
 
-  const recentNotes = notes.slice(0, 4);
+  const clearFocus = () => {
+    setIsFocusSet(false);
+    setFocusInput('');
+    localStorage.removeItem('dailyFocus');
+  };
+
+  const pendingTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted);
+  const getGreeting = () => {
+    const h = currentTime.getHours();
+    if (h < 5) return "İyi Geceler";
+    if (h < 12) return "Günaydın";
+    if (h < 18) return "Tünaydın";
+    return "İyi Akşamlar";
+  };
 
   return (
-    <div className="h-full bg-zinc-50 dark:bg-black p-4 md:p-6 overflow-y-auto">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="h-full relative overflow-hidden bg-white dark:bg-black transition-colors duration-500">
+      {/* Abstract Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] dark:bg-indigo-500/5" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px] dark:bg-purple-500/5" />
+      </div>
+
+      <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 max-w-4xl mx-auto text-center">
         
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
-          <div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-              {greeting}, Fokus.
-            </h1>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-1 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              {today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' })}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-             <button 
-              onClick={() => onNavigate('settings')}
-              className="p-2.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:scale-105 transition-transform shadow-sm"
-            >
-              <Layout className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
+        {/* Clock Area */}
+        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-[6rem] md:text-[8rem] font-bold text-zinc-900 dark:text-white leading-none tracking-tighter tabular-nums select-none">
+            {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+          </h1>
+          <h2 className="text-xl md:text-2xl text-zinc-500 dark:text-zinc-400 mt-2 font-medium">
+            {getGreeting()}, Metehan.
+          </h2>
+        </div>
 
-        {/* Bento Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)]">
+        {/* Main Focus Area */}
+        <div className="w-full max-w-lg mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+          {!isFocusSet ? (
+            <form onSubmit={handleFocusSubmit} className="space-y-4">
+              <label className="text-lg md:text-xl text-zinc-600 dark:text-zinc-300 font-medium">
+                Bugün ana odağın nedir?
+              </label>
+              <input
+                type="text"
+                value={focusInput}
+                onChange={(e) => setFocusInput(e.target.value)}
+                className="w-full bg-transparent border-b-2 border-zinc-200 dark:border-zinc-800 text-center text-2xl md:text-3xl text-zinc-900 dark:text-white py-2 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
+                autoFocus
+              />
+            </form>
+          ) : (
+            <div className="group">
+              <h3 className="text-sm uppercase tracking-widest text-zinc-400 mb-4 font-bold">BUGÜNÜN ODAĞI</h3>
+              <div className="flex items-center justify-center gap-4">
+                <span className="text-2xl md:text-4xl font-bold text-zinc-900 dark:text-white border-b-2 border-transparent group-hover:border-zinc-200 dark:group-hover:border-zinc-800 transition-all pb-1">
+                  {focusInput}
+                </span>
+                <button 
+                  onClick={clearFocus}
+                  className="opacity-0 group-hover:opacity-100 p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Widgets (Cards) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
           
-          {/* 1. Pomodoro Timer (Large Block) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-4 row-span-2 relative overflow-hidden group">
-            {/* Helper variables for conditional classes */}
-            {(() => {
-              const isWorkModeActive = pomodoro.isActive && pomodoro.mode === 'work';
-              const isShortBreakModeActive = pomodoro.isActive && pomodoro.mode === 'shortBreak';
-              const isLongBreakModeActive = pomodoro.isActive && pomodoro.mode === 'longBreak';
-              const isBreakModeActive = isShortBreakModeActive || isLongBreakModeActive;
-
-              const activeBgClasses = isWorkModeActive
-                ? 'bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-800'
-                : isBreakModeActive
-                  ? 'bg-gradient-to-br from-sky-400 to-cyan-500 dark:from-sky-500 dark:to-cyan-700'
-                  : 'bg-white dark:bg-zinc-900';
-
-              const activeTextClasses = isWorkModeActive || isBreakModeActive ? 'text-white' : 'text-zinc-900 dark:text-white';
-              const activeSubTextClasses = isWorkModeActive
-                ? 'text-indigo-100'
-                : isBreakModeActive
-                  ? 'text-emerald-100'
-                  : 'text-zinc-400';
-
-              const activeLabelBgClasses = isWorkModeActive || isBreakModeActive ? 'bg-white/20 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500';
-              const activeIconClasses = isWorkModeActive || isBreakModeActive ? 'text-white/80' : 'text-zinc-300';
-              const activePlayButtonClasses = isWorkModeActive
-                ? 'bg-white text-indigo-600'
-                : isBreakModeActive
-                  ? 'bg-white text-emerald-600'
-                  : 'bg-zinc-900 dark:bg-white text-white dark:text-black';
-              const activeResetButtonClasses = isWorkModeActive || isBreakModeActive
-                ? 'bg-white/10 hover:bg-white/20 text-white'
-                : 'bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400';
-
-              let modeLabelText;
-              if (pomodoro.mode === 'work') {
-                modeLabelText = 'Odaklanma';
-              } else if (pomodoro.mode === 'shortBreak') {
-                modeLabelText = 'Kısa Mola';
-              } else if (pomodoro.mode === 'longBreak') {
-                modeLabelText = 'Uzun Mola';
-              }
-
-              const timerStatusText = pomodoro.isActive ? 'Sayaç çalışıyor...' : 'Hazır mısın?';
-
-              return (
-                <>
-                  <div className={`absolute inset-0 transition-colors duration-500 ${activeBgClasses}`}></div>
-                  
-                  <div className={`relative h-full p-6 flex flex-col justify-between border rounded-3xl transition-all duration-300 ${
-                    pomodoro.isActive 
-                      ? 'border-transparent ' + activeTextClasses 
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl ' + activeTextClasses
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider ${activeLabelBgClasses}`}>
-                        {modeLabelText}
-                      </span>
-                      {pomodoro.mode === 'work' ? (
-                        <Timer className={`w-5 h-5 ${activeIconClasses}`} />
-                      ) : (
-                        <Coffee className={`w-5 h-5 ${activeIconClasses}`} />
-                      )}
-                    </div>
-
-                    <div className="flex flex-col items-center justify-center py-8">
-                      <div className={`text-7xl font-bold font-mono tracking-tighter mb-2 ${activeTextClasses}`}>
-                        {pomodoro.formatTime(pomodoro.timeLeft)}
-                      </div>
-                      <p className={`text-sm ${activeSubTextClasses}`}>
-                        {timerStatusText}
-                      </p>
-                    </div>
-
-                    {/* Mode Selection Buttons */}
-                    <div className="flex justify-center gap-2 mb-4">
-                      {['work', 'shortBreak', 'longBreak'].map((modeItem) => {
-                        let modeText = '';
-                        if (modeItem === 'work') modeText = 'Odaklanma';
-                        else if (modeItem === 'shortBreak') modeText = 'Kısa Mola';
-                        else if (modeItem === 'longBreak') modeText = 'Uzun Mola';
-
-                        return (
-                          <button
-                            key={modeItem}
-                            onClick={() => pomodoro.setMode(modeItem as any)} // Cast needed for TimerMode
-                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                              pomodoro.mode === modeItem
-                                ? isWorkModeActive || (pomodoro.mode === 'work' && pomodoro.isActive)
-                                  ? 'bg-white/30 text-white'
-                                  : isBreakModeActive || ((pomodoro.mode === 'shortBreak' || pomodoro.mode === 'longBreak') && pomodoro.isActive)
-                                    ? 'bg-white/30 text-white'
-                                    : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200'
-                                : isWorkModeActive || isBreakModeActive
-                                  ? 'text-white/70 hover:text-white hover:bg-white/10'
-                                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                            }`}
-                          >
-                            {modeText}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="flex items-center justify-center gap-4">
-                      <button 
-                        onClick={pomodoro.toggleTimer}
-                        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-lg ${activePlayButtonClasses}`}
-                      >
-                        {pomodoro.isActive ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current pl-1" />}
-                      </button>
-                      <button 
-                        onClick={pomodoro.resetTimer}
-                        className={`p-4 rounded-full transition-colors ${activeResetButtonClasses}`}
-                      >
-                        <RotateCcw className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
+          {/* 1. Pomodoro Card */}
+          <div className="group relative overflow-hidden bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all text-left">
+             <div className="flex items-center justify-between mb-4">
+               <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400">
+                 <Clock className="w-5 h-5" />
+               </div>
+               <span className={cn("text-2xl font-mono font-bold text-zinc-900 dark:text-white", isActive && "text-indigo-600 dark:text-indigo-400")}>
+                 {formatTime(timeLeft)}
+               </span>
+             </div>
+             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4 h-5">
+               {isActive ? 'Odaklanma modu aktif.' : 'Hazırsan başlayalım.'}
+             </p>
+             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+               <button 
+                 onClick={toggleTimer}
+                 className="flex-1 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg text-sm font-bold"
+               >
+                 {isActive ? <Pause className="w-4 h-4 mx-auto" /> : <Play className="w-4 h-4 mx-auto" />}
+               </button>
+               <button 
+                 onClick={resetTimer}
+                 className="p-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700"
+               >
+                 <RotateCcw className="w-4 h-4" />
+               </button>
+             </div>
           </div>
 
-          {/* 2. Stats Cards (Small Blocks) */}
-          <div className="col-span-1 md:col-span-6 lg:col-span-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20 rounded-3xl p-6 flex flex-col justify-between group hover:border-orange-200 dark:hover:border-orange-900/40 transition-colors">
-            <div className="flex items-start justify-between">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-orange-600 dark:text-orange-400">
-                <ListTodo className="w-6 h-6" />
-              </div>
-              <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">{stats.today}</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-200">Bugünkü Görevler</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{stats.completed} tamamlandı</p>
-            </div>
+          {/* 2. Tasks Summary */}
+          <div 
+            onClick={() => onNavigate('tasks')}
+            className="group cursor-pointer bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all text-left flex flex-col"
+          >
+             <div className="flex items-center justify-between mb-2">
+               <div className="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400">
+                 <CheckSquare className="w-5 h-5" />
+               </div>
+               <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                 {pendingTasks.length}
+               </span>
+             </div>
+             <h4 className="font-semibold text-zinc-900 dark:text-white mb-1">Görevler</h4>
+             <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 flex-1">
+               {pendingTasks.length > 0 
+                 ? `${pendingTasks[0].title} ve diğerleri...` 
+                 : 'Her şey tamamlandı! 🎉'}
+             </p>
+             <div className="mt-4 flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+               Görüntüle <ArrowRight className="w-4 h-4 ml-1" />
+             </div>
           </div>
 
-          <div className="col-span-1 md:col-span-6 lg:col-span-4 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/20 rounded-3xl p-6 flex flex-col justify-between group hover:border-emerald-200 dark:hover:border-emerald-900/40 transition-colors">
-            <div className="flex items-start justify-between">
-              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">%{stats.completionRate}</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-200">Verimlilik</h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Haftalık ortalama</p>
-            </div>
-          </div>
-
-          {/* 3. Today's Tasks List (Tall Block) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-8 row-span-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 flex flex-col shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                Bugünün Planı
-              </h2>
-              <button 
-                onClick={onOpenTaskModal}
-                className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-              >
-                <Plus className="w-4 h-4" />
-                Yeni Görev
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto -mx-2 px-2 space-y-2 custom-scrollbar">
-              {todayTasks.length > 0 ? (
-                todayTasks.map(task => (
-                  <div 
-                    key={task.id}
-                    className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-zinc-800"
-                  >
-                    <button
-                      onClick={() => toggleTask(task.id)}
-                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                        task.isCompleted 
-                          ? 'bg-green-500 border-green-500 text-white' 
-                          : 'border-zinc-300 dark:border-zinc-600 hover:border-indigo-500 dark:hover:border-indigo-400'
-                      }`}
-                    >
-                      {task.isCompleted && <CheckCircle2 className="w-4 h-4" />}
-                    </button>
-                    
-                    <div className="flex-1 min-w-0" onClick={() => onEditTask?.(task)}>
-                      <p className={`font-medium truncate transition-colors ${
-                        task.isCompleted ? 'text-zinc-400 line-through' : 'text-zinc-900 dark:text-zinc-200'
-                      }`}>
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500 mt-0.5">
-                        <Clock className="w-3 h-3" />
-                        {task.dueDate ? new Date(task.dueDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : 'Tüm gün'}
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => onEditTask?.(task)}
-                      className="opacity-0 group-hover:opacity-100 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-60">
-                  <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                    <ListTodo className="w-8 h-8 text-zinc-400" />
-                  </div>
-                  <p className="text-zinc-500 font-medium">Bugün için planın boş</p>
-                  <p className="text-sm text-zinc-400">Yeni bir görev ekleyerek başla</p>
-                </div>
-              )}
-            </div>
-            
-            <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <button 
-                onClick={() => onNavigate('tasks')}
-                className="w-full py-2 flex items-center justify-center gap-2 text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
-              >
-                Tüm Görevleri Gör <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* 4. Quick Notes (Medium Block) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-4 row-span-2 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/20 rounded-3xl p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <StickyNote className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-                Hızlı Notlar
-              </h2>
-              <button onClick={onOpenNoteModal} className="p-1.5 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 rounded-lg transition-colors text-yellow-700 dark:text-yellow-400">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="space-y-3">
-              {recentNotes.length > 0 ? (
-                recentNotes.map(note => (
-                  <div 
-                    key={note.id}
-                    onClick={() => onNavigate('notes')}
-                    className="p-3 bg-white dark:bg-zinc-900/60 rounded-xl border border-yellow-100 dark:border-yellow-900/20 cursor-pointer hover:scale-[1.02] transition-transform shadow-sm"
-                  >
-                    <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-200 truncate">{note.title}</h4>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
-                      {note.content.replace(/<[^>]*>/g, '') || 'İçerik yok'}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-zinc-400 text-sm">
-                  Henüz not yok
-                </div>
-              )}
-            </div>
+          {/* 3. Notes Summary */}
+          <div 
+            onClick={() => onNavigate('notes')}
+            className="group cursor-pointer bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all text-left flex flex-col"
+          >
+             <div className="flex items-center justify-between mb-2">
+               <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg text-amber-600 dark:text-amber-400">
+                 <FileText className="w-5 h-5" />
+               </div>
+               <span className="text-2xl font-bold text-zinc-900 dark:text-white">
+                 {notes.length}
+               </span>
+             </div>
+             <h4 className="font-semibold text-zinc-900 dark:text-white mb-1">Notlar</h4>
+             <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 flex-1">
+               {notes.length > 0 ? 'Fikirlerin burada güvende.' : 'Yeni bir not al.'}
+             </p>
+             <div className="mt-4 flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+               Görüntüle <ArrowRight className="w-4 h-4 ml-1" />
+             </div>
           </div>
 
         </div>
+
       </div>
+      
+      {/* Bottom Quote / Inspiration Area (Optional) */}
+      <div className="absolute bottom-6 left-0 right-0 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+        <p className="text-sm text-zinc-400 italic">
+          "En iyi hazırlık, bugünü en iyi şekilde yapmaktır."
+        </p>
+      </div>
+
     </div>
   );
 };

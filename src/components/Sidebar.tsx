@@ -12,10 +12,10 @@ import {
   Monitor,
   Timer,
   BarChart,
-  User,
-  ChevronRight,
   PanelLeft,
-  Plus
+  Plus,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
@@ -52,24 +52,21 @@ const Tooltip: React.FC<{
 
   return (
     <div 
-      className="relative inline-flex w-full"
+      className="relative inline-flex w-full items-center justify-center"
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
       {children}
       {isVisible && (
         <div className={cn(
-          "absolute z-50 px-2.5 py-1.5 text-xs font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200",
-          side === 'right' && "left-full ml-3 top-1/2 -translate-y-1/2",
-          side === 'left' && "right-full mr-3 top-1/2 -translate-y-1/2",
-        )}>
+          "fixed z-[100] px-2.5 py-1.5 text-xs font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 rounded-lg shadow-xl whitespace-nowrap animate-in fade-in zoom-in-95 duration-200 pointer-events-none",
+        )}
+        style={{
+          left: side === 'right' ? '5rem' : 'auto',
+          marginLeft: side === 'right' ? '0.5rem' : '0'
+        }}
+        >
           {content}
-          {/* Arrow */}
-          <div className={cn(
-            "absolute w-1.5 h-1.5 rotate-45",
-            side === 'right' && "left-[-3px] top-1/2 -translate-y-1/2 bg-zinc-900 dark:bg-white",
-            side === 'left' && "right-[-3px] top-1/2 -translate-y-1/2 bg-zinc-900 dark:bg-white"
-          )} />
         </div>
       )}
     </div>
@@ -98,58 +95,47 @@ const bottomItems = [
   { id: 'settings', label: 'Ayarlar', icon: Settings },
 ];
 
-// Sidebar Navigation Item
-interface SidebarNavItemProps {
+const SidebarNavItem: React.FC<{
   icon: React.ReactNode;
   label: string;
   active?: boolean;
   collapsed: boolean;
   onClick: () => void;
-  className?: string;
-}
-
-const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
-  icon,
-  label,
-  active,
-  collapsed,
-  onClick,
-  className
-}) => {
-  const button = (
-    <button
-      onClick={onClick}
-      className={cn(
-        "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl group overflow-hidden",
-        "transition-all duration-300",
-        active 
-          ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg shadow-zinc-900/10 dark:shadow-white/5" 
-          : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200",
-        collapsed && "justify-center px-0",
-        className
-      )}
-    >
-      <span className={cn(
-        "relative z-10 flex-shrink-0 transition-transform duration-300",
-        active ? "scale-100" : "group-hover:scale-110"
-      )}>
-        {icon}
-      </span>
-      {!collapsed && (
-        <span className="relative z-10 text-sm font-medium tracking-tight">{label}</span>
-      )}
-    </button>
-  );
-
+}> = ({ icon, label, active, collapsed, onClick }) => {
   if (collapsed) {
     return (
       <Tooltip content={label} side="right">
-        {button}
+        <button
+          onClick={onClick}
+          className={cn(
+            "w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 mx-auto",
+            active 
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg" 
+              : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:text-zinc-400"
+          )}
+        >
+          {icon}
+        </button>
       </Tooltip>
     );
   }
 
-  return button;
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+        active 
+          ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg" 
+          : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+      )}
+    >
+      <span className={cn("transition-transform", active ? "scale-100" : "group-hover:scale-110")}>
+        {icon}
+      </span>
+      <span className="font-medium text-sm">{label}</span>
+    </button>
+  );
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -182,15 +168,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     localStorage.setItem('sidebarOpen', JSON.stringify(open));
   }, [open]);
 
-  const toggleSidebar = () => {
-    if (isMobile) {
-      setOpenMobile(!openMobile);
-    } else {
-      setOpen(!open);
-    }
-  };
+  const toggleSidebar = () => setOpen(!open);
 
-  const state = open ? 'expanded' : 'collapsed';
+  const contextValue: SidebarContextType = {
+    state: open ? 'expanded' : 'collapsed',
+    open,
+    setOpen,
+    openMobile,
+    setOpenMobile,
+    isMobile,
+    toggleSidebar,
+  };
 
   const getThemeIcon = () => {
     if (theme === 'light') return <Sun className="w-4 h-4" />;
@@ -204,257 +192,194 @@ export const Sidebar: React.FC<SidebarProps> = ({
     else setTheme('light');
   };
 
-  const contextValue: SidebarContextType = {
-    state,
-    open,
-    setOpen,
-    openMobile,
-    setOpenMobile,
-    isMobile,
-    toggleSidebar,
-  };
-
-  const handleNavClick = (id: string) => {
-    onViewChange(id);
-    if (isMobile) setOpenMobile(false);
-  };
-
   return (
     <SidebarContext.Provider value={contextValue}>
-      {/* Mobile Trigger */}
+      {/* Mobile Toggle */}
       <button
         onClick={() => setOpenMobile(true)}
-        className={cn(
-          "lg:hidden fixed top-4 left-4 z-40 p-3",
-          "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl",
-          "border border-zinc-200/50 dark:border-zinc-800/50",
-          "rounded-2xl shadow-lg shadow-zinc-900/5",
-          "text-zinc-600 dark:text-zinc-400",
-          "transition-all duration-200 hover:scale-105 active:scale-95"
-        )}
+        className="lg:hidden fixed top-4 left-4 z-40 p-2.5 bg-white dark:bg-zinc-900 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-800"
       >
-        <PanelLeft className="w-5 h-5" />
+        <PanelLeft className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
       </button>
 
       {/* Mobile Overlay */}
       {openMobile && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-md z-40 animate-in fade-in duration-200"
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
           onClick={() => setOpenMobile(false)}
         />
       )}
 
-      {/* Floating Sidebar Container */}
-      <aside
+      {/* Sidebar Container */}
+      <aside 
         className={cn(
-          "fixed lg:relative z-50 lg:z-auto h-screen lg:h-auto",
-          "transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-          isMobile ? (openMobile ? "translate-x-0" : "-translate-x-full") : "",
-          !isMobile && "p-4" // Padding for floating effect on desktop
+          "fixed lg:relative z-50 h-screen lg:h-auto",
+          "transition-all duration-300 ease-in-out",
+          // Desktop: Padded Floating Look
+          !isMobile && "py-4 pl-4",
+          // Width Control
+          open ? "w-72" : "w-[6rem]", 
+          isMobile ? (openMobile ? "translate-x-0 w-72" : "-translate-x-full w-72") : "translate-x-0"
         )}
       >
-        <div
-          className={cn(
-            "flex flex-col h-full",
-            // Floating Styles
-            "bg-white dark:bg-zinc-900",
-            "lg:rounded-[2rem] lg:shadow-2xl lg:shadow-zinc-900/5",
-            "border-r lg:border border-zinc-200/50 dark:border-zinc-800",
-            // Width transitions
-            "transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]",
-            open ? "w-72" : "w-[4.5rem]",
-            isMobile && "w-[85vw] max-w-xs h-full rounded-none border-r"
-          )}
-        >
-          {/* Header */}
+        <div className={cn(
+          "h-full flex flex-col",
+          "bg-white dark:bg-zinc-900",
+          "lg:rounded-[2rem] lg:border border-zinc-200/50 dark:border-zinc-800",
+          "shadow-2xl shadow-zinc-200/50 dark:shadow-black/20",
+          "overflow-hidden"
+        )}>
+          
+          {/* Header & Toggle */}
           <div className={cn(
-            "flex items-center h-20 px-4",
-            !open && !isMobile && "justify-center px-0"
+            "h-20 flex items-center justify-between px-6 shrink-0 transition-all duration-300",
+            !open && !isMobile && "justify-center px-0 flex-col-reverse gap-4 h-32"
           )}>
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => handleNavClick('dashboard')}>
-                <div className="absolute inset-0 bg-indigo-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-xl" />
-                <div className="relative w-10 h-10 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl flex items-center justify-center shadow-lg">
-                   <span className="font-bold text-lg">F</span>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/20 shrink-0">
+                F
               </div>
               {(open || isMobile) && (
-                <div className="flex flex-col animate-in fade-in slide-in-from-left-4 duration-500">
-                  <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight leading-none">
-                    FOCHUS
-                  </span>
-                  <span className="text-[10px] font-medium text-zinc-400 tracking-widest uppercase mt-0.5">
-                    Workspace
-                  </span>
+                <div className="flex flex-col animate-in fade-in slide-in-from-left-2 overflow-hidden whitespace-nowrap">
+                  <span className="font-bold text-lg text-zinc-900 dark:text-white leading-none">FOCHUS</span>
                 </div>
               )}
             </div>
+
+            {/* Collapse Toggle - Now in Header */}
+            {!isMobile && (
+              <button
+                onClick={toggleSidebar}
+                className={cn(
+                  "p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors",
+                  !open && "rotate-180 mb-2"
+                )}
+                title={open ? "Kenar çubuğunu gizle" : "Kenar çubuğunu göster"}
+              >
+                 {open ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+              </button>
+            )}
           </div>
 
-          {/* Quick Actions & Search */}
-          <div className="px-3 pb-2 space-y-2">
-            <button
-              onClick={() => {
-                onOpenSpotlight();
-                if (isMobile) setOpenMobile(false);
-              }}
-              className={cn(
-                "w-full flex items-center gap-2 px-3 py-2.5 rounded-xl",
-                "bg-zinc-50 dark:bg-zinc-800/50",
-                "border border-zinc-200/50 dark:border-zinc-800",
-                "text-zinc-500 dark:text-zinc-400",
-                "hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700",
-                "transition-all duration-200 group",
-                !open && !isMobile && "justify-center px-0"
-              )}
-            >
-               <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
-               {(open || isMobile) && (
-                 <>
-                  <span className="text-sm">Ara...</span>
-                  <kbd className="ml-auto text-[10px] font-mono bg-white dark:bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 text-zinc-400">⌘K</kbd>
-                 </>
+          {/* Quick Actions */}
+          <div className={cn("px-4 mb-2 space-y-2 transition-all duration-300", !open && "px-2")}>
+             <button
+               onClick={onOpenSpotlight}
+               className={cn(
+                 "w-full flex items-center gap-3 px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 dark:text-zinc-400",
+                 !open && !isMobile && "justify-center px-0 aspect-square"
                )}
-            </button>
+               title="Ara ( / )"
+             >
+                <Search className="w-4 h-4 shrink-0" />
+                {(open || isMobile) && (
+                  <>
+                    <span className="text-sm font-medium">Ara...</span>
+                    <kbd className="ml-auto text-[10px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded px-1.5 py-0.5">/</kbd>
+                  </>
+                )}
+             </button>
 
-            {/* Quick Add Buttons */}
-            {(open || isMobile) ? (
-              <div className="grid grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-2">
-                <button
-                  onClick={onOpenTaskModal}
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all active:scale-95"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Görev
-                </button>
-                <button
-                  onClick={onOpenNoteModal}
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-500/20 rounded-xl text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all active:scale-95"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Not
-                </button>
-              </div>
-            ) : (
+             {(open || isMobile) ? (
+               <div className="grid grid-cols-2 gap-2">
+                 <button onClick={onOpenTaskModal} className="flex items-center justify-center gap-2 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors">
+                   <Plus className="w-3.5 h-3.5" /> Görev
+                 </button>
+                 <button onClick={onOpenNoteModal} className="flex items-center justify-center gap-2 py-2 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors">
+                   <Plus className="w-3.5 h-3.5" /> Not
+                 </button>
+               </div>
+             ) : (
                <div className="flex flex-col gap-2">
-                 <Tooltip content="Yeni Görev" side="right">
-                   <button onClick={onOpenTaskModal} className="p-2.5 flex justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition-colors">
+                 <Tooltip content="Yeni Görev">
+                   <button onClick={onOpenTaskModal} className="w-10 h-10 mx-auto flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-100 transition-colors">
                      <CheckSquare className="w-4 h-4" />
                    </button>
                  </Tooltip>
-                 <Tooltip content="Yeni Not" side="right">
-                   <button onClick={onOpenNoteModal} className="p-2.5 flex justify-center bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl hover:bg-amber-100 transition-colors">
+                 <Tooltip content="Yeni Not">
+                   <button onClick={onOpenNoteModal} className="w-10 h-10 mx-auto flex items-center justify-center bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl hover:bg-amber-100 transition-colors">
                      <FileText className="w-4 h-4" />
                    </button>
                  </Tooltip>
                </div>
-            )}
+             )}
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto px-3 space-y-1 my-2 custom-scrollbar">
-            {menuItems.map((item) => (
-              <SidebarNavItem
+          {/* Menu */}
+          <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1 custom-scrollbar">
+            {menuItems.map(item => (
+              <SidebarNavItem 
                 key={item.id}
                 icon={<item.icon className="w-5 h-5" />}
                 label={item.label}
                 active={activeView === item.id}
                 collapsed={!open && !isMobile}
-                onClick={() => handleNavClick(item.id)}
+                onClick={() => {
+                  onViewChange(item.id);
+                  if (isMobile) setOpenMobile(false);
+                }}
               />
             ))}
             
             <div className="my-4 border-t border-zinc-100 dark:border-zinc-800/50 mx-2" />
 
-             {bottomItems.map((item) => (
-              <SidebarNavItem
+            {bottomItems.map(item => (
+              <SidebarNavItem 
                 key={item.id}
                 icon={<item.icon className="w-5 h-5" />}
                 label={item.label}
                 active={activeView === item.id}
                 collapsed={!open && !isMobile}
-                onClick={() => handleNavClick(item.id)}
+                onClick={() => {
+                  onViewChange(item.id);
+                  if (isMobile) setOpenMobile(false);
+                }}
               />
             ))}
           </nav>
 
-          {/* Footer - Pomodoro & Settings */}
-          <div className="p-3 mt-auto">
-            {/* Pomodoro Card */}
-            <div 
-              onClick={onOpenPomodoro || (() => {})}
-              className={cn(
-                "cursor-pointer group relative overflow-hidden",
-                "bg-zinc-900 dark:bg-zinc-800",
-                "text-white rounded-2xl",
-                "transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20",
-                !open && !isMobile ? "p-3 flex justify-center aspect-square items-center" : "p-4"
-              )}
-            >
-              {/* Progress Background */}
-              {(open || isMobile) && isActive && (
-                <div 
-                  className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-1000" 
-                  style={{ width: `${progress}%` }}
-                />
-              )}
-
-              <div className={cn(
-                "flex items-center",
-                !open && !isMobile ? "flex-col gap-1" : "justify-between"
-              )}>
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "p-2 rounded-xl bg-white/10 transition-colors",
-                    isActive && "text-indigo-300 bg-indigo-500/20"
-                  )}>
-                    <Timer className={cn("w-5 h-5", isActive && "animate-pulse")} />
+          {/* Footer */}
+          <div className="p-4 bg-zinc-50/50 dark:bg-black/20 border-t border-zinc-100 dark:border-zinc-800/50">
+             {/* Pomodoro */}
+             <button
+               onClick={onOpenPomodoro}
+               className={cn(
+                 "w-full relative overflow-hidden rounded-2xl bg-zinc-900 dark:bg-zinc-800 text-white transition-all hover:shadow-lg hover:shadow-indigo-500/20 group",
+                 !open && !isMobile ? "aspect-square flex items-center justify-center p-0" : "p-4"
+               )}
+             >
+               {(open || isMobile) && isActive && (
+                 <div className="absolute bottom-0 left-0 h-1 bg-indigo-500 transition-all duration-1000" style={{ width: `${progress}%` }} />
+               )}
+               
+               <div className={cn("flex items-center", !open && !isMobile ? "justify-center" : "gap-3")}>
+                  <div className={cn("p-2 rounded-xl bg-white/10", isActive && "text-indigo-300 animate-pulse")}>
+                    <Timer className="w-5 h-5" />
                   </div>
                   {(open || isMobile) && (
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Pomodoro</span>
-                      <span className="text-xl font-bold font-mono tracking-wider tabular-nums">
-                        {formatTime(timeLeft)}
-                      </span>
+                    <div className="flex flex-col items-start">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Pomodoro</span>
+                      <span className="text-xl font-mono font-bold leading-none mt-0.5">{formatTime(timeLeft)}</span>
                     </div>
                   )}
-                </div>
-              </div>
-            </div>
+               </div>
+             </button>
 
-            {/* Theme & Collapse */}
-            <div className="mt-3 flex items-center gap-2">
-              <button
-                onClick={cycleTheme}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-2 p-2.5 rounded-xl",
-                  "bg-zinc-50 dark:bg-zinc-800/50",
-                  "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
-                  "hover:bg-zinc-100 dark:hover:bg-zinc-800",
-                  "transition-all duration-200",
-                  !open && !isMobile && "aspect-square"
-                )}
-              >
-                {getThemeIcon()}
-                {(open || isMobile) && <span className="text-xs font-semibold">Tema</span>}
-              </button>
-
-              {!isMobile && (
-                <button
-                  onClick={toggleSidebar}
-                  className={cn(
-                    "p-2.5 rounded-xl",
-                    "bg-zinc-50 dark:bg-zinc-800/50",
-                    "text-zinc-400 hover:text-zinc-900 dark:hover:text-white",
-                    "hover:bg-zinc-100 dark:hover:bg-zinc-800",
-                    "transition-all duration-200"
-                  )}
-                >
-                  <ChevronRight className={cn("w-4 h-4 transition-transform duration-300", open && "rotate-180")} />
-                </button>
-              )}
-            </div>
+             {/* Theme Control */}
+             <div className="mt-3">
+               <button 
+                 onClick={cycleTheme}
+                 className={cn(
+                   "w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors",
+                   !open && !isMobile && "aspect-square p-0"
+                 )}
+               >
+                 {getThemeIcon()}
+                 {(open || isMobile) && <span className="text-xs font-bold">Tema</span>}
+               </button>
+             </div>
           </div>
+
         </div>
       </aside>
     </SidebarContext.Provider>

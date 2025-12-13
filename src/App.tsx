@@ -55,8 +55,11 @@ const App: React.FC = () => {
 
     // Global keyboard shortcuts
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Cmd+K / Ctrl+K for Spotlight
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      const activeTag = document.activeElement?.tagName.toLowerCase();
+      const isInputActive = activeTag === 'input' || activeTag === 'textarea';
+
+      // Cmd+K / Ctrl+K OR '/' for Spotlight
+      if (((e.metaKey || e.ctrlKey) && e.key === 'k') || (e.key === '/' && !isInputActive)) {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
