@@ -18,7 +18,9 @@ import {
   Shield, 
   Camera,
   ChevronRight,
-  GripVertical
+  GripVertical,
+  Lock,
+  Key
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -51,39 +53,43 @@ const SettingsTab = ({
 
 // --- Sections ---
 
-// 1. Profile Section
-const ProfileSection = () => {
+// 1. Profile Section (Updated)
+const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const userData = {
     name: "Kullanıcı",
     email: "kullanici@fochus.app",
     role: "Pro Üye",
-    joinDate: "Bugün",
-    avatar: "K"
+    joinDate: "Bugün"
   };
 
+  const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
-      <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 border border-zinc-100 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-10 group-hover:opacity-20 transition-opacity" />
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
+      
+      {/* User Card */}
+      <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 group relative">
         
-        <div className="relative flex flex-col items-center text-center pt-8">
-           <div className="relative mb-6">
-             <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-1 shadow-2xl">
-               <div className="w-full h-full rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center text-5xl font-bold text-zinc-800 dark:text-white">
-                 {userData.avatar}
-               </div>
-             </div>
-             <button className="absolute bottom-1 right-1 p-2 bg-zinc-900 text-white rounded-full shadow-lg hover:bg-indigo-600 transition-colors">
-               <Camera className="w-4 h-4" />
-             </button>
-           </div>
-           
-           <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">{userData.name}</h2>
+        {/* Dynamic Background Header */}
+        <div className="absolute top-0 left-0 w-full h-48 overflow-hidden">
+           {isCustomBg ? (
+              <img src={bgImage} className="w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" alt="Profile BG" />
+           ) : (
+              <>
+                <img src="/light.png" className={cn("absolute inset-0 w-full h-full object-cover transition-opacity", bgImage === 'light' ? 'opacity-50' : 'opacity-0')} alt="Light BG" />
+                <img src="/dark.png" className={cn("absolute inset-0 w-full h-full object-cover transition-opacity", bgImage === 'dark' ? 'opacity-50' : 'opacity-0')} alt="Dark BG" />
+              </>
+           )}
+           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-zinc-900" />
+        </div>
+        
+        <div className="relative pt-32 px-8 pb-8 flex flex-col items-center text-center">
+           <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">{userData.name}</h2>
            <p className="text-zinc-500 dark:text-zinc-400 mb-6 flex items-center gap-2">
              <Mail className="w-4 h-4" /> {userData.email}
            </p>
 
-           <div className="flex gap-4 mb-8">
+           <div className="flex gap-3 mb-8">
              <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-sm font-semibold border border-indigo-100 dark:border-indigo-500/20 flex items-center gap-2">
                <Award className="w-4 h-4" /> {userData.role}
              </div>
@@ -91,8 +97,63 @@ const ProfileSection = () => {
                <Calendar className="w-4 h-4" /> {userData.joinDate}
              </div>
            </div>
+
+           <div className="grid grid-cols-3 gap-4 w-full pt-6 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">12</div>
+                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">5</div>
+                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Not</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-zinc-900 dark:text-white">2.5s</div>
+                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
+              </div>
+           </div>
         </div>
       </div>
+
+      {/* Password Change Section */}
+      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-8 border border-zinc-100 dark:border-zinc-800">
+         <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
+              <Lock className="w-5 h-5" />
+            </div>
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
+         </div>
+
+         <div className="space-y-4">
+            <div className="space-y-2">
+               <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
+               <div className="relative">
+                 <input type="password" placeholder="••••••••" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 pl-11 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+                 <Key className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
+               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="space-y-2">
+                 <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Yeni Şifre</label>
+                 <input type="password" placeholder="Yeni şifreniz" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+               </div>
+               <div className="space-y-2">
+                 <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Tekrar</label>
+                 <input type="password" placeholder="Şifreyi onaylayın" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+               </div>
+            </div>
+            <div className="pt-2 flex justify-end">
+               <button className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:opacity-90 transition-opacity text-sm">
+                 Şifreyi Güncelle
+               </button>
+            </div>
+         </div>
+      </div>
+
+      <button className="w-full py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide">
+        <LogOut className="w-5 h-5" />
+        Oturumu Kapat
+      </button>
     </div>
   );
 };
@@ -430,12 +491,12 @@ export const Settings: React.FC<SettingsProps> = ({ bgImage = 'light', onBgChang
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'profile': return <ProfileSection />;
+      case 'profile': return <ProfileSection bgImage={bgImage} />;
       case 'appearance': return <AppearanceSection bgImage={bgImage} onBgChange={onBgChange} />;
       case 'spotlight': return <SpotlightSection />;
       case 'data': return <DataSection />;
       case 'about': return <AboutSection />;
-      default: return <ProfileSection />;
+      default: return <ProfileSection bgImage={bgImage} />;
     }
   };
 
