@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { 
   Play, 
   Pause, 
-  RotateCcw,
   CheckSquare,
   FileText,
   Clock,
   ArrowRight,
-  Search as SearchIcon, // Renamed to avoid conflict with `Search` component
-  Target
+  Search as SearchIcon,
+  Zap,
+  Calendar,
+  MoreHorizontal
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 import { usePomodoro } from '../hooks/usePomodoro';
-import { useTheme } from '../components/ThemeProvider'; // Assuming useTheme is in hooks/useTheme now
 import { cn } from '../lib/utils';
 
 interface DashboardProps {
@@ -21,7 +21,7 @@ interface DashboardProps {
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
   onEditTask: (task: any) => void;
-  onOpenSpotlight: () => void; // Added for search bar
+  onOpenSpotlight: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
@@ -31,10 +31,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onEditTask,
   onOpenSpotlight 
 }) => {
-  const { tasks, toggleTask } = useTasks();
+  const { tasks } = useTasks();
   const { notes } = useNotes();
-  const { timeLeft, isActive, toggleTimer, resetTimer, formatTime } = usePomodoro();
-  const { theme } = useTheme(); // To determine which background to show
+  const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
   
   const [currentTime, setCurrentTime] = useState(new Date());
   
@@ -54,112 +53,161 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const pendingTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted);
 
   return (
-    <div className="h-full relative overflow-hidden transition-colors duration-500">
-      
-      {/* BACKGROUND IMAGE - Theme Aware, covers entire screen */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={theme === 'dark' ? '/dark.png' : '/light.png'} 
-          alt="Background" 
-          className="w-full h-full object-cover" // object-cover ensures it covers, no cropping issues
-        />
-        {/* Overlay Gradient for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-white/80 dark:from-black/80 dark:via-black/40 dark:to-black/80" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 max-w-5xl mx-auto text-center">
+    <div className="h-full w-full p-8 lg:p-12 overflow-y-auto custom-scrollbar">
+      <div className="max-w-[1600px] mx-auto flex flex-col gap-12">
         
-        {/* Clock & Greeting */}
-        <div className="mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="text-[7rem] md:text-[10rem] font-bold text-zinc-900 dark:text-white leading-none tracking-tighter tabular-nums select-none drop-shadow-sm">
+        {/* Header Section - Clock & Greeting */}
+        <div className="flex flex-col items-start gap-2 animate-in slide-in-from-left duration-700">
+          <h1 className="text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono">
             {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-          <div className="text-xl md:text-3xl text-zinc-600 dark:text-zinc-300 mt-4 font-medium tracking-wide uppercase opacity-80">
-            {getGreeting()}
+          </h1>
+          <div className="flex items-center gap-3">
+            <div className="h-px w-12 bg-zinc-900/50 dark:bg-white/50" />
+            <span className="text-2xl font-light text-zinc-700 dark:text-zinc-200 uppercase tracking-widest">
+              {getGreeting()}
+            </span>
           </div>
         </div>
 
-        {/* Spotlight Search Bar (Replaces "What's your focus") */}
-        <div className="w-full max-w-2xl mb-24 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 min-h-[120px] flex items-center justify-center">
-          <button 
-            onClick={onOpenSpotlight}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full border border-zinc-200 dark:border-zinc-800 shadow-lg text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors group"
-          >
-            <SearchIcon className="w-6 h-6 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-            <span className="text-xl font-medium">Hızlı Ara veya Komut Çalıştır...</span>
-            <kbd className="ml-auto text-lg font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">/</kbd>
-          </button>
+        {/* Main Unified Glass Frame (Bento Grid Container) */}
+        <div className="w-full bg-white/30 dark:bg-black/30 backdrop-blur-2xl border border-white/20 dark:border-white/5 rounded-[40px] p-8 lg:p-10 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
+           
+           <div className="flex flex-col gap-8">
+              
+              {/* 1. Search Section - Integrated into the top */}
+              <div className="w-full">
+                <button 
+                  onClick={onOpenSpotlight}
+                  className="w-full flex items-center justify-between p-6 bg-white/40 dark:bg-zinc-900/40 hover:bg-white/60 dark:hover:bg-zinc-900/60 border border-white/30 dark:border-white/5 rounded-3xl transition-all duration-300 group cursor-text text-left shadow-lg"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-zinc-900 dark:bg-white rounded-2xl text-white dark:text-zinc-900 shadow-lg group-hover:scale-110 transition-transform">
+                       <SearchIcon className="w-6 h-6" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xl font-semibold text-zinc-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        Ne arıyorsunuz?
+                      </span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                        Komutlar, görevler, notlar...
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 pr-4">
+                    <kbd className="hidden md:flex h-8 items-center gap-1 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-2 font-mono text-xs font-medium text-zinc-500">
+                      <span className="text-xs">⌘</span>K
+                    </kbd>
+                  </div>
+                </button>
+              </div>
+
+              {/* 2. Widgets Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                {/* Pomodoro Card */}
+                <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/5 dark:to-purple-500/5 border border-white/20 dark:border-white/5 rounded-3xl p-6 transition-all hover:scale-[1.01] hover:shadow-xl">
+                   <div className="absolute top-0 right-0 p-6 opacity-50">
+                      <Clock className="w-24 h-24 text-indigo-500/20 -mr-6 -mt-6" />
+                   </div>
+                   
+                   <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+                           <Zap className="w-5 h-5" />
+                        </div>
+                        <span className="font-bold text-zinc-700 dark:text-zinc-200">Odak Zamanı</span>
+                      </div>
+
+                      <div className="flex flex-col">
+                         <span className={cn("text-5xl font-mono font-bold tracking-tighter", isActive ? "text-indigo-600 dark:text-indigo-400 animate-pulse" : "text-zinc-900 dark:text-white")}>
+                           {formatTime(timeLeft)}
+                         </span>
+                         <span className="text-sm text-zinc-500 mt-1">
+                           {isActive ? "Süre işliyor..." : "Hazır mısın?"}
+                         </span>
+                      </div>
+
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); toggleTimer(); }}
+                        className="w-full py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                      >
+                        {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+                        {isActive ? "Duraklat" : "Başlat"}
+                      </button>
+                   </div>
+                </div>
+
+                {/* Tasks Card */}
+                <div 
+                  onClick={() => onNavigate('tasks')}
+                  className="group relative overflow-hidden bg-white/40 dark:bg-zinc-900/40 border border-white/20 dark:border-white/5 rounded-3xl p-6 cursor-pointer transition-all hover:bg-white/60 dark:hover:bg-zinc-900/60 hover:scale-[1.01] hover:shadow-xl"
+                >
+                   <div className="flex flex-col h-full justify-between gap-6">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                               <CheckSquare className="w-5 h-5" />
+                            </div>
+                            <span className="font-bold text-zinc-700 dark:text-zinc-200">Görevler</span>
+                         </div>
+                         <ArrowRight className="w-5 h-5 text-zinc-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
+                      </div>
+
+                      <div>
+                         <div className="flex items-baseline gap-2">
+                           <span className="text-4xl font-bold text-zinc-900 dark:text-white">{pendingTasks.length}</span>
+                           <span className="text-lg text-zinc-500">bekleyen</span>
+                         </div>
+                         <div className="mt-4 space-y-2">
+                            {pendingTasks.slice(0, 2).map(task => (
+                              <div key={task.id} className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 truncate">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                <span className="truncate">{task.title}</span>
+                              </div>
+                            ))}
+                            {pendingTasks.length === 0 && <span className="text-sm text-zinc-400 italic">Tüm görevler tamamlandı!</span>}
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Notes Card */}
+                <div 
+                  onClick={() => onNavigate('notes')}
+                  className="group relative overflow-hidden bg-white/40 dark:bg-zinc-900/40 border border-white/20 dark:border-white/5 rounded-3xl p-6 cursor-pointer transition-all hover:bg-white/60 dark:hover:bg-zinc-900/60 hover:scale-[1.01] hover:shadow-xl"
+                >
+                   <div className="flex flex-col h-full justify-between gap-6">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
+                               <FileText className="w-5 h-5" />
+                            </div>
+                            <span className="font-bold text-zinc-700 dark:text-zinc-200">Notlar</span>
+                         </div>
+                         <ArrowRight className="w-5 h-5 text-zinc-400 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all" />
+                      </div>
+
+                      <div>
+                         <div className="flex items-baseline gap-2">
+                           <span className="text-4xl font-bold text-zinc-900 dark:text-white">{notes.length}</span>
+                           <span className="text-lg text-zinc-500">kayıt</span>
+                         </div>
+                         <div className="mt-4 space-y-2">
+                            {notes.slice(0, 2).map(note => (
+                              <div key={note.id} className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 truncate">
+                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                                <span className="truncate">{note.title || "Adsız Not"}</span>
+                              </div>
+                            ))}
+                             {notes.length === 0 && <span className="text-sm text-zinc-400 italic">Henüz not eklenmedi.</span>}
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+              </div>
+           </div>
         </div>
-
-        {/* Minimalist Widgets Row */}
-        <div className="flex flex-wrap justify-center gap-6 w-full animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
-          
-          {/* 1. Pomodoro Widget */}
-          <div className="group relative bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-5 w-72 text-left transition-all hover:scale-[1.02] hover:bg-white dark:hover:bg-zinc-900 hover:shadow-2xl hover:shadow-indigo-500/10">
-             <div className="flex items-center gap-3 mb-2 text-zinc-500 dark:text-zinc-400">
-               <Clock className="w-5 h-5" />
-               <span className="text-xs font-bold uppercase tracking-wider">Odak Süresi</span>
-             </div>
-             <div className="flex items-end justify-between">
-               <span className={cn("text-4xl font-mono font-bold text-zinc-900 dark:text-white tracking-tight", isActive && "text-indigo-600 dark:text-indigo-400")}>
-                 {formatTime(timeLeft)}
-               </span>
-               <button 
-                 onClick={(e) => { e.stopPropagation(); toggleTimer(); }}
-                 className="w-12 h-12 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
-               >
-                 {isActive ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-               </button>
-             </div>
-          </div>
-
-          {/* 2. Tasks Widget */}
-          <div 
-            onClick={() => onNavigate('tasks')}
-            className="group cursor-pointer bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 w-72 text-left transition-all hover:scale-[1.02] hover:bg-white dark:hover:bg-zinc-900 hover:shadow-2xl hover:shadow-emerald-500/10"
-          >
-             <div className="flex items-center gap-3 mb-4 text-zinc-500 dark:text-zinc-400">
-               <CheckSquare className="w-5 h-5" />
-               <span className="text-xs font-bold uppercase tracking-wider">Görevler</span>
-             </div>
-             <div className="flex items-end justify-between">
-               <div>
-                 <span className="text-4xl font-bold text-zinc-900 dark:text-white">
-                   {pendingTasks.length}
-                 </span>
-                 <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-2">bekleyen</span>
-               </div>
-               <span className="w-12 h-12 rounded-full border-2 border-zinc-200 dark:border-zinc-800 flex items-center justify-center group-hover:border-zinc-900 dark:group-hover:border-white transition-colors">
-                 <ArrowRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" />
-               </span>
-             </div>
-          </div>
-
-          {/* 3. Notes Widget */}
-          <div 
-            onClick={() => onNavigate('notes')}
-            className="group cursor-pointer bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800 rounded-3xl p-6 w-72 text-left transition-all hover:scale-[1.02] hover:bg-white dark:hover:bg-zinc-900 hover:shadow-2xl hover:shadow-amber-500/10"
-          >
-             <div className="flex items-center gap-3 mb-4 text-zinc-500 dark:text-zinc-400">
-               <FileText className="w-5 h-5" />
-               <span className="text-xs font-bold uppercase tracking-wider">Notlar</span>
-             </div>
-             <div className="flex items-end justify-between">
-               <div>
-                 <span className="text-4xl font-bold text-zinc-900 dark:text-white">
-                   {notes.length}
-                 </span>
-                 <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-2">kayıtlı</span>
-               </div>
-               <span className="w-12 h-12 rounded-full border-2 border-zinc-200 dark:border-zinc-800 flex items-center justify-center group-hover:border-zinc-900 dark:group-hover:border-white transition-colors">
-                 <ArrowRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" />
-               </span>
-             </div>
-          </div>
-
-        </div>
-
       </div>
     </div>
   );

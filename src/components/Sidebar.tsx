@@ -87,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       >
         <div className={cn(
-          "h-full flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] border border-zinc-200 dark:border-zinc-800 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 overflow-hidden relative",
+          "h-full flex flex-col bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-[24px] border border-white/20 dark:border-zinc-800/50 shadow-2xl shadow-zinc-200/20 dark:shadow-black/50 overflow-hidden relative",
         )}>
           
           {/* 1. Header (Custom Logo) */}
