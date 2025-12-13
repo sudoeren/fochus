@@ -51,13 +51,13 @@ async function fetchAPI<T>(
 
 // Auth API
 export const authAPI = {
-  register: (data: { email: string; password: string; name?: string }) =>
+  register: (data: { username: string; password: string; name?: string }) =>
     fetchAPI<{ user: any; token: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  login: (data: { email: string; password: string }) =>
+  login: (data: { username: string; password: string }) =>
     fetchAPI<{ user: any; token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),

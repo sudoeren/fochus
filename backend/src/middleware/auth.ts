@@ -5,7 +5,7 @@ import prisma from '../lib/prisma.js';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email: string;
+    username: string;
   };
 }
 
@@ -24,11 +24,11 @@ export const authenticate = async (
     const token = authHeader.split(' ')[1];
     const secret = process.env.JWT_SECRET || 'default-secret';
 
-    const decoded = jwt.verify(token, secret) as { userId: string; email: string };
+    const decoded = jwt.verify(token, secret) as { userId: string; username: string };
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, email: true }
+      select: { id: true, username: true }
     });
 
     if (!user) {

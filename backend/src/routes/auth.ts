@@ -1,7 +1,6 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
 import { z } from 'zod';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
@@ -10,24 +9,22 @@ const router = Router();
 
 // Validation Schemas
 const registerSchema = z.object({
-  email: z.string().email('Geçerli bir email adresi giriniz'),
+  username: z.string().min(3, 'Kullanıcı adı en az 3 karakter olmalı'),
   password: z.string().min(6, 'Şifre en az 6 karakter olmalı'),
   name: z.string().optional()
 });
 
 const loginSchema = z.object({
-  email: z.string().email('Geçerli bir email adresi giriniz'),
+  username: z.string().min(1, 'Kullanıcı adı gerekli'),
   password: z.string().min(1, 'Şifre gerekli')
 });
 
 // Generate JWT
-const generateToken = (userId: string, email: string): string => {
+const generateToken = (userId: string, username: string): string => {
   const secret = process.env.JWT_SECRET || 'default-secret';
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-  return jwt.sign({ userId, email }, secret, { expiresIn });
+  return jwt.sign({ userId, username }, secret, { expiresIn });
 };
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // POST /api/auth/register
 router.post('/register', async (req, res: Response) => {
@@ -40,15 +37,15 @@ router.post('/register', async (req, res: Response) => {
       });
     }
 
-    const { email, password, name } = validation.data;
+    const { username, password, name } = validation.data;
 
     // Check existing user
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { username }
     });
 
     if (existingUser) {
-      return res.status(400).json({ error: 'Bu email zaten kayıtlı' });
+      return res.status(400).json({ error: 'Bu kullanıcı adı zaten alınmış' });
     }
 
     // Hash password
@@ -57,7 +54,7 @@ router.post('/register', async (req, res: Response) => {
     // Create user
     const user = await prisma.user.create({
       data: {
-        email,
+        username,
         password: hashedPassword,
         name,
         settings: {
@@ -69,14 +66,14 @@ router.post('/register', async (req, res: Response) => {
       },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         createdAt: true
       }
     });
 
     // Generate token
-    const token = generateToken(user.id, user.email);
+    const token = generateToken(user.id, user.username);
 
     res.status(201).json({
       user,
@@ -99,31 +96,31 @@ router.post('/login', async (req, res: Response) => {
       });
     }
 
-    const { email, password } = validation.data;
+    const { username, password } = validation.data;
 
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { username }
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Email veya şifre hatalı' });
+      return res.status(401).json({ error: 'Kullanıcı adı veya şifre hatalı' });
     }
 
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Email veya şifre hatalı' });
+      return res.status(401).json({ error: 'Kullanıcı adı veya şifre hatalı' });
     }
 
     // Generate token
-    const token = generateToken(user.id, user.email);
+    const token = generateToken(user.id, user.username);
 
     res.json({
       user: {
         id: user.id,
-        email: user.email,
+        username: user.username,
         name: user.name,
         avatar: user.avatar
       },
@@ -142,7 +139,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
       where: { id: req.user!.id },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         avatar: true,
         createdAt: true
@@ -173,7 +170,7 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
       },
       select: {
         id: true,
-        email: true,
+        username: true,
         name: true,
         avatar: true
       }
@@ -227,71 +224,12 @@ router.put('/password', authenticate, async (req: AuthRequest, res: Response) =>
   }
 });
 
+/*
 // POST /api/auth/google
 router.post('/google', async (req, res: Response) => {
-  try {
-    const { idToken } = req.body;
-
-    if (!idToken) {
-      return res.status(400).json({ error: 'Google id token gerekli' });
-    }
-
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      return res.status(500).json({ error: 'Google client id konfigüre edilmemiş' });
-    }
-
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID
-    });
-
-    const payload = ticket.getPayload();
-
-    if (!payload || !payload.email) {
-      return res.status(400).json({ error: 'Geçersiz Google token' });
-    }
-
-    const email = payload.email;
-
-    let user = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    if (!user) {
-      const randomPassword = Math.random().toString(36).slice(2);
-      const hashed = await bcrypt.hash(randomPassword, 12);
-
-      user = await prisma.user.create({
-        data: {
-          email,
-          password: hashed,
-          name: payload.name,
-          avatar: payload.picture,
-          settings: {
-            create: {
-              theme: 'system',
-              language: 'tr'
-            }
-          }
-        }
-      });
-    }
-
-    const token = generateToken(user.id, user.email);
-
-    res.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Google login error:', error);
-    res.status(500).json({ error: 'Google ile giriş yapılamadı' });
-  }
+  // Google auth implementation removed as it relies on email
+  res.status(501).json({ error: 'Google girişi devre dışı bırakıldı' });
 });
+*/
 
 export default router;
