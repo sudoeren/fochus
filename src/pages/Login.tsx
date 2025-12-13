@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Calendar, BarChart2, Layers, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Zap } from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
 
 interface LoginProps {
@@ -157,26 +157,31 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-zinc-50 dark:bg-black relative">
+         {/* Subtle background effects for the form side too */}
+         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20 dark:opacity-10">
+            <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-white/5 rounded-full blur-[90px] animate-pulse-slow" />
+            <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-zinc-700/5 rounded-full blur-[80px] animate-pulse-slow delay-500" />
+         </div>
+        <div className="w-full max-w-md relative z-10 p-6 sm:p-8 bg-white dark:bg-zinc-950 rounded-3xl shadow-xl border border-zinc-100 dark:border-zinc-800">
           <div className="text-center mb-10">
             <div className="lg:hidden flex justify-center mb-6">
-              <div className="h-12 w-12 bg-zinc-900 text-white rounded-xl flex items-center justify-center">
+              <div className="h-12 w-12 bg-black text-white rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-xl font-bold">F</span>
               </div>
             </div>
             <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">
-              {isRegister ? 'Hesap Oluşturun' : 'Tekrar Hoşgeldiniz'}
+              {isRegister ? 'Yeni Bir Başlangıç' : 'Tekrar Hoş Geldiniz'}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400">
               {isRegister 
-                ? 'FOCHUS dünyasına katılın ve üretkenliğinizi artırın.' 
-                : 'Kaldığınız yerden devam etmek için giriş yapın.'}
+                ? 'Hedeflerine ulaşmak için ilk adımı at.' 
+                : 'Kaldığınız yerden devam edin.'}
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-sm font-medium">
+            <div className="mb-6 p-4 bg-red-900/20 text-red-400 rounded-xl text-sm font-medium border border-red-800">
               {error}
             </div>
           )}
@@ -193,7 +198,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     type="text"
                     required
                     autoFocus
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                     placeholder="Adınız Soyadınız"
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
@@ -212,7 +217,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     type="text"
                     required
                     autoFocus={isRegister}
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                     placeholder="kullaniciadi"
                     value={formData.username}
                     onChange={e => setFormData({...formData, username: e.target.value})}
@@ -232,7 +237,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       type="password"
                       required
                       autoFocus={isRegister}
-                      className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={e => setFormData({...formData, password: e.target.value})}
@@ -248,7 +253,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       <input
                         type="password"
                         required
-                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                        className="w-full pl-10 pr-4 py-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-white/20 focus:border-white/10 outline-none transition-all text-zinc-900 dark:text-white"
                         placeholder="••••••••"
                         value={formData.confirmPassword}
                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
@@ -264,7 +269,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <button
                   type="button"
                   onClick={handlePrevStep}
-                  className="px-6 py-3.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-xl font-medium hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                  className="px-6 py-3.5 bg-zinc-800 text-zinc-400 rounded-xl font-medium hover:bg-zinc-700 transition-colors border border-zinc-700"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -273,7 +278,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-medium hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-zinc-900/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3.5 bg-white text-black rounded-xl font-bold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-200"
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -294,8 +299,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <div 
                   key={s}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    s === step ? 'w-8 bg-indigo-500' : 
-                    s < step ? 'w-2 bg-indigo-200 dark:bg-indigo-900' : 'w-2 bg-zinc-200 dark:bg-zinc-800'
+                    s === step ? 'w-8 bg-white' : 
+                    s < step ? 'w-2 bg-zinc-600' : 'w-2 bg-zinc-800'
                   }`}
                 />
               ))}
@@ -303,15 +308,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+            <div className="h-px flex-1 bg-zinc-800" />
             <span className="text-xs text-zinc-500 uppercase font-medium">veya</span>
-            <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+            <div className="h-px flex-1 bg-zinc-800" />
           </div>
 
           <div className="mt-6 space-y-4">
             <button
               onClick={handleGuestLogin}
-              className="w-full py-3.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 rounded-xl font-medium hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-xl font-medium hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 shadow-md shadow-zinc-800/10"
             >
               Misafir Olarak Devam Et
             </button>
@@ -320,7 +325,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {isRegister ? 'Zaten hesabınız var mı?' : 'Hesabınız yok mu?'}
               <button
                 onClick={toggleMode}
-                className="ml-2 font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="ml-2 font-medium text-white hover:underline"
               >
                 {isRegister ? 'Giriş Yap' : 'Kayıt Ol'}
               </button>
