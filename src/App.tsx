@@ -22,7 +22,7 @@ const App: React.FC = () => {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
-  const [editingTask, setEditingTask] = useState<any>(null); // keeping any for flexibility as per existing code
+  const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -48,27 +48,21 @@ const App: React.FC = () => {
     setEditingTask(null);
   };
 
-  // Shortcut handler
   useEffect(() => {
-    // Setup FAST polling system for instant updates
     setupFastPolling();
 
-    // Global keyboard shortcuts
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
-      // Cmd+K / Ctrl+K OR '/' for Spotlight
       if (((e.metaKey || e.ctrlKey) && e.key === 'k') || (e.key === '/' && !isInputActive)) {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
-      // Cmd+N / Ctrl+N for new note
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
         e.preventDefault();
         setShowNoteModal(true);
       }
-      // Cmd+T / Ctrl+T for new task
       if ((e.metaKey || e.ctrlKey) && e.key === 't') {
         e.preventDefault();
         setShowTaskModal(true);
@@ -76,7 +70,6 @@ const App: React.FC = () => {
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
-
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
@@ -133,7 +126,9 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="flex h-screen bg-gray-50 dark:bg-black overflow-hidden">
+      <div className="min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex">
+        
+        {/* Floating Sidebar (Fixed Position) */}
         <Sidebar
           activeView={activeView}
           onViewChange={setActiveView}
@@ -142,10 +137,10 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
           onOpenPomodoro={() => setShowPomodoroModal(true)}
         />
-        <main className="flex-1 overflow-hidden lg:ml-0">
-          <div className="h-full overflow-auto">
-            {renderView()}
-          </div>
+
+        {/* Main Content Area - With Padding for Sidebar */}
+        <main className="flex-1 min-h-screen lg:pl-[320px] transition-all duration-300">
+          {renderView()}
         </main>
 
         {/* Spotlight */}
@@ -157,7 +152,7 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
         />
 
-        {/* Global Modals - NEW WINDOWS */}
+        {/* Modals */}
         <NewNoteWindow
           isOpen={showNoteModal}
           onClose={() => setShowNoteModal(false)}
