@@ -22,7 +22,8 @@ import {
   Lock,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -276,7 +277,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 };
 
 // 2. Appearance Section
-const AppearanceSection = ({ bgImage, onBgChange }: { bgImage: string, onBgChange: (bg: string) => void }) => {
+const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }: { bgImage: string, onBgChange: (bg: string) => void, isGlobalBg: boolean, onToggleGlobalBg: (enabled: boolean) => void }) => {
   const { theme, setTheme } = useTheme();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -361,6 +362,34 @@ const AppearanceSection = ({ bgImage, onBgChange }: { bgImage: string, onBgChang
             previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
           />
         </div>
+      </div>
+
+      {/* Global Background Toggle */}
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className={cn(
+            "p-3 rounded-2xl",
+            isGlobalBg ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+          )}>
+            <ImageIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <h4 className="font-bold text-zinc-900 dark:text-white">Genel Arka Plan</h4>
+            <p className="text-sm text-zinc-500">Ana sayfa görselini tüm sayfalarda kullan</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onToggleGlobalBg(!isGlobalBg)}
+          className={cn(
+            "w-14 h-8 rounded-full p-1 transition-colors duration-300",
+            isGlobalBg ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
+          )}
+        >
+          <div className={cn(
+            "w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300",
+            isGlobalBg ? "translate-x-6" : "translate-x-0"
+          )} />
+        </button>
       </div>
 
       {/* Background Image */}
@@ -601,15 +630,22 @@ const AboutSection = () => {
 interface SettingsProps {
   bgImage?: string;
   onBgChange?: (bg: string) => void;
+  isGlobalBg: boolean;
+  onToggleGlobalBg: (enabled: boolean) => void;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ bgImage = 'light', onBgChange = () => {} }) => {
+export const Settings: React.FC<SettingsProps> = ({ 
+  bgImage = 'light', 
+  onBgChange = () => {},
+  isGlobalBg,
+  onToggleGlobalBg
+}) => {
   const [activeTab, setActiveTab] = useState('profile');
 
   const renderContent = () => {
     switch(activeTab) {
       case 'profile': return <ProfileSection bgImage={bgImage} />;
-      case 'appearance': return <AppearanceSection bgImage={bgImage} onBgChange={onBgChange} />;
+      case 'appearance': return <AppearanceSection bgImage={bgImage} onBgChange={onBgChange} isGlobalBg={isGlobalBg} onToggleGlobalBg={onToggleGlobalBg} />;
       case 'spotlight': return <SpotlightSection />;
       case 'data': return <DataSection />;
       case 'about': return <AboutSection />;
@@ -618,7 +654,7 @@ export const Settings: React.FC<SettingsProps> = ({ bgImage = 'light', onBgChang
   };
 
   return (
-    <div className="h-full flex flex-col bg-white/50 dark:bg-black">
+    <div className="h-full flex flex-col bg-white/50 dark:bg-black/50">
       
       {/* Header Area - Fixed at top */}
       <div className="flex-none pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10">

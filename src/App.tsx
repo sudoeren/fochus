@@ -15,6 +15,7 @@ import { Stats } from './pages/Stats';
 import { Login } from './pages/Login';
 import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
+import { cn } from './lib/utils';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -28,6 +29,8 @@ const App: React.FC = () => {
   
   // Background Image State
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
+  // Global Background State
+  const [isGlobalBg, setIsGlobalBg] = useState(() => localStorage.getItem('isGlobalBg') === 'true');
 
   useEffect(() => {
     const auth = localStorage.getItem('isAuthenticated');
@@ -40,6 +43,11 @@ const App: React.FC = () => {
   const handleBgChange = (newBg: string) => {
     setBgImage(newBg);
     localStorage.setItem('bgImage', newBg);
+  };
+
+  const handleGlobalBgToggle = (enabled: boolean) => {
+    setIsGlobalBg(enabled);
+    localStorage.setItem('isGlobalBg', String(enabled));
   };
 
   const handleLogin = () => {
@@ -121,6 +129,8 @@ const App: React.FC = () => {
         return <Settings 
           bgImage={bgImage}
           onBgChange={handleBgChange}
+          isGlobalBg={isGlobalBg}
+          onToggleGlobalBg={handleGlobalBgToggle}
         />;
       default:
         return <Dashboard
@@ -141,10 +151,41 @@ const App: React.FC = () => {
     );
   }
 
+  const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
+  const showBackground = isGlobalBg || activeView === 'dashboard';
+
   return (
     <ThemeProvider>
       <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
         
+        {/* GLOBAL BACKGROUND IMAGE */}
+        {showBackground && (
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            {isCustomBg ? (
+              <img 
+                src={bgImage} 
+                alt="Custom Background" 
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100" 
+              />
+            ) : (
+              <>
+                <img 
+                  src="/light.png" 
+                  alt="Background" 
+                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'light' ? 'opacity-100' : 'opacity-0')} 
+                />
+                <img 
+                  src="/dark.png" 
+                  alt="Background" 
+                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'dark' ? 'opacity-100' : 'opacity-0')} 
+                />
+              </>
+            )}
+            {/* Overlay for readability */}
+            <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
+          </div>
+        )}
+
         {/* Floating Sidebar (Fixed Position) */}
         <Sidebar
           activeView={activeView}
@@ -156,7 +197,12 @@ const App: React.FC = () => {
         />
 
         {/* Main Content Area - With Padding for Sidebar */}
-        <main className="relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto">
+        <main className={cn(
+          "relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto",
+          // If global BG is on, we might want to ensure transparency in children, but Dashboard usually handles its own layout.
+          // Other pages might need a translucent background if they assume a solid one.
+          // For now, let's assume pages will layer on top.
+        )}>
           {renderView()}
         </main>
 
