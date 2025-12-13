@@ -13,7 +13,8 @@ import {
   Cloud,
   Moon,
   Zap,
-  Target
+  Target,
+  Plus
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
