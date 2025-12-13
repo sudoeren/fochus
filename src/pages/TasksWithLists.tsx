@@ -167,7 +167,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
           <div className="flex h-full gap-8">
 
             {/* Uncategorized List */}
-            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50">
+            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50">
               <div className="p-5 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
@@ -273,7 +273,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             {taskLists.map((list) => {
               const listTasks = getTasksByList(list.id);
               return (
-                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50 group/list">
+                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50 group/list">
                   <div className="p-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: list.color }}></div>

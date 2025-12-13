@@ -106,7 +106,10 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     return (
         <div className="h-full flex flex-col bg-white dark:bg-black/20">
             {/* Header */}
-            <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+            <header className={clsx(
+                "fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between px-6 py-3 w-[calc(100%-3rem)] max-w-4xl rounded-2xl shadow-2xl border backdrop-blur-xl transition-all duration-300",
+                "bg-white/80 dark:bg-zinc-900/80 border-white/20 dark:border-white/10"
+            )}>
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
@@ -152,7 +155,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
 
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto">
-                <div className="max-w-3xl mx-auto px-8 py-12 flex flex-col gap-8">
+                <div className="max-w-3xl mx-auto px-8 py-12 pt-32 flex flex-col gap-8">
 
                     {/* Title Input */}
                     <input

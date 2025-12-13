@@ -167,7 +167,7 @@ export const Trash: React.FC = () => {
             {filteredItems.map((item) => (
               <div
                 key={`${item.type}-${item.id}`}
-                className="group relative flex flex-col bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                className="group relative flex flex-col bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className={cn(
