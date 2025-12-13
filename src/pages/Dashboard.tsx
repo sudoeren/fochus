@@ -71,11 +71,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       <div className="p-8 lg:p-12 pb-24 overflow-y-auto custom-scrollbar h-full">
-        <div className="max-w-[1600px] mx-auto flex flex-col gap-12">
+        <div className="max-w-[1200px] mx-auto flex flex-col gap-12">
         
         {/* Header Section - Clock & Greeting */}
         <div className="flex flex-col items-start gap-2 animate-in slide-in-from-left duration-700">
-          <h1 className="text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono">
+          <h1 className="text-8xl lg:text-9xl font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono">
             {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
           </h1>
           <div className="flex items-center gap-3">
