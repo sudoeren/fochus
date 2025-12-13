@@ -53,8 +53,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const pendingTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted);
 
   return (
-    <div className="h-full w-full p-8 lg:p-12 overflow-y-auto custom-scrollbar">
-      <div className="max-w-[1600px] mx-auto flex flex-col gap-12">
+    <div className="h-full w-full relative">
+      {/* BACKGROUND IMAGE - Only visible on Dashboard, covers entire screen including sidebar area */}
+      <div className="fixed inset-0 z-[-1]">
+        <img 
+          src="/light.png" 
+          alt="Background" 
+          className="absolute inset-0 w-full h-full object-cover dark:hidden transition-opacity duration-500" 
+        />
+        <img 
+          src="/dark.png" 
+          alt="Background" 
+          className="absolute inset-0 w-full h-full object-cover hidden dark:block transition-opacity duration-500" 
+        />
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="p-8 lg:p-12 pb-24 overflow-y-auto custom-scrollbar h-full">
+        <div className="max-w-[1600px] mx-auto flex flex-col gap-12">
         
         {/* Header Section - Clock & Greeting */}
         <div className="flex flex-col items-start gap-2 animate-in slide-in-from-left duration-700">
@@ -209,6 +226,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
            </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

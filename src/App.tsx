@@ -127,15 +127,8 @@ const App: React.FC = () => {
 
   return (
     <ThemeProvider>
-      <div className="relative min-h-screen text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
+      <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
         
-        {/* GLOBAL BACKGROUND - Covers entire viewport */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
-           <BackgroundWrapper />
-           {/* Global Overlay for readability */}
-           <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
-        </div>
-
         {/* Floating Sidebar (Fixed Position) */}
         <Sidebar
           activeView={activeView}
@@ -146,10 +139,11 @@ const App: React.FC = () => {
           onOpenPomodoro={() => setShowPomodoroModal(true)}
         />
 
-        {/* Main Content Area - With Padding for Sidebar - Z-index ensures it sits above background */}
+        {/* Main Content Area - With Padding for Sidebar */}
         <main className="relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto">
           {renderView()}
         </main>
+
 
         {/* Spotlight */}
         <Spotlight
@@ -185,29 +179,5 @@ const App: React.FC = () => {
     </ThemeProvider>
   );
 };
-
-// Helper component to access theme context for the background
-const BackgroundWrapper = () => {
-  // We need to access the theme from local storage or context if available. 
-  // Since App component doesn't have direct access to theme context here easily without refactoring,
-  // we will use a simple CSS-based approach or a small internal component if ThemeProvider allows.
-  // Assuming ThemeProvider exposes useTheme, but we are inside it.
-  
-  // Actually, let's just use CSS classes with dark: modifier since Tailwind handles it via 'class' strategy on the html element.
-  return (
-    <>
-      <img 
-        src="/light.png" 
-        alt="Background" 
-        className="absolute inset-0 w-full h-full object-cover dark:hidden transition-opacity duration-500" 
-      />
-      <img 
-        src="/dark.png" 
-        alt="Background" 
-        className="absolute inset-0 w-full h-full object-cover hidden dark:block transition-opacity duration-500" 
-      />
-    </>
-  );
-}
 
 export default App;
