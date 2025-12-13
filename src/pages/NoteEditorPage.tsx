@@ -6,7 +6,7 @@ import {
     Tag,
     Trash2,
     X,
-    Palette
+    MoreHorizontal
 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
@@ -17,15 +17,6 @@ interface NoteEditorPageProps {
     onBack: () => void;
 }
 
-const NOTE_COLORS = [
-    { id: 'default', bg: 'bg-white dark:bg-zinc-950', border: 'border-zinc-200 dark:border-zinc-800' },
-    { id: 'yellow', bg: 'bg-yellow-50 dark:bg-yellow-900/10', border: 'border-yellow-200 dark:border-yellow-800/30' },
-    { id: 'green', bg: 'bg-green-50 dark:bg-green-900/10', border: 'border-green-200 dark:border-green-800/30' },
-    { id: 'blue', bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-200 dark:border-blue-800/30' },
-    { id: 'purple', bg: 'bg-purple-50 dark:bg-purple-900/10', border: 'border-purple-200 dark:border-purple-800/30' },
-    { id: 'red', bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-200 dark:border-red-800/30' },
-];
-
 export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }) => {
     const { notes, addNote, updateNote, deleteNote } = useNotes();
     const [title, setTitle] = useState('');
@@ -33,8 +24,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     const [plainContent, setPlainContent] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
-    const [selectedColor, setSelectedColor] = useState(NOTE_COLORS[0]);
-    const [showColorPicker, setShowColorPicker] = useState(false);
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [loadedNoteId, setLoadedNoteId] = useState<string | null>(null);
 
@@ -47,10 +36,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 setContent(existingNote.content);
                 setPlainContent(existingNote.plainContent || '');
                 setTags(existingNote.tags || []);
-
-                const color = NOTE_COLORS.find(c => c.id === existingNote.color) || NOTE_COLORS[0];
-                setSelectedColor(color);
-
                 setLastSaved(existingNote.updatedAt);
                 setLoadedNoteId(noteId);
             }
@@ -58,8 +43,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     }, [noteId, notes, loadedNoteId]);
 
     const handleSave = async () => {
-        // Allow saving empty note if it already exists (updating)
-        // But if creating new, need at least title or content
         if (!noteId && !title.trim() && !plainContent.trim()) return;
 
         try {
@@ -69,7 +52,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     content,
                     plainContent,
                     tags,
-                    color: selectedColor.id,
                     updatedAt: new Date()
                 });
             } else {
@@ -78,7 +60,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     content,
                     plainContent,
                     tags,
-                    color: selectedColor.id,
+                    color: 'default', // Force default color
                     isPinned: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -111,39 +93,35 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
         setTags(tags.filter(tag => tag !== tagToRemove));
     };
 
-    // Auto-save every 30 seconds
+    // Auto-save
     useEffect(() => {
         const interval = setInterval(() => {
             if (title || plainContent) {
                 handleSave();
             }
-        }, 30000);
+        }, 10000); // 10s auto-save
         return () => clearInterval(interval);
-    }, [title, content, plainContent, tags, selectedColor]);
+    }, [title, content, plainContent, tags]);
 
     return (
-        <div className={clsx("h-full flex flex-col transition-colors duration-300", selectedColor.bg)}>
+        <div className="h-full flex flex-col bg-white dark:bg-black/20">
             {/* Header */}
-            <header className={clsx(
-                "sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b backdrop-blur-md transition-colors duration-300",
-                selectedColor.bg.replace('bg-', 'bg-opacity-80 '),
-                selectedColor.border
-            )}>
+            <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
-                        className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-zinc-600 dark:text-zinc-400 transition-colors"
+                        className="p-2 -ml-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors"
                         title="Geri"
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </button>
                     <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                            {title || 'Adsız Not'}
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                            Notu Düzenle
                         </span>
                         {lastSaved && (
-                            <span className="text-xs text-zinc-400">
-                                Son düzenleme: {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">
+                                Kaydedildi: {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                         )}
                     </div>
@@ -153,46 +131,18 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     {noteId && (
                         <button
                             onClick={handleDelete}
-                            className="p-2 text-red-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title="Sil"
+                            className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                            title="Notu Sil"
                         >
                             <Trash2 className="w-5 h-5" />
                         </button>
                     )}
 
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowColorPicker(!showColorPicker)}
-                            className="p-2 rounded-lg text-zinc-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                            title="Renk Değiştir"
-                        >
-                            <Palette className="w-5 h-5" />
-                        </button>
-                        {showColorPicker && (
-                            <div className="absolute right-0 top-full mt-2 p-2 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-700 flex gap-2 animate-in fade-in slide-in-from-top-2 z-50">
-                                {NOTE_COLORS.map((color) => (
-                                    <button
-                                        key={color.id}
-                                        className={clsx(
-                                            "w-6 h-6 rounded-full border border-black/10 dark:border-white/10 ring-offset-2 ring-offset-white dark:ring-offset-zinc-800 transition-all",
-                                            color.bg.replace('/10', ''),
-                                            selectedColor.id === color.id && "ring-2 ring-zinc-400"
-                                        )}
-                                        onClick={() => {
-                                            setSelectedColor(color);
-                                            setShowColorPicker(false);
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="w-px h-6 bg-black/10 dark:bg-white/10 mx-2" />
+                    <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
                     <button
                         onClick={handleSave}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl"
                     >
                         <Save className="w-4 h-4" />
                         Kaydet
@@ -200,57 +150,58 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 </div>
             </header>
 
-            {/* Main Content Area - Centered Paper Layout */}
+            {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto">
-                <div className="max-w-4xl mx-auto px-6 py-8 sm:px-10 sm:py-12 flex flex-col gap-6">
+                <div className="max-w-3xl mx-auto px-8 py-12 flex flex-col gap-8">
 
                     {/* Title Input */}
                     <input
                         type="text"
-                        placeholder="Not Başlığı"
+                        placeholder="Başlık"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-4xl sm:text-5xl font-extrabold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 p-0 leading-tight"
+                        className="w-full text-5xl font-bold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
                     />
 
                     {/* Metadata Bar (Tags) */}
-                    <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-                        <div className="flex items-center gap-2 text-zinc-400">
-                            <Clock className="w-4 h-4" />
-                            <span>{new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</span>
+                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                        <div className="flex items-center gap-2 text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 px-3 py-1.5 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span className="text-xs font-medium">{new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                         </div>
-                        <div className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
 
                         {/* Tags Input Area */}
                         <div className="flex items-center gap-2 flex-wrap">
-                            <Tag className="w-4 h-4 text-zinc-400" />
                             {tags.map(tag => (
-                                <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs">
+                                <span key={tag} className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-medium group">
                                     #{tag}
-                                    <button onClick={() => removeTag(tag)} className="hover:text-red-500"><X size={12} /></button>
+                                    <button onClick={() => removeTag(tag)} className="text-zinc-400 hover:text-red-500 transition-colors"><X size={12} /></button>
                                 </span>
                             ))}
-                            <input
-                                type="text"
-                                value={tagInput}
-                                onChange={(e) => setTagInput(e.target.value)}
-                                onKeyDown={handleAddTag}
-                                placeholder="Etiket ekle..."
-                                className="bg-transparent border-none focus:ring-0 p-0 w-24 text-sm placeholder-zinc-400 hover:placeholder-zinc-500 focus:placeholder-zinc-300 transition-colors"
-                            />
+                            <div className="relative group">
+                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+                                <input
+                                    type="text"
+                                    value={tagInput}
+                                    onChange={(e) => setTagInput(e.target.value)}
+                                    onKeyDown={handleAddTag}
+                                    placeholder="Etiket ekle..."
+                                    className="bg-transparent border-none focus:ring-0 py-1.5 pl-9 w-32 text-sm placeholder-zinc-400 hover:placeholder-zinc-500 focus:placeholder-zinc-300 transition-colors"
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    {/* Rich Text Editor */}
-                    <div className="flex-1 min-h-[60vh] -mx-4 sm:mx-0">
+                    {/* Rich Text Editor - Distraction Free */}
+                    <div className="flex-1 min-h-[50vh] prose prose-lg dark:prose-invert max-w-none">
                         <RichTextEditor
                             value={content}
                             onChange={(val, plain) => {
                                 setContent(val);
                                 setPlainContent(plain);
                             }}
-                            placeholder="Düşüncelerinizi yazın..."
-                            className="min-h-full border-none shadow-none bg-transparent"
+                            placeholder="Hikayeni anlatmaya başla..."
+                            className="min-h-full border-none shadow-none bg-transparent !p-0 focus:ring-0"
                         />
                     </div>
                 </div>

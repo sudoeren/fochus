@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TaskList } from '../types';
 import { storageService } from '../services/storage';
+import { triggerInstantRefresh } from '../utils/refreshUtils';
 
 export const useTaskLists = () => {
   const [taskLists, setTaskLists] = useState<TaskList[]>([]);
@@ -25,7 +26,7 @@ export const useTaskLists = () => {
         description: data.description,
         color: data.color || '#3B82F6'
       });
-      
+
       await fetchTaskLists(); // Auto-refresh after adding
       return newList;
     } catch (error) {
@@ -73,6 +74,7 @@ export const useTaskLists = () => {
       await storageService.tasks.update(taskId, { listId: targetListId });
       // Refresh lists to update task counts
       await fetchTaskLists();
+      triggerInstantRefresh();
     } catch (error) {
       console.error('Error moving task to list:', error);
       throw error;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, RotateCcw, X } from 'lucide-react';
+import { Trash2, RotateCcw, X, AlertTriangle, FileText, CheckSquare, Search } from 'lucide-react';
 import { storageService } from '../services/storage';
 import { EmptyState } from '../components/EmptyState';
+import { cn } from '../lib/utils';
 
 interface DeletedItem {
   id: string;
@@ -15,6 +16,7 @@ interface DeletedItem {
 export const Trash: React.FC = () => {
   const [deletedItems, setDeletedItems] = useState<DeletedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadDeletedItems();
@@ -63,7 +65,7 @@ export const Trash: React.FC = () => {
       } else {
         await storageService.tasks.restore(item.id);
       }
-      
+
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
     } catch (error) {
       console.error('Error restoring item:', error);
@@ -81,7 +83,7 @@ export const Trash: React.FC = () => {
       } else {
         await storageService.tasks.permanentlyDelete(item.id);
       }
-      
+
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
     } catch (error) {
       console.error('Error permanently deleting item:', error);
@@ -94,119 +96,133 @@ export const Trash: React.FC = () => {
     }
 
     try {
-      // Delete all notes
-      await Promise.all(deletedItems.filter(item => item.type === 'note').map(item => 
+      await Promise.all(deletedItems.filter(item => item.type === 'note').map(item =>
         storageService.notes.permanentlyDelete(item.id)
       ));
 
-      // Delete all tasks
-      await Promise.all(deletedItems.filter(item => item.type === 'task').map(item => 
+      await Promise.all(deletedItems.filter(item => item.type === 'task').map(item =>
         storageService.tasks.permanentlyDelete(item.id)
       ));
-      
+
       setDeletedItems([]);
     } catch (error) {
       console.error('Error clearing trash:', error);
     }
   };
 
+  const filteredItems = deletedItems.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Yükleniyor...</div>
+      <div className="h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 min-h-screen">
+    <div className="h-full flex flex-col relative">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-            <Trash2 className="w-8 h-8" />
-            Çöp Kutusu
-          </h1>
-          <p className="text-gray-600 dark:text-zinc-400">
-            Silinen notlar ve görevler burada görünür. {deletedItems.length} öğe bulundu.
-          </p>
+      <div className="flex-none p-8 lg:p-10 pb-4">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Çöp Kutusu</h1>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-1">Silinen öğeleri incele veya geri yükle.</p>
+            </div>
+
+            {deletedItems.length > 0 && (
+              <button
+                onClick={clearAllTrash}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl font-medium transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Kutuyu Boşalt</span>
+              </button>
+            )}
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Silinenlerde ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
+            />
+          </div>
         </div>
-        {deletedItems.length > 0 && (
-          <button
-            onClick={clearAllTrash}
-            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg flex items-center gap-2 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-            Çöp Kutusunu Temizle
-          </button>
-        )}
       </div>
 
-      {/* Deleted Items */}
-      <div className="space-y-4">
-        {deletedItems.length > 0 ? (
-          deletedItems.map((item) => (
-            <div 
-              key={`${item.type}-${item.id}`}
-              className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-gray-200 dark:border-zinc-800 p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      item.type === 'note' 
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                    }`}>
-                      {item.type === 'note' ? 'Not' : 'Görev'}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-zinc-500">
-                      {item.deletedAt.toLocaleDateString('tr-TR')} {item.deletedAt.toLocaleTimeString('tr-TR')}
-                    </span>
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-8 lg:px-10 pb-8 custom-scrollbar">
+        {filteredItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredItems.map((item) => (
+              <div
+                key={`${item.type}-${item.id}`}
+                className="group relative flex flex-col bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={cn(
+                    "p-2 rounded-xl",
+                    item.type === 'note'
+                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                      : "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
+                  )}>
+                    {item.type === 'note' ? <FileText className="w-4 h-4" /> : <CheckSquare className="w-4 h-4" />}
                   </div>
-                  
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {item.title}
-                  </h3>
-                  
-                  {item.content && (
-                    <p className="text-gray-600 dark:text-zinc-400 line-clamp-3">
-                      {item.content.substring(0, 200)}...
-                    </p>
-                  )}
-                  
-                  {item.description && (
-                    <p className="text-gray-600 dark:text-zinc-400">
-                      {item.description}
-                    </p>
-                  )}
+                  <span className="text-xs font-medium text-zinc-400">
+                    {item.deletedAt.toLocaleDateString('tr-TR')}
+                  </span>
                 </div>
-                
-                <div className="flex items-center gap-2 ml-4">
+
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2 leading-tight">
+                  {item.title}
+                </h3>
+
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-6 flex-1">
+                  {item.type === 'note' ? item.content : item.description || 'Açıklama yok'}
+                </p>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
                   <button
                     onClick={() => restoreItem(item)}
-                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors"
-                    title="Geri yükle"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs font-bold transition-colors"
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    Geri Yükle
                   </button>
                   <button
                     onClick={() => permanentlyDelete(item)}
-                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                    title="Kalıcı olarak sil"
+                    className="p-2 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
+                    title="Kalıcı Sil"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
-          <EmptyState
-            type="trash"
-            title="Çöp kutusu boş"
-            description="Silinen notlar ve görevler burada görünür. Şu an için her şey temiz!"
-          />
+          <div className="flex flex-col items-center justify-center h-full text-zinc-400">
+            <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900/50 flex items-center justify-center mb-6">
+              <Trash2 className="w-10 h-10 opacity-30" />
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">
+              {searchTerm ? "Sonuç bulunamadı" : "Çöp kutusu boş"}
+            </h3>
+            <p className="text-zinc-500 dark:text-zinc-500">
+              {searchTerm ? "Farklı bir arama yapmayı dene." : "Geri dönüşüm kutusu tertemiz!"}
+            </p>
+          </div>
         )}
       </div>
     </div>
