@@ -12,13 +12,11 @@ import {
   Mail, 
   Calendar, 
   Award, 
-  Zap, 
   LogOut, 
   Download, 
   Upload, 
   Shield, 
   Camera,
-  Save,
   ChevronRight,
   GripVertical
 } from 'lucide-react';
@@ -283,6 +281,55 @@ const DataSection = () => {
   );
 };
 
+// 5. About Section (New)
+const AboutSection = () => {
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-zinc-900 dark:bg-black text-white rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl" />
+        
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-24 h-24 bg-white text-zinc-900 rounded-3xl flex items-center justify-center text-6xl font-bold shadow-xl mb-6">
+            F
+          </div>
+          <h2 className="text-5xl font-bold tracking-tight mb-4">FOCHUS</h2>
+          <p className="text-xl text-zinc-400 max-w-lg mx-auto leading-relaxed">
+            Açık kaynaklı, gizlilik odaklı ve minimalist kişisel üretkenlik asistanı.
+          </p>
+          <div className="mt-8 flex gap-4">
+            <span className="px-4 py-2 bg-white/10 rounded-full text-sm font-mono border border-white/10">v1.2.0</span>
+            <span className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/20">Stable</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800">
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">Geliştirici</h3>
+          <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
+            Bu proje, modern web teknolojileri kullanılarak geliştirilmiş açık kaynaklı bir inisiyatiftir. Katkıda bulunmak isterseniz GitHub deposunu ziyaret edebilirsiniz.
+          </p>
+          <a href="#" className="inline-flex items-center text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+            GitHub Profili <ChevronRight className="w-4 h-4 ml-1" />
+          </a>
+        </div>
+
+        <div className="bg-white dark:bg-zinc-900 p-8 rounded-[2rem] border border-zinc-100 dark:border-zinc-800">
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-4">Lisans</h3>
+          <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed mb-6">
+            FOCHUS, MIT Lisansı altında yayınlanmıştır. Bu, yazılımı özgürce kullanabileceğiniz, değiştirebileceğiniz ve dağıtabileceğiniz anlamına gelir.
+          </p>
+          <a href="#" className="inline-flex items-center text-zinc-900 dark:text-white font-semibold hover:underline">
+            Lisans Detayları <ChevronRight className="w-4 h-4 ml-1" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Main Page Component ---
 
 export const Settings: React.FC = () => {
@@ -294,6 +341,7 @@ export const Settings: React.FC = () => {
       case 'appearance': return <AppearanceSection />;
       case 'spotlight': return <SpotlightSection />;
       case 'data': return <DataSection />;
+      case 'about': return <AboutSection />;
       default: return <ProfileSection />;
     }
   };
@@ -330,23 +378,20 @@ export const Settings: React.FC = () => {
               active={activeTab === 'data'} 
               onClick={() => setActiveTab('data')} 
               icon={Database} 
-              label="Veri & Yedek" 
+              label="Veri" 
+            />
+            <SettingsTab 
+              active={activeTab === 'about'} 
+              onClick={() => setActiveTab('about')} 
+              icon={Info} 
+              label="Hakkında" 
             />
           </div>
         </div>
 
         {/* Content Area with Animation */}
-        <div className="min-h-[500px]">
+        <div className="min-h-[500px] pb-20">
           {renderContent()}
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-20 text-center border-t border-zinc-100 dark:border-zinc-800 pt-8">
-           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-bold text-xl mb-4">
-             F
-           </div>
-           <p className="text-zinc-500 font-medium">FOCHUS v1.2.0</p>
-           <p className="text-zinc-400 text-sm mt-1">Open Source Productivity</p>
         </div>
 
       </div>

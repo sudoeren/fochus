@@ -10,9 +10,6 @@ import {
   Plus,
   Hash,
   CornerDownLeft,
-  Calendar,
-  Clock,
-  Sparkles
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTasks } from '../hooks/useTasks';
@@ -57,99 +54,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/' && !isOpen) {
-        const activeTag = document.activeElement?.tagName.toLowerCase();
-        if (activeTag !== 'input' && activeTag !== 'textarea') {
-          e.preventDefault();
-          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
-        }
-      }
-    };
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [isOpen]);
-
-  // Static items definition
-  const staticItems: SpotlightItem[] = [
-    { 
-      id: 'new-task', 
-      label: 'Yeni Görev', 
-      detail: 'Görev ekle',
-      icon: Plus, 
-      group: 'Quick Actions', 
-      action: () => { onOpenTaskModal(); onClose(); },
-      shortcut: 'T'
-    },
-    { 
-      id: 'new-note', 
-      label: 'Yeni Not', 
-      detail: 'Not al',
-      icon: FileText, 
-      group: 'Quick Actions', 
-      action: () => { onOpenNoteModal(); onClose(); },
-      shortcut: 'N'
-    },
-    { 
-      id: 'go-dashboard', 
-      label: 'Dashboard', 
-      icon: Layout, 
-      group: 'Navigation', 
-      action: () => { onNavigate('dashboard'); onClose(); }
-    },
-    { 
-      id: 'go-tasks', 
-      label: 'Görevlerim', 
-      icon: CheckSquare, 
-      group: 'Navigation', 
-      action: () => { onNavigate('tasks'); onClose(); }
-    },
-    { 
-      id: 'go-notes', 
-      label: 'Notlarım', 
-      icon: FileText, 
-      group: 'Navigation', 
-      action: () => { onNavigate('notes'); onClose(); }
-    },
-    { 
-      id: 'go-settings', 
-      label: 'Ayarlar', 
-      icon: Settings, 
-      group: 'Navigation', 
-      action: () => { onNavigate('settings'); onClose(); }
-    },
-  ];
-
-  // Dynamic Content
-  const taskItems: SpotlightItem[] = tasks
-    .filter(t => t.title.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 3)
-    .map(t => ({
-      id: `task-${t.id}`,
-      label: t.title,
-      detail: t.listId ? `Liste: ${t.listId}` : 'Kategorisiz',
-      icon: Hash,
-      group: 'Tasks',
-      action: () => { onNavigate('tasks'); onClose(); }
-    }));
-
-  const noteItems: SpotlightItem[] = notes
-    .filter(n => n.title.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 3)
-    .map(n => ({
-      id: `note-${n.id}`,
-      label: n.title,
-      detail: new Date(n.createdAt).toLocaleDateString(),
-      icon: FileText,
-      group: 'Notes',
-      action: () => { onNavigate('notes'); onClose(); }
-    }));
-
-  const allItems = query 
-    ? [...staticItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())), ...taskItems, ...noteItems]
-    : staticItems;
-
+  // Handle keys inside component as well for navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -168,7 +73,86 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, allItems, selectedIndex, onClose]);
+  }, [isOpen, allItems, selectedIndex, onClose]); // allItems will be defined below
+
+  // Static items definition
+  const staticItems: SpotlightItem[] = [
+    { 
+      id: 'new-task', 
+      label: 'Yeni Görev', 
+      detail: 'Görev ekle',
+      icon: Plus, 
+      group: 'Eylemler', 
+      action: () => { onOpenTaskModal(); onClose(); },
+      shortcut: 'T'
+    },
+    { 
+      id: 'new-note', 
+      label: 'Yeni Not', 
+      detail: 'Not al',
+      icon: FileText, 
+      group: 'Eylemler', 
+      action: () => { onOpenNoteModal(); onClose(); },
+      shortcut: 'N'
+    },
+    { 
+      id: 'go-dashboard', 
+      label: 'Dashboard', 
+      icon: Layout, 
+      group: 'Navigasyon', 
+      action: () => { onNavigate('dashboard'); onClose(); }
+    },
+    { 
+      id: 'go-tasks', 
+      label: 'Görevlerim', 
+      icon: CheckSquare, 
+      group: 'Navigasyon', 
+      action: () => { onNavigate('tasks'); onClose(); }
+    },
+    { 
+      id: 'go-notes', 
+      label: 'Notlarım', 
+      icon: FileText, 
+      group: 'Navigasyon', 
+      action: () => { onNavigate('notes'); onClose(); }
+    },
+    { 
+      id: 'go-settings', 
+      label: 'Ayarlar', 
+      icon: Settings, 
+      group: 'Navigasyon', 
+      action: () => { onNavigate('settings'); onClose(); }
+    },
+  ];
+
+  // Dynamic Content
+  const taskItems: SpotlightItem[] = tasks
+    .filter(t => t.title.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 3)
+    .map(t => ({
+      id: `task-${t.id}`,
+      label: t.title,
+      detail: t.listId ? `Liste: ${t.listId}` : 'Kategorisiz',
+      icon: Hash,
+      group: 'Görevler',
+      action: () => { onNavigate('tasks'); onClose(); }
+    }));
+
+  const noteItems: SpotlightItem[] = notes
+    .filter(n => n.title.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 3)
+    .map(n => ({
+      id: `note-${n.id}`,
+      label: n.title,
+      detail: new Date(n.createdAt).toLocaleDateString(),
+      icon: FileText,
+      group: 'Notlar',
+      action: () => { onNavigate('notes'); onClose(); }
+    }));
+
+  var allItems = query 
+    ? [...staticItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())), ...taskItems, ...noteItems]
+    : staticItems;
 
   const renderGroupHeader = (group: string, index: number) => {
     const prevItem = allItems[index - 1];
@@ -188,7 +172,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[60vh]">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[60vh] transform origin-center">
         
         {/* Header / Input */}
         <div className="flex items-center px-4 py-4 border-b border-zinc-100 dark:border-zinc-800">
@@ -265,7 +249,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
             </div>
           ) : (
             <div className="py-12 text-center text-zinc-400 flex flex-col items-center gap-2">
-              <Sparkles className="w-8 h-8 text-zinc-300 dark:text-zinc-700" />
+              <Command className="w-8 h-8 text-zinc-300 dark:text-zinc-700" />
               <p>Sonuç yok</p>
             </div>
           )}
