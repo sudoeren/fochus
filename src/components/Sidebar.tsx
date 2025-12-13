@@ -153,11 +153,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                     active 
-                      ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md"
-                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                      ? "text-zinc-900 dark:text-white font-bold drop-shadow-md"
+                      : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                   )}
                 >
-                  <Icon className={cn("w-5 h-5 shrink-0 transition-colors", active ? "text-white dark:text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600")} />
+                  <Icon className={cn("w-5 h-5 shrink-0 transition-all", active ? "text-zinc-900 dark:text-white drop-shadow-md" : "text-zinc-400 group-hover:text-zinc-600")} />
                   <span>{item.label}</span>
 
                 </button>
@@ -172,11 +172,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                 activeView === 'settings' 
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md" 
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  ? "text-zinc-900 dark:text-white font-bold drop-shadow-md" 
+                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
               )}
             >
-              <Settings className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'settings' ? "text-white dark:text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600")} />
+              <Settings className={cn("w-5 h-5 shrink-0 transition-all", activeView === 'settings' ? "text-zinc-900 dark:text-white drop-shadow-md" : "text-zinc-400 group-hover:text-zinc-600")} />
               <span>Ayarlar</span>
 
             </button>
@@ -185,11 +185,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                 activeView === 'trash' 
-                  ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md" 
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  ? "text-zinc-900 dark:text-white font-bold drop-shadow-md" 
+                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
               )}
             >
-              <Trash2 className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'trash' ? "text-white dark:text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600")} />
+              <Trash2 className={cn("w-5 h-5 shrink-0 transition-all", activeView === 'trash' ? "text-zinc-900 dark:text-white drop-shadow-md" : "text-zinc-400 group-hover:text-zinc-600")} />
               <span>Çöp Kutusu</span>
 
             </button>
