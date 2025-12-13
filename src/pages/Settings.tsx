@@ -58,7 +58,7 @@ const SettingsTab = ({
 
 // 1. Profile Section (Updated - Compact)
 const ProfileSection = ({ bgImage }: { bgImage: string }) => {
-  const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
+  const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(true); // Default to true
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -105,7 +105,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      setShowPasswordChangeForm(false);
+      // Keep form open
     } catch (err: any) {
       setPasswordChangeError(err.message || 'Şifre güncellenirken bir hata oluştu.');
     } finally {
@@ -116,13 +116,22 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4">
       
       {/* User Card */}
       <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 group relative">
         
+        {/* Logout Button - Positioned Top Right */}
+        <button 
+          onClick={handleLogout}
+          className="absolute top-4 right-4 z-20 p-2.5 bg-white/20 hover:bg-red-500 hover:text-white backdrop-blur-md rounded-full text-white transition-all duration-300 group/logout"
+          title="Oturumu Kapat"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
+
         {/* Dynamic Background Header */}
-        <div className="absolute top-0 left-0 w-full h-32 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-28 overflow-hidden"> {/* Reduced height */}
            {isCustomBg ? (
               <img src={bgImage} className="w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" alt="Profile BG" />
            ) : (
@@ -134,94 +143,87 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-zinc-900" />
         </div>
         
-        <div className="relative pt-20 px-8 pb-8 flex flex-col items-center text-center">
-           <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">{userData.name}</h2>
-           <p className="text-zinc-500 dark:text-zinc-400 mb-6 flex items-center gap-2">
-             <User className="w-4 h-4" /> {userData.username}
+        <div className="relative pt-16 px-8 pb-6 flex flex-col items-center text-center">
+           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-0.5">{userData.name}</h2>
+           <p className="text-zinc-500 dark:text-zinc-400 mb-4 flex items-center gap-2 text-sm">
+             <User className="w-3.5 h-3.5" /> {userData.username}
            </p>
 
-           <div className="flex gap-3 mb-8">
-             <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl text-sm font-semibold border border-zinc-100 dark:border-zinc-700 flex items-center gap-2">
-               <Calendar className="w-4 h-4" /> Katılım: {userData.joinDate}
+           <div className="flex gap-3 mb-6">
+             <div className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg text-xs font-semibold border border-zinc-100 dark:border-zinc-700 flex items-center gap-2">
+               <Calendar className="w-3.5 h-3.5" /> Katılım: {userData.joinDate}
              </div>
            </div>
 
            {/* Stats section */}
-           <div className="grid grid-cols-3 gap-4 w-full pt-6 border-t border-zinc-100 dark:border-zinc-800">
+           <div className="grid grid-cols-3 gap-4 w-full pt-4 border-t border-zinc-100 dark:border-zinc-800">
               <div className="text-center">
-                <div className="text-xl font-bold text-zinc-900 dark:text-white">12</div>
-                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">12</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-zinc-900 dark:text-white">5</div>
-                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Not</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">5</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Not</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-zinc-900 dark:text-white">2.5s</div>
-                <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">2.5s</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
               </div>
            </div>
         </div>
       </div>
 
       {/* Password Change Section */}
-      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-8 border border-zinc-100 dark:border-zinc-800">
-         <div className="flex items-center justify-between mb-6">
+      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800">
+         <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
-                  <Lock className="w-5 h-5" />
+                <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
+                  <Lock className="w-4 h-4" />
                 </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
             </div>
-            <button 
-              onClick={() => setShowPasswordChangeForm(!showPasswordChangeForm)}
-              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
-            >
-              <ChevronRight className={cn("w-5 h-5 transition-transform", showPasswordChangeForm && "rotate-90")} />
-            </button>
          </div>
 
-         {showPasswordChangeForm && (
-           <form onSubmit={handlePasswordChange} className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+         <form onSubmit={handlePasswordChange} className="space-y-3">
              {passwordChangeMessage && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-medium border border-emerald-100 dark:border-emerald-800">
+                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-medium border border-emerald-100 dark:border-emerald-800">
                   {passwordChangeMessage}
                 </div>
               )}
               {passwordChangeError && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl text-sm font-medium border border-red-100 dark:border-red-800">
+                <div className="p-2.5 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-xs font-medium border border-red-100 dark:border-red-800">
                   {passwordChangeError}
                 </div>
               )}
-             <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
+             <div className="space-y-1.5">
+                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
                 <div className="relative">
                   <input 
                     type={showCurrentPassword ? "text" : "password"} 
                     placeholder="••••••••" 
-                    className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 pl-11 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                    className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 pl-10 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
                   />
-                  <Key className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
+                  <Key className="absolute left-3.5 top-3 w-3.5 h-3.5 text-zinc-400" />
                   <button 
                     type="button" 
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
                   >
-                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showCurrentPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
              </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Yeni Şifre</label>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Yeni Şifre</label>
                   <div className="relative">
                     <input 
                       type={showNewPassword ? "text" : "password"} 
                       placeholder="Yeni şifreniz" 
-                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
@@ -229,19 +231,19 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                      <button 
                        type="button" 
                        onClick={() => setShowNewPassword(!showNewPassword)}
-                       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
                      >
-                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                       {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                      </button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Tekrar</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Tekrar</label>
                   <div className="relative">
                     <input 
                       type={showConfirmNewPassword ? "text" : "password"} 
                       placeholder="Şifreyi onaylayın" 
-                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
                       value={confirmNewPassword}
                       onChange={(e) => setConfirmNewPassword(e.target.value)}
                       required
@@ -249,35 +251,26 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                     <button 
                       type="button" 
                       onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
                     >
-                      {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showConfirmNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
              </div>
-             <div className="pt-2 flex justify-end">
+             <div className="pt-1 flex justify-end">
                 <button 
                   type="submit"
                   disabled={isPasswordLoading}
-                  className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:opacity-90 transition-opacity text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-lg hover:opacity-90 transition-opacity text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isPasswordLoading ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : 'Şifreyi Güncelle'}
+                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : 'Güncelle'}
                 </button>
              </div>
            </form>
-         )}
       </div>
-
-      <button 
-        onClick={handleLogout}
-        className="w-full py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
-      >
-        <LogOut className="w-5 h-5" />
-        Oturumu Kapat
-      </button>
     </div>
   );
 };
