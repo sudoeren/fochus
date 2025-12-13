@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Home, 
   FileText, 
@@ -7,23 +7,17 @@ import {
   Settings, 
   Trash2, 
   Search,
-  Sun,
-  Moon,
-  Monitor,
   Timer,
   BarChart,
   Plus,
   Play,
   Pause,
   RotateCcw,
-  Zap,
   Briefcase,
-  Pin,
   ChevronRight
 } from 'lucide-react';
-import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
-import { useTasks } from '../hooks/useTasks'; // Added to fetch pinned task
+import { useTasks } from '../hooks/useTasks';
 import { cn } from '../lib/utils';
 
 interface SidebarProps {
@@ -48,30 +42,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onViewChange,
   onOpenSpotlight,
   onOpenNoteModal,
-  onOpenTaskModal,
-  onOpenPomodoro
+  onOpenTaskModal
 }) => {
-  // We're removing the `open` state for sidebar collapse/expand. It's always open.
-  const { theme, setTheme } = useTheme(); // Now correctly getting setTheme from useTheme
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer } = usePomodoro();
-  const { tasks } = useTasks(); // For current tasks widget
+  const { tasks } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Filter pending tasks for the widget
   const currentTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted).slice(0, 3);
-
-  // Helper functions for theme - NOW DEFINED WITHIN SCOPE
-  const cycleTheme = () => {
-    if (theme === 'light') setTheme('dark');
-    else if (theme === 'dark') setTheme('system');
-    else setTheme('light');
-  };
-
-  const getThemeIcon = () => {
-    if (theme === 'light') return <Sun className="w-4 h-4" />;
-    if (theme === 'dark') return <Moon className="w-4 h-4" />;
-    return <Monitor className="w-4 h-4" />;
-  };
 
   return (
     <>
@@ -93,11 +70,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Sidebar Container - Always Open, Floating Style */}
+      {/* Sidebar Container */}
       <aside 
         className={cn(
           "fixed top-4 bottom-4 left-4 z-40 w-[280px] flex flex-col transition-transform duration-300 ease-spring",
-          // Mobile behavior: Slide in/out
           "lg:translate-x-0", 
           mobileOpen ? "translate-x-0" : "-translate-x-[calc(100%+16px)] lg:translate-x-0"
         )}
@@ -205,82 +181,71 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </nav>
 
-          {/* 4. Widgets Area (Current Tasks & Pomodoro) */}
-          <div className="p-4 bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-800 space-y-4">
+          {/* 4. Widgets Area (Current Tasks & Pomodoro) - INTEGRATED LOOK */}
+          <div className="mt-auto bg-zinc-50/80 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800">
             
             {/* Current Tasks Widget */}
-            <div className="bg-white dark:bg-zinc-900 rounded-xl p-3 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5" /> Aktif Görevler
+            <div className="px-4 pt-4 pb-2">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Briefcase className="w-3 h-3" /> Görevler
                 </span>
-                <button onClick={() => onViewChange('tasks')} className="p-1 rounded-md text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                  <ChevronRight className="w-4 h-4" />
+                <button onClick={() => onViewChange('tasks')} className="p-1 rounded-md text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
               {currentTasks.length > 0 ? (
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   {currentTasks.map(task => (
-                    <li key={task.id} className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
-                      <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0" />
-                      <span className="truncate">{task.title}</span>
+                    <li key={task.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-colors group cursor-default">
+                      <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full shrink-0 group-hover:scale-125 transition-transform" />
+                      <span className="truncate text-xs font-medium text-zinc-600 dark:text-zinc-300">{task.title}</span>
                     </li>
                   ))}
-                  {tasks.filter(t => !t.isCompleted && !t.isDeleted).length > currentTasks.length && (
-                    <li className="text-xs text-zinc-500 text-center pt-1">
-                      ... ve {tasks.filter(t => !t.isCompleted && !t.isDeleted).length - currentTasks.length} tane daha
-                    </li>
-                  )}
                 </ul>
               ) : (
-                <div className="text-center py-4 text-zinc-400 text-sm italic">
-                  Henüz aktif görev yok.
+                <div className="text-center py-3 text-zinc-400 text-xs italic bg-white/50 dark:bg-zinc-800/50 rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700">
+                  Aktif görev yok
                 </div>
               )}
             </div>
 
-            {/* Pomodoro Widget */}
-            <div className="bg-zinc-900 dark:bg-black rounded-xl p-4 text-white shadow-lg relative overflow-hidden">
-              <div className="absolute inset-0 bg-indigo-500/10 blur-xl opacity-20 pointer-events-none" />
-              <div className="relative z-10 flex flex-col items-center">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Zap className={cn("w-3 h-3", isActive && "text-yellow-400 fill-yellow-400")} />
-                  Odak Süresi
-                </span>
-                <div className="text-3xl font-mono font-bold tracking-tight mb-4">
-                  {formatTime(timeLeft)}
-                </div>
-                <div className="flex gap-2 w-full">
-                  <button 
-                    onClick={toggleTimer}
-                    className="flex-1 h-9 bg-white text-zinc-900 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-zinc-200 transition-colors"
-                  >
-                    {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                    {isActive ? "Durdur" : "Başlat"}
-                  </button>
-                  <button onClick={resetTimer} className="w-9 h-9 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white">
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
+            {/* Pomodoro Widget - INTEGRATED */}
+            <div className="p-4 pt-2">
+              <div className="bg-zinc-900 dark:bg-black rounded-xl p-4 text-white shadow-lg relative overflow-hidden group">
+                {/* Background Pulse Effect */}
+                {isActive && (
+                  <div className="absolute inset-0 bg-indigo-500/20 animate-pulse" />
+                )}
+                
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="text-3xl font-mono font-bold tracking-tight mb-3 tabular-nums">
+                    {formatTime(timeLeft)}
+                  </div>
+                  <div className="flex gap-2 w-full">
+                    <button 
+                      onClick={toggleTimer}
+                      className={cn(
+                        "flex-1 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all active:scale-95",
+                        isActive 
+                          ? "bg-red-500 hover:bg-red-600 text-white" 
+                          : "bg-white text-zinc-900 hover:bg-zinc-200"
+                      )}
+                    >
+                      {isActive ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
+                      {isActive ? "Dur" : "Başla"}
+                    </button>
+                    <button 
+                      onClick={resetTimer}
+                      className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white active:scale-95"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Theme Toggle Button */}
-            <div className="text-center">
-                <button
-                onClick={() => { 
-                    const currentTheme = localStorage.getItem('vite-ui-theme') || 'system';
-                    if (currentTheme === 'light') setTheme('dark');
-                    else if (currentTheme === 'dark') setTheme('system');
-                    else setTheme('light');
-                }}
-                className="w-full py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
-                title="Temayı Değiştir"
-                >
-                {getThemeIcon()}
-                <span>Tema: {theme === 'light' ? 'Açık' : theme === 'dark' ? 'Koyu' : 'Sistem'}</span>
-                </button>
-            </div>
           </div>
 
         </div>
