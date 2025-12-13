@@ -48,7 +48,7 @@ export const WeeklyPlanner: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 min-h-screen bg-gray-50 dark:bg-black">
+    <div className="p-4 sm:p-6 lg:p-8 min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
         <div>

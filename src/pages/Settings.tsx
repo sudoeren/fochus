@@ -297,49 +297,49 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
     <button
       onClick={onClick}
       className={cn(
-        "relative group flex flex-col items-center p-4 rounded-3xl border-2 transition-all duration-300 w-full",
+        "relative group flex flex-col items-center p-3 rounded-2xl border-2 transition-all duration-300 w-full",
         isActive 
           ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-500/10 scale-[1.02] shadow-xl shadow-indigo-500/10" 
           : "border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg"
       )}
     >
-      <div className="w-full aspect-video rounded-2xl bg-zinc-100 dark:bg-zinc-800 mb-4 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
-        <div className={cn("absolute top-2 left-2 right-2 h-4 rounded-full opacity-50", previewColors.nav)} />
-        <div className="absolute top-8 left-2 w-1/4 bottom-2 rounded-xl opacity-30 bg-zinc-400" />
-        <div className="absolute top-8 right-2 left-[30%] h-12 rounded-xl opacity-80" style={{background: previewColors.primary}} />
+      <div className="w-full h-20 rounded-xl bg-zinc-100 dark:bg-zinc-800 mb-3 overflow-hidden relative border border-zinc-200 dark:border-zinc-700">
+        <div className={cn("absolute top-2 left-2 right-2 h-3 rounded-full opacity-50", previewColors.nav)} />
+        <div className="absolute top-7 left-2 w-1/4 bottom-2 rounded-lg opacity-30 bg-zinc-400" />
+        <div className="absolute top-7 right-2 left-[30%] h-10 rounded-lg opacity-80" style={{background: previewColors.primary}} />
         
         {isActive && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-white/5 backdrop-blur-[1px]">
-            <div className="bg-indigo-600 text-white p-2 rounded-full shadow-lg transform scale-110">
-              <Check className="w-4 h-4" />
+            <div className="bg-indigo-600 text-white p-1.5 rounded-full shadow-lg transform scale-110">
+              <Check className="w-3 h-3" />
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className={cn(
-          "p-2 rounded-xl transition-colors",
+          "p-1.5 rounded-lg transition-colors",
           isActive ? "bg-indigo-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
         )}>
-          <Icon className="w-4 h-4" />
+          <Icon className="w-3.5 h-3.5" />
         </div>
-        <span className="font-bold text-sm text-zinc-900 dark:text-white">{label}</span>
+        <span className="font-bold text-xs text-zinc-900 dark:text-white">{label}</span>
       </div>
     </button>
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+    <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-6">
       
       {/* App Theme */}
       <div>
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Uygulama Teması</h3>
-          <p className="text-sm text-zinc-500">Arayüz renklerinizi seçin.</p>
+        <div className="text-center mb-2">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">Uygulama Teması</h3>
+          <p className="text-xs text-zinc-500">Arayüz renklerinizi seçin.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <ThemeCard 
             isActive={theme === 'light'}
             onClick={() => setTheme('light')}
@@ -365,41 +365,41 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
       </div>
 
       {/* Global Background Toggle */}
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <div className={cn(
-            "p-3 rounded-2xl",
+            "p-2 rounded-xl",
             isGlobalBg ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
           )}>
-            <ImageIcon className="w-6 h-6" />
+            <ImageIcon className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-zinc-900 dark:text-white">Genel Arka Plan</h4>
-            <p className="text-sm text-zinc-500">Ana sayfa görselini tüm sayfalarda kullan</p>
+            <h4 className="font-bold text-sm text-zinc-900 dark:text-white">Genel Arka Plan</h4>
+            <p className="text-xs text-zinc-500">Ana sayfa görselini tüm sayfalarda kullan</p>
           </div>
         </div>
         <button
           onClick={() => onToggleGlobalBg(!isGlobalBg)}
           className={cn(
-            "w-14 h-8 rounded-full p-1 transition-colors duration-300",
+            "w-12 h-7 rounded-full p-1 transition-colors duration-300",
             isGlobalBg ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
           )}
         >
           <div className={cn(
-            "w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300",
-            isGlobalBg ? "translate-x-6" : "translate-x-0"
+            "w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300",
+            isGlobalBg ? "translate-x-5" : "translate-x-0"
           )} />
         </button>
       </div>
 
       {/* Background Image */}
       <div>
-        <div className="text-center mb-6">
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">Ana Sayfa Arka Planı</h3>
-          <p className="text-sm text-zinc-500">Dashboard'da görünecek görseli seçin veya yükleyin.</p>
+        <div className="text-center mb-2">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">Ana Sayfa Arka Planı</h3>
+          <p className="text-xs text-zinc-500">Dashboard'da görünecek görseli seçin veya yükleyin.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <ThemeCard 
             isActive={bgImage === 'light'}
             onClick={() => onBgChange('light')}
@@ -654,10 +654,10 @@ export const Settings: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white/50 dark:bg-black/50">
+    <div className="h-full flex flex-col">
       
       {/* Header Area - Fixed at top */}
-      <div className="flex-none pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center bg-white/50 dark:bg-black/50 backdrop-blur-sm z-10">
+      <div className="flex-none pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center z-10">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">Ayarlar</h1>
         
         {/* Segmented Control Navigation */}

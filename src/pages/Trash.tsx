@@ -119,7 +119,7 @@ export const Trash: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 min-h-screen bg-gray-50 dark:bg-black">
+    <div className="p-6 space-y-6 min-h-screen">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>

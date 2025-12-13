@@ -106,7 +106,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
   }
 
   return (
-    <div className="h-full overflow-y-auto bg-zinc-50/50 dark:bg-black p-6 lg:p-10">
+    <div className="h-full overflow-y-auto p-6 lg:p-10">
       <div className="max-w-[1600px] mx-auto space-y-10">
         
         {/* Header Section */}

@@ -55,7 +55,7 @@ export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask 
   }
 
   return (
-    <div className="h-full flex flex-col bg-zinc-50/50 dark:bg-black">
+    <div className="h-full flex flex-col">
       {/* Header */}
       <div className="flex-none p-6 lg:p-8 border-b border-zinc-200/50 dark:border-zinc-800">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-[1800px] mx-auto w-full">
