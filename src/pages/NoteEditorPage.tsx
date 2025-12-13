@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
-import clsx from 'clsx';
 
 interface NoteEditorPageProps {
     noteId?: string;
@@ -20,14 +19,14 @@ interface NoteEditorPageProps {
 export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }) => {
     const { notes, addNote, updateNote, deleteNote } = useNotes();
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState(''); // HTML content
+    const [content, setContent] = useState('');
     const [plainContent, setPlainContent] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [loadedNoteId, setLoadedNoteId] = useState<string | null>(null);
 
-    // Load note data only once when noteId changes
+    // Load note data
     useEffect(() => {
         if (noteId && noteId !== loadedNoteId) {
             const existingNote = notes.find(n => n.id === noteId);
@@ -60,7 +59,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                     content,
                     plainContent,
                     tags,
-                    color: 'default', // Force default color
+                    color: 'default',
                     isPinned: false,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -99,63 +98,52 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
             if (title || plainContent) {
                 handleSave();
             }
-        }, 10000); // 10s auto-save
+        }, 10000);
         return () => clearInterval(interval);
     }, [title, content, plainContent, tags]);
 
     return (
-        <div className="h-full flex flex-col bg-white dark:bg-black/20">
-            {/* Header */}
-            <header className={clsx(
-                "fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between px-8 py-3 w-[calc(100%-3rem)] max-w-3xl rounded-2xl shadow-2xl border backdrop-blur-xl transition-all duration-300",
-                "bg-white/80 dark:bg-zinc-900/80 border-white/20 dark:border-white/10"
-            )}>
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={onBack}
-                        className="p-2 -ml-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors"
-                        title="Geri"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </button>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                            Notu Düzenle
-                        </span>
-                        {lastSaved && (
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">
-                                Kaydedildi: {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        )}
-                    </div>
-                </div>
+        <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white overflow-hidden relative transition-colors">
 
-                <div className="flex items-center gap-2">
+            {/* Header - Integrated into app flow */}
+            <div className="flex-none px-6 py-4 flex items-center justify-between z-20">
+                <button
+                    onClick={onBack}
+                    className="p-2 -ml-2 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors"
+                >
+                    <ArrowLeft className="w-6 h-6" />
+                </button>
+
+                <div className="flex items-center gap-3">
+                    {lastSaved && (
+                        <span className="text-xs font-semibold tracking-wide text-zinc-400 uppercase hidden sm:block">
+                            {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}'de kaydedildi
+                        </span>
+                    )}
+
                     {noteId && (
                         <button
                             onClick={handleDelete}
-                            className="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
                             title="Notu Sil"
                         >
                             <Trash2 className="w-5 h-5" />
                         </button>
                     )}
 
-                    <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 mx-1" />
-
                     <button
                         onClick={handleSave}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:shadow-lg hover:scale-105 transition-all"
                     >
                         <Save className="w-4 h-4" />
                         Kaydet
                     </button>
                 </div>
-            </header>
+            </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="max-w-3xl mx-auto px-8 py-12 pt-32 flex flex-col gap-8">
+            {/* Main Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="max-w-4xl mx-auto px-8 py-8 flex flex-col gap-6">
 
                     {/* Title Input */}
                     <input
@@ -163,49 +151,63 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                         placeholder="Başlık"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-5xl font-bold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
+                        className="w-full text-5xl font-extrabold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
                     />
 
-                    {/* Metadata Bar (Tags) */}
-                    <div className="flex flex-wrap items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2 text-zinc-400 bg-zinc-50 dark:bg-zinc-900/50 px-3 py-1.5 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                    {/* Metadata Row */}
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
+                        {/* Date Pill */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-lg text-zinc-500 dark:text-zinc-400 font-medium">
                             <Clock className="w-3.5 h-3.5" />
-                            <span className="text-xs font-medium">{new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                            <span className="text-xs">
+                                {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
                         </div>
 
-                        {/* Tags Input Area */}
+                        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800" />
+
+                        {/* Tags */}
                         <div className="flex items-center gap-2 flex-wrap">
+                            <Tag className="w-4 h-4 text-zinc-400" />
+                            {tags.length === 0 && !tagInput && (
+                                <span className="text-zinc-400 text-sm">Etiket ekle...</span>
+                            )}
                             {tags.map(tag => (
-                                <span key={tag} className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-medium group">
+                                <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs font-bold group cursor-pointer border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700">
                                     #{tag}
-                                    <button onClick={() => removeTag(tag)} className="text-zinc-400 hover:text-red-500 transition-colors"><X size={12} /></button>
+                                    <button onClick={() => removeTag(tag)} className="opacity-0 group-hover:opacity-100 hover:text-red-500 ml-1"><X size={10} /></button>
                                 </span>
                             ))}
-                            <div className="relative group">
-                                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-                                <input
-                                    type="text"
-                                    value={tagInput}
-                                    onChange={(e) => setTagInput(e.target.value)}
-                                    onKeyDown={handleAddTag}
-                                    placeholder="Etiket ekle..."
-                                    className="bg-transparent border-none focus:ring-0 py-1.5 pl-9 w-32 text-sm placeholder-zinc-400 hover:placeholder-zinc-500 focus:placeholder-zinc-300 transition-colors"
-                                />
-                            </div>
+                            <input
+                                type="text"
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={handleAddTag}
+                                className="bg-transparent border-none focus:ring-0 p-0 w-32 text-sm text-zinc-900 dark:text-zinc-300 placeholder-transparent focus:placeholder-zinc-300 dark:focus:placeholder-zinc-700 transition-all font-medium"
+                                placeholder=" "
+                            />
                         </div>
                     </div>
 
-                    {/* Rich Text Editor - Distraction Free */}
-                    <div className="flex-1 min-h-[50vh] prose prose-lg dark:prose-invert max-w-none">
-                        <RichTextEditor
-                            value={content}
-                            onChange={(val, plain) => {
-                                setContent(val);
-                                setPlainContent(plain);
-                            }}
-                            placeholder="Hikayeni anlatmaya başla..."
-                            className="min-h-full border-none shadow-none bg-transparent !p-0 focus:ring-0"
-                        />
+                    {/* Editor Container */}
+                    <div className="min-h-[60vh] mt-4">
+                        <div className="prose prose-lg dark:prose-invert max-w-none 
+                            prose-p:text-zinc-600 dark:prose-p:text-zinc-400 
+                            prose-headings:text-zinc-900 dark:prose-headings:text-white 
+                            prose-strong:text-zinc-900 dark:prose-strong:text-white 
+                            prose-a:text-indigo-500 dark:prose-a:text-indigo-400
+                            prose-blockquote:border-l-4 prose-blockquote:border-zinc-200 dark:prose-blockquote:border-zinc-700
+                            prose-code:text-indigo-500 dark:prose-code:text-indigo-300 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:rounded prose-code:px-1">
+                            <RichTextEditor
+                                value={content}
+                                onChange={(val, plain) => {
+                                    setContent(val);
+                                    setPlainContent(plain);
+                                }}
+                                placeholder="Buraya yazmaya başla..."
+                                className="min-h-full border-none shadow-none bg-transparent !p-0 focus:ring-0 text-zinc-600 dark:text-zinc-300 text-lg leading-relaxed"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

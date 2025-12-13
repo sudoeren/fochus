@@ -8,9 +8,10 @@ export const useTasks = () => {
   const [loading, setLoading] = useState(false);
 
   // Load tasks from storage
-  const loadTasks = async () => {
+  // Load tasks from storage
+  const loadTasks = async (silent: boolean = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const dbTasks = await storageService.tasks.getAll() as unknown as Task[];
 
       // Order değerine göre sırala, sonra pinned görevleri en üste al
@@ -27,7 +28,7 @@ export const useTasks = () => {
     } catch (error) {
       console.error('Error loading tasks:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -38,7 +39,7 @@ export const useTasks = () => {
     // INSTANT refresh event listener
     const handleInstantRefresh = () => {
       console.log('⚡ INSTANT refresh - Tasks yeniden yükleniyor...');
-      loadTasks();
+      loadTasks(true); // Silent refresh
     };
 
     // Custom event for instant refresh
@@ -57,7 +58,7 @@ export const useTasks = () => {
 
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
-      await loadTasks(); // Local refresh
+      await loadTasks(true); // Local silent refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
       return newTask;
     } catch (error) {
@@ -73,7 +74,7 @@ export const useTasks = () => {
 
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
-      await loadTasks(); // Local refresh
+      await loadTasks(true); // Local silent refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
       return updatedTask;
     } catch (error) {
@@ -88,7 +89,7 @@ export const useTasks = () => {
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
       await storageService.tasks.delete(id);
-      await loadTasks(); // Local refresh
+      await loadTasks(true); // Local silent refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -237,11 +238,11 @@ export const useTasks = () => {
       });
 
       await Promise.all(updatePromises);
-      await loadTasks();
+      await loadTasks(true);
 
     } catch (error) {
       console.error('❌ reorderTasks HATASI:', error);
-      await loadTasks();
+      await loadTasks(true);
     }
   };
 
@@ -256,6 +257,7 @@ export const useTasks = () => {
     reorderTasks,
     getTasksByFilter,
     getTaskStats,
-    loadTasks
+    loadTasks,
+    setTasks
   };
 };

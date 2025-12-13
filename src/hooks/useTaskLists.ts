@@ -7,15 +7,15 @@ export const useTaskLists = () => {
   const [taskLists, setTaskLists] = useState<TaskList[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchTaskLists = async () => {
+  const fetchTaskLists = async (silent: boolean = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const lists = await storageService.taskLists.getAll();
       setTaskLists(lists);
     } catch (error) {
       console.error('Error fetching task lists:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -27,7 +27,7 @@ export const useTaskLists = () => {
         color: data.color || '#3B82F6'
       });
 
-      await fetchTaskLists(); // Auto-refresh after adding
+      await fetchTaskLists(true); // Silent refresh
       return newList;
     } catch (error) {
       console.error('Error adding task list:', error);
@@ -38,7 +38,7 @@ export const useTaskLists = () => {
   const updateTaskList = async (id: string, data: Partial<TaskList>) => {
     try {
       const updatedList = await storageService.taskLists.update(id, data);
-      await fetchTaskLists(); // Auto-refresh after updating
+      await fetchTaskLists(true); // Silent refresh
       return updatedList;
     } catch (error) {
       console.error('Error updating task list:', error);
@@ -49,7 +49,7 @@ export const useTaskLists = () => {
   const deleteTaskList = async (id: string) => {
     try {
       await storageService.taskLists.delete(id);
-      await fetchTaskLists(); // Auto-refresh after deleting
+      await fetchTaskLists(true); // Silent refresh
     } catch (error) {
       console.error('Error deleting task list:', error);
       throw error;
@@ -62,7 +62,7 @@ export const useTaskLists = () => {
       for (let i = 0; i < reorderedLists.length; i++) {
         await storageService.taskLists.update(reorderedLists[i].id, { order: i });
       }
-      await fetchTaskLists(); // Auto-refresh after reordering
+      await fetchTaskLists(true); // Silent refresh
     } catch (error) {
       console.error('Error reordering task lists:', error);
       throw error;
@@ -73,7 +73,7 @@ export const useTaskLists = () => {
     try {
       await storageService.tasks.update(taskId, { listId: targetListId });
       // Refresh lists to update task counts
-      await fetchTaskLists();
+      await fetchTaskLists(true); // Silent refresh
       triggerInstantRefresh();
     } catch (error) {
       console.error('Error moving task to list:', error);

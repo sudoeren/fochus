@@ -11,7 +11,7 @@ interface TasksNewProps {
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { tasks, loading, deleteTask, toggleTask } = useTasks();
+  const { tasks, loading, deleteTask, toggleTask, setTasks } = useTasks();
   const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
@@ -68,12 +68,27 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
     const { source, destination, draggableId } = result;
 
-    // If moving between lists (or even within logic for now, though restricted by activeTab)
-    if (source.droppableId !== destination.droppableId) {
-      const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
+    // Same container? No change needed in list logic (reorder not implemented here yet)
+    if (source.droppableId === destination.droppableId) return;
 
-      // Call moveTaskToList which handles the refresh internally now
-      await moveTaskToList(draggableId, targetListId);
+    const targetListId = destination.droppableId === 'uncategorized' ? undefined : destination.droppableId;
+
+    // 1. Optimistic Update
+    const updatedTasks = tasks.map(task => {
+      if (task.id === draggableId) {
+        return { ...task, listId: targetListId };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+
+    // 2. Server Update
+    try {
+      await moveTaskToList(draggableId, targetListId || null);
+    } catch (error) {
+      console.error("Failed to move task", error);
+      // Revert if failed (optional but recommended)
+      // triggerInstantRefresh(); // Fallback to refresh from server
     }
   };
 
@@ -170,7 +185,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
           <div className="flex h-full gap-8">
 
             {/* Uncategorized List */}
-            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-800/50">
+            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <div className="p-5 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
@@ -186,7 +201,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-100/50 dark:bg-zinc-800/50' : ''
+                    className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/30' : ''
                       }`}
                   >
                     {uncategorizedTasks.map((task, index) => (
@@ -196,10 +211,16 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm transition-all duration-200 ${snapshot.isDragging
-                              ? 'shadow-xl rotate-2 scale-[1.02] z-50 ring-2 ring-zinc-900 dark:ring-white'
-                              : 'hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700'
+                            className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
+                              ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent z-[9999]'
+                              : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
                               } ${task.isCompleted ? 'opacity-50' : ''}`}
+                            style={{
+                              ...provided.draggableProps.style,
+                              // Force z-index and remove transition during drag to prevent lag
+                              zIndex: snapshot.isDragging ? 9999 : 'auto',
+                              transition: snapshot.isDragging ? 'none' : 'all 0.2s',
+                            }}
                           >
                             <div className="flex gap-3">
                               {/* Toggle Checkbox */}
@@ -212,6 +233,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                   ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
                                   : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
                                   }`}
+                                onMouseDown={(e) => e.stopPropagation()}
                               >
                                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
                                   <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -248,12 +270,14 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                   <button
                                     onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
                                     className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                    onMouseDown={(e) => { e.stopPropagation(); }}
                                   >
                                     <Edit3 className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
                                     className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    onMouseDown={(e) => { e.stopPropagation(); }}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -283,7 +307,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             {taskLists.map((list) => {
               const listTasks = getTasksByList(list.id);
               return (
-                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-800/50 group/list">
+                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm group/list">
                   <div className="p-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: list.color }}></div>
@@ -313,11 +337,12 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   </div>
 
                   <Droppable droppableId={list.id}>
+
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-100/50 dark:bg-zinc-800/50' : ''
+                        className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/30' : ''
                           }`}
                       >
                         {listTasks.map((task, index) => (
@@ -327,10 +352,16 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm transition-all duration-200 ${snapshot.isDragging
-                                  ? 'shadow-xl rotate-2 scale-[1.02] z-50 ring-2 ring-zinc-900 dark:ring-white'
-                                  : 'hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700'
+                                className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
+                                  ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent z-[9999]'
+                                  : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
                                   } ${task.isCompleted ? 'opacity-50' : ''}`}
+                                style={{
+                                  ...provided.draggableProps.style,
+                                  // Force z-index and remove transition during drag to prevent lag
+                                  zIndex: snapshot.isDragging ? 9999 : 'auto',
+                                  transition: snapshot.isDragging ? 'none' : 'all 0.2s',
+                                }}
                               >
                                 <div className="flex gap-3">
                                   {/* Toggle Checkbox */}
@@ -343,6 +374,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                       ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
                                       : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
                                       }`}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                   >
                                     <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
                                       <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -379,12 +411,14 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                       <button
                                         onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
                                         className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                        onMouseDown={(e) => e.stopPropagation()}
                                       >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
                                       <button
                                         onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
                                         className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                        onMouseDown={(e) => e.stopPropagation()}
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>

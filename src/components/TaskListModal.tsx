@@ -17,7 +17,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
   const [title, setTitle] = useState(editingList?.title || '');
   const [color, setColor] = useState(editingList?.color || 'blue');
   const [icon, setIcon] = useState(editingList?.icon || 'list');
-  const { createTaskList, updateTaskList } = useTaskLists();
+  const { addTaskList, updateTaskList } = useTaskLists();
 
   if (!isOpen) return null;
 
@@ -25,12 +25,9 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
     e.preventDefault();
     try {
       if (editingList) {
-        await updateTaskList.mutateAsync({
-          id: editingList.id,
-          data: { title, color, icon }
-        });
+        await updateTaskList(editingList.id, { title, color, icon });
       } else {
-        await createTaskList.mutateAsync({
+        await addTaskList({
           title,
           color,
           icon
@@ -63,17 +60,17 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div 
+      <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      
+
       <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl transform transition-all overflow-hidden border border-zinc-200 dark:border-zinc-800">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
             {editingList ? 'Listeyi Düzenle' : 'Yeni Liste'}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500"
           >
@@ -134,8 +131,8 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
                     onClick={() => setIcon(item.id)}
                     className={cn(
                       "p-3 rounded-xl transition-all border",
-                      icon === item.id 
-                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400" 
+                      icon === item.id
+                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400"
                         : "bg-zinc-50 dark:bg-zinc-800/50 border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
                     )}
                   >
