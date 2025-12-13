@@ -159,9 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 >
                   <Icon className={cn("w-5 h-5 shrink-0 transition-colors", active ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
                   <span>{item.label}</span>
-                  {active && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-                  )}
+
                 </button>
               );
             })}
@@ -180,9 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <Settings className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'settings' ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
               <span>Ayarlar</span>
-              {activeView === 'settings' && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-              )}
+
             </button>
             <button
               onClick={() => { onViewChange('trash'); setMobileOpen(false); }}
@@ -195,9 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <Trash2 className={cn("w-5 h-5 shrink-0 transition-colors", activeView === 'trash' ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400 group-hover:text-zinc-600")} />
               <span>Çöp Kutusu</span>
-              {activeView === 'trash' && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-indigo-600 dark:bg-indigo-400 rounded-r-full" />
-              )}
+
             </button>
           </nav>
 
