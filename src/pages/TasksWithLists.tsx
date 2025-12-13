@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle, Circle, Trash2, Pin, GripVertical, Edit3, List, MoreVertical, Search, Grid3X3 } from 'lucide-react';
+import { Plus, Calendar, CheckCircle, Circle, Trash2, Edit3, MoreVertical, Search } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
@@ -11,7 +11,7 @@ interface TasksNewProps {
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { tasks, loading, deleteTask, toggleTask, pinTask } = useTasks();
+  const { tasks, loading, deleteTask, toggleTask } = useTasks();
   const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
@@ -37,10 +37,6 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
   const handleToggleTask = async (id: string) => {
     await toggleTask(id);
-  };
-
-  const handlePinTask = async (id: string, currentPinned: boolean) => {
-    await pinTask(id, !currentPinned);
   };
 
   const handleDeleteTask = async (id: string) => {
@@ -72,9 +68,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
     const { source, destination, draggableId } = result;
 
-    // If moving between lists
+    // If moving between lists (or even within logic for now, though restricted by activeTab)
     if (source.droppableId !== destination.droppableId) {
       const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
+
+      // Call moveTaskToList which handles the refresh internally now
       await moveTaskToList(draggableId, targetListId);
     }
   };
@@ -197,63 +195,70 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`group relative mb-3 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
-                              } ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
+                            {...provided.dragHandleProps}
+                            className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm transition-all duration-200 ${snapshot.isDragging
+                              ? 'shadow-xl rotate-2 scale-[1.02] z-50 ring-2 ring-zinc-900 dark:ring-white'
+                              : 'hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700'
+                              } ${task.isCompleted ? 'opacity-50' : ''}`}
                           >
-                            {/* Drag Handle (Hidden but active area usually, or visible on hover) */}
-                            <div {...provided.dragHandleProps} className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100">
-                              <GripVertical className="w-4 h-4" />
-                            </div>
-
-                            <div className="flex items-start gap-4">
+                            <div className="flex gap-3">
+                              {/* Toggle Checkbox */}
                               <button
-                                onClick={() => handleToggleTask(task.id)}
-                                className={`mt-0.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-emerald-500' : 'text-zinc-300 hover:text-emerald-500'}`}
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent drag start when clicking button
+                                  handleToggleTask(task.id);
+                                }}
+                                className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${task.isCompleted
+                                  ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
+                                  : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
+                                  }`}
                               >
-                                {task.isCompleted ? <CheckCircle className="w-6 h-6" /> : <Circle className="w-6 h-6 stroke-[1.5]" />}
+                                <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
+                                  <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
                               </button>
 
-                              <div className="flex-1 min-w-0 pr-6">
-                                <h4 className={`text-base font-semibold leading-tight ${task.isCompleted ? 'line-through text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                              {/* Task Content */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                   {task.title}
                                 </h4>
 
                                 {task.description && (
-                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
+                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-2 leading-relaxed">
                                     {task.description}
                                   </p>
                                 )}
 
-                                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                {/* Meta Row - Conditional rendering */}
+                                <div className="flex items-center gap-2 mt-2">
                                   {task.dueDate && (
-                                    <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md ${new Date(task.dueDate) < new Date() && !task.isCompleted
+                                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${new Date(task.dueDate) < new Date() && !task.isCompleted
                                       ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                                      : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                                      : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
                                       }`}>
                                       <Calendar className="w-3 h-3" />
-                                      <span>{formatDate(new Date(task.dueDate))}</span>
-                                    </div>
-                                  )}
-
-                                  {task.isPinned && (
-                                    <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
-                                      <Pin className="w-3 h-3 fill-current" />
+                                      {formatDate(new Date(task.dueDate))}
                                     </div>
                                   )}
                                 </div>
 
-                                {/* Quick Actions Row */}
-                                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button onClick={() => onEditTask(task)} className="p-1.5 text-zinc-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Düzenle">
+                                {/* Hover Actions */}
+                                <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-900 pl-2 shadow-[-10px_0_10px_-5px_rgba(255,255,255,1)] dark:shadow-[-10px_0_10px_-5px_rgba(24,24,27,1)]">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                                    className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                  >
                                     <Edit3 className="w-3.5 h-3.5" />
                                   </button>
-                                  <button onClick={() => handlePinTask(task.id, task.isPinned || false)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-zinc-400 hover:text-amber-500 hover:bg-amber-50'}`} title="Sabitle">
-                                    <Pin className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ml-auto" title="Sil">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                    className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                  >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
+
                               </div>
                             </div>
                           </div>
@@ -321,62 +326,70 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className={`group relative mb-3 p-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
-                                  } ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
+                                {...provided.dragHandleProps}
+                                className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-sm transition-all duration-200 ${snapshot.isDragging
+                                  ? 'shadow-xl rotate-2 scale-[1.02] z-50 ring-2 ring-zinc-900 dark:ring-white'
+                                  : 'hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700'
+                                  } ${task.isCompleted ? 'opacity-50' : ''}`}
                               >
-                                <div {...provided.dragHandleProps} className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100">
-                                  <GripVertical className="w-4 h-4" />
-                                </div>
-
-                                <div className="flex items-start gap-4">
+                                <div className="flex gap-3">
+                                  {/* Toggle Checkbox */}
                                   <button
-                                    onClick={() => handleToggleTask(task.id)}
-                                    className={`mt-0.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-emerald-500' : 'text-zinc-300 hover:text-emerald-500'}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // Prevent drag start when clicking button
+                                      handleToggleTask(task.id);
+                                    }}
+                                    className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${task.isCompleted
+                                      ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
+                                      : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
+                                      }`}
                                   >
-                                    {task.isCompleted ? <CheckCircle className="w-6 h-6" /> : <Circle className="w-6 h-6 stroke-[1.5]" />}
+                                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
+                                      <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
                                   </button>
 
-                                  <div className="flex-1 min-w-0 pr-6">
-                                    <h4 className={`text-base font-semibold leading-tight ${task.isCompleted ? 'line-through text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                  {/* Task Content */}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                       {task.title}
                                     </h4>
 
                                     {task.description && (
-                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
+                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-2 leading-relaxed">
                                         {task.description}
                                       </p>
                                     )}
 
-                                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                    {/* Meta Row - Conditional rendering */}
+                                    <div className="flex items-center gap-2 mt-2">
                                       {task.dueDate && (
-                                        <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md ${new Date(task.dueDate) < new Date() && !task.isCompleted
+                                        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${new Date(task.dueDate) < new Date() && !task.isCompleted
                                           ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                                          : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                                          : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
                                           }`}>
                                           <Calendar className="w-3 h-3" />
-                                          <span>{formatDate(new Date(task.dueDate))}</span>
-                                        </div>
-                                      )}
-
-                                      {task.isPinned && (
-                                        <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
-                                          <Pin className="w-3 h-3 fill-current" />
+                                          {formatDate(new Date(task.dueDate))}
                                         </div>
                                       )}
                                     </div>
 
-                                    {/* Quick Actions Row */}
-                                    <div className="flex items-center gap-1 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <button onClick={() => onEditTask(task)} className="p-1.5 text-zinc-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Düzenle">
+                                    {/* Hover Actions */}
+                                    <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-900 pl-2 shadow-[-10px_0_10px_-5px_rgba(255,255,255,1)] dark:shadow-[-10px_0_10px_-5px_rgba(24,24,27,1)]">
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                                        className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                      >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
-                                      <button onClick={() => handlePinTask(task.id, task.isPinned || false)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-zinc-400 hover:text-amber-500 hover:bg-amber-50'}`} title="Sabitle">
-                                        <Pin className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ml-auto" title="Sil">
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                        className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                      >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
+
                                   </div>
                                 </div>
                               </div>
