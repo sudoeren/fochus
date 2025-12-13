@@ -83,6 +83,7 @@ const App: React.FC = () => {
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
+          onOpenSpotlight={() => setIsSpotlightOpen(true)}
         />;
       case 'note-editor':
         return <NoteEditorPage

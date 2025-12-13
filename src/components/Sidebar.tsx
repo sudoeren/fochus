@@ -110,10 +110,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* 2. Quick Actions */}
-          <div className="px-5 mb-4 space-y-3">
+          <div className="px-5 mb-2 space-y-4">
             <button
               onClick={onOpenSpotlight}
-              className="w-full flex items-center gap-3 px-3 py-3 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group text-zinc-500 dark:text-zinc-400"
+              className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 transition-all group text-zinc-500 dark:text-zinc-400"
               title="Ara ( / )"
             >
               <Search className="w-4 h-4 shrink-0 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
@@ -121,24 +121,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <kbd className="ml-auto text-[10px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded px-1.5 py-0.5 opacity-50">/</kbd>
             </button>
 
-            <div className="flex gap-2">
-              <button 
-                onClick={onOpenTaskModal}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 active:scale-95 border border-transparent"
-              >
-                <Plus className="w-4 h-4" /> Görev
-              </button>
-              <button 
-                onClick={onOpenNoteModal}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 rounded-xl text-xs font-bold transition-all active:scale-95"
-              >
-                <Plus className="w-4 h-4" /> Not
-              </button>
+            <div className="grid grid-cols-2 gap-3">
+               <button
+                  onClick={onOpenTaskModal}
+                  className="col-span-1 flex flex-col items-center justify-center gap-2 p-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-zinc-900/20 active:scale-95 group"
+                >
+                  <div className="p-2 bg-white/10 dark:bg-black/10 rounded-full group-hover:scale-110 transition-transform">
+                    <Plus className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-bold">Yeni Görev</span>
+                </button>
+                
+                <button
+                  onClick={onOpenNoteModal}
+                  className="col-span-1 flex flex-col items-center justify-center gap-2 p-4 bg-indigo-50 dark:bg-zinc-800/50 text-indigo-600 dark:text-indigo-400 rounded-2xl border border-indigo-100 dark:border-zinc-700 hover:bg-indigo-100 dark:hover:bg-zinc-800 transition-all active:scale-95 group"
+                >
+                   <div className="p-2 bg-white dark:bg-zinc-900 rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-bold">Yeni Not</span>
+                </button>
             </div>
           </div>
 
           {/* 3. Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto px-5 py-2 space-y-1 custom-scrollbar">
+          <nav className="flex-1 overflow-y-auto px-5 py-4 space-y-1 custom-scrollbar">
             {mainNav.map(item => {
               const Icon = item.icon;
               const active = activeView === item.id;
@@ -199,7 +206,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
 
           {/* 4. Functional Widgets Area */}
-          <div className="flex flex-col gap-4 p-4 bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex flex-col gap-4 px-4 pb-6 mt-2">
             
             {/* Functional Tasks Widget */}
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col gap-3">

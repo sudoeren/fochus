@@ -37,28 +37,33 @@ export const usePomodoro = () => {
   useEffect(() => {
     if (state.isActive && state.timeLeft > 0) {
       intervalRef.current = setInterval(() => {
-        setState((prev) => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-      }, 1000);
-    } else if (state.timeLeft === 0) {
-      // Timer finished
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      
-      // Play notification sound
-      const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-      audio.play().catch(e => console.log('Audio play failed', e));
+        setState((prev) => {
+          if (prev.timeLeft <= 0) {
+            // Timer finished within the interval
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            
+            // Play notification sound
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            audio.play().catch(e => console.log('Audio play failed', e));
 
-      // Auto-switch mode logic could go here, for now just stop
-      setState(prev => ({ 
-        ...prev, 
-        isActive: false,
-        cycles: prev.mode === 'work' ? prev.cycles + 1 : prev.cycles 
-      }));
+            return { 
+              ...prev, 
+              isActive: false, 
+              timeLeft: 0,
+              cycles: prev.mode === 'work' ? prev.cycles + 1 : prev.cycles 
+            };
+          }
+          return { ...prev, timeLeft: prev.timeLeft - 1 };
+        });
+      }, 1000);
+    } else {
+       if (intervalRef.current) clearInterval(intervalRef.current);
     }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [state.isActive, state.timeLeft]);
+  }, [state.isActive, state.mode]);
 
   const toggleTimer = () => {
     setState(prev => ({ ...prev, isActive: !prev.isActive }));
