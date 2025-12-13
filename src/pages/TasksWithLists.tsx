@@ -16,7 +16,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [searchTerm, setSearchTerm] = useState('');
 
 
@@ -82,7 +82,13 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
 
   const getTasksByList = (listId: string | null) => {
-    return tasks.filter(task => (task as any).listId === listId && !task.isDeleted);
+    return tasks.filter(task => {
+      const matchesList = (task as any).listId === listId && !task.isDeleted;
+      const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = activeTab === 'completed' ? task.isCompleted : !task.isCompleted;
+
+      return matchesList && matchesSearch && matchesStatus;
+    });
   };
 
   const uncategorizedTasks = getTasksByList(null);
@@ -110,24 +116,24 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             <div className="flex items-center gap-3">
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
                 <button
-                  onClick={() => setViewMode('board')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'board'
+                  onClick={() => setActiveTab('active')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'active'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                 >
-                  <Grid3X3 className="w-4 h-4" />
-                  <span>Pano</span>
+                  <Circle className="w-4 h-4" />
+                  <span>Mevcut</span>
                 </button>
                 <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list'
+                  onClick={() => setActiveTab('completed')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'completed'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
                     }`}
                 >
-                  <List className="w-4 h-4" />
-                  <span>Liste</span>
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Tamamlanan</span>
                 </button>
               </div>
 

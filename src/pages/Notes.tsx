@@ -31,7 +31,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
   const NoteCard = ({ note }: { note: any }) => (
     <div
       onClick={() => onEditNote(note.id)}
-      className="group relative flex flex-col mb-6 break-inside-avoid bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+      className="group relative flex flex-col mb-6 break-inside-avoid bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
     >
 
       {/* Pin Badge */}
