@@ -1,5 +1,26 @@
 node_modules
+dist
+dist-electron
+
 # Keep environment variables out of version control
 .env
+.env.local
+.env.*.local
 
+# Prisma
 /generated/prisma
+backend/node_modules
+backend/dist
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+*.swp
+*.swo

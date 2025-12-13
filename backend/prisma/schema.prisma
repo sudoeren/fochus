@@ -1,0 +1,141 @@
+// Prisma Schema for Fokus App
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notes           Note[]
+  tasks           Task[]
+  taskLists       TaskList[]
+  pomodoroSessions PomodoroSession[]
+  settings        UserSettings?
+
+  @@map("users")
+}
+
+// User Settings
+model UserSettings {
+  id       String @id @default(cuid())
+  userId   String @unique
+  theme    String @default("system") // light, dark, system
+  language String @default("tr") // tr, en
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// Notes
+model Note {
+  id        String    @id @default(cuid())
+  title     String
+  content   String    @default("")
+  isPinned  Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  linkedTasks Task[] @relation("NoteToTask")
+
+  @@index([userId])
+  @@index([isDeleted])
+  @@map("notes")
+}
+
+// Task Lists
+model TaskList {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  color       String   @default("#3B82F6")
+  order       Int      @default(0)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+
+  @@index([userId])
+  @@map("task_lists")
+}
+
+// Tasks
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("PENDING") // PENDING, COMPLETED, POSTPONED
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  isPinned    Boolean   @default(false)
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Reminder & Recurring
+  hasReminder       Boolean   @default(false)
+  reminderAt        DateTime?
+  isRecurring       Boolean   @default(false)
+  recurringType     String?   // daily, weekly, monthly
+  recurringInterval Int?
+  recurringDays     String?   // JSON array of days for weekly
+  lastCompleted     DateTime?
+  nextDue           DateTime?
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  listId String?
+  list   TaskList? @relation(fields: [listId], references: [id], onDelete: SetNull)
+
+  linkedNoteId String?
+  linkedNote   Note?   @relation("NoteToTask", fields: [linkedNoteId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([listId])
+  @@index([isDeleted])
+  @@index([isCompleted])
+  @@map("tasks")
+}
+
+// Pomodoro Sessions
+model PomodoroSession {
+  id        String   @id @default(cuid())
+  startTime DateTime
+  endTime   DateTime
+  duration  Int      // in seconds
+  mode      String   // work, shortBreak, longBreak
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([startTime])
+  @@map("pomodoro_sessions")
+}

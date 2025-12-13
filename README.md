@@ -1,6 +1,26 @@
 # Fokus - Kişisel Üretkenlik Uygulaması
 
-Electron.js + React + TypeScript + Tailwind CSS + Prisma teknolojileri kullanılarak geliştirilmiş modern bir masaüstü üretkenlik uygulaması.
+Modern bir kişisel üretkenlik uygulaması. Not alma, görev yönetimi, Pomodoro zamanlayıcı ve haftalık planlama özellikleri.
+
+## 🚀 Teknoloji Stack
+
+### Frontend
+- React 19 + TypeScript
+- Tailwind CSS
+- Vite
+- Lucide React Icons
+
+### Backend
+- Node.js + Express
+- TypeScript
+- PostgreSQL
+- Prisma ORM
+- JWT Authentication
+
+### DevOps
+- Docker & Docker Compose
+- Coolify Compatible
+- Nginx (Production)
 
 ## ✨ Özellikler
 
@@ -32,193 +52,145 @@ Electron.js + React + TypeScript + Tailwind CSS + Prisma teknolojileri kullanıl
 - Gerçek zamanlı tema değişimi
 - Tüm bileşenler için uyumlu renkler
 
-### 📱 Responsive Tasarım
-- **Mobile-first** yaklaşım
-- Telefon, tablet ve masaüstü uyumlu
-- Responsive sidebar navigasyon
-- Touch-friendly arayüz
-
-### 💾 Çevrimdışı Çalışma
-- SQLite veritabanı
-- Yerel veri depolama
-- Hızlı performans
-- İstatistik kartları ve ilerleme takibi
-
-### 🔍 Spotlight Arama
-- Ctrl+K ile hızlı arama ve komut çalıştırma
-- Navigasyon kısayolları
-- Hızlı görev ve not oluşturma
-- Özelleştirilebilir komut sıralaması
-- Akıllı filtreleme ve öneriler
-
-### 📅 Haftalık Planlayıcı
-- 7 günlük detaylı görünüm
-- Gün bazlı görev organizasyonu
-- Haftalık özet ve analytics
-- İlerleme çubukları
-- Geçmiş hafta karşılaştırmaları
-
-### 🎨 Arayüz ve Tema
-- Açık, koyu ve sistem modu desteği
-- Tailwind CSS ile modern tasarım
-- Responsive layout (masaüstü odaklı)
-- Lucide React ikonları
-- Türkçe dil desteği
-- Minimalist ve temiz arayüz
-
-## 🛠️ Teknolojiler
-
-- **Frontend**: React 18 + TypeScript + Tailwind CSS
-- **Desktop Framework**: Electron.js
-- **Veritabanı**: SQLite + Prisma ORM
-- **Build Tool**: Vite
-- **İkonlar**: Lucide React
-- **Paketleme**: Electron Builder
-
-## 🚀 Kurulum
+## 📦 Kurulum
 
 ### Gereksinimler
-- Node.js 18+
-- npm veya yarn
+- Node.js 20+
+- Docker & Docker Compose (opsiyonel)
+- PostgreSQL 16+ (Docker olmadan)
 
-### Geliştirme Ortamı
+### 1. Docker ile Başlatma (Önerilen)
 
-1. **Bağımlılıkları kur:**
-   ```bash
-   npm install
-   ```
-
-2. **Veritabanını hazırla:**
-   ```bash
-   npm run db:push
-   npm run db:generate
-   ```
-
-3. **Geliştirme sunucusunu başlat:**
-   ```bash
-   npm run dev
-   ```
-
-## 📦 Build ve Dağıtım
-
-### Development Build
 ```bash
-npm run build
+# Repository'yi klonla
+git clone <repo-url>
+cd fokus
+
+# .env dosyasını oluştur
+cp .env.example .env
+
+# Docker ile başlat (tüm servisler)
+docker-compose up -d
+
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:3001
+# PostgreSQL: localhost:5432
 ```
 
-### Production Build
+### 2. Yerel Geliştirme (Docker olmadan)
+
 ```bash
-npm run build:app
+# Backend kurulumu
+cd backend
+npm install
+cp .env.example .env
+# .env dosyasında DATABASE_URL'i güncelleyin
+
+# Veritabanı migration
+npx prisma migrate dev
+
+# Backend'i başlat
+npm run dev
+
+# Frontend kurulumu (yeni terminal)
+cd ..
+npm install
+npm run dev
 ```
 
-Bu komut `dist-app/` klasöründe platform-specific kurulum dosyaları oluşturur.
+## 🐳 Coolify Deployment
 
-## 🗄️ Veritabanı
+### Backend Deployment
+1. Coolify'da yeni servis oluştur
+2. Repository'yi bağla
+3. Build Path: `backend`
+4. Dockerfile: `backend/Dockerfile`
+5. Environment Variables:
+   - `DATABASE_URL`: PostgreSQL connection string
+   - `JWT_SECRET`: Güçlü bir secret key
+   - `CORS_ORIGIN`: Frontend URL
 
-Uygulama SQLite veritabanı kullanır ve tamamen çevrimdışı çalışır. Veritabanı dosyası (`fokus.db`) proje klasöründe saklanır.
+### Frontend Deployment
+1. Coolify'da yeni servis oluştur
+2. Repository'yi bağla
+3. Build Path: `.` (root)
+4. Dockerfile: `Dockerfile`
+5. Build Args:
+   - `VITE_API_URL`: Backend API URL
 
-### Veritabanı Komutları
-```bash
-# Şemayı sync et
-npm run db:push
+## 🔧 API Endpoints
 
-# Prisma client oluştur
-npm run db:generate  
+### Authentication
+- `POST /api/auth/register` - Kayıt ol
+- `POST /api/auth/login` - Giriş yap
+- `GET /api/auth/me` - Kullanıcı bilgileri
 
-# Veritabanı studio aç
-npm run db:studio
-```
+### Notes
+- `GET /api/notes` - Tüm notlar
+- `POST /api/notes` - Not oluştur
+- `PUT /api/notes/:id` - Not güncelle
+- `DELETE /api/notes/:id` - Not sil
 
-## 📂 Proje Yapısı
+### Tasks
+- `GET /api/tasks` - Tüm görevler
+- `POST /api/tasks` - Görev oluştur
+- `PUT /api/tasks/:id` - Görev güncelle
+- `DELETE /api/tasks/:id` - Görev sil
+
+### Task Lists
+- `GET /api/task-lists` - Tüm listeler
+- `POST /api/task-lists` - Liste oluştur
+
+### Pomodoro
+- `GET /api/pomodoro` - Tüm oturumlar
+- `GET /api/pomodoro/stats` - İstatistikler
+- `POST /api/pomodoro` - Oturum kaydet
+
+## 📁 Proje Yapısı
 
 ```
 fokus/
-├── src/                 # React frontend kodu
-│   ├── components/      # React bileşenleri
-│   ├── pages/          # Sayfa bileşenleri
-│   ├── types.ts        # TypeScript tanımları
-│   └── index.css       # Global stiller
-├── electron/           # Electron main process
-│   ├── main.ts         # Ana Electron dosyası
-│   ├── preload.ts      # Preload script
-│   └── utils.ts        # Yardımcı fonksiyonlar
-├── prisma/             # Veritabanı şeması
-│   └── schema.prisma   # Prisma şema dosyası
-├── dist-renderer/      # Build edilmiş React
-├── dist-electron/      # Build edilmiş Electron
-└── dist-app/          # Dağıtım dosyaları
+├── src/                    # Frontend kaynak kodu
+│   ├── components/         # React bileşenleri
+│   ├── pages/              # Sayfa bileşenleri
+│   ├── hooks/              # Custom hooks
+│   ├── services/           # API servisleri
+│   └── lib/                # Utility fonksiyonları
+├── backend/                # Backend kaynak kodu
+│   ├── src/
+│   │   ├── routes/         # API route'ları
+│   │   ├── middleware/     # Express middleware
+│   │   └── lib/            # Utility & Prisma
+│   └── prisma/             # Prisma schema
+├── public/                 # Statik dosyalar
+├── docker-compose.yml      # Docker Compose config
+├── Dockerfile              # Frontend Dockerfile
+└── nginx.conf              # Nginx config
 ```
 
-## 🖥️ Ekranlar
+## 🔐 Environment Variables
 
-1. **Ana Sayfa (Dashboard)** - Günün özeti ve hızlı erişim
-2. **Notlar** - Not listesi ve detay görünümü
-3. **Günlük Görevler** - To-do liste yönetimi
-4. **Haftalık Planlayıcı** - 7 günlük görünüm
-5. **Ayarlar** - Tema ve veri yönetimi
+### Backend (.env)
+```env
+DATABASE_URL=postgresql://user:password@host:5432/database
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+PORT=3001
+NODE_ENV=production
+CORS_ORIGIN=http://localhost:3000
+```
 
-## ⌨️ Klavye Kısayolları
+### Docker Compose (.env)
+```env
+POSTGRES_USER=fokus
+POSTGRES_PASSWORD=fokus_password
+POSTGRES_DB=fokus_db
+VITE_API_URL=http://localhost:3001/api
+```
 
-- `Ctrl+N` - Yeni not
-- `Ctrl+T` - Yeni görev
-## ⌨️ Klavye Kısayolları
+## 📝 Lisans
 
-### Genel
-- `Ctrl+K` - Spotlight açık/kapat
-- `Ctrl+N` - Yeni not oluştur
-- `Ctrl+T` - Yeni görev oluştur
-- `Ctrl+,` - Ayarlar sayfası
-- `F11` - Tam ekran
-- `F12` - Geliştirici araçları
-
-### Spotlight İçinde
-- `↑` / `↓` - Yukarı/aşağı hareket
-- `Enter` - Seçili öğeyi aç/çalıştır
-- `Esc` - Spotlight'ı kapat
-
-### Görev Yönetimi
-- `Space` - Görev durumunu değiştir
-- `Delete` - Görevi sil
-- `Ctrl+P` - Görevi sabitle/sabitlemeyi kaldır
-
-## 🎯 Gelecek Özellikler
-
-- [ ] Görevler arası bağımlılık
-- [ ] Pomodoro timer entegrasyonu
-- [ ] Export/import fonksiyonları
-- [ ] Kategori bazlı raporlama
-- [ ] Widget modu
-- [ ] Bulut senkronizasyonu (isteğe bağlı)
-- [ ] Markdown not desteği
-- [ ] Klavye kısayolları kişiselleştirme
-- [ ] Otomatik yedekleme
-- [ ] Bildirim sistemi
-
-## 🔧 Geliştirme
-
-### Katkıda Bulunma
-1. Projeyi fork edin
-2. Feature branch oluşturun (`git checkout -b feature/yeni-ozellik`)
-3. Değişikliklerinizi commit edin (`git commit -am 'Yeni özellik eklendi'`)
-4. Branch'i push edin (`git push origin feature/yeni-ozellik`)
-5. Pull Request oluşturun
-
-### Hata Raporlama
-Hataları Issues sekmesinden rapor edebilirsiniz.
-
-## � Bilinen Sorunlar
-
-Şu anda bilinen kritik sorun bulunmamaktadır. Sorun yaşarsanız GitHub Issues bölümünden bildirebilirsiniz.
-
-## �📄 Lisans
-
-Bu proje MIT lisansı altında dağıtılmaktadır. Detaylar için [LICENSE](LICENSE) dosyasını inceleyin.
-
-## 👤 Geliştirici
-
-Fokus, kişisel üretkenliği artırmak için modern teknolojilerle geliştirilmiş bir uygulamadır.
-
----
+MIT License
 
 **Fokus** ile üretkenliğinizi artırın! 🚀
 
