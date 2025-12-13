@@ -7,10 +7,9 @@ import { NewTaskWindow } from './components/NewTaskWindow';
 import { PomodoroModal } from './components/PomodoroModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
-import { TasksNew } from './pages/Tasks_new';
+import { TasksWithLists } from './pages/TasksWithLists';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
-import { Stats } from './pages/Stats';
 import { Login } from './pages/Login';
 import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
@@ -25,7 +24,7 @@ const App: React.FC = () => {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
+
   // Background Image State
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
   // Global Background State
@@ -37,7 +36,7 @@ const App: React.FC = () => {
       setIsAuthenticated(true);
     }
   }, []);
-  
+
   // Persist background choice
   const handleBgChange = (newBg: string) => {
     setBgImage(newBg);
@@ -112,18 +111,23 @@ const App: React.FC = () => {
           }}
         />;
       case 'notes':
-        return <Notes onOpenNoteModal={() => setShowNoteModal(true)} />;
+        return <Notes
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onEditNote={(id) => {
+            setEditingNoteId(id);
+            setActiveView('note-editor');
+          }}
+        />;
       case 'tasks':
-        return <TasksNew
+        return <TasksWithLists
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
         />;
-      case 'stats':
-        return <Stats />;
+      // case 'stats': removed
       case 'trash':
         return <Trash />;
       case 'settings':
-        return <Settings 
+        return <Settings
           bgImage={bgImage}
           onBgChange={handleBgChange}
           isGlobalBg={isGlobalBg}
@@ -154,27 +158,27 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
-        
+
         {/* GLOBAL BACKGROUND IMAGE */}
         {showBackground && (
           <div className="fixed inset-0 z-0 pointer-events-none">
             {isCustomBg ? (
-              <img 
-                src={bgImage} 
-                alt="Custom Background" 
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100" 
+              <img
+                src={bgImage}
+                alt="Custom Background"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
               />
             ) : (
               <>
-                <img 
-                  src="/light.png" 
-                  alt="Background" 
-                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'light' ? 'opacity-100' : 'opacity-0')} 
+                <img
+                  src="/light.png"
+                  alt="Background"
+                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'light' ? 'opacity-100' : 'opacity-0')}
                 />
-                <img 
-                  src="/dark.png" 
-                  alt="Background" 
-                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'dark' ? 'opacity-100' : 'opacity-0')} 
+                <img
+                  src="/dark.png"
+                  alt="Background"
+                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'dark' ? 'opacity-100' : 'opacity-0')}
                 />
               </>
             )}

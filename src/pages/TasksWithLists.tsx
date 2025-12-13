@@ -18,8 +18,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'completed'>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'priority' | 'name'>('date');
+
 
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -32,7 +31,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     if (diffDays === -1) return 'Dün';
     if (diffDays < -1) return `${Math.abs(diffDays)} gün önce`;
     if (diffDays > 1) return `${diffDays} gün sonra`;
-    
+
     return taskDate.toLocaleDateString('tr-TR');
   };
 
@@ -80,11 +79,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     }
   };
 
-  const getStatusColor = (task: any) => {
-    if (task.isCompleted) return 'text-green-500';
-    if (task.dueDate && new Date(task.dueDate) < new Date()) return 'text-red-500';
-    return 'text-gray-400 hover:text-blue-500';
-  };
+
 
   const getTasksByList = (listId: string | null) => {
     return tasks.filter(task => (task as any).listId === listId && !task.isDeleted);
@@ -94,128 +89,84 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
   if (loading || listsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900 dark:border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-full">
-      {/* Modern Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Görevlerim</h1>
-            <div className="flex items-center gap-6 text-sm">
-              <span className="text-gray-600 dark:text-gray-400">
-                {taskLists.length} liste
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                {tasks.filter(t => !t.isDeleted && !t.isCompleted).length} bekleyen görev
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                {tasks.filter(t => !t.isDeleted && t.isCompleted).length} tamamlanan
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('board')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all ${
-                  viewMode === 'board' 
-                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <Grid3X3 className="w-4 h-4" />
-                Kanban
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all ${
-                  viewMode === 'list' 
-                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                <List className="w-4 h-4" />
-                Liste
-              </button>
+    <div className="h-full flex flex-col relative">
+      {/* Header Section (Tasks_new Style) */}
+      <div className="flex-none p-8 lg:p-10 pb-4">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Görevlerim</h1>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-1">Projelerini ve işlerini listeler halinde yönet.</p>
             </div>
 
-            {/* New Buttons */}
-            <button
-              onClick={() => setShowListModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-            >
-              <Plus className="w-4 h-4" />
-              Yeni Liste
-            </button>
-            <button
-              onClick={onOpenTaskModal}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
-            >
-              <Plus className="w-4 h-4" />
-              Yeni Görev
-            </button>
-          </div>
-        </div>
+            {/* View Toggle & Actions */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <button
+                  onClick={() => setViewMode('board')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'board'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                    }`}
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                  <span>Pano</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${viewMode === 'list'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                    }`}
+                >
+                  <List className="w-4 h-4" />
+                  <span>Liste</span>
+                </button>
+              </div>
 
-        {/* Search and Filters Bar */}
-        <div className="flex items-center gap-4 mb-6">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <button
+                onClick={() => setShowListModal(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white rounded-xl font-medium transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Liste Ekle</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             <input
               type="text"
               placeholder="Görevlerde ara..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
             />
           </div>
-
-          {/* Filter Dropdown */}
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-300"
-          >
-            <option value="all">Tüm Görevler</option>
-            <option value="pending">Bekleyen</option>
-            <option value="completed">Tamamlanan</option>
-          </select>
-
-          {/* Sort Dropdown */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-300"
-          >
-            <option value="date">Tarihe Göre</option>
-            <option value="priority">Önceliğe Göre</option>
-            <option value="name">İsme Göre</option>
-          </select>
         </div>
       </div>
 
-      {/* Task Lists Content */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4">
-          {/* Uncategorized Tasks */}
-          <div className="flex-shrink-0 w-80">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-4 h-4 rounded bg-gray-400"></div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Kategorisiz</h3>
-                  </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+      {/* Board Content */}
+      <div className="flex-1 overflow-x-auto overflow-y-hidden px-8 lg:px-10 pb-8">
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex h-full gap-8">
+
+            {/* Uncategorized List */}
+            <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50">
+              <div className="p-5 flex items-center justify-between pointer-events-none">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
+                  <h3 className="font-bold text-zinc-700 dark:text-zinc-300">Kategorisiz</h3>
+                  <span className="bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md text-xs font-bold">
                     {uncategorizedTasks.length}
                   </span>
                 </div>
@@ -226,9 +177,8 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`p-4 min-h-32 transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                    }`}
+                    className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-100/50 dark:bg-zinc-800/50' : ''
+                      }`}
                   >
                     {uncategorizedTasks.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -236,89 +186,61 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border transition-all hover:shadow-md ${
-                              snapshot.isDragging ? 'shadow-lg rotate-2' : ''
-                            } ${
-                              task.isCompleted ? 'opacity-75' : ''
-                            }`}
+                            className={`group relative mb-3 p-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
+                              } ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
                           >
-                            <div className="flex items-start gap-3">
-                              <div
-                                {...provided.dragHandleProps}
-                                className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
-                              >
-                                <GripVertical className="w-4 h-4" />
-                              </div>
-                              
+                            {/* Drag Handle (Hidden but active area usually, or visible on hover) */}
+                            <div {...provided.dragHandleProps} className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100">
+                              <GripVertical className="w-4 h-4" />
+                            </div>
+
+                            <div className="flex items-start gap-4">
                               <button
                                 onClick={() => handleToggleTask(task.id)}
-                                className={`mt-1 transition-colors ${getStatusColor(task)}`}
+                                className={`mt-0.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-emerald-500' : 'text-zinc-300 hover:text-emerald-500'}`}
                               >
-                                {task.isCompleted ? (
-                                  <CheckCircle className="w-4 h-4" />
-                                ) : (
-                                  <Circle className="w-4 h-4" />
-                                )}
+                                {task.isCompleted ? <CheckCircle className="w-6 h-6" /> : <Circle className="w-6 h-6 stroke-[1.5]" />}
                               </button>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-medium ${
-                                  task.isCompleted 
-                                    ? 'line-through text-gray-500 dark:text-gray-400' 
-                                    : 'text-gray-900 dark:text-white'
-                                }`}>
-                                  {task.isPinned && (
-                                    <Pin className="w-3 h-3 text-yellow-500 inline mr-1" />
-                                  )}
+
+                              <div className="flex-1 min-w-0 pr-6">
+                                <h4 className={`text-base font-semibold leading-tight ${task.isCompleted ? 'line-through text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                   {task.title}
                                 </h4>
+
                                 {task.description && (
-                                  <p className={`text-xs mt-1 ${
-                                    task.isCompleted 
-                                      ? 'line-through text-gray-400 dark:text-gray-500' 
-                                      : 'text-gray-600 dark:text-gray-300'
-                                  }`}>
-                                    {task.description.length > 60 
-                                      ? task.description.substring(0, 60) + '...' 
-                                      : task.description}
+                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
+                                    {task.description}
                                   </p>
                                 )}
-                                
-                                {task.dueDate && (
-                                  <div className={`flex items-center gap-1 text-xs mt-2 ${
-                                    task.isCompleted 
-                                      ? 'text-gray-400 dark:text-gray-500'
-                                      : new Date(task.dueDate) < new Date()
-                                        ? 'text-red-500 dark:text-red-400'
-                                        : 'text-gray-500 dark:text-gray-400'
-                                  }`}>
-                                    <Calendar className="w-3 h-3" />
-                                    <span>{formatDate(new Date(task.dueDate))}</span>
-                                  </div>
-                                )}
-                                
-                                <div className="flex gap-1 mt-2">
-                                  <button
-                                    onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                    className={`p-1 text-xs transition-colors ${
-                                      task.isPinned 
-                                        ? 'text-yellow-500 hover:text-yellow-600' 
-                                        : 'text-gray-400 hover:text-yellow-500'
-                                    }`}
-                                  >
-                                    <Pin className="w-3 h-3" />
+
+                                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                  {task.dueDate && (
+                                    <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md ${new Date(task.dueDate) < new Date() && !task.isCompleted
+                                      ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                      : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                                      }`}>
+                                      <Calendar className="w-3 h-3" />
+                                      <span>{formatDate(new Date(task.dueDate))}</span>
+                                    </div>
+                                  )}
+
+                                  {task.isPinned && (
+                                    <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                                      <Pin className="w-3 h-3 fill-current" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Quick Actions Row */}
+                                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => onEditTask(task)} className="p-1.5 text-zinc-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Düzenle">
+                                    <Edit3 className="w-3.5 h-3.5" />
                                   </button>
-                                  <button
-                                    onClick={() => onEditTask(task)}
-                                    className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                                  >
-                                    <Edit3 className="w-3 h-3" />
+                                  <button onClick={() => handlePinTask(task.id, task.isPinned || false)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-zinc-400 hover:text-amber-500 hover:bg-amber-50'}`} title="Sabitle">
+                                    <Pin className="w-3.5 h-3.5" />
                                   </button>
-                                  <button
-                                    onClick={() => handleDeleteTask(task.id)}
-                                    className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
+                                  <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ml-auto" title="Sil">
+                                    <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               </div>
@@ -328,69 +250,50 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    
                     {uncategorizedTasks.length === 0 && (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Circle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Bu listede görev yok</p>
+                      <div className="flex flex-col items-center justify-center py-8 text-zinc-400/50">
+                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
+                          <Circle className="w-6 h-6" />
+                        </div>
+                        <p className="text-xs font-medium">Boş liste</p>
                       </div>
                     )}
                   </div>
                 )}
               </Droppable>
             </div>
-          </div>
 
-          {/* Task Lists */}
-          {taskLists.map((list) => {
-            const listTasks = getTasksByList(list.id);
-            
-            return (
-              <div key={list.id} className="flex-shrink-0 w-80">
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-4 h-4 rounded" 
-                          style={{ backgroundColor: list.color }}
-                        ></div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{list.title}</h3>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          {listTasks.length}
-                        </span>
-                        <div className="relative">
-                          <button
-                            onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
-                            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                          
-                          {activeListMenu === list.id && (
-                            <div className="absolute right-0 top-8 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10 py-1 min-w-32">
-                              <button
-                                onClick={() => handleEditList(list)}
-                                className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                              >
-                                Düzenle
-                              </button>
-                              <button
-                                onClick={() => handleDeleteList(list.id)}
-                                className="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                              >
-                                Sil
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+            {/* Dynamic Lists */}
+            {taskLists.map((list) => {
+              const listTasks = getTasksByList(list.id);
+              return (
+                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-800/50 group/list">
+                  <div className="p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: list.color }}></div>
+                      <h3 className="font-bold text-zinc-700 dark:text-zinc-300 truncate max-w-[150px]">{list.title}</h3>
+                      <span className="bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md text-xs font-bold">
+                        {listTasks.length}
+                      </span>
                     </div>
-                    {list.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{list.description}</p>
-                    )}
+                    <div className="relative">
+                      <button
+                        onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
+                        className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      {activeListMenu === list.id && (
+                        <div className="absolute right-0 top-8 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl shadow-xl z-50 py-1.5 w-36 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                          <button onClick={() => handleEditList(list)} className="w-full text-left px-4 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                            Listeyi Düzenle
+                          </button>
+                          <button onClick={() => handleDeleteList(list.id)} className="w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                            Listeyi Sil
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <Droppable droppableId={list.id}>
@@ -398,9 +301,8 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`p-4 min-h-32 transition-colors ${
-                          snapshot.isDraggingOver ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                        }`}
+                        className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-100/50 dark:bg-zinc-800/50' : ''
+                          }`}
                       >
                         {listTasks.map((task, index) => (
                           <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -408,89 +310,60 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
-                                className={`mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border transition-all hover:shadow-md ${
-                                  snapshot.isDragging ? 'shadow-lg rotate-2' : ''
-                                } ${
-                                  task.isCompleted ? 'opacity-75' : ''
-                                }`}
+                                className={`group relative mb-3 p-4 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-2xl border border-zinc-200/50 dark:border-zinc-800 hover:shadow-lg transition-all duration-200 ${snapshot.isDragging ? 'shadow-xl rotate-2 scale-105 z-50' : 'hover:-translate-y-0.5'
+                                  } ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
                               >
-                                <div className="flex items-start gap-3">
-                                  <div
-                                    {...provided.dragHandleProps}
-                                    className="mt-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
-                                  >
-                                    <GripVertical className="w-4 h-4" />
-                                  </div>
-                                  
+                                <div {...provided.dragHandleProps} className="absolute top-4 right-4 text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors opacity-0 group-hover:opacity-100">
+                                  <GripVertical className="w-4 h-4" />
+                                </div>
+
+                                <div className="flex items-start gap-4">
                                   <button
                                     onClick={() => handleToggleTask(task.id)}
-                                    className={`mt-1 transition-colors ${getStatusColor(task)}`}
+                                    className={`mt-0.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-emerald-500' : 'text-zinc-300 hover:text-emerald-500'}`}
                                   >
-                                    {task.isCompleted ? (
-                                      <CheckCircle className="w-4 h-4" />
-                                    ) : (
-                                      <Circle className="w-4 h-4" />
-                                    )}
+                                    {task.isCompleted ? <CheckCircle className="w-6 h-6" /> : <Circle className="w-6 h-6 stroke-[1.5]" />}
                                   </button>
-                                  
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className={`text-sm font-medium ${
-                                      task.isCompleted 
-                                        ? 'line-through text-gray-500 dark:text-gray-400' 
-                                        : 'text-gray-900 dark:text-white'
-                                    }`}>
-                                      {task.isPinned && (
-                                        <Pin className="w-3 h-3 text-yellow-500 inline mr-1" />
-                                      )}
+
+                                  <div className="flex-1 min-w-0 pr-6">
+                                    <h4 className={`text-base font-semibold leading-tight ${task.isCompleted ? 'line-through text-zinc-500' : 'text-zinc-900 dark:text-zinc-100'}`}>
                                       {task.title}
                                     </h4>
+
                                     {task.description && (
-                                      <p className={`text-xs mt-1 ${
-                                        task.isCompleted 
-                                          ? 'line-through text-gray-400 dark:text-gray-500' 
-                                          : 'text-gray-600 dark:text-gray-300'
-                                      }`}>
-                                        {task.description.length > 60 
-                                          ? task.description.substring(0, 60) + '...' 
-                                          : task.description}
+                                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-2">
+                                        {task.description}
                                       </p>
                                     )}
-                                    
-                                    {task.dueDate && (
-                                      <div className={`flex items-center gap-1 text-xs mt-2 ${
-                                        task.isCompleted 
-                                          ? 'text-gray-400 dark:text-gray-500'
-                                          : new Date(task.dueDate) < new Date()
-                                            ? 'text-red-500 dark:text-red-400'
-                                            : 'text-gray-500 dark:text-gray-400'
-                                      }`}>
-                                        <Calendar className="w-3 h-3" />
-                                        <span>{formatDate(new Date(task.dueDate))}</span>
-                                      </div>
-                                    )}
-                                    
-                                    <div className="flex gap-1 mt-2">
-                                      <button
-                                        onClick={() => handlePinTask(task.id, task.isPinned || false)}
-                                        className={`p-1 text-xs transition-colors ${
-                                          task.isPinned 
-                                            ? 'text-yellow-500 hover:text-yellow-600' 
-                                            : 'text-gray-400 hover:text-yellow-500'
-                                        }`}
-                                      >
-                                        <Pin className="w-3 h-3" />
+
+                                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                      {task.dueDate && (
+                                        <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md ${new Date(task.dueDate) < new Date() && !task.isCompleted
+                                          ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                          : 'bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400'
+                                          }`}>
+                                          <Calendar className="w-3 h-3" />
+                                          <span>{formatDate(new Date(task.dueDate))}</span>
+                                        </div>
+                                      )}
+
+                                      {task.isPinned && (
+                                        <div className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                                          <Pin className="w-3 h-3 fill-current" />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Quick Actions Row */}
+                                    <div className="flex items-center gap-1 mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button onClick={() => onEditTask(task)} className="p-1.5 text-zinc-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="Düzenle">
+                                        <Edit3 className="w-3.5 h-3.5" />
                                       </button>
-                                      <button
-                                        onClick={() => onEditTask(task)}
-                                        className="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                                      >
-                                        <Edit3 className="w-3 h-3" />
+                                      <button onClick={() => handlePinTask(task.id, task.isPinned || false)} className={`p-1.5 rounded-lg transition-colors ${task.isPinned ? 'text-amber-500 bg-amber-50' : 'text-zinc-400 hover:text-amber-500 hover:bg-amber-50'}`} title="Sabitle">
+                                        <Pin className="w-3.5 h-3.5" />
                                       </button>
-                                      <button
-                                        onClick={() => handleDeleteTask(task.id)}
-                                        className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
+                                      <button onClick={() => handleDeleteTask(task.id)} className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ml-auto" title="Sil">
+                                        <Trash2 className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
                                   </div>
@@ -500,35 +373,49 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           </Draggable>
                         ))}
                         {provided.placeholder}
-                        
                         {listTasks.length === 0 && (
-                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <Circle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">Bu listede görev yok</p>
+                          <div className="flex flex-col items-center justify-center py-8 text-zinc-400/50">
+                            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
+                              <Circle className="w-6 h-6" />
+                            </div>
+                            <p className="text-xs font-medium">Bu listede görev yok</p>
                           </div>
                         )}
                       </div>
                     )}
                   </Droppable>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {/* Add New List Placeholder */}
-          <div className="flex-shrink-0 w-80">
-            <button
-              onClick={() => setShowListModal(true)}
-              className="w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 transition-colors flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
-            >
-              <Plus className="w-8 h-8 mb-2" />
-              <span className="text-sm font-medium">Yeni Liste Ekle</span>
-            </button>
+            {/* Add New List Button Column */}
+            <div className="flex-shrink-0 w-80">
+              <button
+                onClick={() => setShowListModal(true)}
+                className="w-full h-16 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 gap-2 group"
+              >
+                <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                <span className="font-bold">Yeni Liste Ekle</span>
+              </button>
+            </div>
+
+            {/* Spacer for right padding */}
+            <div className="w-2" />
           </div>
-        </div>
-      </DragDropContext>
+        </DragDropContext>
+      </div>
 
-      {/* Task List Modal */}
+      {/* Floating Add Task Button */}
+      <button
+        onClick={onOpenTaskModal}
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 pl-4 pr-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group"
+      >
+        <div className="bg-white/20 dark:bg-black/10 p-1 rounded-full">
+          <Plus className="w-5 h-5" />
+        </div>
+        Yeni Görev
+      </button>
+
       <TaskListModal
         isOpen={showListModal}
         onClose={closeListModal}

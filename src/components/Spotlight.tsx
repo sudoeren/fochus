@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Search, 
-  Command, 
-  FileText, 
-  CheckSquare, 
-  Settings, 
-  ArrowRight, 
+import {
+  Search,
+  Command,
+  FileText,
+  CheckSquare,
+  Settings,
+  ArrowRight,
   Layout,
   Plus,
   Hash,
   CornerDownLeft,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
+import { useTheme } from './ThemeProvider';
 
 interface SpotlightProps {
   isOpen: boolean;
@@ -45,6 +48,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { tasks } = useTasks();
   const { notes } = useNotes();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (isOpen) {
@@ -54,73 +58,60 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     }
   }, [isOpen]);
 
-  // Handle keys inside component as well for navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % allItems.length);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev - 1 + allItems.length) % allItems.length);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (allItems[selectedIndex]) allItems[selectedIndex].action();
-      } else if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, allItems, selectedIndex, onClose]); // allItems will be defined below
-
   // Static items definition
   const staticItems: SpotlightItem[] = [
-    { 
-      id: 'new-task', 
-      label: 'Yeni Görev', 
+    {
+      id: 'new-task',
+      label: 'Yeni Görev',
       detail: 'Görev ekle',
-      icon: Plus, 
-      group: 'Eylemler', 
+      icon: Plus,
+      group: 'Eylemler',
       action: () => { onOpenTaskModal(); onClose(); },
       shortcut: 'T'
     },
-    { 
-      id: 'new-note', 
-      label: 'Yeni Not', 
+    {
+      id: 'new-note',
+      label: 'Yeni Not',
       detail: 'Not al',
-      icon: FileText, 
-      group: 'Eylemler', 
+      icon: FileText,
+      group: 'Eylemler',
       action: () => { onOpenNoteModal(); onClose(); },
       shortcut: 'N'
     },
-    { 
-      id: 'go-dashboard', 
-      label: 'Dashboard', 
-      icon: Layout, 
-      group: 'Navigasyon', 
+    {
+      id: 'toggle-theme',
+      label: theme === 'dark' ? 'Açık Mod' : 'Koyu Mod',
+      detail: 'Temayı değiştir',
+      icon: theme === 'dark' ? Sun : Moon,
+      group: 'Eylemler',
+      action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); onClose(); },
+    },
+    {
+      id: 'go-dashboard',
+      label: 'Dashboard',
+      icon: Layout,
+      group: 'Navigasyon',
       action: () => { onNavigate('dashboard'); onClose(); }
     },
-    { 
-      id: 'go-tasks', 
-      label: 'Görevlerim', 
-      icon: CheckSquare, 
-      group: 'Navigasyon', 
+    {
+      id: 'go-tasks',
+      label: 'Görevlerim',
+      icon: CheckSquare,
+      group: 'Navigasyon',
       action: () => { onNavigate('tasks'); onClose(); }
     },
-    { 
-      id: 'go-notes', 
-      label: 'Notlarım', 
-      icon: FileText, 
-      group: 'Navigasyon', 
+    {
+      id: 'go-notes',
+      label: 'Notlarım',
+      icon: FileText,
+      group: 'Navigasyon',
       action: () => { onNavigate('notes'); onClose(); }
     },
-    { 
-      id: 'go-settings', 
-      label: 'Ayarlar', 
-      icon: Settings, 
-      group: 'Navigasyon', 
+    {
+      id: 'go-settings',
+      label: 'Ayarlar',
+      icon: Settings,
+      group: 'Navigasyon',
       action: () => { onNavigate('settings'); onClose(); }
     },
   ];
@@ -150,9 +141,30 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       action: () => { onNavigate('notes'); onClose(); }
     }));
 
-  var allItems = query 
+  var allItems = query
     ? [...staticItems.filter(i => i.label.toLowerCase().includes(query.toLowerCase())), ...taskItems, ...noteItems]
     : staticItems;
+
+  // Handle keys inside component as well for navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev + 1) % allItems.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev - 1 + allItems.length) % allItems.length);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (allItems[selectedIndex]) allItems[selectedIndex].action();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, allItems, selectedIndex, onClose]);
 
   const renderGroupHeader = (group: string, index: number) => {
     const prevItem = allItems[index - 1];
@@ -172,8 +184,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-      <div className="relative w-full max-w-2xl bg-white dark:bg-zinc-900 rounded-xl shadow-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[60vh] transform origin-center">
-        
+      <div className="relative w-full max-w-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[60vh] transform origin-center">
+
         {/* Header / Input */}
         <div className="flex items-center px-4 py-4 border-b border-zinc-100 dark:border-zinc-800">
           <Search className="w-5 h-5 text-zinc-400 mr-3" />
@@ -203,16 +215,16 @@ export const Spotlight: React.FC<SpotlightProps> = ({
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-all duration-150 group",
-                      index === selectedIndex 
-                        ? "bg-zinc-100 dark:bg-zinc-800" 
+                      index === selectedIndex
+                        ? "bg-zinc-100 dark:bg-zinc-800"
                         : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={cn(
                         "p-2 rounded-md transition-colors",
-                        index === selectedIndex 
-                          ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm" 
+                        index === selectedIndex
+                          ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm"
                           : "bg-zinc-200/50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
                       )}>
                         <item.icon className="w-4 h-4" />
@@ -257,11 +269,11 @@ export const Spotlight: React.FC<SpotlightProps> = ({
 
         {/* Footer */}
         <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[10px] text-zinc-400">
-           <div className="flex gap-3">
-             <span className="flex items-center gap-1"><ArrowRight className="w-3 h-3" /> Seç</span>
-             <span className="flex items-center gap-1"><Command className="w-3 h-3" /> Eylemler</span>
-           </div>
-           <div className="font-medium">v1.2</div>
+          <div className="flex gap-3">
+            <span className="flex items-center gap-1"><ArrowRight className="w-3 h-3" /> Seç</span>
+            <span className="flex items-center gap-1"><Command className="w-3 h-3" /> Eylemler</span>
+          </div>
+          <div className="font-medium">v1.2</div>
         </div>
       </div>
     </div>
