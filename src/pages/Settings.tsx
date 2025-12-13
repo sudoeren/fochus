@@ -58,8 +58,14 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const userData = {
     name: "Kullanıcı",
     email: "kullanici@fochus.app",
-    role: "Pro Üye",
-    joinDate: "Bugün"
+    joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+  };
+
+  const handleLogout = () => {
+    if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
+      localStorage.removeItem('isAuthenticated');
+      window.location.reload();
+    }
   };
 
   const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
@@ -90,11 +96,8 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
            </p>
 
            <div className="flex gap-3 mb-8">
-             <div className="px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-sm font-semibold border border-indigo-100 dark:border-indigo-500/20 flex items-center gap-2">
-               <Award className="w-4 h-4" /> {userData.role}
-             </div>
              <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-xl text-sm font-semibold border border-zinc-100 dark:border-zinc-700 flex items-center gap-2">
-               <Calendar className="w-4 h-4" /> {userData.joinDate}
+               <Calendar className="w-4 h-4" /> Katılım: {userData.joinDate}
              </div>
            </div>
 
@@ -150,7 +153,10 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
          </div>
       </div>
 
-      <button className="w-full py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide">
+      <button 
+        onClick={handleLogout}
+        className="w-full py-4 rounded-2xl border-2 border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
+      >
         <LogOut className="w-5 h-5" />
         Oturumu Kapat
       </button>
