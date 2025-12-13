@@ -40,7 +40,8 @@ export interface Task {
   nextDue?: Date;
   isPinned?: boolean;
   isDeleted?: boolean;
-  listId?: string;
+  deletedAt?: Date;
+  listId?: string | null;
 }
 
 export interface SubTask {

@@ -69,12 +69,15 @@ export const useTaskLists = () => {
     }
   };
 
-  const moveTaskToList = async (taskId: string, targetListId: string | null) => {
+  const moveTaskToList = async (taskId: string, targetListId: string | null, options?: { skipRefresh?: boolean }) => {
     try {
       await storageService.tasks.update(taskId, { listId: targetListId });
-      // Refresh lists to update task counts
-      await fetchTaskLists(true); // Silent refresh
-      triggerInstantRefresh();
+
+      if (!options?.skipRefresh) {
+        // Refresh lists to update task counts
+        await fetchTaskLists(true); // Silent refresh
+        triggerInstantRefresh();
+      }
     } catch (error) {
       console.error('Error moving task to list:', error);
       throw error;

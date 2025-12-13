@@ -16,26 +16,25 @@ import { setupFastPolling } from './utils/refreshUtils';
 import { cn } from './lib/utils';
 
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, setActiveView] = useState(() => localStorage.getItem('activeView') || 'dashboard');
+
+  useEffect(() => {
+    localStorage.setItem('activeView', activeView);
+  }, [activeView]);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
 
   // Background Image State
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
   // Global Background State
   const [isGlobalBg, setIsGlobalBg] = useState(() => localStorage.getItem('isGlobalBg') === 'true');
-
-  useEffect(() => {
-    const auth = localStorage.getItem('isAuthenticated');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   // Persist background choice
   const handleBgChange = (newBg: string) => {

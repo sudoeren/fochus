@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
+import { storageService } from '../services/storage';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -11,8 +12,8 @@ interface TasksNewProps {
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { tasks, loading, deleteTask, toggleTask, setTasks } = useTasks();
-  const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList } = useTaskLists();
+  const { tasks, loading, deleteTask, toggleTask, loadTasks } = useTasks();
+  const { taskLists, loading: listsLoading, deleteTaskList, refetch: refetchTaskLists } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
@@ -63,32 +64,56 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     setEditingList(null);
   };
 
+  const handleDragStart = () => {
+    console.log('🎯 Drag started!');
+  };
+
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
+    console.log('🏁 Drag ended, result:', JSON.stringify(result, null, 2));
+
+    if (!result.destination) {
+      console.log('❌ No destination - drag cancelled');
+      return;
+    }
 
     const { source, destination, draggableId } = result;
 
-    // Same container? No change needed in list logic (reorder not implemented here yet)
-    if (source.droppableId === destination.droppableId) return;
+    console.log('📍 Source:', source.droppableId, 'index:', source.index);
+    console.log('📍 Destination:', destination.droppableId, 'index:', destination.index);
+    console.log('📍 Task ID:', draggableId);
 
-    const targetListId = destination.droppableId === 'uncategorized' ? undefined : destination.droppableId;
+    // Same container? No change needed
+    if (source.droppableId === destination.droppableId) {
+      console.log('ℹ️ Same container, no list change needed');
+      return;
+    }
 
-    // 1. Optimistic Update
-    const updatedTasks = tasks.map(task => {
-      if (task.id === draggableId) {
-        return { ...task, listId: targetListId };
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+    // Determine target list ID (null for uncategorized)
+    const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
 
-    // 2. Server Update
+    console.log('🔄 Moving task:', draggableId, 'to list:', targetListId);
+
     try {
-      await moveTaskToList(draggableId, targetListId || null);
+      // 1. Directly update localStorage via storageService
+      console.log('💾 Updating storage...');
+      await storageService.tasks.update(draggableId, { listId: targetListId });
+
+      console.log('✅ Task updated in storage');
+
+      // 2. Small delay to ensure storage is fully written
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // 3. Refresh both lists and tasks from storage
+      console.log('🔃 Refreshing data...');
+      await refetchTaskLists(true);
+      await loadTasks(true);
+
+      console.log('✅ Data refreshed successfully');
+
     } catch (error) {
-      console.error("Failed to move task", error);
-      // Revert if failed (optional but recommended)
-      // triggerInstantRefresh(); // Fallback to refresh from server
+      console.error('❌ Failed to move task:', error);
+      // Refresh to revert UI to actual storage state
+      await loadTasks(true);
     }
   };
 
@@ -96,10 +121,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
   const getTasksByList = (listId: string | null) => {
     return tasks.filter(task => {
-      // Handle Uncategorized (null listId) vs Specific List
-      const isListMatch = listId
-        ? (task as any).listId === listId
-        : !(task as any).listId; // Check for null or undefined
+      // Handle Uncategorized (null/undefined listId) vs Specific List
+      const taskListId = task.listId;
+      const isListMatch = listId === null
+        ? !taskListId // null or undefined means uncategorized
+        : taskListId === listId;
 
       const matchesList = isListMatch && !task.isDeleted;
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -181,7 +207,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
       {/* Board Content */}
       <div className="flex-1 overflow-x-auto overflow-y-hidden px-8 lg:px-10 pb-8">
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex h-full gap-8">
 
             {/* Uncategorized List */}
@@ -201,7 +227,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/30' : ''
+                    className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10' : ''
                       }`}
                   >
                     {uncategorizedTasks.map((task, index) => (
@@ -212,15 +238,10 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
-                              ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent z-[9999]'
+                              ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
                               : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
                               } ${task.isCompleted ? 'opacity-50' : ''}`}
-                            style={{
-                              ...provided.draggableProps.style,
-                              // Force z-index and remove transition during drag to prevent lag
-                              zIndex: snapshot.isDragging ? 9999 : 'auto',
-                              transition: snapshot.isDragging ? 'none' : 'all 0.2s',
-                            }}
+                            style={provided.draggableProps.style}
                           >
                             <div className="flex gap-3">
                               {/* Toggle Checkbox */}
@@ -290,14 +311,18 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    {uncategorizedTasks.length === 0 && (
-                      <div className="flex flex-col items-center justify-center py-8 text-zinc-400/50">
-                        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
-                          <Circle className="w-6 h-6" />
-                        </div>
-                        <p className="text-xs font-medium">Boş liste</p>
+
+                    <div
+                      className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${uncategorizedTasks.length === 0 && !snapshot.isDraggingOver
+                        ? 'opacity-100'
+                        : 'opacity-0'
+                        }`}
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
+                        <Circle className="w-6 h-6 text-zinc-400/50" />
                       </div>
-                    )}
+                      <p className="text-xs font-medium text-zinc-400/50">Boş liste</p>
+                    </div>
                   </div>
                 )}
               </Droppable>
@@ -342,7 +367,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-colors rounded-b-3xl ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/30' : ''
+                        className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10' : ''
                           }`}
                       >
                         {listTasks.map((task, index) => (
@@ -353,15 +378,10 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
-                                  ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent z-[9999]'
+                                  ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
                                   : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
                                   } ${task.isCompleted ? 'opacity-50' : ''}`}
-                                style={{
-                                  ...provided.draggableProps.style,
-                                  // Force z-index and remove transition during drag to prevent lag
-                                  zIndex: snapshot.isDragging ? 9999 : 'auto',
-                                  transition: snapshot.isDragging ? 'none' : 'all 0.2s',
-                                }}
+                                style={provided.draggableProps.style}
                               >
                                 <div className="flex gap-3">
                                   {/* Toggle Checkbox */}
@@ -411,14 +431,14 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                       <button
                                         onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
                                         className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => { e.stopPropagation(); }}
                                       >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
                                       <button
                                         onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
                                         className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => { e.stopPropagation(); }}
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
@@ -431,14 +451,18 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           </Draggable>
                         ))}
                         {provided.placeholder}
-                        {listTasks.length === 0 && (
-                          <div className="flex flex-col items-center justify-center py-8 text-zinc-400/50">
-                            <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
-                              <Circle className="w-6 h-6" />
-                            </div>
-                            <p className="text-xs font-medium">Bu listede görev yok</p>
+
+                        <div
+                          className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${listTasks.length === 0 && !snapshot.isDraggingOver
+                            ? 'opacity-100'
+                            : 'opacity-0'
+                            }`}
+                        >
+                          <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
+                            <Circle className="w-6 h-6 text-zinc-400/50" />
                           </div>
-                        )}
+                          <p className="text-xs font-medium text-zinc-400/50">Bu listede görev yok</p>
+                        </div>
                       </div>
                     )}
                   </Droppable>
