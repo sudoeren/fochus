@@ -8,7 +8,6 @@ import { PomodoroModal } from './components/PomodoroModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
 import { TasksNew } from './pages/Tasks_new';
-import { WeeklyPlanner } from './pages/WeeklyPlanner';
 import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
 import { Stats } from './pages/Stats';
@@ -119,8 +118,6 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
         />;
-      case 'weekly':
-        return <WeeklyPlanner />;
       case 'stats':
         return <Stats />;
       case 'trash':

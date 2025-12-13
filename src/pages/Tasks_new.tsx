@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle2, Circle, Trash2, Pin, GripVertical, Edit3, MoreHorizontal, Layout, CheckSquare } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import React, { useState, useMemo } from 'react';
+import { 
+  Plus, 
+  Calendar, 
+  Clock, 
+  CheckCircle2, 
+  Circle, 
+  Trash2, 
+  Edit2, 
+  Filter, 
+  AlertCircle, 
+  CheckSquare 
+} from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
-import { useTaskLists } from '../hooks/useTaskLists';
-import { TaskListModal } from '../components/TaskListModal';
-import { EmptyState } from '../components/EmptyState';
 import { cn } from '../lib/utils';
 
 interface TasksNewProps {
@@ -13,320 +20,268 @@ interface TasksNewProps {
 }
 
 export const TasksNew: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { tasks, loading, deleteTask, toggleTask, pinTask } = useTasks();
-  const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList } = useTaskLists();
-  const [showListModal, setShowListModal] = useState(false);
-  const [editingList, setEditingList] = useState<any>(null);
-  const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
+  const { tasks, toggleTask, deleteTask, loading } = useTasks();
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
-  const formatDate = (date: Date) => {
+  // Görevleri Gruplama ve Filtreleme Mantığı
+  const groupedTasks = useMemo(() => {
     const today = new Date();
-    const taskDate = new Date(date);
-    const diffTime = taskDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    if (diffDays === 0) return 'Bugün';
-    if (diffDays === 1) return 'Yarın';
-    if (diffDays === -1) return 'Dün';
-    return taskDate.toLocaleDateString('tr-TR');
-  };
+    let filtered = tasks.filter(t => !t.isDeleted);
 
-  const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
-    const { source, destination, draggableId } = result;
-    if (source.droppableId !== destination.droppableId) {
-      const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
-      await moveTaskToList(draggableId, targetListId);
-    }
-  };
+    if (filter === 'pending') filtered = filtered.filter(t => !t.isCompleted);
+    if (filter === 'completed') filtered = filtered.filter(t => t.isCompleted);
 
-  const getTasksByList = (listId: string | null) => {
-    return tasks.filter(task => task.listId === listId && !task.isDeleted);
-  };
+    const groups = {
+      overdue: [] as typeof tasks,
+      today: [] as typeof tasks,
+      upcoming: [] as typeof tasks,
+      noDate: [] as typeof tasks,
+      completed: [] as typeof tasks
+    };
 
-  const uncategorizedTasks = getTasksByList(null);
+    filtered.forEach(task => {
+      if (task.isCompleted) {
+        groups.completed.push(task);
+        return;
+      }
 
-  if (loading || listsLoading) {
+      if (!task.dueDate) {
+        groups.noDate.push(task);
+        return;
+      }
+
+      const taskDate = new Date(task.dueDate);
+      taskDate.setHours(0, 0, 0, 0);
+
+      if (taskDate < today) {
+        groups.overdue.push(task);
+      } else if (taskDate.getTime() === today.getTime()) {
+        groups.today.push(task);
+      } else {
+        groups.upcoming.push(task);
+      }
+    });
+
+    return groups;
+  }, [tasks, filter]);
+
+  // Yükleniyor durumu
+  if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-         <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="flex-none p-6 lg:p-8 border-b border-zinc-200/50 dark:border-zinc-800">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-[1800px] mx-auto w-full">
-          <div>
-            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-1">Görevlerim</h1>
-            <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm">
-              <span className="font-semibold text-zinc-900 dark:text-white">{taskLists.length}</span> liste
-              <span className="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-              <span className="font-semibold text-zinc-900 dark:text-white">{tasks.filter(t => !t.isDeleted).length}</span> görev
+  // Tekil Görev Bileşeni
+  const TaskItem = ({ task, isOverdue = false }: { task: any, isOverdue?: boolean }) => (
+    <div className={cn(
+      "group relative flex items-start gap-4 p-4 rounded-2xl border transition-all duration-300 backdrop-blur-sm",
+      "bg-white/60 dark:bg-zinc-900/60 border-white/20 dark:border-white/5",
+      "hover:bg-white/80 dark:hover:bg-zinc-900/80 hover:shadow-lg hover:scale-[1.005]",
+      task.isCompleted && "opacity-60 grayscale-[0.5]"
+    )}>
+      <button 
+        onClick={(e) => { e.stopPropagation(); toggleTask(task.id); }}
+        className="mt-1 flex-shrink-0 text-zinc-400 hover:text-emerald-500 transition-colors"
+      >
+        {task.isCompleted ? (
+          <CheckCircle2 className="w-6 h-6 text-emerald-500 fill-emerald-500/10" />
+        ) : (
+          <Circle className="w-6 h-6 hover:fill-emerald-500/10" />
+        )}
+      </button>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className={cn(
+            "text-base font-semibold leading-relaxed transition-all",
+            task.isCompleted ? "text-zinc-500 line-through decoration-zinc-400" : "text-zinc-900 dark:text-zinc-100",
+            isOverdue && !task.isCompleted && "text-red-600 dark:text-red-400"
+          )}>
+            {task.title}
+          </h3>
+        </div>
+        
+        {task.description && (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2 font-medium">
+            {task.description}
+          </p>
+        )}
+        
+        <div className="flex flex-wrap items-center gap-3 mt-3">
+          {task.dueDate && (
+            <div className={cn(
+              "flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg",
+              isOverdue && !task.isCompleted
+                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                : "bg-zinc-100/80 text-zinc-600 dark:bg-zinc-800/80 dark:text-zinc-300"
+            )}>
+              {isOverdue ? <AlertCircle className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
+              {new Date(task.dueDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+              {task.dueDate.includes('T') && (
+                <span className="flex items-center gap-1 ml-1 opacity-75 border-l border-current pl-1.5">
+                  <Clock className="w-3 h-3" />
+                  {new Date(task.dueDate).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-             <button
-              onClick={() => setShowListModal(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm font-medium"
-            >
-              <Layout className="w-4 h-4" />
-              <span>Liste Ekle</span>
-            </button>
-            <button
-              onClick={onOpenTaskModal}
-              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-lg shadow-zinc-900/10 font-medium active:scale-95"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Görev Ekle</span>
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <div className="flex-1 overflow-x-auto overflow-y-hidden">
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="h-full flex px-6 lg:px-8 py-8 gap-6 min-w-max">
-            
-            {/* Uncategorized List */}
-            <div className="flex-shrink-0 w-80 lg:w-96 flex flex-col">
-               <div className="flex items-center justify-between mb-4 px-1">
-                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-                      <CheckSquare className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-bold text-zinc-900 dark:text-white">Genel</h3>
-                 </div>
-                 <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full text-xs font-bold">
-                   {uncategorizedTasks.length}
-                 </span>
-               </div>
-               
-               <div className="flex-1 bg-zinc-100/50 dark:bg-zinc-900/30 rounded-3xl p-3 border border-zinc-200/50 dark:border-zinc-800/50">
-                <Droppable droppableId="uncategorized">
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={cn(
-                        "h-full overflow-y-auto pr-2 custom-scrollbar transition-colors rounded-2xl",
-                        snapshot.isDraggingOver && "bg-zinc-200/50 dark:bg-zinc-800/50"
-                      )}
-                    >
-                      {uncategorizedTasks.map((task, index) => (
-                        <TaskCard 
-                          key={task.id} 
-                          task={task} 
-                          index={index} 
-                          onEdit={onEditTask}
-                          onToggle={toggleTask}
-                          onDelete={deleteTask}
-                          onPin={pinTask}
-                        />
-                      ))}
-                      {provided.placeholder}
-                      {uncategorizedTasks.length === 0 && (
-                        <div className="h-32 flex flex-col items-center justify-center text-zinc-400">
-                           <p className="text-sm">Görev yok</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Droppable>
-               </div>
-            </div>
-
-            {/* Custom Lists */}
-            {taskLists.map((list) => {
-              const listTasks = getTasksByList(list.id);
-              return (
-                <div key={list.id} className="flex-shrink-0 w-80 lg:w-96 flex flex-col">
-                  {/* List Header */}
-                   <div className="flex items-center justify-between mb-4 px-1">
-                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-8 rounded-full" style={{ backgroundColor: list.color }} />
-                        <h3 className="font-bold text-zinc-900 dark:text-white truncate max-w-[160px]">
-                          {list.title}
-                        </h3>
-                     </div>
-                     <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full text-xs font-bold">
-                          {listTasks.length}
-                        </span>
-                        <div className="relative">
-                          <button
-                            onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
-                            className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                          {activeListMenu === list.id && (
-                             <>
-                              <div className="fixed inset-0 z-10" onClick={() => setActiveListMenu(null)} />
-                              <div className="absolute right-0 top-full mt-2 w-40 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 z-20 overflow-hidden py-1 animate-in fade-in zoom-in-95">
-                                <button
-                                  onClick={() => {
-                                    setEditingList(list);
-                                    setShowListModal(true);
-                                    setActiveListMenu(null);
-                                  }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-center gap-2"
-                                >
-                                  <Edit3 className="w-4 h-4" /> Düzenle
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if(confirm('Listeyi silmek istediğinize emin misiniz?')) deleteTaskList(list.id);
-                                  }}
-                                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                                >
-                                  <Trash2 className="w-4 h-4" /> Sil
-                                </button>
-                              </div>
-                             </>
-                          )}
-                        </div>
-                     </div>
-                   </div>
-
-                   {/* List Body */}
-                   <div className="flex-1 bg-zinc-100/50 dark:bg-zinc-900/30 rounded-3xl p-3 border border-zinc-200/50 dark:border-zinc-800/50">
-                    <Droppable droppableId={list.id}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={cn(
-                            "h-full overflow-y-auto pr-2 custom-scrollbar transition-colors rounded-2xl",
-                            snapshot.isDraggingOver && "bg-zinc-200/50 dark:bg-zinc-800/50"
-                          )}
-                        >
-                          {listTasks.map((task, index) => (
-                            <TaskCard 
-                              key={task.id} 
-                              task={task} 
-                              index={index} 
-                              onEdit={onEditTask}
-                              onToggle={toggleTask}
-                              onDelete={deleteTask}
-                              onPin={pinTask}
-                            />
-                          ))}
-                          {provided.placeholder}
-                          {listTasks.length === 0 && (
-                            <div className="h-32 flex flex-col items-center justify-center text-zinc-400">
-                               <p className="text-sm opacity-50">Görev sürükleyin</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Droppable>
-                   </div>
-                </div>
-              );
-            })}
-
-            {/* Add List Button */}
-            <div className="flex-shrink-0 w-80 lg:w-96 flex flex-col pt-12">
-               <button
-                  onClick={() => setShowListModal(true)}
-                  className="h-full max-h-[500px] border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl flex flex-col items-center justify-center gap-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all group"
-               >
-                  <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Plus className="w-8 h-8" />
-                  </div>
-                  <span className="font-semibold">Yeni Liste Ekle</span>
-               </button>
-            </div>
-            
-          </div>
-        </DragDropContext>
+      {/* Aksiyon Butonları (Hover ile görünür) */}
+      <div className="absolute right-4 top-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
+        <button 
+          onClick={() => onEditTask(task)}
+          className="p-2 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-colors"
+          title="Düzenle"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button 
+          onClick={() => { if(window.confirm('Bu görevi silmek istediğinize emin misiniz?')) deleteTask(task.id); }}
+          className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+          title="Sil"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
-
-      <TaskListModal
-        isOpen={showListModal}
-        onClose={() => {
-          setShowListModal(false);
-          setEditingList(null);
-        }}
-        editingList={editingList}
-      />
     </div>
   );
-};
 
-// Extracted Task Card Component for cleaner code
-const TaskCard = ({ task, index, onEdit, onToggle, onDelete, onPin }: any) => {
   return (
-    <Draggable draggableId={task.id} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className={cn(
-            "group relative mb-3 p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all duration-200",
-            snapshot.isDragging ? "shadow-2xl ring-2 ring-indigo-500 rotate-2 z-50 cursor-grabbing" : "hover:border-indigo-300 dark:hover:border-zinc-600 hover:shadow-lg hover:shadow-indigo-500/5 cursor-grab",
-            task.isCompleted && "opacity-60 bg-zinc-50 dark:bg-zinc-900/50"
-          )}
-        >
-          <div className="flex items-start gap-3">
-             <button
-              onClick={() => onToggle(task.id)}
-              className="mt-1 flex-shrink-0"
-             >
-               {task.isCompleted ? (
-                 <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-               ) : (
-                 <Circle className="w-5 h-5 text-zinc-300 dark:text-zinc-600 hover:text-emerald-500 transition-colors" />
-               )}
-             </button>
+    <div className="h-full flex flex-col">
+      {/* Header Alanı */}
+      <div className="flex-none p-8 lg:p-10 pb-0">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Görevlerim</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium">
+              Bugün yapman gereken <span className="text-zinc-900 dark:text-white font-bold">{groupedTasks.today.length}</span>, 
+              toplam <span className="text-zinc-900 dark:text-white font-bold">{tasks.filter(t => !t.isCompleted && !t.isDeleted).length}</span> aktif görevin var.
+            </p>
+          </div>
+          
+          <button
+            onClick={onOpenTaskModal}
+            className="flex items-center gap-2 px-6 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg active:scale-95 whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            Yeni Görev
+          </button>
+        </div>
 
-             <div className="flex-1 min-w-0">
-               <div className="flex items-start justify-between gap-2">
-                 <h4 className={cn(
-                   "text-sm font-semibold leading-relaxed",
-                   task.isCompleted ? "line-through text-zinc-500" : "text-zinc-900 dark:text-zinc-100"
-                 )}>
-                   {task.title}
-                 </h4>
-                 {task.isPinned && <Pin className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 fill-current" />}
-               </div>
-               
-               {task.description && (
-                 <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{task.description}</p>
-               )}
-
-               <div className="flex items-center justify-between mt-3">
-                  {task.dueDate ? (
-                    <div className={cn(
-                      "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md bg-zinc-50 dark:bg-zinc-800",
-                      new Date(task.dueDate) < new Date() && !task.isCompleted ? "text-red-500 bg-red-50 dark:bg-red-900/20" : "text-zinc-500"
-                    )}>
-                      <Calendar className="w-3 h-3" />
-                      {new Date(task.dueDate).toLocaleDateString('tr-TR')}
-                    </div>
-                  ) : <div />}
-
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onEdit(task)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-indigo-500 transition-colors">
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => onPin(task.id, !task.isPinned)} className={cn("p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded transition-colors", task.isPinned ? "text-amber-500" : "text-zinc-400 hover:text-amber-500")}>
-                      <Pin className="w-3.5 h-3.5" />
-                    </button>
-                    <button onClick={() => onDelete(task.id)} className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-               </div>
-             </div>
+        {/* Filtreler */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="p-1 bg-white/50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 flex items-center gap-1 backdrop-blur-sm">
+            {(['all', 'pending', 'completed'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap",
+                  filter === f 
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm" 
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                )}
+              >
+                {f === 'all' && 'Tümü'}
+                {f === 'pending' && 'Bekleyenler'}
+                {f === 'completed' && 'Tamamlananlar'}
+              </button>
+            ))}
           </div>
         </div>
-      )}
-    </Draggable>
+      </div>
+
+      {/* Görev Listesi */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-10 pt-4">
+        <div className="max-w-4xl space-y-10 pb-20">
+          
+          {/* Boş Durum */}
+          {tasks.filter(t => !t.isDeleted).length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
+              <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-6">
+                <CheckSquare className="w-10 h-10 opacity-50" />
+              </div>
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">Henüz görev yok</h3>
+              <p className="text-zinc-500 dark:text-zinc-500">Yeni bir görev ekleyerek güne başla.</p>
+            </div>
+          )}
+
+          {/* Gecikmiş Görevler */}
+          {groupedTasks.overdue.length > 0 && filter !== 'completed' && (
+            <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-2 text-sm font-bold text-red-600 dark:text-red-400 uppercase tracking-wider pl-1">
+                <AlertCircle className="w-4 h-4" />
+                Gecikenler
+              </div>
+              <div className="space-y-3">
+                {groupedTasks.overdue.map(task => <TaskItem key={task.id} task={task} isOverdue={true} />)}
+              </div>
+            </section>
+          )}
+
+          {/* Bugünün Görevleri */}
+          {groupedTasks.today.length > 0 && filter !== 'completed' && (
+            <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1">
+                <Calendar className="w-4 h-4" />
+                Bugün
+              </div>
+              <div className="space-y-3">
+                {groupedTasks.today.map(task => <TaskItem key={task.id} task={task} />)}
+              </div>
+            </section>
+          )}
+
+          {/* Yaklaşan Görevler */}
+          {groupedTasks.upcoming.length > 0 && filter !== 'completed' && (
+            <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1">
+                <Clock className="w-4 h-4" />
+                Yaklaşan
+              </div>
+              <div className="space-y-3">
+                {groupedTasks.upcoming.map(task => <TaskItem key={task.id} task={task} />)}
+              </div>
+            </section>
+          )}
+
+          {/* Tarihsiz Görevler */}
+          {groupedTasks.noDate.length > 0 && filter !== 'completed' && (
+            <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1">
+                <Filter className="w-4 h-4" />
+                Zamanlanmamış
+              </div>
+              <div className="space-y-3">
+                {groupedTasks.noDate.map(task => <TaskItem key={task.id} task={task} />)}
+              </div>
+            </section>
+          )}
+
+          {/* Tamamlananlar */}
+          {groupedTasks.completed.length > 0 && filter !== 'pending' && (
+            <section className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 pt-8 border-t border-zinc-200/50 dark:border-zinc-800/50">
+                <CheckCircle2 className="w-4 h-4" />
+                Tamamlananlar
+              </div>
+              <div className="space-y-3">
+                {groupedTasks.completed.map(task => <TaskItem key={task.id} task={task} />)}
+              </div>
+            </section>
+          )}
+
+        </div>
+      </div>
+    </div>
   );
 };

@@ -37,7 +37,6 @@ const mainNav = [
   { id: 'dashboard', label: 'Genel Bakış', icon: Home },
   { id: 'tasks', label: 'Görevler', icon: CheckSquare },
   { id: 'notes', label: 'Notlar', icon: FileText },
-  { id: 'weekly', label: 'Takvim', icon: Calendar },
   { id: 'stats', label: 'İstatistik', icon: BarChart },
 ];
 
