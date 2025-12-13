@@ -6,8 +6,7 @@ import {
   Calendar, 
   Trash2, 
   FileText, 
-  ArrowUpRight,
-  MoreVertical
+  ArrowUpRight 
 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
@@ -20,7 +19,6 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
   const { notes, deleteNote, pinNote, loading } = useNotes();
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Notları Filtreleme ve Sıralama
   const filteredNotes = notes.filter(note => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     note.content?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -29,71 +27,51 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
   const pinnedNotes = filteredNotes.filter(n => n.isPinned);
   const otherNotes = filteredNotes.filter(n => !n.isPinned);
 
-  // Yükleniyor Göstergesi
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  // Not Kartı Bileşeni
+  // Masonry Card Component
   const NoteCard = ({ note }: { note: any }) => (
-    <div 
-      className={cn(
-        "group relative flex flex-col h-[280px] p-6 transition-all duration-300",
-        "bg-white/60 dark:bg-zinc-900/60 backdrop-blur-sm",
-        "border border-white/20 dark:border-white/5",
-        "rounded-[2rem]",
-        "hover:-translate-y-1 hover:shadow-xl hover:bg-white/80 dark:hover:bg-zinc-900/80"
-      )}
-    >
-      {/* Kart Başlığı ve Pin Durumu */}
-      <div className="flex items-start justify-between mb-4 relative z-10">
-        <h3 className="font-bold text-lg text-zinc-900 dark:text-zinc-100 line-clamp-1 pr-8">
-          {note.title}
-        </h3>
-        
-        {/* Sabitleme İkonu (Aktifse görünür) */}
-        {note.isPinned && (
-          <Pin className="absolute top-1 right-0 w-4 h-4 text-amber-500 fill-current" />
-        )}
-      </div>
-
-      {/* Kart İçeriği */}
-      <div className="flex-1 overflow-hidden relative mb-4">
-        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap font-medium break-words">
-          {note.content || "İçerik yok..."}
-        </p>
-        {/* Metin Taşması İçin Fade Efekti */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white/80 via-white/40 to-transparent dark:from-zinc-900/80 dark:via-zinc-900/40 pointer-events-none" />
-      </div>
-
-      {/* Alt Bilgi ve Aksiyonlar */}
-      <div className="mt-auto flex items-center justify-between pt-4 border-t border-zinc-200/50 dark:border-white/5">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 uppercase tracking-wide">
-          <Calendar className="w-3.5 h-3.5" />
-          {new Date(note.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+    <div className="group relative flex flex-col mb-6 break-inside-avoid bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      
+      {/* Pin Badge */}
+      {note.isPinned && (
+        <div className="absolute top-4 right-4 text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-1.5 rounded-full">
+          <Pin className="w-3.5 h-3.5 fill-current" />
         </div>
+      )}
 
-        {/* Hover Aksiyonları */}
+      {/* Title */}
+      <h3 className={cn("font-bold text-lg text-zinc-900 dark:text-zinc-100 mb-3 leading-tight", note.isPinned && "pr-8")}>
+        {note.title}
+      </h3>
+
+      {/* Content Preview */}
+      <div className="mb-4 relative">
+        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-words font-medium line-clamp-[8]">
+          {note.content}
+        </p>
+        {!note.content && <p className="text-sm text-zinc-400 italic">İçerik yok...</p>}
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+          <Calendar className="w-3 h-3" />
+          {new Date(note.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+        </div>
+        
+        {/* Actions - Visible on Hover */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
           <button 
             onClick={(e) => { e.stopPropagation(); pinNote(note.id, !note.isPinned); }}
             className={cn(
-              "p-2 rounded-xl transition-colors",
-              note.isPinned 
-                ? "text-amber-500 bg-amber-50 dark:bg-amber-900/20" 
-                : "text-zinc-400 hover:text-amber-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              "p-2 rounded-xl transition-colors", 
+              note.isPinned ? "text-amber-500 bg-amber-50 dark:bg-amber-900/20" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             )}
             title={note.isPinned ? "Sabitlemeyi Kaldır" : "Sabitle"}
           >
-            <Pin className={cn("w-4 h-4", note.isPinned && "fill-current")} />
+            <Pin className="w-4 h-4" />
           </button>
-          
           <button 
-            onClick={(e) => { e.stopPropagation(); if(confirm('Bu notu silmek istiyor musunuz?')) deleteNote(note.id); }}
+            onClick={(e) => { e.stopPropagation(); if(confirm('Not silinsin mi?')) deleteNote(note.id); }}
             className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
             title="Sil"
           >
@@ -104,88 +82,94 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal }) => {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col">
-      {/* Header Alanı */}
+    <div className="h-full flex flex-col relative">
+      {/* Header */}
       <div className="flex-none p-8 lg:p-10 pb-4">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div className="flex flex-col gap-6">
           <div>
-            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Notlarım</h1>
-            <p className="text-zinc-500 dark:text-zinc-400 font-medium">
-              Toplam <span className="text-zinc-900 dark:text-white font-bold">{notes.length}</span> notunuz var.
-            </p>
+            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Notlar</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Düşüncelerini ve fikirlerini kaydet.</p>
           </div>
           
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <div className="relative flex-1 md:w-80 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" />
-              <input 
-                type="text" 
-                placeholder="Notlarda ara..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-white/50 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-sm backdrop-blur-sm"
-              />
-            </div>
-            <button
-              onClick={onOpenNoteModal}
-              className="flex items-center gap-2 px-6 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg active:scale-95 whitespace-nowrap"
-            >
-              <Plus className="w-5 h-5" />
-              Yeni Not
-            </button>
+          {/* Search Bar */}
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+            <input 
+              type="text" 
+              placeholder="Notlarda ara..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
+            />
           </div>
         </div>
       </div>
 
-      {/* İçerik Alanı (Grid) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-10 pt-0">
-        <div className="max-w-[1800px] mx-auto space-y-12 pb-20">
+      {/* Masonry Content */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-10 pt-2 pb-24">
+        <div className="max-w-[1800px] mx-auto space-y-10">
           
-          {/* Boş Durum */}
           {filteredNotes.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-              <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-6">
-                <FileText className="w-10 h-10 opacity-50" />
+              <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center mb-6">
+                <FileText className="w-10 h-10 opacity-30" />
               </div>
               <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">
-                {searchQuery ? "Sonuç bulunamadı" : "Henüz notunuz yok"}
+                {searchQuery ? "Sonuç bulunamadı" : "Not defterin boş"}
               </h3>
               <p className="text-zinc-500 dark:text-zinc-500">
-                {searchQuery ? "Farklı bir arama yapmayı deneyin." : "Düşüncelerinizi kaydetmeye hemen başlayın."}
+                {searchQuery ? "Farklı bir arama yapmayı dene." : "Harika fikirlerini kaydetmeye başla."}
               </p>
             </div>
           )}
 
-          {/* Sabitlenen Notlar */}
           {pinnedNotes.length > 0 && (
-            <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1">
+            <section>
+              <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 mb-6">
                 <Pin className="w-4 h-4" />
                 Sabitlenenler
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
                 {pinnedNotes.map(note => <NoteCard key={note.id} note={note} />)}
               </div>
             </section>
           )}
 
-          {/* Diğer Notlar */}
           {otherNotes.length > 0 && (
-            <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+            <section>
               {pinnedNotes.length > 0 && (
-                <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 border-t border-zinc-200/50 dark:border-zinc-800/50 pt-8">
+                <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 mb-6 border-t border-zinc-200/50 dark:border-zinc-800/50 pt-8">
                   <FileText className="w-4 h-4" />
-                  Diğer Notlar
+                  Diğerleri
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
                 {otherNotes.map(note => <NoteCard key={note.id} note={note} />)}
               </div>
             </section>
           )}
         </div>
       </div>
+
+      {/* Floating Add Button */}
+      <button
+        onClick={onOpenNoteModal}
+        className="fixed bottom-8 right-8 z-50 flex items-center gap-3 pl-4 pr-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-full font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group"
+      >
+        <div className="bg-white/20 dark:bg-black/10 p-1 rounded-full">
+          <Plus className="w-5 h-5" />
+        </div>
+        Yeni Not
+      </button>
     </div>
   );
 };
