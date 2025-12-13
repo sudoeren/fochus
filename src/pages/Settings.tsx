@@ -20,10 +20,13 @@ import {
   ChevronRight,
   GripVertical,
   Lock,
-  Key
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
+import { authAPI } from '../services/api';
 
 // --- Tab Component ---
 const SettingsTab = ({ 
@@ -53,11 +56,22 @@ const SettingsTab = ({
 
 // --- Sections ---
 
-// 1. Profile Section (Updated)
+// 1. Profile Section (Updated - Compact)
 const ProfileSection = ({ bgImage }: { bgImage: string }) => {
+  const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordChangeMessage, setPasswordChangeMessage] = useState<string | null>(null);
+  const [passwordChangeError, setPasswordChangeError] = useState<string | null>(null);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+
   const userData = {
     name: "Kullanıcı",
-    email: "kullanici@fochus.app",
+    username: "kullaniciadi",
     joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
   };
 
@@ -65,6 +79,37 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
     if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
       localStorage.removeItem('isAuthenticated');
       window.location.reload();
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordChangeMessage(null);
+    setPasswordChangeError(null);
+    setIsPasswordLoading(true);
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordChangeError('Yeni şifreler eşleşmiyor!');
+      setIsPasswordLoading(false);
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordChangeError('Yeni şifre en az 6 karakter olmalıdır.');
+      setIsPasswordLoading(false);
+      return;
+    }
+
+    try {
+      await authAPI.updatePassword({ currentPassword, newPassword });
+      setPasswordChangeMessage('Şifre başarıyla güncellendi!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setShowPasswordChangeForm(false);
+    } catch (err: any) {
+      setPasswordChangeError(err.message || 'Şifre güncellenirken bir hata oluştu.');
+    } finally {
+      setIsPasswordLoading(false);
     }
   };
 
@@ -77,7 +122,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-black/20 group relative">
         
         {/* Dynamic Background Header */}
-        <div className="absolute top-0 left-0 w-full h-48 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-32 overflow-hidden">
            {isCustomBg ? (
               <img src={bgImage} className="w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity" alt="Profile BG" />
            ) : (
@@ -89,10 +134,10 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-zinc-900" />
         </div>
         
-        <div className="relative pt-32 px-8 pb-8 flex flex-col items-center text-center">
+        <div className="relative pt-20 px-8 pb-8 flex flex-col items-center text-center">
            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-1">{userData.name}</h2>
            <p className="text-zinc-500 dark:text-zinc-400 mb-6 flex items-center gap-2">
-             <Mail className="w-4 h-4" /> {userData.email}
+             <User className="w-4 h-4" /> {userData.username}
            </p>
 
            <div className="flex gap-3 mb-8">
@@ -101,17 +146,18 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
              </div>
            </div>
 
+           {/* Stats section */}
            <div className="grid grid-cols-3 gap-4 w-full pt-6 border-t border-zinc-100 dark:border-zinc-800">
               <div className="text-center">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-white">12</div>
+                <div className="text-xl font-bold text-zinc-900 dark:text-white">12</div>
                 <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-white">5</div>
+                <div className="text-xl font-bold text-zinc-900 dark:text-white">5</div>
                 <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Not</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-zinc-900 dark:text-white">2.5s</div>
+                <div className="text-xl font-bold text-zinc-900 dark:text-white">2.5s</div>
                 <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
               </div>
            </div>
@@ -120,37 +166,109 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 
       {/* Password Change Section */}
       <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-8 border border-zinc-100 dark:border-zinc-800">
-         <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
-              <Lock className="w-5 h-5" />
+         <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
             </div>
-            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
+            <button 
+              onClick={() => setShowPasswordChangeForm(!showPasswordChangeForm)}
+              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
+            >
+              <ChevronRight className={cn("w-5 h-5 transition-transform", showPasswordChangeForm && "rotate-90")} />
+            </button>
          </div>
 
-         <div className="space-y-4">
-            <div className="space-y-2">
-               <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
-               <div className="relative">
-                 <input type="password" placeholder="••••••••" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 pl-11 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
-                 <Key className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
-               </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="space-y-2">
-                 <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Yeni Şifre</label>
-                 <input type="password" placeholder="Yeni şifreniz" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
-               </div>
-               <div className="space-y-2">
-                 <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Tekrar</label>
-                 <input type="password" placeholder="Şifreyi onaylayın" className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
-               </div>
-            </div>
-            <div className="pt-2 flex justify-end">
-               <button className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:opacity-90 transition-opacity text-sm">
-                 Şifreyi Güncelle
-               </button>
-            </div>
-         </div>
+         {showPasswordChangeForm && (
+           <form onSubmit={handlePasswordChange} className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+             {passwordChangeMessage && (
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-medium border border-emerald-100 dark:border-emerald-800">
+                  {passwordChangeMessage}
+                </div>
+              )}
+              {passwordChangeError && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl text-sm font-medium border border-red-100 dark:border-red-800">
+                  {passwordChangeError}
+                </div>
+              )}
+             <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
+                <div className="relative">
+                  <input 
+                    type={showCurrentPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 pl-11 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                  <Key className="absolute left-4 top-3.5 w-4 h-4 text-zinc-400" />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Yeni Şifre</label>
+                  <div className="relative">
+                    <input 
+                      type={showNewPassword ? "text" : "password"} 
+                      placeholder="Yeni şifreniz" 
+                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                     <button 
+                       type="button" 
+                       onClick={() => setShowNewPassword(!showNewPassword)}
+                       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                     >
+                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                     </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">Tekrar</label>
+                  <div className="relative">
+                    <input 
+                      type={showConfirmNewPassword ? "text" : "password"} 
+                      placeholder="Şifreyi onaylayın" 
+                      className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      required
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-500 transition-colors"
+                    >
+                      {showConfirmNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+             </div>
+             <div className="pt-2 flex justify-end">
+                <button 
+                  type="submit"
+                  disabled={isPasswordLoading}
+                  className="px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold rounded-xl hover:opacity-90 transition-opacity text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPasswordLoading ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : 'Şifreyi Güncelle'}
+                </button>
+             </div>
+           </form>
+         )}
       </div>
 
       <button 
@@ -384,27 +502,27 @@ const DataSection = () => {
   );
 };
 
-// 5. About Section (Updated - Monochrome & Creative)
+// 5. About Section (Restored - Colorful & Vibrant)
 const AboutSection = () => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
       {/* Hero Card */}
-      <div className="bg-black text-white rounded-[2.5rem] p-10 text-center relative overflow-hidden shadow-2xl group border border-zinc-800">
-        {/* Subtle Light Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-white/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-zinc-800/20 rounded-full blur-[80px] pointer-events-none" />
+      <div className="bg-zinc-900 dark:bg-black text-white rounded-[2.5rem] p-10 text-center relative overflow-hidden shadow-2xl group">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl group-hover:bg-indigo-500/40 transition-colors duration-700" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl group-hover:bg-purple-500/40 transition-colors duration-700" />
         
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 text-white rounded-3xl flex items-center justify-center text-5xl font-bold shadow-2xl shadow-white/5 mb-6 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+          <div className="w-20 h-20 bg-white text-zinc-900 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
             F
           </div>
-          <h2 className="text-4xl font-bold tracking-tight mb-3">FOKUS</h2>
-          <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed font-light">
-            "Karanlığın içinde bir ışık hüzmesi. Zihnin gürültüsünü sustur, sadece hedefine odaklan."
+          <h2 className="text-4xl font-bold tracking-tight mb-3">FOCHUS</h2>
+          <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
+            Minimalist, odaklanma dostu ve tamamen kişiselleştirilebilir üretkenlik asistanınız.
           </p>
           <div className="mt-8 flex gap-3">
-             <span className="px-4 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded-full text-sm font-mono backdrop-blur-md">v1.2.0</span>
-             <span className="px-4 py-1.5 bg-white text-black rounded-full text-sm font-bold shadow-lg shadow-white/10">Stable</span>
+             <span className="px-4 py-1.5 bg-white/10 rounded-full text-sm font-mono border border-white/10 backdrop-blur-md">v1.2.0</span>
+             <span className="px-4 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/20 backdrop-blur-md">Stable</span>
           </div>
         </div>
       </div>
@@ -413,26 +531,27 @@ const AboutSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Developer Card */}
-        <div className="bg-zinc-900 p-6 rounded-[2rem] border border-zinc-800 flex flex-col gap-4 relative overflow-hidden group hover:border-zinc-700 transition-colors">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-white/10" />
+        <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 flex flex-col gap-4 relative overflow-hidden group">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-zinc-100 dark:bg-zinc-800 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700" />
            
            <div className="relative z-10">
-             <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-4">Mimar</h3>
+             <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">Geliştirici</h3>
              <div className="flex items-center gap-4">
-               <div className="w-16 h-16 rounded-full bg-zinc-800 p-0.5 border border-zinc-700">
-                 <div className="w-full h-full rounded-full bg-black overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center text-zinc-400 font-bold text-xl">
+               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-0.5 shadow-lg">
+                 <div className="w-full h-full rounded-full bg-white dark:bg-zinc-900 overflow-hidden">
+                    {/* Placeholder Avatar */}
+                    <div className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-bold text-xl">
                       MK
                     </div>
                  </div>
                </div>
                <div>
-                 <h4 className="text-xl font-bold text-white">Metehan Kaya</h4>
-                 <p className="text-sm text-zinc-400">Software Craftsman</p>
+                 <h4 className="text-xl font-bold text-zinc-900 dark:text-white">Metehan Kaya</h4>
+                 <p className="text-sm text-zinc-500 dark:text-zinc-400">Full Stack Developer</p>
                </div>
              </div>
-             <p className="mt-4 text-zinc-400 text-sm leading-relaxed font-light">
-               Sadeliğin gücüne inanan, karmaşadan uzak, amaca hizmet eden dijital deneyimler tasarlıyorum.
+             <p className="mt-4 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
+               Kullanıcı deneyimini ön planda tutan, modern web teknolojileriyle geliştirilmiş açık kaynaklı projeler üretiyorum.
              </p>
            </div>
         </div>
@@ -445,15 +564,15 @@ const AboutSection = () => {
             href="https://github.com/metehan-kaya" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex-1 bg-black text-white p-6 rounded-[2rem] border border-zinc-800 flex items-center justify-between group hover:border-zinc-600 transition-all duration-300"
+            className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
           >
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-zinc-900 rounded-full border border-zinc-800 group-hover:bg-white group-hover:text-black transition-colors">
+              <div className="p-3 bg-white/10 dark:bg-black/10 rounded-full">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.26.96-.27 1.98-.405 3-.405 1.02 0 2.04.135 3 .405 2.28-1.575 3.285-1.26 3.285-1.26.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.285 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               </div>
               <div>
                 <h4 className="font-bold text-lg">Kaynak Kod</h4>
-                <p className="text-xs text-zinc-500 group-hover:text-zinc-400 transition-colors">GitHub'da İncele</p>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">GitHub'da İncele</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
@@ -464,15 +583,15 @@ const AboutSection = () => {
             href="https://fochus.app" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex-1 bg-white text-black p-6 rounded-[2rem] border border-zinc-200 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl"
+            className="flex-1 bg-indigo-600 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-indigo-500/20 text-white"
           >
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-black text-white rounded-full">
+              <div className="p-3 bg-white/20 rounded-full">
                 <Laptop className="w-6 h-6" />
               </div>
               <div>
                 <h4 className="font-bold text-lg">Web Sitesi</h4>
-                <p className="text-xs text-zinc-500">fochus.app</p>
+                <p className="text-xs text-indigo-200">fochus.app</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
