@@ -91,17 +91,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* 1. Header (Custom Logo) */}
           <div className="h-24 flex items-center px-6 shrink-0">
             <div className="flex items-center gap-3">
-              {/* Light Mode Logo */}
               <img 
-                src="/l.png" 
-                alt="Logo" 
-                className="h-10 w-auto object-contain dark:hidden" 
-              />
-              {/* Dark Mode Logo */}
-              <img 
-                src="/d.png" 
-                alt="Logo" 
-                className="h-10 w-auto object-contain hidden dark:block" 
+                src="/logo.svg" 
+                alt="Fokus Logo" 
+                className="h-10 w-10 object-contain" 
               />
               <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">FOCHUS</span>
             </div>

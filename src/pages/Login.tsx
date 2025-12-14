@@ -235,13 +235,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="text-center mb-10">
             <div className="lg:hidden flex justify-center mb-6">
               <div className={cn(
-                "h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg p-3",
-                theme === 'light' ? "bg-zinc-900" : "bg-black"
+                "h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg",
+                theme === 'light' ? "bg-white border border-zinc-200" : "bg-zinc-900 border border-zinc-800"
               )}>
-                <img src="/logo.svg" alt="Fokus Logo" className={cn(
-                  "w-full h-full object-contain",
-                  theme === 'light' ? "filter invert" : "" // Invert for light mode to show dark logo
-                )} />
+                <img src="/logo.svg" alt="Fokus Logo" className="w-12 h-12 object-contain" />
               </div>
             </div>
             <h2 className={cn(
