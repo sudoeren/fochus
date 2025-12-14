@@ -1,6 +1,7 @@
-import React from 'react';
-import { X, Play, Pause, RotateCcw, Coffee, Zap, Brain } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Play, Pause, RotateCcw, Coffee, Zap, Brain, Settings, ChevronLeft, Minus, Plus, RotateCw } from 'lucide-react';
 import { usePomodoro, TimerMode } from '../hooks/usePomodoro';
+import { cn } from '../lib/utils';
 
 interface PomodoroModalProps {
   isOpen: boolean;
@@ -16,8 +17,14 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
     toggleTimer, 
     resetTimer, 
     setMode,
-    progress 
+    progress,
+    cycles,
+    settings,
+    updateSettings,
+    resetCycles
   } = usePomodoro();
+
+  const [showSettings, setShowSettings] = useState(false);
 
   if (!isOpen) return null;
 
@@ -45,6 +52,193 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
     }
   };
 
+  const getStrokeColor = () => {
+    switch (mode) {
+      case 'work': return '#ef4444';
+      case 'shortBreak': return '#10b981';
+      case 'longBreak': return '#3b82f6';
+      default: return '#6b7280';
+    }
+  };
+
+  // Settings view
+  if (showSettings) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
+        <div 
+          className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+            <button 
+              onClick={() => setShowSettings(false)}
+              className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Zamanlayıcı Ayarları</h2>
+            <button 
+              onClick={onClose}
+              className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Duration Settings */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Süreler (dakika)</h3>
+              
+              {/* Work Duration */}
+              <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Odak Süresi</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => updateSettings({ workDuration: Math.max(1, settings.workDuration - 5) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">{settings.workDuration}</span>
+                  <button 
+                    onClick={() => updateSettings({ workDuration: Math.min(120, settings.workDuration + 5) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Short Break */}
+              <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                    <Coffee className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Kısa Mola</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => updateSettings({ shortBreakDuration: Math.max(1, settings.shortBreakDuration - 1) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">{settings.shortBreakDuration}</span>
+                  <button 
+                    onClick={() => updateSettings({ shortBreakDuration: Math.min(30, settings.shortBreakDuration + 1) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Long Break */}
+              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Uzun Mola</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => updateSettings({ longBreakDuration: Math.max(1, settings.longBreakDuration - 5) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">{settings.longBreakDuration}</span>
+                  <button 
+                    onClick={() => updateSettings({ longBreakDuration: Math.min(60, settings.longBreakDuration + 5) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Auto-start Settings */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Otomasyon</h3>
+              
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
+                <div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Molaları Otomatik Başlat</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Odak bittikten sonra mola otomatik başlar</p>
+                </div>
+                <button
+                  onClick={() => updateSettings({ autoStartBreaks: !settings.autoStartBreaks })}
+                  className={cn(
+                    "w-12 h-7 rounded-full p-1 transition-colors duration-300",
+                    settings.autoStartBreaks ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300",
+                    settings.autoStartBreaks ? "translate-x-5" : "translate-x-0"
+                  )} />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
+                <div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Odağı Otomatik Başlat</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Mola bittikten sonra odak otomatik başlar</p>
+                </div>
+                <button
+                  onClick={() => updateSettings({ autoStartWork: !settings.autoStartWork })}
+                  className={cn(
+                    "w-12 h-7 rounded-full p-1 transition-colors duration-300",
+                    settings.autoStartWork ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300",
+                    settings.autoStartWork ? "translate-x-5" : "translate-x-0"
+                  )} />
+                </button>
+              </div>
+
+              {/* Long Break Interval */}
+              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
+                <div>
+                  <span className="font-medium text-zinc-900 dark:text-white">Uzun Mola Aralığı</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Kaç odak sonrası uzun mola</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => updateSettings({ longBreakInterval: Math.max(2, settings.longBreakInterval - 1) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                  <span className="w-8 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">{settings.longBreakInterval}</span>
+                  <button 
+                    onClick={() => updateSettings({ longBreakInterval: Math.min(10, settings.longBreakInterval + 1) })}
+                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main timer view
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
       <div 
@@ -52,7 +246,14 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Bar */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-4 left-4 right-4 z-10 flex justify-between">
+          <button 
+            onClick={() => setShowSettings(true)}
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+            title="Ayarlar"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
           <button 
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
@@ -61,8 +262,24 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           </button>
         </div>
 
-        <div className="flex flex-col items-center pt-12 pb-8 px-8">
+        <div className="flex flex-col items-center pt-14 pb-8 px-8">
           
+          {/* Cycle Counter */}
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+              Tamamlanan: {cycles} odak
+            </span>
+            {cycles > 0 && (
+              <button 
+                onClick={resetCycles}
+                className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                title="Sıfırla"
+              >
+                <RotateCw className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
           {/* Timer Display with SVG Ring */}
           <div className="relative mb-10 group cursor-default">
             {/* Background Ring */}
@@ -86,12 +303,12 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                 cy="130"
                 r={radius}
                 fill="none"
-                stroke="currentColor"
+                stroke={getStrokeColor()}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
-                className={`${getThemeColor()} transition-all duration-1000 ease-linear`}
+                className="transition-all duration-1000 ease-linear"
               />
             </svg>
 

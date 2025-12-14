@@ -1,197 +1,115 @@
-# Fokus - Kişisel Üretkenlik Uygulaması
+# FOCHUS 🎯
 
-Modern bir kişisel üretkenlik uygulaması. Not alma, görev yönetimi, Pomodoro zamanlayıcı ve haftalık planlama özellikleri.
+<div align="center">
+  <img src="public/logo.svg" alt="Fochus Logo" width="120" height="120" />
+  
+  <h1>FOCHUS</h1>
+  
+  <p>
+    <strong>Minimalist, Odaklanma Dostu ve Kişiselleştirilebilir Üretkenlik Asistanı</strong>
+  </p>
 
-## 🚀 Teknoloji Stack
+  <p>
+    <a href="#özellikler">Özellikler</a> •
+    <a href="#kurulum">Kurulum</a> •
+    <a href="#teknolojiler">Teknolojiler</a> •
+    <a href="#lisans">Lisans</a>
+  </p>
 
-### Frontend
-- React 19 + TypeScript
-- Tailwind CSS
-- Vite
-- Lucide React Icons
+  <img src="https://img.shields.io/badge/version-1.2.0-blue.svg?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat-square" alt="License" />
+  <img src="https://img.shields.io/badge/platform-web%20%7C%20desktop-lightgrey.svg?style=flat-square" alt="Platform" />
+</div>
 
-### Backend
-- Node.js + Express
-- TypeScript
-- PostgreSQL
-- Prisma ORM
-- JWT Authentication
+<br />
 
-### DevOps
-- Docker & Docker Compose
-- Coolify Compatible
-- Nginx (Production)
+## ✨ Hakkında
 
-## ✨ Özellikler
+**Fochus**, dijital gürültüden arınmış, sadece işinize odaklanmanızı sağlayan modern bir üretkenlik uygulamasıdır. Kişisel kullanımım için geliştirdiğim bu proje, minimalist tasarımı güçlü özelliklerle birleştirerek günlük iş akışınızı optimize etmeyi hedefler.
 
-### 📝 Not Yönetimi
-- Başlık, içerik, etiketler ve tarih damgası ile kapsamlı not tutma
-- Not sabitleme ve arama özellikleri
-- Markdown desteği
-- Tema uyumlu tasarım
+Verileriniz tamamen **yerel** olarak saklanır. Bulut yok, üyelik yok, takip yok. Sadece siz ve odaklanmanız gereken işler.
+
+---
+
+## 📸 Ekran Görüntüleri
+
+<div align="center">
+  <img src="screenshots/dashboard.png" alt="Dashboard Görünümü" width="800" style="border-radius: 10px; margin-bottom: 20px;" />
+  <br />
+  <em>Genel Bakış ve Dashboard</em>
+</div>
+
+<div align="center" style="display: flex; gap: 10px; justify-content: center;">
+  <img src="screenshots/spotlight.png" alt="Spotlight Arama" width="48%" style="border-radius: 10px;" />
+  <img src="screenshots/timer.png" alt="Focus Timer" width="48%" style="border-radius: 10px;" />
+</div>
+
+---
+
+## 🚀 Özellikler
+
+### 🎯 Odak Modu (Pomodoro)
+Özelleştirilebilir zamanlayıcı ile çalışma seanslarınızı yönetin. Otomatik mola geçişleri ve sesli bildirimler ile akışta kalın.
+
+### 📝 Akıllı Notlar
+Zengin metin editörü ile düşüncelerinizi organize edin. Etiketleme sistemi ve renk kodları ile notlarınıza hızla ulaşın.
 
 ### ✅ Görev Yönetimi
-- Günlük to-do listesi ve durum takibi
-- Görev düzenleme ve tamamlama özellikleri
-- Öncelik seviyeleri
-- Tarih bazlı filtreleme
+Sürükle-bırak destekli görev listeleri, alt görevler ve tekrarlayan görevler ile projelerinizi planlayın.
 
-### 📅 Haftalık Planlayıcı
-- 7 günlük görünüm
-- Görev planlama ve takip
-- Drag & drop desteği (gelecek güncelleme)
+### 🔍 Spotlight Arama (`Ctrl + K`)
+Uygulamanın her yerinden erişilebilen güçlü komut merkezi. Notlarda arama yapın, görev ekleyin veya tema değiştirin.
 
-### 🔍 Spotlight Arama
-- **Ctrl+K** ile hızlı komut arayıcısı
-- Sayfa navigasyonu ve hızlı eylemler
-- Özelleştirilebilir komut sıralaması
-- Arama geçmişi ve kullanım istatistikleri
+### 🎨 Kişiselleştirme
+*   **Tema Desteği:** Aydınlık, Karanlık ve Sistem modları.
+*   **Arka Plan:** Dinamik arka planlar veya kendi görselinizi yükleme imkanı.
+*   **Gizlilik:** Verileriniz tarayıcınızda (LocalStorage) şifrelenmeden saklanır, dışarı çıkmaz.
 
-### 🎨 Tema Sistemi
-- Açık/Koyu/Sistem modu
-- Gerçek zamanlı tema değişimi
-- Tüm bileşenler için uyumlu renkler
+---
+
+## 🛠 Teknolojiler
+
+Bu proje, modern web teknolojilerinin gücüyle inşa edilmiştir:
+
+*   **Frontend:** [React 18](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+*   **Stil:** [Tailwind CSS](https://tailwindcss.com/) + [Lucide Icons](https://lucide.dev/)
+*   **Build:** [Vite](https://vitejs.dev/)
+*   **Veri:** LocalStorage (Offline-first)
+
+---
 
 ## 📦 Kurulum
 
-### Gereksinimler
-- Node.js 20+
-- Docker & Docker Compose (opsiyonel)
-- PostgreSQL 16+ (Docker olmadan)
+Projeyi yerel makinenizde çalıştırmak için:
 
-### 1. Docker ile Başlatma (Önerilen)
+1.  **Repoyu klonlayın:**
+    ```bash
+    git clone https://github.com/metehan-kaya/fochus.git
+    cd fochus
+    ```
 
-```bash
-# Repository'yi klonla
-git clone <repo-url>
-cd fokus
+2.  **Bağımlılıkları yükleyin:**
+    ```bash
+    npm install
+    ```
 
-# .env dosyasını oluştur
-cp .env.example .env
+3.  **Geliştirme sunucusunu başlatın:**
+    ```bash
+    npm run dev
+    ```
 
-# Docker ile başlat (tüm servisler)
-docker-compose up -d
+4.  Tarayıcınızda `http://localhost:5173` adresine gidin.
 
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:3001
-# PostgreSQL: localhost:5432
-```
+---
 
-### 2. Yerel Geliştirme (Docker olmadan)
+## 🤝 İletişim
 
-```bash
-# Backend kurulumu
-cd backend
-npm install
-cp .env.example .env
-# .env dosyasında DATABASE_URL'i güncelleyin
+**Metehan Kaya** - [metehankaya.dev](https://metehankaya.dev)
 
-# Veritabanı migration
-npx prisma migrate dev
+Proje ile ilgili öneri ve görüşleriniz için GitHub üzerinden issue açabilir veya bana ulaşabilirsiniz.
 
-# Backend'i başlat
-npm run dev
+---
 
-# Frontend kurulumu (yeni terminal)
-cd ..
-npm install
-npm run dev
-```
-
-## 🐳 Coolify Deployment
-
-### Backend Deployment
-1. Coolify'da yeni servis oluştur
-2. Repository'yi bağla
-3. Build Path: `backend`
-4. Dockerfile: `backend/Dockerfile`
-5. Environment Variables:
-   - `DATABASE_URL`: PostgreSQL connection string
-   - `JWT_SECRET`: Güçlü bir secret key
-   - `CORS_ORIGIN`: Frontend URL
-
-### Frontend Deployment
-1. Coolify'da yeni servis oluştur
-2. Repository'yi bağla
-3. Build Path: `.` (root)
-4. Dockerfile: `Dockerfile`
-5. Build Args:
-   - `VITE_API_URL`: Backend API URL
-
-## 🔧 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Kayıt ol
-- `POST /api/auth/login` - Giriş yap
-- `GET /api/auth/me` - Kullanıcı bilgileri
-
-### Notes
-- `GET /api/notes` - Tüm notlar
-- `POST /api/notes` - Not oluştur
-- `PUT /api/notes/:id` - Not güncelle
-- `DELETE /api/notes/:id` - Not sil
-
-### Tasks
-- `GET /api/tasks` - Tüm görevler
-- `POST /api/tasks` - Görev oluştur
-- `PUT /api/tasks/:id` - Görev güncelle
-- `DELETE /api/tasks/:id` - Görev sil
-
-### Task Lists
-- `GET /api/task-lists` - Tüm listeler
-- `POST /api/task-lists` - Liste oluştur
-
-### Pomodoro
-- `GET /api/pomodoro` - Tüm oturumlar
-- `GET /api/pomodoro/stats` - İstatistikler
-- `POST /api/pomodoro` - Oturum kaydet
-
-## 📁 Proje Yapısı
-
-```
-fokus/
-├── src/                    # Frontend kaynak kodu
-│   ├── components/         # React bileşenleri
-│   ├── pages/              # Sayfa bileşenleri
-│   ├── hooks/              # Custom hooks
-│   ├── services/           # API servisleri
-│   └── lib/                # Utility fonksiyonları
-├── backend/                # Backend kaynak kodu
-│   ├── src/
-│   │   ├── routes/         # API route'ları
-│   │   ├── middleware/     # Express middleware
-│   │   └── lib/            # Utility & Prisma
-│   └── prisma/             # Prisma schema
-├── public/                 # Statik dosyalar
-├── docker-compose.yml      # Docker Compose config
-├── Dockerfile              # Frontend Dockerfile
-└── nginx.conf              # Nginx config
-```
-
-## 🔐 Environment Variables
-
-### Backend (.env)
-```env
-DATABASE_URL=postgresql://user:password@host:5432/database
-JWT_SECRET=your-secret-key
-JWT_EXPIRES_IN=7d
-PORT=3001
-NODE_ENV=production
-CORS_ORIGIN=http://localhost:3000
-```
-
-### Docker Compose (.env)
-```env
-POSTGRES_USER=fokus
-POSTGRES_PASSWORD=fokus_password
-POSTGRES_DB=fokus_db
-VITE_API_URL=http://localhost:3001/api
-```
-
-## 📝 Lisans
-
-MIT License
-
-**Fokus** ile üretkenliğinizi artırın! 🚀
-
-*Son güncelleme: Aralık 2024*
+<div align="center">
+  <sub>Made with ❤️ by Metehan Kaya</sub>
+</div>

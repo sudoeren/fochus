@@ -23,6 +23,7 @@ interface DashboardProps {
   onOpenTaskModal: () => void;
   onEditTask?: (task: any) => void;
   onOpenSpotlight?: () => void;
+  onOpenPomodoro?: () => void;
   bgImage: string;
   onBgChange: (newBg: string) => void;
 }
@@ -33,6 +34,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenTaskModal,
   onEditTask,
   onOpenSpotlight,
+  onOpenPomodoro,
   bgImage,
   onBgChange
 }) => {
@@ -127,7 +129,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div className="flex items-center gap-2 pr-4">
                     <kbd className="hidden md:flex h-8 items-center gap-1 rounded border border-zinc-300 dark:border-zinc-700 bg-white/50 dark:bg-zinc-800 px-2 font-mono text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      <span className="text-xs">⌘</span>K
+                      /
                     </kbd>
                   </div>
                 </button>
@@ -137,7 +139,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 {/* Pomodoro Card */}
-                <div className="group relative overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/10 dark:to-purple-500/10 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:scale-[1.02] hover:shadow-xl flex flex-col justify-between">
+                <div 
+                  onClick={onOpenPomodoro}
+                  className="group relative overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 dark:from-indigo-500/10 dark:to-purple-500/10 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:scale-[1.02] hover:shadow-xl flex flex-col justify-between cursor-pointer"
+                >
                    <div className="absolute top-0 right-0 p-6 opacity-30">
                       <Clock className="w-24 h-24 text-indigo-600 dark:text-indigo-400 -mr-6 -mt-6" />
                    </div>

@@ -35,6 +35,11 @@ const App: React.FC = () => {
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
   // Global Background State
   const [isGlobalBg, setIsGlobalBg] = useState(() => localStorage.getItem('isGlobalBg') === 'true');
+  // Spotlight Enabled State
+  const [isSpotlightEnabled, setIsSpotlightEnabled] = useState(() => {
+    const stored = localStorage.getItem('isSpotlightEnabled');
+    return stored === null ? true : stored === 'true';
+  });
 
   // Persist background choice
   const handleBgChange = (newBg: string) => {
@@ -45,6 +50,11 @@ const App: React.FC = () => {
   const handleGlobalBgToggle = (enabled: boolean) => {
     setIsGlobalBg(enabled);
     localStorage.setItem('isGlobalBg', String(enabled));
+  };
+
+  const handleSpotlightToggle = (enabled: boolean) => {
+    setIsSpotlightEnabled(enabled);
+    localStorage.setItem('isSpotlightEnabled', String(enabled));
   };
 
   const handleLogin = () => {
@@ -69,7 +79,7 @@ const App: React.FC = () => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
-      if (((e.metaKey || e.ctrlKey) && e.key === 'k') || (e.key === '/' && !isInputActive)) {
+      if (isSpotlightEnabled && (((e.metaKey || e.ctrlKey) && e.key === 'k') || (e.key === '/' && !isInputActive))) {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
@@ -98,6 +108,7 @@ const App: React.FC = () => {
           onOpenTaskModal={() => setShowTaskModal(true)}
           onEditTask={handleEditTask}
           onOpenSpotlight={() => setIsSpotlightOpen(true)}
+          onOpenPomodoro={() => setShowPomodoroModal(true)}
           bgImage={bgImage}
           onBgChange={handleBgChange}
         />;
@@ -131,6 +142,8 @@ const App: React.FC = () => {
           onBgChange={handleBgChange}
           isGlobalBg={isGlobalBg}
           onToggleGlobalBg={handleGlobalBgToggle}
+          isSpotlightEnabled={isSpotlightEnabled}
+          onToggleSpotlight={handleSpotlightToggle}
         />;
       default:
         return <Dashboard
@@ -214,6 +227,7 @@ const App: React.FC = () => {
           onNavigate={setActiveView}
           onOpenNoteModal={() => setShowNoteModal(true)}
           onOpenTaskModal={() => setShowTaskModal(true)}
+          onOpenPomodoro={() => setShowPomodoroModal(true)}
         />
 
         {/* Modals */}

@@ -9,21 +9,21 @@ import {
   Sun, 
   Laptop, 
   Check, 
-  Mail, 
   Calendar, 
-  Award, 
   LogOut, 
   Download, 
   Upload, 
   Shield, 
-  Camera,
   ChevronRight,
-  GripVertical,
   Lock,
   Key,
   Eye,
   EyeOff,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CheckSquare,
+  FileText,
+  Search,
+  Zap
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -439,52 +439,103 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
 };
 
 // 3. Spotlight Section
-const SpotlightSection = () => {
-  const [items] = useState([
-    { id: 'dashboard', label: 'Dashboard', enabled: true },
-    { id: 'notes', label: 'Notlar', enabled: true },
-    { id: 'tasks', label: 'Görevler', enabled: true },
-  ]);
-
+const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggle: (enabled: boolean) => void }) => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+       {/* Hero Section */}
        <div className="bg-gradient-to-br from-zinc-900 to-zinc-800 text-white rounded-[2rem] p-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -mr-32 -mt-32" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl -ml-24 -mb-24" />
+          
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-left">
+            <div className="text-left flex-1">
               <h3 className="text-2xl font-bold mb-2">Spotlight Arama</h3>
-              <p className="text-zinc-400 text-sm">
-                <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">⌘</kbd> + <kbd className="bg-white/10 px-2 py-1 rounded-lg text-white font-mono mx-1">K</kbd>
+              <p className="text-zinc-400 text-sm mb-4">
+                Her yerden hızlıca arama yapın, sayfalara gidin veya eylemler gerçekleştirin.
               </p>
+              <div className="flex items-center gap-2">
+                <kbd className="bg-white/10 px-3 py-1.5 rounded-lg text-white font-mono text-sm border border-white/10">Ctrl</kbd>
+                <span className="text-zinc-500">+</span>
+                <kbd className="bg-white/10 px-3 py-1.5 rounded-lg text-white font-mono text-sm border border-white/10">K</kbd>
+              </div>
             </div>
-            <div className="w-full md:w-1/2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-2xl">
-              <div className="flex items-center gap-3 text-zinc-400 border-b border-white/10 pb-3 mb-3">
-                <Command className="w-5 h-5" />
-                <span>Nereye gitmek istersiniz?</span>
+            
+            {/* Mini Preview */}
+            <div className="w-full md:w-72 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-2xl opacity-80">
+              <div className="flex items-center gap-3 text-zinc-300 border-b border-white/10 pb-3 mb-3">
+                <Command className="w-4 h-4" />
+                <span className="text-sm">Ara veya komut yaz...</span>
               </div>
               <div className="space-y-2">
-                <div className="h-8 bg-white/10 rounded-lg w-3/4" />
-                <div className="h-8 bg-white/5 rounded-lg w-1/2" />
+                <div className="h-2 w-3/4 bg-white/10 rounded" />
+                <div className="h-2 w-1/2 bg-white/10 rounded" />
               </div>
             </div>
           </div>
        </div>
 
-       <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 border border-zinc-100 dark:border-zinc-800">
-         <h4 className="font-bold text-lg mb-6 flex items-center gap-2">
-           <Command className="w-5 h-5 text-indigo-500" />
-           Arama Menüsü Düzeni
-         </h4>
-         <div className="space-y-3">
-           {items.map(item => (
-             <div key={item.id} className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-               <GripVertical className="w-5 h-5 text-zinc-400 cursor-move" />
-               <span className="font-medium flex-1">{item.label}</span>
-               <div className={`w-12 h-6 rounded-full p-1 transition-colors cursor-pointer ${item.enabled ? 'bg-indigo-500' : 'bg-zinc-200 dark:bg-zinc-700'}`}>
-                 <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${item.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+       {/* Settings Toggle */}
+       <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800">
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <div className={cn(
+                 "p-3 rounded-xl transition-colors",
+                 isEnabled ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+               )}>
+                 <Command className="w-6 h-6" />
                </div>
-             </div>
-           ))}
+               <div>
+                 <h4 className="font-bold text-lg text-zinc-900 dark:text-white">Spotlight'ı Etkinleştir</h4>
+                 <p className="text-sm text-zinc-500 dark:text-zinc-400">Ctrl + K kısayolu ile hızlı aramayı kullanın.</p>
+               </div>
+            </div>
+            
+            <button
+              onClick={() => onToggle(!isEnabled)}
+              className={cn(
+                "w-14 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20",
+                isEnabled ? "bg-indigo-600" : "bg-zinc-200 dark:bg-zinc-700"
+              )}
+            >
+              <div className={cn(
+                "w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300",
+                isEnabled ? "translate-x-6" : "translate-x-0"
+              )} />
+            </button>
          </div>
+       </div>
+
+       {/* Tips - Redesigned */}
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-indigo-50 dark:bg-indigo-500/10 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
+             <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
+               <Search className="w-4 h-4" />
+             </div>
+             <h5 className="font-bold text-indigo-900 dark:text-indigo-100 mb-1">Hızlı Arama</h5>
+             <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
+               Notlarınız, görevleriniz ve sayfalarınız arasında anında arama yapın.
+             </p>
+          </div>
+          
+          <div className="bg-purple-50 dark:bg-purple-500/10 p-5 rounded-2xl border border-purple-100 dark:border-purple-500/20">
+             <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
+               <Zap className="w-4 h-4" />
+             </div>
+             <h5 className="font-bold text-purple-900 dark:text-purple-100 mb-1">Hızlı Eylemler</h5>
+             <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
+               Yeni not oluşturma veya tema değiştirme gibi işlemleri klavyeden yapın.
+             </p>
+          </div>
+
+          <div className="bg-emerald-50 dark:bg-emerald-500/10 p-5 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
+             <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
+               <CheckSquare className="w-4 h-4" />
+             </div>
+             <h5 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">Görev Yönetimi</h5>
+             <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
+               Görevlerinizi arayın ve durumlarını değiştirmek için üzerine tıklayın.
+             </p>
+          </div>
        </div>
     </div>
   );
@@ -535,16 +586,15 @@ const AboutSection = () => {
         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl group-hover:bg-purple-500/40 transition-colors duration-700" />
         
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white text-zinc-900 rounded-3xl flex items-center justify-center text-5xl font-bold shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
-            F
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden p-2">
+            <img src="/logo.svg" alt="Fochus Logo" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-4xl font-bold tracking-tight mb-3">FOCHUS</h2>
           <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
             Minimalist, odaklanma dostu ve tamamen kişiselleştirilebilir üretkenlik asistanınız.
           </p>
-          <div className="mt-8 flex gap-3">
-             <span className="px-4 py-1.5 bg-white/10 rounded-full text-sm font-mono border border-white/10 backdrop-blur-md">v1.2.0</span>
-             <span className="px-4 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/20 backdrop-blur-md">Stable</span>
+          <div className="mt-8">
+             <span className="px-5 py-2 bg-white/10 rounded-full text-sm font-mono border border-white/10 backdrop-blur-md">v1.2.0</span>
           </div>
         </div>
       </div>
@@ -552,38 +602,23 @@ const AboutSection = () => {
       {/* Developer & Links Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
-        {/* Developer Card */}
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 flex flex-col gap-4 relative overflow-hidden group">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-zinc-100 dark:bg-zinc-800 rounded-full blur-3xl -mr-16 -mt-16 transition-colors group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700" />
-           
-           <div className="relative z-10">
-             <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-4">Geliştirici</h3>
-             <div className="flex items-center gap-4">
-               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-0.5 shadow-lg">
-                 <div className="w-full h-full rounded-full bg-white dark:bg-zinc-900 overflow-hidden">
-                    {/* Placeholder Avatar */}
-                    <div className="w-full h-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-bold text-xl">
-                      MK
-                    </div>
-                 </div>
-               </div>
-               <div>
-                 <h4 className="text-xl font-bold text-zinc-900 dark:text-white">Metehan Kaya</h4>
-                 <p className="text-sm text-zinc-500 dark:text-zinc-400">Full Stack Developer</p>
-               </div>
-             </div>
-             <p className="mt-4 text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed">
-               Kullanıcı deneyimini ön planda tutan, modern web teknolojileriyle geliştirilmiş açık kaynaklı projeler üretiyorum.
-             </p>
-           </div>
-        </div>
+        {/* Developer Card - Minimal & Clean */}
+        <a 
+          href="https://metehankaya.dev" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-transform duration-300 group"
+        >
+           <span className="font-bold text-zinc-900 dark:text-white text-xl group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Metehan Kaya</span>
+           <span className="text-sm text-zinc-500 dark:text-zinc-400 font-mono">metehankaya.dev</span>
+        </a>
 
         {/* Links Column */}
         <div className="flex flex-col gap-4">
           
           {/* GitHub Link */}
           <a 
-            href="https://github.com/metehan-kaya" 
+            href="https://github.com/metehan-kaya/fochus" 
             target="_blank" 
             rel="noopener noreferrer"
             className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
@@ -632,13 +667,17 @@ interface SettingsProps {
   onBgChange?: (bg: string) => void;
   isGlobalBg: boolean;
   onToggleGlobalBg: (enabled: boolean) => void;
+  isSpotlightEnabled: boolean;
+  onToggleSpotlight: (enabled: boolean) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ 
   bgImage = 'light', 
   onBgChange = () => {},
   isGlobalBg,
-  onToggleGlobalBg
+  onToggleGlobalBg,
+  isSpotlightEnabled,
+  onToggleSpotlight
 }) => {
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -646,7 +685,7 @@ export const Settings: React.FC<SettingsProps> = ({
     switch(activeTab) {
       case 'profile': return <ProfileSection bgImage={bgImage} />;
       case 'appearance': return <AppearanceSection bgImage={bgImage} onBgChange={onBgChange} isGlobalBg={isGlobalBg} onToggleGlobalBg={onToggleGlobalBg} />;
-      case 'spotlight': return <SpotlightSection />;
+      case 'spotlight': return <SpotlightSection isEnabled={isSpotlightEnabled} onToggle={onToggleSpotlight} />;
       case 'data': return <DataSection />;
       case 'about': return <AboutSection />;
       default: return <ProfileSection bgImage={bgImage} />;

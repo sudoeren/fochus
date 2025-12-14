@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, List, Palette, Layout, Calendar } from 'lucide-react';
+import { X, Plus, List } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTaskLists } from '../hooks/useTaskLists';
 
@@ -16,7 +16,6 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
 }) => {
   const [title, setTitle] = useState(editingList?.title || '');
   const [color, setColor] = useState(editingList?.color || 'blue');
-  const [icon, setIcon] = useState(editingList?.icon || 'list');
   const { addTaskList, updateTaskList } = useTaskLists();
 
   if (!isOpen) return null;
@@ -25,12 +24,11 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
     e.preventDefault();
     try {
       if (editingList) {
-        await updateTaskList(editingList.id, { title, color, icon });
+        await updateTaskList(editingList.id, { title, color });
       } else {
         await addTaskList({
           title,
-          color,
-          icon
+          color
         });
       }
       onClose();
@@ -49,13 +47,6 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
     { id: 'pink', class: 'bg-pink-500' },
     { id: 'indigo', class: 'bg-indigo-500' },
     { id: 'orange', class: 'bg-orange-500' },
-  ];
-
-  const icons = [
-    { id: 'list', icon: List },
-    { id: 'calendar', icon: Calendar },
-    { id: 'layout', icon: Layout },
-    { id: 'palette', icon: Palette },
   ];
 
   return (
@@ -113,33 +104,6 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
                   )}
                 />
               ))}
-            </div>
-          </div>
-
-          {/* Icon Selection */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              İkon
-            </label>
-            <div className="flex gap-3">
-              {icons.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setIcon(item.id)}
-                    className={cn(
-                      "p-3 rounded-xl transition-all border",
-                      icon === item.id
-                        ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400"
-                        : "bg-zinc-50 dark:bg-zinc-800/50 border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
-                    )}
-                  >
-                    <Icon size={20} />
-                  </button>
-                );
-              })}
             </div>
           </div>
 

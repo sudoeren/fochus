@@ -37,6 +37,7 @@ const mainNav = [
   { id: 'dashboard', label: 'Genel Bakış', icon: Home },
   { id: 'tasks', label: 'Görevler', icon: CheckSquare },
   { id: 'notes', label: 'Notlar', icon: FileText },
+  { id: 'timer', label: 'Fochus Timer', icon: Timer },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -140,7 +141,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               return (
                 <button
                   key={item.id}
-                  onClick={() => { onViewChange(item.id); setMobileOpen(false); }}
+                  onClick={() => { 
+                    if (item.id === 'timer') {
+                      onOpenPomodoro();
+                    } else {
+                      onViewChange(item.id); 
+                    }
+                    setMobileOpen(false); 
+                  }}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                     active 
