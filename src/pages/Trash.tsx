@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, RotateCcw, X, AlertTriangle, FileText, CheckSquare, Search } from 'lucide-react';
-import { storageService } from '../services/storage';
+import { notesAPI, tasksAPI } from '../services/api';
 import { EmptyState } from '../components/EmptyState';
 import { cn } from '../lib/utils';
+import { deserializeApiDates } from '../utils/apiTransforms';
 
 interface DeletedItem {
   id: string;
@@ -26,7 +27,8 @@ export const Trash: React.FC = () => {
     setLoading(true);
     try {
       // Load deleted notes
-      const deletedNotes = await storageService.notes.getDeleted();
+      const deletedNotesRaw = await notesAPI.getDeleted();
+      const deletedNotes = deserializeApiDates(deletedNotesRaw) as any[];
       const formattedNotes: DeletedItem[] = deletedNotes.map((note) => ({
         id: note.id,
         title: note.title,
@@ -36,7 +38,8 @@ export const Trash: React.FC = () => {
       }));
 
       // Load deleted tasks
-      const deletedTasks = await storageService.tasks.getDeleted();
+      const deletedTasksRaw = await tasksAPI.getDeleted();
+      const deletedTasks = deserializeApiDates(deletedTasksRaw) as any[];
       const formattedTasks: DeletedItem[] = deletedTasks.map((task) => ({
         id: task.id,
         title: task.title,
@@ -61,9 +64,9 @@ export const Trash: React.FC = () => {
   const restoreItem = async (item: DeletedItem) => {
     try {
       if (item.type === 'note') {
-        await storageService.notes.restore(item.id);
+        await notesAPI.restore(item.id);
       } else {
-        await storageService.tasks.restore(item.id);
+        await tasksAPI.restore(item.id);
       }
 
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
@@ -79,9 +82,9 @@ export const Trash: React.FC = () => {
 
     try {
       if (item.type === 'note') {
-        await storageService.notes.permanentlyDelete(item.id);
+        await notesAPI.permanentDelete(item.id);
       } else {
-        await storageService.tasks.permanentlyDelete(item.id);
+        await tasksAPI.permanentDelete(item.id);
       }
 
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
@@ -97,11 +100,11 @@ export const Trash: React.FC = () => {
 
     try {
       await Promise.all(deletedItems.filter(item => item.type === 'note').map(item =>
-        storageService.notes.permanentlyDelete(item.id)
+        notesAPI.permanentDelete(item.id)
       ));
 
       await Promise.all(deletedItems.filter(item => item.type === 'task').map(item =>
-        storageService.tasks.permanentlyDelete(item.id)
+        tasksAPI.permanentDelete(item.id)
       ));
 
       setDeletedItems([]);

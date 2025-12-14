@@ -15,6 +15,8 @@ import {
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 import { usePomodoro } from '../hooks/usePomodoro';
+import { authAPI, pomodoroAPI } from '../services/api';
+import { deserializeApiDates } from '../utils/apiTransforms';
 import { cn } from '../lib/utils';
 
 interface DashboardProps {
@@ -41,6 +43,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
+
+  const [displayName, setDisplayName] = useState<string>('');
+
+  const [weeklyFocusSeconds, setWeeklyFocusSeconds] = useState<number>(0);
   
   const [currentTime, setCurrentTime] = useState(new Date());
   
@@ -56,6 +62,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadMe = async () => {
+      try {
+        const meRaw = await authAPI.me();
+        const me = deserializeApiDates(meRaw) as any;
+        const name = (me?.name ?? '').toString().trim();
+        if (!cancelled) setDisplayName(name);
+      } catch {
+        if (!cancelled) setDisplayName('');
+      }
+    };
+
+    loadMe();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStats = async () => {
+      try {
+        const stats = await pomodoroAPI.getStats('week');
+        const seconds = Number(stats?.work?.duration ?? 0);
+        if (!cancelled) setWeeklyFocusSeconds(Number.isFinite(seconds) ? seconds : 0);
+      } catch {
+        if (!cancelled) setWeeklyFocusSeconds(0);
+      }
+    };
+
+    loadStats();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatFocusDuration = (seconds: number) => {
+    const totalMinutes = Math.floor(seconds / 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (hours <= 0) return `${minutes}d`;
+    if (minutes <= 0) return `${hours}s`;
+    return `${hours}s ${minutes}d`;
+  };
 
   const pendingTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted).slice(0, 5);
   const recentNotes = notes.filter(n => !n.isDeleted).slice(0, 5);
@@ -98,11 +153,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
               {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
             </h1>
-            <div className="flex items-center gap-4 ml-2">
+            <div className="flex items-center gap-4 ml-2 w-full">
               <div className="h-1 w-16 bg-zinc-900 dark:bg-white" />
               <span className="text-3xl font-light text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.2em]">
                 {getGreeting()}
               </span>
+              {displayName ? (
+                <span className="ml-auto text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">
+                  {displayName}
+                </span>
+              ) : null}
             </div>
         </div>
 
@@ -160,7 +220,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                            {formatTime(timeLeft)}
                          </span>
                          <span className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 font-medium">
-                           {isActive ? "Süre işliyor..." : "Hazır mısın?"}
+                           {isActive
+                             ? "Süre işliyor..."
+                             : weeklyFocusSeconds > 0
+                               ? `Bu hafta: ${formatFocusDuration(weeklyFocusSeconds)}`
+                               : "Hazır mısın?"}
                          </span>
                       </div>
                    </div>

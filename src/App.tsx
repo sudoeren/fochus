@@ -14,6 +14,7 @@ import { Login } from './pages/Login';
 import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
 import { cn } from './lib/utils';
+import { authAPI, getAuthToken, setAuthToken } from './services/api';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState(() => localStorage.getItem('activeView') || 'dashboard');
@@ -27,9 +28,8 @@ const App: React.FC = () => {
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isAuthenticated') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Background Image State
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
@@ -58,9 +58,42 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
-    localStorage.setItem('isAuthenticated', 'true');
-    setIsAuthenticated(true);
+    setIsAuthenticated(Boolean(getAuthToken()));
   };
+
+  useEffect(() => {
+    const handleLogout = () => {
+      setAuthToken(null);
+      setIsAuthenticated(false);
+      setActiveView('dashboard');
+    };
+
+    window.addEventListener('auth:logout', handleLogout);
+    return () => window.removeEventListener('auth:logout', handleLogout);
+  }, []);
+
+  useEffect(() => {
+    const token = getAuthToken();
+
+    if (!token) {
+      setIsAuthenticated(false);
+      setAuthChecked(true);
+      return;
+    }
+
+    authAPI
+      .me()
+      .then(() => {
+        setIsAuthenticated(true);
+      })
+      .catch(() => {
+        setAuthToken(null);
+        setIsAuthenticated(false);
+      })
+      .finally(() => {
+        setAuthChecked(true);
+      });
+  }, []);
 
   const handleEditTask = (task: any) => {
     setEditingTask(task);
@@ -155,6 +188,16 @@ const App: React.FC = () => {
         />;
     }
   };
+
+  if (!authChecked && getAuthToken()) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+          <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      </ThemeProvider>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

@@ -4,7 +4,6 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
-import { storageService } from '../services/storage';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -13,7 +12,7 @@ interface TasksNewProps {
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
   const { tasks, loading, deleteTask, toggleTask, loadTasks } = useTasks();
-  const { taskLists, loading: listsLoading, deleteTaskList, refetch: refetchTaskLists } = useTaskLists();
+  const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList, refetch: refetchTaskLists } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
@@ -94,11 +93,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     console.log('🔄 Moving task:', draggableId, 'to list:', targetListId);
 
     try {
-      // 1. Directly update localStorage via storageService
-      console.log('💾 Updating storage...');
-      await storageService.tasks.update(draggableId, { listId: targetListId });
+      // 1. Update backend
+      console.log('💾 Updating backend...');
+      await moveTaskToList(draggableId, targetListId, { skipRefresh: true });
 
-      console.log('✅ Task updated in storage');
+      console.log('✅ Task updated');
 
       // 2. Small delay to ensure storage is fully written
       await new Promise(resolve => setTimeout(resolve, 100));

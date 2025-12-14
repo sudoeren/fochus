@@ -87,8 +87,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const handleGuestLogin = () => {
-    localStorage.setItem('userType', 'guest');
-    onLogin();
+    setError('Misafir modu şu anda desteklenmiyor. Lütfen giriş yapın veya kayıt olun.');
   };
 
   const toggleMode = () => {

@@ -1,29 +1,56 @@
 import { useState, useEffect } from 'react';
 import { Task } from '../types/index';
 import { triggerInstantRefresh } from '../utils/refreshUtils';
-import { storageService } from '../services/storage';
+import { tasksAPI } from '../services/api';
+import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const normalizeTask = (raw: any): Task => {
+    const task = deserializeApiDates(raw) as any;
+
+    return {
+      ...task,
+      title: (task.title ?? '').toString(),
+      description: task.description ?? undefined,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      deletedAt: task.deletedAt ?? undefined,
+      dueDate: task.dueDate ?? undefined,
+      reminderAt: task.reminderAt ?? undefined,
+      lastCompleted: task.lastCompleted ?? undefined,
+      nextDue: task.nextDue ?? undefined,
+      isCompleted: Boolean(task.isCompleted),
+      status: (task.status ?? (task.isCompleted ? 'COMPLETED' : 'PENDING')) as any,
+      isPinned: Boolean(task.isPinned ?? false),
+      isDeleted: Boolean(task.isDeleted ?? false),
+      order: Number(task.order ?? 0),
+      listId: task.listId ?? null,
+      hasReminder: Boolean(task.hasReminder ?? false),
+      isRecurring: Boolean(task.isRecurring ?? false)
+    } as Task;
+  };
+
+  const toISOStringOrUndefined = (value: unknown): string | undefined => {
+    if (!value) return undefined;
+    const date = value instanceof Date ? value : new Date(value as any);
+    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+  };
 
   // Load tasks from storage
   // Load tasks from storage
   const loadTasks = async (silent: boolean = false) => {
     try {
       if (!silent) setLoading(true);
-      const dbTasks = await storageService.tasks.getAll() as unknown as Task[];
-
-      // Order değerine göre sırala, sonra pinned görevleri en üste al
-      const sortedTasks = dbTasks.sort((a, b) => {
-        // Pinned görevler önce
+      const apiTasks = await tasksAPI.getAll();
+      const normalized = apiTasks.map(normalizeTask);
+      const sortedTasks = normalized.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
-
-        // Sonra order değerine göre sırala
         return (a.order || 0) - (b.order || 0);
       });
-
       setTasks(sortedTasks);
     } catch (error) {
       console.error('Error loading tasks:', error);
@@ -54,7 +81,23 @@ export const useTasks = () => {
   // Add new task
   const addTask = async (taskData: Partial<Task>) => {
     try {
-      const newTask = await storageService.tasks.create(taskData as any);
+      const newTaskRaw = await tasksAPI.create({
+        title: taskData.title || '',
+        description: taskData.description,
+        dueDate: toISOStringOrUndefined(taskData.dueDate),
+        listId: taskData.listId ?? undefined,
+        isPinned: taskData.isPinned,
+        hasReminder: taskData.hasReminder,
+        reminderAt: toISOStringOrUndefined(taskData.reminderAt),
+        isRecurring: taskData.isRecurring,
+        recurringType: taskData.recurringType as any,
+        recurringInterval: taskData.recurringInterval as any,
+        recurringDays: Array.isArray(taskData.recurringDays)
+          ? JSON.stringify(taskData.recurringDays)
+          : (taskData.recurringDays as any),
+        linkedNoteId: (taskData as any).linkedNoteId
+      });
+      const newTask = normalizeTask(newTaskRaw);
 
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
@@ -70,7 +113,14 @@ export const useTasks = () => {
   // Update task
   const updateTask = async (id: string, taskData: Partial<Task>) => {
     try {
-      const updatedTask = await storageService.tasks.update(id, taskData as any);
+      const updatedRaw = await tasksAPI.update(id, {
+        ...taskData,
+        dueDate: taskData.dueDate ? toISOStringOrUndefined(taskData.dueDate) : undefined,
+        reminderAt: taskData.reminderAt ? toISOStringOrUndefined(taskData.reminderAt) : undefined,
+        lastCompleted: taskData.lastCompleted ? toISOStringOrUndefined(taskData.lastCompleted) : undefined,
+        nextDue: taskData.nextDue ? toISOStringOrUndefined(taskData.nextDue) : undefined
+      });
+      const updatedTask = normalizeTask(updatedRaw);
 
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
@@ -88,7 +138,7 @@ export const useTasks = () => {
     try {
       // ULTRA FAST refresh - hemen tetikle!
       triggerInstantRefresh(); // Hemen global refresh
-      await storageService.tasks.delete(id);
+      await tasksAPI.delete(id);
       await loadTasks(true); // Local silent refresh
       triggerInstantRefresh(); // Bir kez daha global refresh
     } catch (error) {
@@ -99,13 +149,16 @@ export const useTasks = () => {
 
   // Toggle task completion
   const toggleTask = async (id: string) => {
-    const task = tasks.find(task => task.id === id);
-    if (task) {
-      const newCompleted = !task.isCompleted;
-      const newStatus = newCompleted ? 'COMPLETED' : 'PENDING';
-      return await updateTask(id, { isCompleted: newCompleted, status: newStatus });
+    try {
+      const updated = await tasksAPI.toggle(id);
+      triggerInstantRefresh();
+      await loadTasks(true);
+      triggerInstantRefresh();
+      return normalizeTask(updated);
+    } catch (error) {
+      console.error('Error toggling task:', error);
+      throw error;
     }
-    return null;
   };
 
   // Get tasks by filter
@@ -188,7 +241,8 @@ export const useTasks = () => {
   // Pin/unpin task
   const pinTask = async (id: string, isPinned: boolean) => {
     try {
-      const updatedTask = await storageService.tasks.pin(id, isPinned) as unknown as Task;
+      const updatedRaw = await tasksAPI.update(id, { isPinned });
+      const updatedTask = normalizeTask(updatedRaw);
       setTasks(prev =>
         prev.map(task =>
           task.id === id
@@ -223,21 +277,8 @@ export const useTasks = () => {
       // 3. Hemen local state'i güncelle
       setTasks(newTasks);
 
-      // 4. Veritabanındaki order değerlerini güncelle
-      const updatePromises = newTasks.map(async (task, index) => {
-        if (task.order !== index) {
-          try {
-            await storageService.tasks.update(task.id, { order: index });
-            return true;
-          } catch (err) {
-            console.error(`❌ Task ${task.id} order güncellenemedi:`, err);
-            return false;
-          }
-        }
-        return true;
-      });
-
-      await Promise.all(updatePromises);
+      // 4. Backend sıralamasını güncelle
+      await tasksAPI.reorder(newTasks.map(t => t.id));
       await loadTasks(true);
 
     } catch (error) {

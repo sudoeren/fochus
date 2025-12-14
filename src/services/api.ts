@@ -11,6 +11,8 @@ export const setAuthToken = (token: string | null) => {
   } else {
     localStorage.removeItem('fokus_token');
   }
+
+  window.dispatchEvent(new Event('auth:token-changed'));
 };
 
 export const getAuthToken = () => authToken;
@@ -40,7 +42,7 @@ async function fetchAPI<T>(
     // Handle 401 - Unauthorized
     if (response.status === 401) {
       setAuthToken(null);
-      window.location.href = '/login';
+      window.dispatchEvent(new Event('auth:logout'));
     }
     
     throw new Error(error.error || 'Bir hata oluştu');

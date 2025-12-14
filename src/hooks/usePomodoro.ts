@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useSyncExternalStore } from 'react';
+import { pomodoroAPI } from '../services/api';
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -34,114 +35,190 @@ const getDefaultTimes = (settings: PomodoroSettings) => ({
   longBreak: settings.longBreakDuration * 60,
 });
 
-export const usePomodoro = () => {
-  const [state, setState] = useState<PomodoroState>(() => {
+const loadInitialState = (): PomodoroState => {
+  try {
     const saved = localStorage.getItem('pomodoroState');
     if (saved) {
       const parsed = JSON.parse(saved);
+      const settings = { ...DEFAULT_SETTINGS, ...(parsed?.settings ?? {}) };
+      const times = getDefaultTimes(settings);
+      const mode: TimerMode = parsed?.mode ?? 'work';
+      const timeLeft = typeof parsed?.timeLeft === 'number' ? parsed.timeLeft : times[mode];
       return {
-        ...parsed,
-        settings: { ...DEFAULT_SETTINGS, ...parsed.settings }
+        mode,
+        timeLeft: Math.max(0, timeLeft),
+        isActive: Boolean(parsed?.isActive ?? false),
+        cycles: typeof parsed?.cycles === 'number' ? parsed.cycles : 0,
+        settings
       };
     }
-    return {
-      mode: 'work',
-      timeLeft: DEFAULT_SETTINGS.workDuration * 60,
-      isActive: false,
-      cycles: 0,
-      settings: DEFAULT_SETTINGS
-    };
-  });
+  } catch {
+    // ignore
+  }
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const DEFAULT_TIMES = getDefaultTimes(state.settings);
+  return {
+    mode: 'work',
+    timeLeft: DEFAULT_SETTINGS.workDuration * 60,
+    isActive: false,
+    cycles: 0,
+    settings: DEFAULT_SETTINGS
+  };
+};
 
-  // Save state to local storage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('pomodoroState', JSON.stringify(state));
-  }, [state]);
+let storeState: PomodoroState = loadInitialState();
+const listeners = new Set<() => void>();
+let intervalId: ReturnType<typeof setInterval> | null = null;
 
-  // Timer logic
-  useEffect(() => {
-    if (state.isActive && state.timeLeft > 0) {
-      intervalRef.current = setInterval(() => {
-        setState((prev) => {
-          if (prev.timeLeft <= 1) {
-            // Timer finished within the interval
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            
-            // Play notification sound
-            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            audio.play().catch(e => console.log('Audio play failed', e));
+const persist = () => {
+  try {
+    localStorage.setItem('pomodoroState', JSON.stringify(storeState));
+  } catch {
+    // ignore
+  }
+};
 
-            // Determine next mode
-            const times = getDefaultTimes(prev.settings);
-            let nextMode: TimerMode = 'work';
-            let shouldAutoStart = false;
+const emitChange = () => {
+  for (const listener of listeners) listener();
+};
 
-            if (prev.mode === 'work') {
-              const newCycles = prev.cycles + 1;
-              if (newCycles % prev.settings.longBreakInterval === 0) {
-                nextMode = 'longBreak';
-              } else {
-                nextMode = 'shortBreak';
-              }
-              shouldAutoStart = prev.settings.autoStartBreaks;
-              return { 
-                ...prev, 
-                isActive: shouldAutoStart, 
-                timeLeft: times[nextMode],
-                mode: nextMode,
-                cycles: newCycles
-              };
-            } else {
-              nextMode = 'work';
-              shouldAutoStart = prev.settings.autoStartWork;
-              return { 
-                ...prev, 
-                isActive: shouldAutoStart, 
-                timeLeft: times.work,
-                mode: 'work'
-              };
-            }
-          }
-          return { ...prev, timeLeft: prev.timeLeft - 1 };
-        });
-      }, 1000);
-    } else {
-       if (intervalRef.current) clearInterval(intervalRef.current);
+const stopIntervalIfNeeded = () => {
+  if (intervalId && (!storeState.isActive || storeState.timeLeft <= 0)) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+};
+
+const startIntervalIfNeeded = () => {
+  if (!intervalId && storeState.isActive && storeState.timeLeft > 0) {
+    intervalId = setInterval(() => {
+      tick();
+    }, 1000);
+  }
+};
+
+const setStoreState = (updater: (prev: PomodoroState) => PomodoroState) => {
+  storeState = updater(storeState);
+  persist();
+  emitChange();
+  startIntervalIfNeeded();
+  stopIntervalIfNeeded();
+};
+
+const recordCompletedSession = (prev: PomodoroState) => {
+  try {
+    const times = getDefaultTimes(prev.settings);
+    const endTime = new Date();
+    const duration = times[prev.mode];
+    const startTime = new Date(endTime.getTime() - duration * 1000);
+    pomodoroAPI
+      .create({
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        duration,
+        mode: prev.mode,
+        completed: true
+      })
+      .catch(() => {
+        // ignore
+      });
+  } catch {
+    // ignore
+  }
+};
+
+const playFinishSound = () => {
+  try {
+    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+    audio.play().catch(() => {
+      // ignore
+    });
+  } catch {
+    // ignore
+  }
+};
+
+const tick = () => {
+  const prev = storeState;
+  if (!prev.isActive) return;
+
+  if (prev.timeLeft <= 1) {
+    playFinishSound();
+    recordCompletedSession(prev);
+
+    const times = getDefaultTimes(prev.settings);
+
+    if (prev.mode === 'work') {
+      const newCycles = prev.cycles + 1;
+      const nextMode: TimerMode = newCycles % prev.settings.longBreakInterval === 0 ? 'longBreak' : 'shortBreak';
+      const shouldAutoStart = prev.settings.autoStartBreaks;
+      setStoreState(() => ({
+        ...prev,
+        cycles: newCycles,
+        mode: nextMode,
+        timeLeft: times[nextMode],
+        isActive: shouldAutoStart
+      }));
+      return;
     }
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [state.isActive, state.mode]);
+    const shouldAutoStart = prev.settings.autoStartWork;
+    setStoreState(() => ({
+      ...prev,
+      mode: 'work',
+      timeLeft: times.work,
+      isActive: shouldAutoStart
+    }));
+    return;
+  }
+
+  setStoreState((current) => ({
+    ...current,
+    timeLeft: Math.max(0, current.timeLeft - 1)
+  }));
+};
+
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+const getSnapshot = () => storeState;
+
+export const usePomodoro = () => {
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const toggleTimer = () => {
-    setState(prev => ({ ...prev, isActive: !prev.isActive }));
+    setStoreState((prev) => {
+      const next = { ...prev, isActive: !prev.isActive };
+      return next;
+    });
   };
 
   const resetTimer = () => {
-    const times = getDefaultTimes(state.settings);
-    setState(prev => ({
-      ...prev,
-      isActive: false,
-      timeLeft: times[prev.mode]
-    }));
+    setStoreState((prev) => {
+      const times = getDefaultTimes(prev.settings);
+      return {
+        ...prev,
+        isActive: false,
+        timeLeft: times[prev.mode]
+      };
+    });
   };
 
   const setMode = (mode: TimerMode) => {
-    const times = getDefaultTimes(state.settings);
-    setState(prev => ({
-      ...prev,
-      mode,
-      isActive: false,
-      timeLeft: times[mode]
-    }));
+    setStoreState((prev) => {
+      const times = getDefaultTimes(prev.settings);
+      return {
+        ...prev,
+        mode,
+        isActive: false,
+        timeLeft: times[mode]
+      };
+    });
   };
 
   const updateSettings = (newSettings: Partial<PomodoroSettings>) => {
-    setState(prev => {
+    setStoreState((prev) => {
       const updatedSettings = { ...prev.settings, ...newSettings };
       const times = getDefaultTimes(updatedSettings);
       return {
@@ -154,7 +231,7 @@ export const usePomodoro = () => {
   };
 
   const resetCycles = () => {
-    setState(prev => ({ ...prev, cycles: 0 }));
+    setStoreState((prev) => ({ ...prev, cycles: 0 }));
   };
 
   const formatTime = (seconds: number) => {
@@ -162,6 +239,10 @@ export const usePomodoro = () => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const times = getDefaultTimes(state.settings);
+  const denom = times[state.mode] || 1;
+  const progress = 1 - state.timeLeft / denom;
 
   return {
     ...state,
@@ -171,6 +252,10 @@ export const usePomodoro = () => {
     formatTime,
     updateSettings,
     resetCycles,
-    progress: 1 - (state.timeLeft / DEFAULT_TIMES[state.mode])
+    progress: Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0
   };
 };
+
+// If state was persisted as active, resume ticking.
+startIntervalIfNeeded();
+stopIntervalIfNeeded();

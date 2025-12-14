@@ -1,17 +1,32 @@
 import { useState, useEffect } from 'react';
 import { TaskList } from '../types';
-import { storageService } from '../services/storage';
+import { taskListsAPI, tasksAPI } from '../services/api';
 import { triggerInstantRefresh } from '../utils/refreshUtils';
+import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useTaskLists = () => {
   const [taskLists, setTaskLists] = useState<TaskList[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const normalizeList = (raw: any): TaskList => {
+    const list = deserializeApiDates(raw) as any;
+    return {
+      ...list,
+      title: (list.title ?? '').toString(),
+      description: list.description ?? undefined,
+      color: list.color ?? '#3B82F6',
+      order: Number(list.order ?? 0),
+      isDeleted: Boolean(list.isDeleted ?? false),
+      createdAt: list.createdAt,
+      updatedAt: list.updatedAt
+    } as TaskList;
+  };
+
   const fetchTaskLists = async (silent: boolean = false) => {
     try {
       if (!silent) setLoading(true);
-      const lists = await storageService.taskLists.getAll();
-      setTaskLists(lists);
+      const lists = await taskListsAPI.getAll();
+      setTaskLists(lists.map(normalizeList));
     } catch (error) {
       console.error('Error fetching task lists:', error);
     } finally {
@@ -21,11 +36,12 @@ export const useTaskLists = () => {
 
   const addTaskList = async (data: { title: string; description?: string; color?: string }) => {
     try {
-      const newList = await storageService.taskLists.create({
+      const newListRaw = await taskListsAPI.create({
         title: data.title,
         description: data.description,
         color: data.color || '#3B82F6'
       });
+      const newList = normalizeList(newListRaw);
 
       await fetchTaskLists(true); // Silent refresh
       return newList;
@@ -37,7 +53,13 @@ export const useTaskLists = () => {
 
   const updateTaskList = async (id: string, data: Partial<TaskList>) => {
     try {
-      const updatedList = await storageService.taskLists.update(id, data);
+      const updatedRaw = await taskListsAPI.update(id, {
+        title: data.title as any,
+        description: data.description as any,
+        color: data.color as any,
+        order: data.order as any
+      });
+      const updatedList = normalizeList(updatedRaw);
       await fetchTaskLists(true); // Silent refresh
       return updatedList;
     } catch (error) {
@@ -48,7 +70,7 @@ export const useTaskLists = () => {
 
   const deleteTaskList = async (id: string) => {
     try {
-      await storageService.taskLists.delete(id);
+      await taskListsAPI.delete(id);
       await fetchTaskLists(true); // Silent refresh
     } catch (error) {
       console.error('Error deleting task list:', error);
@@ -58,10 +80,7 @@ export const useTaskLists = () => {
 
   const reorderTaskLists = async (reorderedLists: TaskList[]) => {
     try {
-      // Update order for all lists
-      for (let i = 0; i < reorderedLists.length; i++) {
-        await storageService.taskLists.update(reorderedLists[i].id, { order: i });
-      }
+      await taskListsAPI.reorder(reorderedLists.map(l => l.id));
       await fetchTaskLists(true); // Silent refresh
     } catch (error) {
       console.error('Error reordering task lists:', error);
@@ -71,7 +90,7 @@ export const useTaskLists = () => {
 
   const moveTaskToList = async (taskId: string, targetListId: string | null, options?: { skipRefresh?: boolean }) => {
     try {
-      await storageService.tasks.update(taskId, { listId: targetListId });
+      await tasksAPI.update(taskId, { listId: targetListId });
 
       if (!options?.skipRefresh) {
         // Refresh lists to update task counts

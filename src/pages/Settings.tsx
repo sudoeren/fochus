@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   User, 
   Palette, 
@@ -28,7 +28,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
-import { authAPI } from '../services/api';
+import { authAPI, notesAPI, pomodoroAPI, setAuthToken, taskListsAPI, tasksAPI, settingsAPI } from '../services/api';
+import { deserializeApiDates } from '../utils/apiTransforms';
 
 // --- Tab Component ---
 const SettingsTab = ({ 
@@ -71,16 +72,63 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
-  const userData = {
-    name: "Kullanıcı",
-    username: "kullaniciadi",
+  const [userData, setUserData] = useState({
+    name: 'Kullanıcı',
+    username: 'kullaniciadi',
     joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
-  };
+  });
+  const [stats, setStats] = useState({ tasks: 0, notes: 0, focusHoursText: '0s' });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProfile = async () => {
+      try {
+        const [meRaw, tasksRaw, notesRaw, focusRaw] = await Promise.all([
+          authAPI.me(),
+          tasksAPI.getAll(),
+          notesAPI.getAll(),
+          pomodoroAPI.getStats('all')
+        ]);
+
+        const me = deserializeApiDates(meRaw) as any;
+        const tasks = Array.isArray(tasksRaw) ? tasksRaw : [];
+        const notes = Array.isArray(notesRaw) ? notesRaw : [];
+        const focusSeconds = Number(focusRaw?.work?.duration ?? 0);
+        const focusHours = Number.isFinite(focusSeconds) ? focusSeconds / 3600 : 0;
+
+        if (cancelled) return;
+
+        const createdAt = me?.createdAt ? new Date(me.createdAt) : new Date();
+        const resolvedUsername = (me?.username ?? '').toString() || 'kullaniciadi';
+        const resolvedName = ((me?.name ?? '').toString().trim() || resolvedUsername || 'Kullanıcı');
+
+        setUserData({
+          name: resolvedName,
+          username: resolvedUsername,
+          joinDate: createdAt.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+        });
+
+        setStats({
+          tasks: tasks.length,
+          notes: notes.length,
+          focusHoursText: `${focusHours.toFixed(1)}s`
+        });
+      } catch {
+        // Keep defaults on failure
+      }
+    };
+
+    loadProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLogout = () => {
     if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
-      localStorage.removeItem('isAuthenticated');
-      window.location.reload();
+      setAuthToken(null);
+      window.dispatchEvent(new Event('auth:logout'));
     }
   };
 
@@ -160,15 +208,15 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
            {/* Stats section */}
            <div className="grid grid-cols-3 gap-4 w-full pt-4 border-t border-zinc-100 dark:border-zinc-800">
               <div className="text-center">
-                <div className="text-lg font-bold text-zinc-900 dark:text-white">12</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.tasks}</div>
                 <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-zinc-900 dark:text-white">5</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.notes}</div>
                 <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Not</div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-bold text-zinc-900 dark:text-white">2.5s</div>
+                <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.focusHoursText}</div>
                 <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
               </div>
            </div>
@@ -544,17 +592,241 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
 
 // 4. Data Section
 const DataSection = () => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+
+  const downloadJson = (filename: string, data: unknown) => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const safeToIso = (value: unknown): string | undefined => {
+    if (!value) return undefined;
+    const date = value instanceof Date ? value : new Date(value as any);
+    if (Number.isNaN(date.getTime())) return undefined;
+    return date.toISOString();
+  };
+
+  const handleBackup = async () => {
+    try {
+      setIsBusy(true);
+
+      const [notes, deletedNotes, tasks, deletedTasks, taskLists, settings, pomodoroSessions] = await Promise.all([
+        notesAPI.getAll(),
+        notesAPI.getDeleted(),
+        tasksAPI.getAll(),
+        tasksAPI.getDeleted(),
+        taskListsAPI.getAll(),
+        settingsAPI.get(),
+        pomodoroAPI.getAll()
+      ]);
+
+      const backup = {
+        app: 'fokus',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        data: {
+          notes,
+          deletedNotes,
+          tasks,
+          deletedTasks,
+          taskLists,
+          settings,
+          pomodoroSessions
+        }
+      };
+
+      const datePart = new Date().toISOString().slice(0, 10);
+      downloadJson(`fokus-backup-${datePart}.json`, backup);
+    } catch (error: any) {
+      alert(error?.message || 'Yedek alınırken bir hata oluştu');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const extractData = (parsed: any) => {
+    if (!parsed) return null;
+    const data = parsed.data ?? parsed;
+    return {
+      notes: Array.isArray(data.notes) ? data.notes : [],
+      deletedNotes: Array.isArray(data.deletedNotes) ? data.deletedNotes : [],
+      tasks: Array.isArray(data.tasks) ? data.tasks : [],
+      deletedTasks: Array.isArray(data.deletedTasks) ? data.deletedTasks : [],
+      taskLists: Array.isArray(data.taskLists) ? data.taskLists : [],
+      settings: data.settings ?? null,
+      pomodoroSessions: Array.isArray(data.pomodoroSessions) ? data.pomodoroSessions : []
+    };
+  };
+
+  const handleRestoreFile = async (file: File) => {
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const payload = extractData(parsed);
+    if (!payload) throw new Error('Geçersiz yedek dosyası');
+
+    const ok = confirm(
+      "Geri yükleme mevcut verilerinizi silmez; yedekten gelen verileri ekler. Devam edilsin mi?"
+    );
+    if (!ok) return;
+
+    // Create task lists first (build ID map)
+    const listIdMap = new Map<string, string>();
+    for (const list of payload.taskLists) {
+      const created = await taskListsAPI.create({
+        title: (list?.title ?? '').toString() || 'Liste',
+        description: list?.description ?? undefined,
+        color: list?.color ?? undefined
+      });
+      if (list?.id && created?.id) listIdMap.set(String(list.id), String(created.id));
+    }
+
+    // Create notes (build ID map for linked tasks)
+    const noteIdMap = new Map<string, string>();
+
+    const createNoteAndMaybeDelete = async (note: any, shouldBeDeleted: boolean) => {
+      const created = await notesAPI.create({
+        title: (note?.title ?? '').toString() || 'Not',
+        content: (note?.content ?? '').toString(),
+        isPinned: Boolean(note?.isPinned ?? false)
+      });
+      if (note?.id && created?.id) noteIdMap.set(String(note.id), String(created.id));
+      if (shouldBeDeleted && created?.id) {
+        await notesAPI.delete(String(created.id));
+      }
+    };
+
+    for (const note of payload.notes) {
+      await createNoteAndMaybeDelete(note, false);
+    }
+    for (const note of payload.deletedNotes) {
+      await createNoteAndMaybeDelete(note, true);
+    }
+
+    // Create tasks
+    const createTaskAndMaybeDelete = async (task: any, shouldBeDeleted: boolean) => {
+      const oldListId = task?.listId ? String(task.listId) : null;
+      const mappedListId = oldListId ? (listIdMap.get(oldListId) ?? null) : null;
+
+      const oldLinkedNoteId = task?.linkedNoteId ? String(task.linkedNoteId) : null;
+      const mappedLinkedNoteId = oldLinkedNoteId ? (noteIdMap.get(oldLinkedNoteId) ?? null) : null;
+
+      const created = await tasksAPI.create({
+        title: (task?.title ?? '').toString() || 'Görev',
+        description: task?.description ?? undefined,
+        dueDate: safeToIso(task?.dueDate),
+        listId: mappedListId ?? undefined,
+        isPinned: Boolean(task?.isPinned ?? false),
+        hasReminder: Boolean(task?.hasReminder ?? false),
+        reminderAt: safeToIso(task?.reminderAt),
+        isRecurring: Boolean(task?.isRecurring ?? false),
+        recurringType: task?.recurringType ?? undefined,
+        recurringInterval: typeof task?.recurringInterval === 'number' ? task.recurringInterval : undefined,
+        recurringDays: Array.isArray(task?.recurringDays)
+          ? JSON.stringify(task.recurringDays)
+          : (task?.recurringDays ?? undefined),
+        linkedNoteId: mappedLinkedNoteId ?? undefined
+      });
+
+      if (created?.id) {
+        const updates: any = {};
+        if (typeof task?.order === 'number') updates.order = task.order;
+        if (task?.status !== undefined) updates.status = task.status;
+        if (task?.isCompleted !== undefined) updates.isCompleted = Boolean(task.isCompleted);
+        if (Object.keys(updates).length > 0) {
+          await tasksAPI.update(String(created.id), updates);
+        }
+
+        if (shouldBeDeleted) {
+          await tasksAPI.delete(String(created.id));
+        }
+      }
+    };
+
+    for (const task of payload.tasks) {
+      await createTaskAndMaybeDelete(task, false);
+    }
+    for (const task of payload.deletedTasks) {
+      await createTaskAndMaybeDelete(task, true);
+    }
+
+    // Restore settings (best-effort)
+    if (payload.settings) {
+      await settingsAPI.update({
+        theme: payload.settings?.theme,
+        language: payload.settings?.language
+      });
+    }
+
+    // Restore pomodoro sessions (best-effort)
+    for (const session of payload.pomodoroSessions) {
+      try {
+        await pomodoroAPI.create({
+          startTime: safeToIso(session?.startTime) ?? new Date().toISOString(),
+          endTime: safeToIso(session?.endTime) ?? new Date().toISOString(),
+          duration: Number(session?.duration ?? 0),
+          mode: (session?.mode ?? 'work') as any,
+          completed: Boolean(session?.completed ?? true)
+        });
+      } catch {
+        // Ignore invalid session rows
+      }
+    }
+
+    alert('Geri yükleme tamamlandı. Sayfaları yenileyerek verileri görebilirsiniz.');
+  };
+
+  const handleRestoreClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file) return;
+
+          try {
+            setIsBusy(true);
+            await handleRestoreFile(file);
+          } catch (error: any) {
+            alert(error?.message || 'Geri yükleme sırasında bir hata oluştu');
+          } finally {
+            setIsBusy(false);
+          }
+        }}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <button className="group relative overflow-hidden bg-gradient-to-br from-indigo-500 to-blue-600 rounded-[2.5rem] p-8 text-left transition-transform hover:scale-[1.02]">
+        <button
+          onClick={handleBackup}
+          disabled={isBusy}
+          className="group relative overflow-hidden bg-gradient-to-br from-indigo-500 to-blue-600 rounded-[2.5rem] p-8 text-left transition-transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
+        >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-white/20 transition-colors" />
           <Download className="w-10 h-10 text-white mb-6" />
           <h3 className="text-2xl font-bold text-white mb-2">Yedekle</h3>
           <p className="text-indigo-100">Tüm verilerinizi JSON formatında cihazınıza indirin.</p>
         </button>
 
-        <button className="group relative overflow-hidden bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-8 text-left border-2 border-dashed border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all">
+        <button
+          onClick={handleRestoreClick}
+          disabled={isBusy}
+          className="group relative overflow-hidden bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-8 text-left border-2 border-dashed border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+        >
           <Upload className="w-10 h-10 text-zinc-400 group-hover:text-emerald-500 mb-6 transition-colors" />
           <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Geri Yükle</h3>
           <p className="text-zinc-500">Yedek dosyanızı sürükleyin veya seçin.</p>
@@ -568,7 +840,7 @@ const DataSection = () => {
         <div>
           <h4 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">Uçtan Uca Yerel</h4>
           <p className="text-emerald-700 dark:text-emerald-300 text-sm leading-relaxed">
-            Verileriniz asla buluta gönderilmez. Tarayıcınızın yerel depolama alanında güvenle saklanır.
+            Verileriniz asla buluta gönderilmez. Cihazınızdaki veritabanında güvenle saklanır.
           </p>
         </div>
       </div>

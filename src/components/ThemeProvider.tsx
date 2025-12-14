@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getAuthToken, settingsAPI } from '../services/api';
 
 interface ThemeContextType {
   theme: 'light' | 'dark' | 'system';
@@ -18,6 +19,38 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (savedTheme) {
       setThemeState(savedTheme);
     }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const syncFromBackend = async () => {
+      if (!getAuthToken()) return;
+
+      try {
+        const settings = await settingsAPI.get();
+        const backendTheme = settings?.theme as 'light' | 'dark' | 'system' | undefined;
+
+        if (!cancelled && backendTheme && ['light', 'dark', 'system'].includes(backendTheme)) {
+          setThemeState(backendTheme);
+          localStorage.setItem('theme', backendTheme);
+        }
+      } catch {
+        // Ignore settings sync errors; keep local theme.
+      }
+    };
+
+    syncFromBackend();
+
+    const handleTokenChanged = () => {
+      syncFromBackend();
+    };
+
+    window.addEventListener('auth:token-changed', handleTokenChanged);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('auth:token-changed', handleTokenChanged);
+    };
   }, []);
 
   useEffect(() => {
@@ -49,6 +82,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const setTheme = (newTheme: 'light' | 'dark' | 'system') => {
     setThemeState(newTheme);
     localStorage.setItem('theme', newTheme);
+
+    if (getAuthToken()) {
+      settingsAPI.update({ theme: newTheme }).catch(() => {
+        // Ignore remote update errors; keep local theme.
+      });
+    }
   };
 
   return (
