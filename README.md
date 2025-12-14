@@ -49,6 +49,12 @@ cd backend
 npm run db:push
 ```
 
+Şema değişikliklerini kalıcı migration olarak kaydetmek (önerilen) için:
+```bash
+cd backend
+npm run db:migrate:dev
+```
+
 ### Veritabanı Arayüzü (Prisma Studio)
 Veritabanı içeriğini tarayıcıdan görüntülemek ve düzenlemek için:
 ```bash

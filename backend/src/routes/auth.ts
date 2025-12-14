@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -27,7 +27,7 @@ const generateToken = (userId: string, username: string): string => {
 };
 
 // POST /api/auth/register
-router.post('/register', async (req, res: Response) => {
+router.post('/register', async (req, res: Response, next: NextFunction) => {
   try {
     const validation = registerSchema.safeParse(req.body);
     
@@ -80,13 +80,12 @@ router.post('/register', async (req, res: Response) => {
       token
     });
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Kayıt sırasında bir hata oluştu' });
+    next(error);
   }
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res: Response) => {
+router.post('/login', async (req, res: Response, next: NextFunction) => {
   try {
     const validation = loginSchema.safeParse(req.body);
     
@@ -127,13 +126,12 @@ router.post('/login', async (req, res: Response) => {
       token
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Giriş sırasında bir hata oluştu' });
+    next(error);
   }
 });
 
 // GET /api/auth/me
-router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
@@ -152,13 +150,12 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
 
     res.json(user);
   } catch (error) {
-    console.error('Get me error:', error);
-    res.status(500).json({ error: 'Bir hata oluştu' });
+    next(error);
   }
 });
 
 // PUT /api/auth/profile
-router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => {
+router.put('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { name, avatar } = req.body;
 
@@ -178,13 +175,12 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
 
     res.json(user);
   } catch (error) {
-    console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Profil güncellenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // PUT /api/auth/password
-router.put('/password', authenticate, async (req: AuthRequest, res: Response) => {
+router.put('/password', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -219,8 +215,7 @@ router.put('/password', authenticate, async (req: AuthRequest, res: Response) =>
 
     res.json({ message: 'Şifre başarıyla güncellendi' });
   } catch (error) {
-    console.error('Update password error:', error);
-    res.status(500).json({ error: 'Şifre güncellenirken bir hata oluştu' });
+    next(error);
   }
 });
 
