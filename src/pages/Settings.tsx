@@ -23,7 +23,8 @@ import {
   CheckSquare,
   FileText,
   Search,
-  Zap
+  Zap,
+  Globe
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -602,15 +603,30 @@ const AboutSection = () => {
       {/* Developer & Links Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
-        {/* Developer Card - Minimal & Clean */}
+        {/* Developer Card - Eren Çakar Special */}
         <a 
-          href="https://metehankaya.dev" 
+          href="https://erencakar.com" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 flex flex-col items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition-transform duration-300 group"
+          className="relative overflow-hidden bg-zinc-900 dark:bg-black text-white p-8 rounded-[2.5rem] group hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-zinc-800 flex flex-col justify-between min-h-[180px]"
         >
-           <span className="font-bold text-zinc-900 dark:text-white text-xl group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Metehan Kaya</span>
-           <span className="text-sm text-zinc-500 dark:text-zinc-400 font-mono">metehankaya.dev</span>
+           {/* Background Effects */}
+           <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+           <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-colors" />
+           
+           <div className="relative z-10 flex justify-between items-start">
+             <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10 text-indigo-300">
+               <Globe className="w-6 h-6" />
+             </div>
+             <div className="p-2 bg-white/5 rounded-full text-white/50 group-hover:text-white group-hover:bg-white/20 transition-all">
+               <ChevronRight className="w-5 h-5" />
+             </div>
+           </div>
+           
+           <div className="relative z-10 mt-auto">
+             <h4 className="text-3xl font-bold tracking-tight mb-1 group-hover:text-indigo-200 transition-colors">Eren Çakar</h4>
+             <p className="text-sm text-zinc-400 font-medium tracking-wide opacity-80">erencakar.com</p>
+           </div>
         </a>
 
         {/* Links Column */}
