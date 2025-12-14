@@ -375,6 +375,10 @@ export const Spotlight: React.FC<SpotlightProps> = ({
               <CornerDownLeft className="w-3 h-3" />
               <span>Seç</span>
             </span>
+            <span className="flex items-center gap-1.5 ml-2 border-l border-zinc-200 dark:border-zinc-700 pl-4">
+              <kbd className="font-mono bg-zinc-100 dark:bg-zinc-800 px-1.5 rounded text-[10px]">/</kbd>
+              <span>Aç</span>
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <img src="/logo.svg" alt="Fochus" className="w-4 h-4" />

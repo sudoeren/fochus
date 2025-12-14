@@ -5,7 +5,7 @@ import { Spotlight } from './components/Spotlight';
 import { NewNoteWindow } from './components/NewNoteWindow';
 import { NewTaskWindow } from './components/NewTaskWindow';
 import { PomodoroModal } from './components/PomodoroModal';
-import { OnboardingModal } from './components/OnboardingModal';
+import { OnboardingPage } from './pages/OnboardingPage';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
 import { TasksWithLists } from './pages/TasksWithLists';
@@ -156,7 +156,7 @@ const App: React.FC = () => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
-      if (isSpotlightEnabled && (((e.metaKey || e.ctrlKey) && e.key === 'k') || (e.key === '/' && !isInputActive))) {
+      if (isSpotlightEnabled && (e.key === '/' && !isInputActive)) {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
@@ -247,6 +247,22 @@ const App: React.FC = () => {
     );
   }
 
+  if (showOnboarding) {
+    return (
+      <OnboardingPage
+        onBackgroundChange={handleBgChange}
+        onGlobalBgChange={handleGlobalBgToggle}
+        onComplete={() => {
+          if (currentUserId) {
+            localStorage.setItem(`fokus_onboarding_done_${currentUserId}`, 'true');
+          }
+          localStorage.removeItem('fokus_onboarding_pending');
+          setShowOnboarding(false);
+        }}
+      />
+    );
+  }
+
   const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
   const showBackground = isGlobalBg || activeView === 'dashboard';
   
@@ -333,21 +349,6 @@ const App: React.FC = () => {
       <PomodoroModal
         isOpen={showPomodoroModal}
         onClose={() => setShowPomodoroModal(false)}
-      />
-
-      <OnboardingModal
-        isOpen={showOnboarding}
-        defaultTheme="dark"
-        defaultBackground="default"
-        onBackgroundChange={handleBgChange}
-        onGlobalBgChange={handleGlobalBgToggle}
-        onComplete={() => {
-          if (currentUserId) {
-            localStorage.setItem(`fokus_onboarding_done_${currentUserId}`, 'true');
-          }
-          localStorage.removeItem('fokus_onboarding_pending');
-          setShowOnboarding(false);
-        }}
       />
     </div>
   );

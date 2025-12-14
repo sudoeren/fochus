@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, User, Key, ArrowLeft, Target, Zap, Moon, Sun, Check, Clock } from 'lucide-react';
+import { 
+  ArrowRight, 
+  CheckCircle2, 
+  User, 
+  Key, 
+  ArrowLeft, 
+  Target, 
+  Zap, 
+  Moon, 
+  Sun, 
+  Check, 
+  Clock,
+  Sparkles,
+  Search,
+  Palette,
+  Monitor,
+  Image as ImageIcon
+} from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -14,6 +31,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  // Onboarding State
+  const [isOnboarding, setIsOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [isGlobalBg, setIsGlobalBg] = useState(false);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -47,9 +69,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           name: formData.name
         });
         setAuthToken(token);
-        localStorage.setItem('fokus_onboarding_pending', 'true');
-        localStorage.setItem('bgImage', 'dark');
-        onLogin();
+        // Start inline onboarding instead of redirecting
+        setIsOnboarding(true);
+        setOnboardingStep(1);
+        // Ensure we don't trigger the old onboarding flow
+        localStorage.removeItem('fokus_onboarding_pending');
       } else {
         const { token } = await authAPI.login({
           username: formData.username,
@@ -63,6 +87,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('bgImage', 'default');
+    localStorage.setItem('isGlobalBg', String(isGlobalBg));
+    onLogin();
   };
 
   const handleNextStep = () => {
@@ -102,6 +132,176 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       confirmPassword: '',
       name: ''
     });
+  };
+
+  // Render Onboarding Content
+  const renderOnboarding = () => {
+    return (
+      <div className="w-full max-w-md relative z-10 p-6 sm:p-8 rounded-3xl shadow-xl border transition-colors duration-500 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className={cn(
+              "h-12 w-12 rounded-xl flex items-center justify-center shadow-sm border",
+              theme === 'light' ? "bg-zinc-50 border-zinc-200" : "bg-zinc-800 border-zinc-700"
+            )}>
+              {onboardingStep === 1 && <Sparkles className="w-6 h-6 text-zinc-900 dark:text-white" />}
+              {onboardingStep === 2 && <Search className="w-6 h-6 text-zinc-900 dark:text-white" />}
+              {onboardingStep === 3 && <Palette className="w-6 h-6 text-zinc-900 dark:text-white" />}
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
+            {onboardingStep === 1 && `Hoş Geldin, ${formData.name.split(' ')[0]}`}
+            {onboardingStep === 2 && 'Spotlight'}
+            {onboardingStep === 3 && 'Görünüm'}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+            {onboardingStep === 1 && 'Hesabın hazır. Şimdi Fochus\'u kişiselleştirelim.'}
+            {onboardingStep === 2 && 'Uygulamanın kalbi: Hızlı erişim menüsü.'}
+            {onboardingStep === 3 && 'Çalışma ortamını kendine göre ayarla.'}
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="mb-8 min-h-[180px] flex flex-col justify-center">
+          {onboardingStep === 1 && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <div className="font-medium text-zinc-900 dark:text-white">Görevler</div>
+                  <div className="text-xs text-zinc-500">Projelerini organize et</div>
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center shadow-sm">
+                  <Sparkles className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div>
+                  <div className="font-medium text-zinc-900 dark:text-white">Notlar</div>
+                  <div className="text-xs text-zinc-500">Fikirlerini yakala</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {onboardingStep === 2 && (
+            <div className="flex flex-col items-center justify-center space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="relative">
+                <kbd className="h-20 w-20 flex items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800 border-b-4 border-zinc-300 dark:border-zinc-950 text-4xl font-bold text-zinc-900 dark:text-white shadow-sm">
+                  /
+                </kbd>
+                <div className="absolute -right-8 -top-4 bg-indigo-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-bounce">
+                  YENİ
+                </div>
+              </div>
+              <p className="text-center text-sm text-zinc-600 dark:text-zinc-400 max-w-[200px]">
+                Herhangi bir yerde <span className="font-bold text-zinc-900 dark:text-white">/</span> tuşuna basarak arama yap veya komut ver.
+              </p>
+            </div>
+          )}
+
+          {onboardingStep === 3 && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'light', label: 'Açık', icon: Sun },
+                  { id: 'dark', label: 'Koyu', icon: Moon },
+                  { id: 'system', label: 'Sistem', icon: Monitor }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTheme(t.id as any)}
+                    className={cn(
+                      'flex flex-col items-center gap-2 p-3 rounded-xl border transition-all duration-200',
+                      theme === t.id
+                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white'
+                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500'
+                    )}
+                  >
+                    <t.icon className="w-5 h-5" />
+                    <span className="text-xs font-medium">{t.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div 
+                onClick={() => setIsGlobalBg(!isGlobalBg)}
+                className={cn(
+                  "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-200",
+                  isGlobalBg 
+                    ? "border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800" 
+                    : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
+                    <ImageIcon className="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs text-zinc-900 dark:text-white">Genel Arka Plan</div>
+                    <div className="text-[10px] text-zinc-500">Ana sayfa görselini her yerde kullan</div>
+                  </div>
+                </div>
+                <div className={cn(
+                  "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                  isGlobalBg ? "bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white" : "border-zinc-300 dark:border-zinc-600"
+                )}>
+                  {isGlobalBg && <Check className="w-3 h-3 text-white dark:text-zinc-900" />}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Buttons */}
+        <div className="flex gap-3">
+          {onboardingStep > 1 && (
+            <button
+              onClick={() => setOnboardingStep(prev => prev - 1)}
+              className={cn(
+                "px-5 py-3 rounded-xl font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400"
+              )}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (onboardingStep < 3) {
+                setOnboardingStep(prev => prev + 1);
+              } else {
+                handleOnboardingComplete();
+              }
+            }}
+            className={cn(
+              "flex-1 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-lg",
+              theme === 'light' ? "bg-zinc-900 text-white hover:bg-zinc-800" : "bg-white text-black hover:bg-zinc-200"
+            )}
+          >
+            {onboardingStep === 3 ? 'Başla' : 'Devam Et'}
+            {onboardingStep !== 3 && <ArrowRight className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Progress Dots */}
+        <div className="mt-6 flex justify-center gap-2">
+          {[1, 2, 3].map((s) => (
+            <div 
+              key={s}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                s === onboardingStep 
+                  ? (theme === 'light' ? "w-6 bg-zinc-900" : "w-6 bg-white") 
+                  : (theme === 'light' ? "w-1.5 bg-zinc-300" : "w-1.5 bg-zinc-800")
+              )}
+            />
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -229,6 +429,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             )} />
          </div>
         
+        {isOnboarding ? renderOnboarding() : (
         <div className={cn(
           "w-full max-w-md relative z-10 p-6 sm:p-8 rounded-3xl shadow-xl border transition-colors duration-500",
           theme === 'light' ? "bg-white border-zinc-200" : "bg-zinc-900 border-zinc-800"
@@ -454,6 +655,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </p>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
