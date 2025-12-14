@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { ThemeProvider } from './components/ThemeProvider';
+import { useTheme } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
 import { NewNoteWindow } from './components/NewNoteWindow';
 import { NewTaskWindow } from './components/NewTaskWindow';
@@ -18,6 +18,7 @@ import { cn } from './lib/utils';
 import { authAPI, getAuthToken, setAuthToken } from './services/api';
 
 const App: React.FC = () => {
+  const { isDark } = useTheme();
   const [activeView, setActiveView] = useState(() => localStorage.getItem('activeView') || 'dashboard');
 
   useEffect(() => {
@@ -34,8 +35,8 @@ const App: React.FC = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  // Background Image State
-  const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
+  // Background Image State - Default to 'default' which adapts to theme
+  const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'default');
   // Global Background State
   const [isGlobalBg, setIsGlobalBg] = useState(() => localStorage.getItem('isGlobalBg') === 'true');
   // Spotlight Enabled State
@@ -234,125 +235,121 @@ const App: React.FC = () => {
 
   if (!authChecked && getAuthToken()) {
     return (
-      <ThemeProvider>
-        <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
-          <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
-        </div>
-      </ThemeProvider>
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="w-8 h-8 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+      </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <ThemeProvider>
-        <Login onLogin={handleLogin} />
-      </ThemeProvider>
+      <Login onLogin={handleLogin} />
     );
   }
 
   const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
   const showBackground = isGlobalBg || activeView === 'dashboard';
+  
+  // Determine which background to show based on theme if default
+  const showLightBg = bgImage === 'light' || (bgImage === 'default' && !isDark);
+  const showDarkBg = bgImage === 'dark' || (bgImage === 'default' && isDark);
 
   return (
-    <ThemeProvider>
-      <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
+    <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
 
-        {/* GLOBAL BACKGROUND IMAGE */}
-        {showBackground && (
-          <div className="fixed inset-0 z-0 pointer-events-none">
-            {isCustomBg ? (
+      {/* GLOBAL BACKGROUND IMAGE */}
+      {showBackground && (
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          {isCustomBg ? (
+            <img
+              src={bgImage}
+              alt="Custom Background"
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
+            />
+          ) : (
+            <>
               <img
-                src={bgImage}
-                alt="Custom Background"
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
+                src="/light.png"
+                alt="Background"
+                className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", showLightBg ? 'opacity-100' : 'opacity-0')}
               />
-            ) : (
-              <>
-                <img
-                  src="/light.png"
-                  alt="Background"
-                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'light' ? 'opacity-100' : 'opacity-0')}
-                />
-                <img
-                  src="/dark.png"
-                  alt="Background"
-                  className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", bgImage === 'dark' ? 'opacity-100' : 'opacity-0')}
-                />
-              </>
-            )}
-            {/* Overlay for readability */}
-            <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
-          </div>
-        )}
+              <img
+                src="/dark.png"
+                alt="Background"
+                className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", showDarkBg ? 'opacity-100' : 'opacity-0')}
+              />
+            </>
+          )}
+          {/* Overlay for readability */}
+          <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
+        </div>
+      )}
 
-        {/* Floating Sidebar (Fixed Position) */}
-        <Sidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
-          onOpenSpotlight={() => setIsSpotlightOpen(true)}
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          onOpenPomodoro={() => setShowPomodoroModal(true)}
-        />
+      {/* Floating Sidebar (Fixed Position) */}
+      <Sidebar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        onOpenSpotlight={() => setIsSpotlightOpen(true)}
+        onOpenNoteModal={() => setShowNoteModal(true)}
+        onOpenTaskModal={() => setShowTaskModal(true)}
+        onOpenPomodoro={() => setShowPomodoroModal(true)}
+      />
 
-        {/* Main Content Area - With Padding for Sidebar */}
-        <main className={cn(
-          "relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto",
-          // If global BG is on, we might want to ensure transparency in children, but Dashboard usually handles its own layout.
-          // Other pages might need a translucent background if they assume a solid one.
-          // For now, let's assume pages will layer on top.
-        )}>
-          {renderView()}
-        </main>
+      {/* Main Content Area - With Padding for Sidebar */}
+      <main className={cn(
+        "relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto",
+      )}>
+        {renderView()}
+      </main>
 
 
-        {/* Spotlight */}
-        <Spotlight
-          isOpen={isSpotlightOpen}
-          onClose={() => setIsSpotlightOpen(false)}
-          onNavigate={setActiveView}
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          onOpenPomodoro={() => setShowPomodoroModal(true)}
-        />
+      {/* Spotlight */}
+      <Spotlight
+        isOpen={isSpotlightOpen}
+        onClose={() => setIsSpotlightOpen(false)}
+        onNavigate={setActiveView}
+        onOpenNoteModal={() => setShowNoteModal(true)}
+        onOpenTaskModal={() => setShowTaskModal(true)}
+        onOpenPomodoro={() => setShowPomodoroModal(true)}
+      />
 
-        {/* Modals */}
-        <NewNoteWindow
-          isOpen={showNoteModal}
-          onClose={() => setShowNoteModal(false)}
-          onExpand={(id) => {
-            setEditingNoteId(id);
-            setActiveView('note-editor');
-            setShowNoteModal(false);
-          }}
-        />
+      {/* Modals */}
+      <NewNoteWindow
+        isOpen={showNoteModal}
+        onClose={() => setShowNoteModal(false)}
+        onExpand={(id) => {
+          setEditingNoteId(id);
+          setActiveView('note-editor');
+          setShowNoteModal(false);
+        }}
+      />
 
-        <NewTaskWindow
-          isOpen={showTaskModal}
-          onClose={closeTaskModal}
-          initialData={editingTask}
-        />
+      <NewTaskWindow
+        isOpen={showTaskModal}
+        onClose={closeTaskModal}
+        initialData={editingTask}
+      />
 
-        <PomodoroModal
-          isOpen={showPomodoroModal}
-          onClose={() => setShowPomodoroModal(false)}
-        />
+      <PomodoroModal
+        isOpen={showPomodoroModal}
+        onClose={() => setShowPomodoroModal(false)}
+      />
 
-        <OnboardingModal
-          isOpen={showOnboarding}
-          defaultTheme="dark"
-          defaultBackground="dark"
-          onBackgroundChange={handleBgChange}
-          onComplete={() => {
-            if (currentUserId) {
-              localStorage.setItem(`fokus_onboarding_done_${currentUserId}`, 'true');
-            }
-            localStorage.removeItem('fokus_onboarding_pending');
-            setShowOnboarding(false);
-          }}
-        />
-      </div>
-    </ThemeProvider>
+      <OnboardingModal
+        isOpen={showOnboarding}
+        defaultTheme="dark"
+        defaultBackground="default"
+        onBackgroundChange={handleBgChange}
+        onGlobalBgChange={handleGlobalBgToggle}
+        onComplete={() => {
+          if (currentUserId) {
+            localStorage.setItem(`fokus_onboarding_done_${currentUserId}`, 'true');
+          }
+          localStorage.removeItem('fokus_onboarding_pending');
+          setShowOnboarding(false);
+        }}
+      />
+    </div>
   );
 };
 

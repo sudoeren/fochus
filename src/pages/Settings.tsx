@@ -20,6 +20,7 @@ import {
   Eye,
   EyeOff,
   Image as ImageIcon,
+  Sparkles,
   CheckSquare,
   FileText,
   Search,
@@ -594,20 +595,13 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
           <p className="text-xs text-zinc-500">Dashboard'da görünecek görseli seçin veya yükleyin.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <ThemeCard 
-            isActive={bgImage === 'light'}
-            onClick={() => onBgChange('light')}
-            label="Aydınlık" 
-            icon={Sun} 
-            previewColors={{ nav: 'bg-sky-200', primary: '#0ea5e9' }} 
-          />
-          <ThemeCard 
-            isActive={bgImage === 'dark'}
-            onClick={() => onBgChange('dark')}
-            label="Karanlık" 
-            icon={Moon} 
-            previewColors={{ nav: 'bg-indigo-900', primary: '#4338ca' }} 
+            isActive={bgImage === 'default' || bgImage === 'light' || bgImage === 'dark'}
+            onClick={() => onBgChange('default')}
+            label="Varsayılan" 
+            icon={Sparkles} 
+            previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
           />
           
           {/* Upload Custom Image */}
@@ -619,7 +613,7 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
              />
              <ThemeCard 
-                isActive={bgImage !== 'light' && bgImage !== 'dark'}
+                isActive={bgImage !== 'light' && bgImage !== 'dark' && bgImage !== 'default'}
                 onClick={() => {}} // Controlled by input
                 label="Görsel Yükle" 
                 icon={Upload} 
