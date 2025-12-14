@@ -70,8 +70,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       try {
         const meRaw = await authAPI.me();
         const me = deserializeApiDates(meRaw) as any;
-        const name = (me?.name ?? '').toString().trim();
-        if (!cancelled) setDisplayName(name);
+        const resolved = ((me?.name ?? '').toString().trim() || (me?.username ?? '').toString().trim());
+        if (!cancelled) setDisplayName(resolved);
       } catch {
         if (!cancelled) setDisplayName('');
       }
@@ -153,16 +153,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
               {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
             </h1>
-            <div className="flex items-center gap-4 ml-2 w-full">
-              <div className="h-1 w-16 bg-zinc-900 dark:bg-white" />
+            <div className="flex items-center ml-2">
               <span className="text-3xl font-light text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.2em]">
-                {getGreeting()}
+                {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
               </span>
-              {displayName ? (
-                <span className="ml-auto text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">
-                  {displayName}
-                </span>
-              ) : null}
             </div>
         </div>
 

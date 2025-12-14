@@ -5,6 +5,7 @@ import { Spotlight } from './components/Spotlight';
 import { NewNoteWindow } from './components/NewNoteWindow';
 import { NewTaskWindow } from './components/NewTaskWindow';
 import { PomodoroModal } from './components/PomodoroModal';
+import { OnboardingModal } from './components/OnboardingModal';
 import { Dashboard } from './pages/Dashboard';
 import { Notes } from './pages/Notes';
 import { TasksWithLists } from './pages/TasksWithLists';
@@ -30,6 +31,8 @@ const App: React.FC = () => {
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
   const [authChecked, setAuthChecked] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Background Image State
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'light');
@@ -57,8 +60,32 @@ const App: React.FC = () => {
     localStorage.setItem('isSpotlightEnabled', String(enabled));
   };
 
-  const handleLogin = () => {
-    setIsAuthenticated(Boolean(getAuthToken()));
+  const handleLogin = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setIsAuthenticated(false);
+      return;
+    }
+
+    try {
+      const me = await authAPI.me();
+      setIsAuthenticated(true);
+      setCurrentUserId((me as any)?.id ?? null);
+      setAuthChecked(true);
+
+      // Check onboarding after login/register
+      const pending = localStorage.getItem('fokus_onboarding_pending') === 'true';
+      const uid = (me as any)?.id;
+      const doneKey = uid ? `fokus_onboarding_done_${uid}` : null;
+      const done = doneKey ? localStorage.getItem(doneKey) === 'true' : false;
+
+      if (pending && !done) {
+        setShowOnboarding(true);
+      }
+    } catch {
+      setAuthToken(null);
+      setIsAuthenticated(false);
+    }
   };
 
   useEffect(() => {
@@ -78,22 +105,38 @@ const App: React.FC = () => {
     if (!token) {
       setIsAuthenticated(false);
       setAuthChecked(true);
+      setCurrentUserId(null);
       return;
     }
 
     authAPI
       .me()
-      .then(() => {
+      .then((me) => {
         setIsAuthenticated(true);
+        setCurrentUserId((me as any)?.id ?? null);
       })
       .catch(() => {
         setAuthToken(null);
         setIsAuthenticated(false);
+        setCurrentUserId(null);
       })
       .finally(() => {
         setAuthChecked(true);
       });
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || !authChecked) return;
+    if (!currentUserId) return;
+
+    const pending = localStorage.getItem('fokus_onboarding_pending') === 'true';
+    const doneKey = `fokus_onboarding_done_${currentUserId}`;
+    const done = localStorage.getItem(doneKey) === 'true';
+
+    if (pending && !done) {
+      setShowOnboarding(true);
+    }
+  }, [isAuthenticated, authChecked, currentUserId]);
 
   const handleEditTask = (task: any) => {
     setEditingTask(task);
@@ -293,6 +336,20 @@ const App: React.FC = () => {
         <PomodoroModal
           isOpen={showPomodoroModal}
           onClose={() => setShowPomodoroModal(false)}
+        />
+
+        <OnboardingModal
+          isOpen={showOnboarding}
+          defaultTheme="dark"
+          defaultBackground="dark"
+          onBackgroundChange={handleBgChange}
+          onComplete={() => {
+            if (currentUserId) {
+              localStorage.setItem(`fokus_onboarding_done_${currentUserId}`, 'true');
+            }
+            localStorage.removeItem('fokus_onboarding_pending');
+            setShowOnboarding(false);
+          }}
         />
       </div>
     </ThemeProvider>

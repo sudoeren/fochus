@@ -67,7 +67,7 @@ export const authAPI = {
 
   me: () => fetchAPI<any>('/auth/me'),
 
-  updateProfile: (data: { name?: string; avatar?: string }) =>
+  updateProfile: (data: { name?: string; username?: string; avatar?: string | null }) =>
     fetchAPI<any>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(data),

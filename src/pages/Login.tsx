@@ -47,6 +47,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           name: formData.name
         });
         setAuthToken(token);
+        localStorage.setItem('fokus_onboarding_pending', 'true');
+        localStorage.setItem('bgImage', 'dark');
         onLogin();
       } else {
         const { token } = await authAPI.login({

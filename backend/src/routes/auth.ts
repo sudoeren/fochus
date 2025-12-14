@@ -59,7 +59,7 @@ router.post('/register', async (req, res: Response, next: NextFunction) => {
         name,
         settings: {
           create: {
-            theme: 'system',
+            theme: 'dark',
             language: 'tr'
           }
         }
@@ -157,14 +157,34 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: Ne
 // PUT /api/auth/profile
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { name, avatar } = req.body;
+    const updateSchema = z.object({
+      name: z.string().min(1).optional(),
+      username: z.string().min(3).optional(),
+      avatar: z.string().optional().nullable()
+    });
+
+    const validation = updateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: 'Geçersiz profil bilgisi' });
+    }
+
+    const { name, username, avatar } = validation.data;
+
+    if (username) {
+      const existing = await prisma.user.findUnique({ where: { username } });
+      if (existing && existing.id !== req.user!.id) {
+        return res.status(400).json({ error: 'Bu kullanıcı adı zaten alınmış' });
+      }
+    }
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (username !== undefined) updateData.username = username;
+    if (avatar !== undefined) updateData.avatar = avatar;
 
     const user = await prisma.user.update({
       where: { id: req.user!.id },
-      data: {
-        name,
-        avatar
-      },
+      data: updateData,
       select: {
         id: true,
         username: true,

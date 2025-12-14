@@ -79,35 +79,49 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   });
   const [stats, setStats] = useState({ tasks: 0, notes: 0, focusHoursText: '0s' });
 
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({ name: '', username: '' });
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null);
+  const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null);
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
 
     const loadProfile = async () => {
       try {
-        const [meRaw, tasksRaw, notesRaw, focusRaw] = await Promise.all([
-          authAPI.me(),
-          tasksAPI.getAll(),
-          notesAPI.getAll(),
-          pomodoroAPI.getStats('all')
+        const meRaw = await authAPI.me();
+        const me = deserializeApiDates(meRaw) as any;
+
+        if (cancelled) return;
+
+        const resolvedUsername = (me?.username ?? '').toString();
+        const resolvedName = (me?.name ?? '').toString().trim() || resolvedUsername;
+        const createdAt = me?.createdAt ? new Date(me.createdAt) : new Date();
+
+        // Only update if we have real data
+        if (resolvedUsername) {
+          setUserData({
+            name: resolvedName || resolvedUsername,
+            username: resolvedUsername,
+            joinDate: createdAt.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+          });
+          setProfileDraft({ name: resolvedName || resolvedUsername, username: resolvedUsername });
+        }
+
+        // Load stats separately
+        const [tasksRaw, notesRaw, focusRaw] = await Promise.all([
+          tasksAPI.getAll().catch(() => []),
+          notesAPI.getAll().catch(() => []),
+          pomodoroAPI.getStats('all').catch(() => ({}))
         ]);
 
-        const me = deserializeApiDates(meRaw) as any;
+        if (cancelled) return;
+
         const tasks = Array.isArray(tasksRaw) ? tasksRaw : [];
         const notes = Array.isArray(notesRaw) ? notesRaw : [];
         const focusSeconds = Number(focusRaw?.work?.duration ?? 0);
         const focusHours = Number.isFinite(focusSeconds) ? focusSeconds / 3600 : 0;
-
-        if (cancelled) return;
-
-        const createdAt = me?.createdAt ? new Date(me.createdAt) : new Date();
-        const resolvedUsername = (me?.username ?? '').toString() || 'kullaniciadi';
-        const resolvedName = ((me?.name ?? '').toString().trim() || resolvedUsername || 'Kullanıcı');
-
-        setUserData({
-          name: resolvedName,
-          username: resolvedUsername,
-          joinDate: createdAt.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
-        });
 
         setStats({
           tasks: tasks.length,
@@ -120,10 +134,60 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
     };
 
     loadProfile();
+
+    const handleTokenChanged = () => {
+      loadProfile();
+    };
+
+    window.addEventListener('auth:token-changed', handleTokenChanged);
     return () => {
       cancelled = true;
+      window.removeEventListener('auth:token-changed', handleTokenChanged);
     };
   }, []);
+
+  const handleSaveProfile = async () => {
+    setProfileSaveError(null);
+    setProfileSaveMessage(null);
+    setIsProfileSaving(true);
+
+    try {
+      const nextName = profileDraft.name.trim();
+      const nextUsername = profileDraft.username.trim();
+
+      if (!nextName) {
+        setProfileSaveError('İsim boş olamaz');
+        return;
+      }
+
+      if (!nextUsername || nextUsername.length < 3) {
+        setProfileSaveError('Kullanıcı adı en az 3 karakter olmalı');
+        return;
+      }
+
+      const updatedRaw = await authAPI.updateProfile({
+        name: nextName,
+        username: nextUsername
+      } as any);
+
+      const updated = deserializeApiDates(updatedRaw) as any;
+      const resolvedUsername = (updated?.username ?? nextUsername).toString();
+      const resolvedName = ((updated?.name ?? nextName).toString().trim() || resolvedUsername || 'Kullanıcı');
+
+      setUserData((prev) => ({
+        ...prev,
+        name: resolvedName,
+        username: resolvedUsername
+      }));
+      setProfileDraft({ name: resolvedName, username: resolvedUsername });
+      setIsEditingProfile(false);
+      setProfileSaveMessage('Profil güncellendi');
+    } catch (e: any) {
+      setProfileSaveError(e?.message || 'Profil güncellenirken bir hata oluştu');
+    } finally {
+      setIsProfileSaving(false);
+    }
+  };
 
   const handleLogout = () => {
     if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
@@ -194,10 +258,92 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
         </div>
         
         <div className="relative pt-16 px-8 pb-6 flex flex-col items-center text-center">
-           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-0.5">{userData.name}</h2>
-           <p className="text-zinc-500 dark:text-zinc-400 mb-4 flex items-center gap-2 text-sm">
-             <User className="w-3.5 h-3.5" /> {userData.username}
-           </p>
+           {profileSaveMessage ? (
+             <div className="mb-3 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-semibold border border-emerald-100 dark:border-emerald-800">
+               {profileSaveMessage}
+             </div>
+           ) : null}
+
+           {profileSaveError ? (
+             <div className="mb-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl text-xs font-semibold border border-red-100 dark:border-red-800">
+               {profileSaveError}
+             </div>
+           ) : null}
+
+           {/* Name - Click to Edit */}
+           {isEditingProfile ? (
+             <input
+               value={profileDraft.name}
+               onChange={(e) => setProfileDraft((p) => ({ ...p, name: e.target.value }))}
+               placeholder="İsim"
+               autoFocus
+               className="text-2xl font-bold text-center bg-transparent border-b-2 border-indigo-500 dark:border-indigo-400 text-zinc-900 dark:text-white outline-none mb-2 w-48"
+             />
+           ) : (
+             <h2
+               onClick={() => {
+                 setProfileSaveError(null);
+                 setProfileSaveMessage(null);
+                 setIsEditingProfile(true);
+                 setProfileDraft({ name: userData.name, username: userData.username });
+               }}
+               className="text-2xl font-bold text-zinc-900 dark:text-white mb-0.5 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+               title="Düzenlemek için tıkla"
+             >
+               {userData.name}
+             </h2>
+           )}
+
+           {/* Username - Click to Edit */}
+           {isEditingProfile ? (
+             <div className="flex items-center gap-2 mb-3">
+               <User className="w-3.5 h-3.5 text-zinc-400" />
+               <input
+                 value={profileDraft.username}
+                 onChange={(e) => setProfileDraft((p) => ({ ...p, username: e.target.value }))}
+                 placeholder="Kullanıcı adı"
+                 className="text-sm bg-transparent border-b border-zinc-400 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 outline-none w-32"
+               />
+             </div>
+           ) : (
+             <p
+               onClick={() => {
+                 setProfileSaveError(null);
+                 setProfileSaveMessage(null);
+                 setIsEditingProfile(true);
+                 setProfileDraft({ name: userData.name, username: userData.username });
+               }}
+               className="text-zinc-500 dark:text-zinc-400 mb-4 flex items-center gap-2 text-sm cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+               title="Düzenlemek için tıkla"
+             >
+               <User className="w-3.5 h-3.5" /> @{userData.username}
+             </p>
+           )}
+
+           {/* Save/Cancel Buttons */}
+           {isEditingProfile && (
+             <div className="flex items-center justify-center gap-2 mb-4">
+               <button
+                 onClick={() => {
+                   setProfileSaveError(null);
+                   setProfileSaveMessage(null);
+                   setIsEditingProfile(false);
+                   setProfileDraft({ name: userData.name, username: userData.username });
+                 }}
+                 disabled={isProfileSaving}
+                 className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+               >
+                 İptal
+               </button>
+               <button
+                 onClick={handleSaveProfile}
+                 disabled={isProfileSaving}
+                 className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+               >
+                 {isProfileSaving ? 'Kaydediliyor...' : 'Kaydet'}
+               </button>
+             </div>
+           )}
 
            <div className="flex gap-3 mb-6">
              <div className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg text-xs font-semibold border border-zinc-100 dark:border-zinc-700 flex items-center gap-2">
