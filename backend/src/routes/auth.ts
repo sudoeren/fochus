@@ -23,7 +23,7 @@ const loginSchema = z.object({
 const generateToken = (userId: string, username: string): string => {
   const secret = process.env.JWT_SECRET || 'default-secret';
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-  return jwt.sign({ userId, username }, secret, { expiresIn });
+  return jwt.sign({ userId, username }, secret, { expiresIn: expiresIn as any });
 };
 
 // POST /api/auth/register
