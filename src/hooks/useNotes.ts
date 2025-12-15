@@ -43,7 +43,6 @@ export const useNotes = () => {
 
     // INSTANT refresh event listener
     const handleInstantRefresh = () => {
-      console.log('⚡ INSTANT refresh - Notes yeniden yükleniyor...');
       loadNotes();
     };
 

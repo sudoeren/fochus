@@ -64,50 +64,34 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
   };
 
   const handleDragStart = () => {
-    console.log('🎯 Drag started!');
+    // Drag started
   };
 
   const handleDragEnd = async (result: DropResult) => {
-    console.log('🏁 Drag ended, result:', JSON.stringify(result, null, 2));
-
     if (!result.destination) {
-      console.log('❌ No destination - drag cancelled');
       return;
     }
 
     const { source, destination, draggableId } = result;
 
-    console.log('📍 Source:', source.droppableId, 'index:', source.index);
-    console.log('📍 Destination:', destination.droppableId, 'index:', destination.index);
-    console.log('📍 Task ID:', draggableId);
-
     // Same container? No change needed
     if (source.droppableId === destination.droppableId) {
-      console.log('ℹ️ Same container, no list change needed');
       return;
     }
 
     // Determine target list ID (null for uncategorized)
     const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
 
-    console.log('🔄 Moving task:', draggableId, 'to list:', targetListId);
-
     try {
       // 1. Update backend
-      console.log('💾 Updating backend...');
       await moveTaskToList(draggableId, targetListId, { skipRefresh: true });
-
-      console.log('✅ Task updated');
 
       // 2. Small delay to ensure storage is fully written
       await new Promise(resolve => setTimeout(resolve, 100));
 
       // 3. Refresh both lists and tasks from storage
-      console.log('🔃 Refreshing data...');
       await refetchTaskLists(true);
       await loadTasks(true);
-
-      console.log('✅ Data refreshed successfully');
 
     } catch (error) {
       console.error('❌ Failed to move task:', error);

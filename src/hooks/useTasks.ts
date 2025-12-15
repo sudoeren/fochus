@@ -65,7 +65,6 @@ export const useTasks = () => {
 
     // INSTANT refresh event listener
     const handleInstantRefresh = () => {
-      console.log('⚡ INSTANT refresh - Tasks yeniden yükleniyor...');
       loadTasks(true); // Silent refresh
     };
 
@@ -257,7 +256,6 @@ export const useTasks = () => {
 
   // Reorder tasks - SADECE 'ALL' FILTER IÇIN ÇALIŞIR
   const reorderTasks = async (startIndex: number, endIndex: number, currentFilter: string = 'all') => {
-    console.log('🔄 reorderTasks çağrıldı:', { startIndex, endIndex, currentFilter });
 
     // Sadece 'all' filter'da drag-drop yapılabilir
     if (currentFilter !== 'all') {
