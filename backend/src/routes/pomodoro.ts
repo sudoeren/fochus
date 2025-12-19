@@ -87,18 +87,38 @@ router.get('/stats', async (req: AuthRequest, res: Response) => {
     });
 
     // Daily breakdown (last 7 days)
-    const dailyStats = await prisma.$queryRaw`
-      SELECT 
-        DATE(start_time) as date,
-        COUNT(*) as count,
-        SUM(duration) as total_duration
-      FROM pomodoro_sessions
-      WHERE user_id = ${req.user!.id}
-        AND completed = true
-        AND start_time >= ${new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)}
-      GROUP BY DATE(start_time)
-      ORDER BY date DESC
-    `;
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const lastWeekSessions = await prisma.pomodoroSession.findMany({
+      where: {
+        userId: req.user!.id,
+        completed: true,
+        startTime: {
+          gte: sevenDaysAgo
+        }
+      },
+      select: {
+        startTime: true,
+        duration: true
+      }
+    });
+
+    const dailyStatsMap = new Map<string, { count: number; total_duration: number }>();
+
+    lastWeekSessions.forEach(session => {
+      const dateKey = session.startTime.toISOString().split('T')[0];
+      const entry = dailyStatsMap.get(dateKey) || { count: 0, total_duration: 0 };
+      entry.count += 1;
+      entry.total_duration += session.duration;
+      dailyStatsMap.set(dateKey, entry);
+    });
+
+    const dailyStats = Array.from(dailyStatsMap.entries())
+      .map(([date, stats]) => ({
+        date,
+        count: stats.count,
+        total_duration: stats.total_duration
+      }))
+      .sort((a, b) => b.date.localeCompare(a.date));
 
     res.json({
       total: {

@@ -18,6 +18,7 @@ import { usePomodoro } from '../hooks/usePomodoro';
 import { authAPI, pomodoroAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
+import { cn } from '../lib/utils';
 
 interface DashboardProps {
   onNavigate: (view: string) => void;
