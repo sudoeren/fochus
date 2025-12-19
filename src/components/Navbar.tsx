@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { usePomodoro } from '../hooks/usePomodoro';
+import { useTranslation } from 'react-i18next';
 
 interface NavbarProps {
   activeView: string;
@@ -22,14 +23,6 @@ interface NavbarProps {
   onOpenPomodoro: () => void;
 }
 
-const navItems = [
-  { id: 'dashboard', icon: Home, label: 'Dashboard' },
-  { id: 'tasks', icon: CheckSquare, label: 'Görevler' },
-  { id: 'notes', icon: FileText, label: 'Notlar' },
-  { id: 'weekly', icon: Calendar, label: 'Takvim' },
-  { id: 'stats', icon: BarChart, label: 'İstatistik' },
-];
-
 export const Navbar: React.FC<NavbarProps> = ({
   activeView,
   onViewChange,
@@ -38,8 +31,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenTaskModal,
   onOpenPomodoro
 }) => {
+  const { t } = useTranslation();
   const { isActive, timeLeft, formatTime } = usePomodoro();
   const [hovered, setHovered] = useState<string | null>(null);
+
+  const navItems = [
+    { id: 'dashboard', icon: Home, label: t('navbar.dashboard') },
+    { id: 'tasks', icon: CheckSquare, label: t('navbar.tasks') },
+    { id: 'notes', icon: FileText, label: t('navbar.notes') },
+    { id: 'weekly', icon: Calendar, label: t('navbar.calendar') },
+    { id: 'stats', icon: BarChart, label: t('navbar.stats') },
+  ];
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4">
@@ -88,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="p-3 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors relative group"
           >
             <Search className="w-5 h-5" />
-            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 text-[10px] font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Ara</span>
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 text-[10px] font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{t('navbar.search')}</span>
           </button>
 
           {/* Quick Add */}
@@ -97,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="p-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 rounded-full transition-colors relative group"
           >
             <Plus className="w-5 h-5" />
-            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 text-[10px] font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Yeni Görev</span>
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 text-[10px] font-medium text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{t('navbar.new_task')}</span>
           </button>
 
           {/* Pomodoro Indicator */}

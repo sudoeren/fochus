@@ -3,6 +3,7 @@ import { X, Pin, Palette, Save, Maximize2 } from 'lucide-react';
 import { Note } from '../types/index';
 import { useNotes } from '../hooks/useNotes';
 import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 interface NewNoteWindowProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ const NOTE_COLORS = [
 ];
 
 export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, initialData, onExpand }) => {
+    const { t } = useTranslation();
     const { addNote, updateNote } = useNotes();
 
     const [title, setTitle] = useState('');
@@ -126,7 +128,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                 <div className="flex items-center justify-between px-6 py-4 border-b border-black/5 dark:border-white/5">
                     <div className="flex items-center gap-2">
                         <h2 className="text-lg font-semibold">
-                            {initialData?.id ? 'Notu Düzenle' : 'Yeni Not'}
+                            {initialData?.id ? t('notes.edit_note') : t('notes.new_note')}
                         </h2>
                     </div>
                     <div className="flex items-center gap-1">
@@ -134,7 +136,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                             <button
                                 onClick={handleExpand}
                                 className="p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                                title="Tam Ekran"
+                                title={t('notes.fullscreen')}
                             >
                                 <Maximize2 size={20} />
                             </button>
@@ -147,7 +149,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                                     ? "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400"
                                     : "text-zinc-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-zinc-600 dark:hover:text-zinc-300"
                             )}
-                            title="Sabitle"
+                            title={t('notes.pin')}
                         >
                             <Pin size={20} className={isPinned ? "fill-current" : ""} />
                         </button>
@@ -164,7 +166,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                 <div className="p-6 flex flex-col gap-4 flex-1">
                     <input
                         type="text"
-                        placeholder="Başlık"
+                        placeholder={t('notes.title_placeholder')}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="w-full text-2xl font-bold bg-transparent border-b border-transparent focus:border-black/10 dark:focus:border-white/10 placeholder-zinc-400/70 dark:placeholder-zinc-600 focus:outline-none focus:ring-0 px-0 py-2 transition-colors"
@@ -172,7 +174,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                     />
 
                     <textarea
-                        placeholder="Notunuzu buraya yazın..."
+                        placeholder={t('notes.content_placeholder')}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         className="w-full min-h-[300px] flex-1 text-lg leading-relaxed resize-none bg-transparent border-none placeholder-zinc-400/50 dark:placeholder-zinc-600 focus:outline-none focus:ring-0 p-0"
@@ -185,7 +187,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                         <button
                             onClick={() => setShowColorPicker(!showColorPicker)}
                             className="p-2 rounded-full text-zinc-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                            title="Renk Değiştir"
+                            title={t('notes.change_color')}
                         >
                             <Palette size={20} />
                         </button>
@@ -212,7 +214,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
 
                     <div className="flex items-center gap-3">
                         <span className="text-xs text-zinc-400 dark:text-zinc-500">
-                            {content.length} karakter
+                            {content.length} {t('notes.chars')}
                         </span>
                         <button
                             onClick={handleSave}
@@ -220,7 +222,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({ isOpen, onClose, i
                             className="flex items-center gap-2 px-6 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full text-sm font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                         >
                             <Save size={18} />
-                            Kaydet
+                            {t('common.save')}
                         </button>
                     </div>
                 </div>

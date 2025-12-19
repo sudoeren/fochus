@@ -15,17 +15,20 @@ import {
   Search,
   Palette,
   Monitor,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Languages
 } from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface LoginProps {
   onLogin: () => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const { t, i18n } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +61,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         }
 
         if (formData.password !== formData.confirmPassword) {
-          setError('Şifreler eşleşmiyor');
+          setError(t('login.error_match'));
           setIsLoading(false);
           return;
         }
@@ -83,7 +86,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         onLogin();
       }
     } catch (err: any) {
-      setError(err.message || 'Bir hata oluştu');
+      setError(err.message || t('login.error_general'));
     } finally {
       setIsLoading(false);
     }
@@ -97,15 +100,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handleNextStep = () => {
     if (step === 1 && !formData.name.trim()) {
-      setError('Lütfen isminizi giriniz');
+      setError(t('login.error_name'));
       return;
     }
     if (step === 2 && !formData.username.trim()) {
-      setError('Lütfen bir kullanıcı adı seçiniz');
+      setError(t('login.error_username'));
       return;
     }
     if (step === 2 && formData.username.length < 3) {
-      setError('Kullanıcı adı en az 3 karakter olmalıdır');
+      setError(t('login.error_username_len'));
       return;
     }
     
@@ -119,7 +122,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const handleGuestLogin = () => {
-    setError('Misafir modu şu anda desteklenmiyor. Lütfen giriş yapın veya kayıt olun.');
+    setError(t('login.error_guest'));
   };
 
   const toggleMode = () => {
@@ -151,14 +154,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">
-            {onboardingStep === 1 && `Hoş Geldin, ${formData.name.split(' ')[0]}`}
-            {onboardingStep === 2 && 'Spotlight'}
-            {onboardingStep === 3 && 'Görünüm'}
+            {onboardingStep === 1 && `${t('onboarding.welcome')}, ${formData.name.split(' ')[0]}`}
+            {onboardingStep === 2 && t('login.onboarding.step2_title')}
+            {onboardingStep === 3 && t('login.onboarding.step3_title')}
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-            {onboardingStep === 1 && 'Hesabın hazır. Şimdi Fochus\'u kişiselleştirelim.'}
-            {onboardingStep === 2 && 'Uygulamanın kalbi: Hızlı erişim menüsü.'}
-            {onboardingStep === 3 && 'Çalışma ortamını kendine göre ayarla.'}
+            {onboardingStep === 1 && t('login.onboarding.step1_desc')}
+            {onboardingStep === 2 && t('login.onboarding.step2_desc')}
+            {onboardingStep === 3 && t('login.onboarding.step3_desc')}
           </p>
         </div>
 
@@ -171,8 +174,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
-                  <div className="font-medium text-zinc-900 dark:text-white">Görevler</div>
-                  <div className="text-xs text-zinc-500">Projelerini organize et</div>
+                  <div className="font-medium text-zinc-900 dark:text-white">{t('login.onboarding.tasks_card_title')}</div>
+                  <div className="text-xs text-zinc-500">{t('login.onboarding.tasks_card_desc')}</div>
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 flex items-center gap-4">
@@ -180,8 +183,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <Sparkles className="w-5 h-5 text-indigo-500" />
                 </div>
                 <div>
-                  <div className="font-medium text-zinc-900 dark:text-white">Notlar</div>
-                  <div className="text-xs text-zinc-500">Fikirlerini yakala</div>
+                  <div className="font-medium text-zinc-900 dark:text-white">{t('login.onboarding.notes_card_title')}</div>
+                  <div className="text-xs text-zinc-500">{t('login.onboarding.notes_card_desc')}</div>
                 </div>
               </div>
             </div>
@@ -194,11 +197,17 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   /
                 </kbd>
                 <div className="absolute -right-8 -top-4 bg-indigo-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-bounce">
-                  YENİ
+                  {t('login.onboarding.spotlight_new')}
                 </div>
               </div>
               <p className="text-center text-sm text-zinc-600 dark:text-zinc-400 max-w-[200px]">
-                Herhangi bir yerde <span className="font-bold text-zinc-900 dark:text-white">/</span> tuşuna basarak arama yap veya komut ver.
+                {/* Interpolation for the key hint */}
+                <span dangerouslySetInnerHTML={{ 
+                  __html: t('login.onboarding.spotlight_instruction').replace(
+                    '<1>/</1>', 
+                    '<span class="font-bold text-zinc-900 dark:text-white">/</span>'
+                  ) 
+                }} />
               </p>
             </div>
           )}
@@ -207,9 +216,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'light', label: 'Açık', icon: Sun },
-                  { id: 'dark', label: 'Koyu', icon: Moon },
-                  { id: 'system', label: 'Sistem', icon: Monitor }
+                  { id: 'light', label: t('onboarding.light'), icon: Sun },
+                  { id: 'dark', label: t('onboarding.dark'), icon: Moon },
+                  { id: 'system', label: t('onboarding.system'), icon: Monitor }
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -241,8 +250,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <ImageIcon className="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
                   </div>
                   <div>
-                    <div className="font-bold text-xs text-zinc-900 dark:text-white">Genel Arka Plan</div>
-                    <div className="text-[10px] text-zinc-500">Ana sayfa görselini her yerde kullan</div>
+                    <div className="font-bold text-xs text-zinc-900 dark:text-white">{t('onboarding.global_bg')}</div>
+                    <div className="text-[10px] text-zinc-500">{t('onboarding.global_bg_desc')}</div>
                   </div>
                 </div>
                 <div className={cn(
@@ -281,7 +290,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               theme === 'light' ? "bg-zinc-900 text-white hover:bg-zinc-800" : "bg-white text-black hover:bg-zinc-200"
             )}
           >
-            {onboardingStep === 3 ? 'Başla' : 'Devam Et'}
+            {onboardingStep === 3 ? t('onboarding.start') : t('onboarding.continue')}
             {onboardingStep !== 3 && <ArrowRight className="w-4 h-4" />}
           </button>
         </div>
@@ -307,13 +316,42 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   return (
     <div className="min-h-screen flex bg-zinc-50 dark:bg-black transition-colors duration-300">
       
-      {/* Theme Switcher - Absolute Position */}
-      <button
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="absolute top-6 right-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
-      >
-        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-      </button>
+      {/* Top Right Controls */}
+      <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
+        {/* Language Switcher */}
+        <div className="flex items-center gap-1 p-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg mr-2">
+          <button
+            onClick={() => i18n.changeLanguage('tr')}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-bold transition-all",
+              i18n.language === 'tr' 
+                ? "bg-white text-black shadow-sm" 
+                : "text-zinc-500 dark:text-zinc-300 hover:text-black dark:hover:text-white"
+            )}
+          >
+            TR
+          </button>
+          <button
+            onClick={() => i18n.changeLanguage('en')}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-bold transition-all",
+              i18n.language === 'en' 
+                ? "bg-white text-black shadow-sm" 
+                : "text-zinc-500 dark:text-zinc-300 hover:text-black dark:hover:text-white"
+            )}
+          >
+            EN
+          </button>
+        </div>
+
+        {/* Theme Switcher */}
+        <button
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+      </div>
 
       {/* Left Side - Visuals (Redesigned) */}
       <div className={cn(
@@ -330,18 +368,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {/* Main Title Section */}
           <div className="space-y-4">
             <h1 className={cn(
-              "text-7xl font-bold tracking-tighter leading-[0.9]",
+              "text-7xl font-bold tracking-tighter leading-[0.9] whitespace-pre-line",
               theme === 'light' ? "text-zinc-900" : "text-white"
             )}>
-              Zamanı <br />
-              Yönet. <br />
-              <span className="text-zinc-400 dark:text-zinc-600">Hayatı Yaşa.</span>
+              {t('login.hero_title')}
             </h1>
             <p className={cn(
               "text-xl max-w-md font-medium",
               theme === 'light' ? "text-zinc-500" : "text-zinc-400"
             )}>
-              Karmaşadan uzaklaş. FOKUS ile hedeflerine giden yolda net bir görüş kazan.
+              {t('login.hero_desc')}
             </p>
           </div>
 
@@ -364,8 +400,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className={cn("text-sm font-bold", theme === 'light' ? "text-zinc-900" : "text-white")}>Günlük Hedef</div>
-                    <div className={cn("text-xs", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>%85 Tamamlandı</div>
+                    <div className={cn("text-sm font-bold", theme === 'light' ? "text-zinc-900" : "text-white")}>{t('login.daily_goal')}</div>
+                    <div className={cn("text-xs", theme === 'light' ? "text-zinc-500" : "text-zinc-400")}>%85 {t('login.completed')}</div>
                   </div>
                 </div>
                 <div className={cn("text-2xl font-mono font-bold", theme === 'light' ? "text-zinc-900" : "text-white")}>
@@ -401,12 +437,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div className="flex gap-8 pt-4">
             <div>
               <div className={cn("text-3xl font-bold font-mono", theme === 'light' ? "text-zinc-900" : "text-white")}>12+</div>
-              <div className={cn("text-sm font-medium", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>Odak Saati</div>
+              <div className={cn("text-sm font-medium", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>{t('login.stat_focus')}</div>
             </div>
             <div className="w-px bg-zinc-200 dark:bg-zinc-800" />
             <div>
               <div className={cn("text-3xl font-bold font-mono", theme === 'light' ? "text-zinc-900" : "text-white")}>85%</div>
-              <div className={cn("text-sm font-medium", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>Verimlilik</div>
+              <div className={cn("text-sm font-medium", theme === 'light' ? "text-zinc-500" : "text-zinc-500")}>{t('login.stat_efficiency')}</div>
             </div>
           </div>
         </div>
@@ -447,12 +483,12 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               "text-3xl font-bold mb-2",
               theme === 'light' ? "text-zinc-900" : "text-white"
             )}>
-              {isRegister ? 'Yeni Bir Başlangıç' : 'Tekrar Hoş Geldiniz'}
+              {isRegister ? t('login.new_beginning') : t('login.welcome_back')}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400">
               {isRegister 
-                ? 'Hedeflerine ulaşmak için ilk adımı at.' 
-                : 'Kaldığınız yerden devam edin.'}
+                ? t('login.start_journey') 
+                : t('login.continue_journey')}
             </p>
           </div>
 
@@ -470,7 +506,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <label className={cn(
                   "block text-sm font-medium mb-1.5",
                   theme === 'light' ? "text-zinc-700" : "text-zinc-300"
-                )}>İsim</label>
+                )}>{t('login.name')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
@@ -481,7 +517,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       "w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all",
                       theme === 'light' ? "bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400" : "bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10"
                     )}
-                    placeholder="Adınız Soyadınız"
+                    placeholder={t('login.name_placeholder')}
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
                   />
@@ -495,7 +531,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <label className={cn(
                   "block text-sm font-medium mb-1.5",
                   theme === 'light' ? "text-zinc-700" : "text-zinc-300"
-                )}>Kullanıcı Adı</label>
+                )}>{t('login.username')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
@@ -506,7 +542,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       "w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all",
                       theme === 'light' ? "bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400" : "bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10"
                     )}
-                    placeholder="kullaniciadi"
+                    placeholder={t('login.username_placeholder')}
                     value={formData.username}
                     onChange={e => setFormData({...formData, username: e.target.value})}
                   />
@@ -521,7 +557,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <label className={cn(
                     "block text-sm font-medium mb-1.5",
                     theme === 'light' ? "text-zinc-700" : "text-zinc-300"
-                  )}>Şifre</label>
+                  )}>{t('login.password')}</label>
                   <div className="relative">
                     <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                     <input
@@ -532,7 +568,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         "w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all",
                         theme === 'light' ? "bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400" : "bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10"
                       )}
-                      placeholder="••••••••"
+                      placeholder={t('login.password_placeholder')}
                       value={formData.password}
                       onChange={e => setFormData({...formData, password: e.target.value})}
                     />
@@ -544,7 +580,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <label className={cn(
                       "block text-sm font-medium mb-1.5",
                       theme === 'light' ? "text-zinc-700" : "text-zinc-300"
-                    )}>Şifre Tekrar</label>
+                    )}>{t('login.confirm_password')}</label>
                     <div className="relative">
                       <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                       <input
@@ -554,7 +590,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                           "w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all",
                           theme === 'light' ? "bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400" : "bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10"
                         )}
-                        placeholder="••••••••"
+                        placeholder={t('login.password_placeholder')}
                         value={formData.confirmPassword}
                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
                       />
@@ -590,7 +626,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    {isRegister && step < 3 ? 'Devam Et' : (isRegister ? 'Kayıt Ol' : 'Giriş Yap')}
+                    {isRegister && step < 3 ? t('login.continue_btn') : (isRegister ? t('login.register_btn') : t('login.login_btn'))}
                     {(!isRegister || step < 3) && <ArrowRight className="w-4 h-4" />}
                     {isRegister && step === 3 && <CheckCircle2 className="w-4 h-4" />}
                   </>
@@ -623,7 +659,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <span className={cn(
               "text-xs uppercase font-medium",
               theme === 'light' ? "text-zinc-500" : "text-zinc-500"
-            )}>veya</span>
+            )}>{t('login.or')}</span>
             <div className={cn(
               "h-px flex-1",
               theme === 'light' ? "bg-zinc-200" : "bg-zinc-800"
@@ -638,11 +674,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 theme === 'light' ? "bg-zinc-100 text-zinc-600 border-zinc-200" : "bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700"
               )}
             >
-              Misafir Olarak Devam Et
+              {t('login.guest_btn')}
             </button>
             
             <p className="text-center text-sm text-zinc-500">
-              {isRegister ? 'Zaten hesabınız var mı?' : 'Hesabınız yok mu?'}
+              {isRegister ? t('login.have_account') : t('login.no_account')}
               <button
                 onClick={toggleMode}
                 className={cn(
@@ -650,7 +686,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   theme === 'light' ? "text-zinc-700" : "text-white"
                 )}
               >
-                {isRegister ? 'Giriş Yap' : 'Kayıt Ol'}
+                {isRegister ? t('login.login_btn') : t('login.register_btn')}
               </button>
             </p>
           </div>

@@ -25,12 +25,14 @@ import {
   FileText,
   Search,
   Zap,
-  Globe
+  Globe,
+  Languages
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
 import { authAPI, notesAPI, pomodoroAPI, setAuthToken, taskListsAPI, tasksAPI, settingsAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
+import { useTranslation } from 'react-i18next';
 
 // --- Tab Component ---
 const SettingsTab = ({ 
@@ -62,6 +64,7 @@ const SettingsTab = ({
 
 // 1. Profile Section (Updated - Compact)
 const ProfileSection = ({ bgImage }: { bgImage: string }) => {
+  const { t, i18n } = useTranslation();
   const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(true); // Default to true
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -74,9 +77,9 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   const [userData, setUserData] = useState({
-    name: 'Kullanıcı',
-    username: 'kullaniciadi',
-    joinDate: new Date().toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+    name: t('settings.profile.default_name'),
+    username: t('settings.profile.default_username'),
+    joinDate: new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   });
   const [stats, setStats] = useState({ tasks: 0, notes: 0, focusHoursText: '0s' });
 
@@ -105,7 +108,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
           setUserData({
             name: resolvedName || resolvedUsername,
             username: resolvedUsername,
-            joinDate: createdAt.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+            joinDate: createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
           });
           setProfileDraft({ name: resolvedName || resolvedUsername, username: resolvedUsername });
         }
@@ -157,12 +160,12 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       const nextUsername = profileDraft.username.trim();
 
       if (!nextName) {
-        setProfileSaveError('İsim boş olamaz');
+        setProfileSaveError(t('settings.profile.error_name_empty') || 'Name cannot be empty');
         return;
       }
 
       if (!nextUsername || nextUsername.length < 3) {
-        setProfileSaveError('Kullanıcı adı en az 3 karakter olmalı');
+        setProfileSaveError(t('settings.profile.error_username_short') || 'Username too short');
         return;
       }
 
@@ -173,7 +176,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 
       const updated = deserializeApiDates(updatedRaw) as any;
       const resolvedUsername = (updated?.username ?? nextUsername).toString();
-      const resolvedName = ((updated?.name ?? nextName).toString().trim() || resolvedUsername || 'Kullanıcı');
+      const resolvedName = ((updated?.name ?? nextName).toString().trim() || resolvedUsername || t('settings.profile.default_name'));
 
       setUserData((prev) => ({
         ...prev,
@@ -182,16 +185,16 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       }));
       setProfileDraft({ name: resolvedName, username: resolvedUsername });
       setIsEditingProfile(false);
-      setProfileSaveMessage('Profil güncellendi');
+      setProfileSaveMessage(t('settings.profile.success_update') || 'Profile updated');
     } catch (e: any) {
-      setProfileSaveError(e?.message || 'Profil güncellenirken bir hata oluştu');
+      setProfileSaveError(e?.message || 'Error updating profile');
     } finally {
       setIsProfileSaving(false);
     }
   };
 
   const handleLogout = () => {
-    if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
+    if (confirm(t('settings.profile.logout_confirm') || 'Are you sure?')) {
       setAuthToken(null);
       window.dispatchEvent(new Event('auth:logout'));
     }
@@ -204,25 +207,25 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
     setIsPasswordLoading(true);
 
     if (newPassword !== confirmNewPassword) {
-      setPasswordChangeError('Yeni şifreler eşleşmiyor!');
+      setPasswordChangeError(t('settings.profile.error_password_match') || 'Passwords do not match');
       setIsPasswordLoading(false);
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordChangeError('Yeni şifre en az 6 karakter olmalıdır.');
+      setPasswordChangeError(t('settings.profile.error_password_short') || 'Password too short');
       setIsPasswordLoading(false);
       return;
     }
 
     try {
       await authAPI.updatePassword({ currentPassword, newPassword });
-      setPasswordChangeMessage('Şifre başarıyla güncellendi!');
+      setPasswordChangeMessage(t('settings.profile.success_password') || 'Password updated');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
       // Keep form open
     } catch (err: any) {
-      setPasswordChangeError(err.message || 'Şifre güncellenirken bir hata oluştu.');
+      setPasswordChangeError(err.message || 'Error updating password');
     } finally {
       setIsPasswordLoading(false);
     }
@@ -240,7 +243,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
         <button 
           onClick={handleLogout}
           className="absolute top-4 right-4 z-20 p-2.5 bg-white/20 hover:bg-red-500 hover:text-white backdrop-blur-md rounded-full text-white transition-all duration-300 group/logout"
-          title="Oturumu Kapat"
+          title={t('settings.profile.logout')}
         >
           <LogOut className="w-5 h-5" />
         </button>
@@ -276,7 +279,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
              <input
                value={profileDraft.name}
                onChange={(e) => setProfileDraft((p) => ({ ...p, name: e.target.value }))}
-               placeholder="İsim"
+               placeholder={t('settings.profile.edit_name')}
                autoFocus
                className="text-2xl font-bold text-center bg-transparent border-b-2 border-indigo-500 dark:border-indigo-400 text-zinc-900 dark:text-white outline-none mb-2 w-48"
              />
@@ -289,7 +292,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                  setProfileDraft({ name: userData.name, username: userData.username });
                }}
                className="text-2xl font-bold text-zinc-900 dark:text-white mb-0.5 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-               title="Düzenlemek için tıkla"
+               title="Click to edit"
              >
                {userData.name}
              </h2>
@@ -302,7 +305,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                <input
                  value={profileDraft.username}
                  onChange={(e) => setProfileDraft((p) => ({ ...p, username: e.target.value }))}
-                 placeholder="Kullanıcı adı"
+                 placeholder={t('settings.profile.edit_username')}
                  className="text-sm bg-transparent border-b border-zinc-400 dark:border-zinc-600 text-zinc-600 dark:text-zinc-300 outline-none w-32"
                />
              </div>
@@ -315,7 +318,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                  setProfileDraft({ name: userData.name, username: userData.username });
                }}
                className="text-zinc-500 dark:text-zinc-400 mb-4 flex items-center gap-2 text-sm cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-               title="Düzenlemek için tıkla"
+               title="Click to edit"
              >
                <User className="w-3.5 h-3.5" /> @{userData.username}
              </p>
@@ -334,21 +337,21 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                  disabled={isProfileSaving}
                  className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
                >
-                 İptal
+                 {t('settings.profile.cancel')}
                </button>
                <button
                  onClick={handleSaveProfile}
                  disabled={isProfileSaving}
                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
                >
-                 {isProfileSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                 {isProfileSaving ? '...' : t('settings.profile.save')}
                </button>
              </div>
            )}
 
            <div className="flex gap-3 mb-6">
              <div className="px-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-lg text-xs font-semibold border border-zinc-100 dark:border-zinc-700 flex items-center gap-2">
-               <Calendar className="w-3.5 h-3.5" /> Katılım: {userData.joinDate}
+               <Calendar className="w-3.5 h-3.5" /> {t('settings.profile.joined')}: {userData.joinDate}
              </div>
            </div>
 
@@ -356,15 +359,15 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
            <div className="grid grid-cols-3 gap-4 w-full pt-4 border-t border-zinc-100 dark:border-zinc-800">
               <div className="text-center">
                 <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.tasks}</div>
-                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Görev</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{t('settings.profile.stats_tasks')}</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.notes}</div>
-                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Not</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{t('settings.profile.stats_notes')}</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-zinc-900 dark:text-white">{stats.focusHoursText}</div>
-                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Odak</div>
+                <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">{t('settings.profile.stats_focus')}</div>
               </div>
            </div>
         </div>
@@ -377,7 +380,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                 <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400">
                   <Lock className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Güvenlik & Şifre</h3>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">{t('settings.profile.security_title')}</h3>
             </div>
          </div>
 
@@ -393,7 +396,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                 </div>
               )}
              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Mevcut Şifre</label>
+                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">{t('settings.profile.current_pass')}</label>
                 <div className="relative">
                   <input 
                     type={showCurrentPassword ? "text" : "password"} 
@@ -415,11 +418,11 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
              </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Yeni Şifre</label>
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">{t('settings.profile.new_pass')}</label>
                   <div className="relative">
                     <input 
                       type={showNewPassword ? "text" : "password"} 
-                      placeholder="Yeni şifreniz" 
+                      placeholder="******" 
                       className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -435,11 +438,11 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">Tekrar</label>
+                  <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">{t('settings.profile.confirm_pass')}</label>
                   <div className="relative">
                     <input 
                       type={showConfirmNewPassword ? "text" : "password"} 
-                      placeholder="Şifreyi onaylayın" 
+                      placeholder="******" 
                       className="w-full bg-zinc-50 dark:bg-black/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" 
                       value={confirmNewPassword}
                       onChange={(e) => setConfirmNewPassword(e.target.value)}
@@ -463,7 +466,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                 >
                   {isPasswordLoading ? (
                     <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  ) : 'Güncelle'}
+                  ) : t('settings.profile.update_btn')}
                 </button>
              </div>
            </form>
@@ -474,6 +477,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 
 // 2. Appearance Section
 const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }: { bgImage: string, onBgChange: (bg: string) => void, isGlobalBg: boolean, onToggleGlobalBg: (enabled: boolean) => void }) => {
+  const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -487,6 +491,10 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
   };
 
   const ThemeCard = ({ id, label, icon: Icon, previewColors, isActive, onClick }: any) => (
@@ -527,33 +535,73 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
 
   return (
     <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-6">
+
+      {/* Language Selection */}
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-100 dark:border-zinc-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+             <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-500 dark:text-zinc-400">
+               <Languages className="w-5 h-5" />
+             </div>
+             <div>
+               <h4 className="font-bold text-sm text-zinc-900 dark:text-white">{t('settings.appearance.language_title')}</h4>
+               <p className="text-xs text-zinc-500">{t('settings.appearance.language_subtitle')}</p>
+             </div>
+          </div>
+          
+          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
+             <button
+               onClick={() => changeLanguage('tr')}
+               className={cn(
+                 "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                 i18n.language === 'tr' 
+                   ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm" 
+                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+               )}
+             >
+               Türkçe
+             </button>
+             <button
+               onClick={() => changeLanguage('en')}
+               className={cn(
+                 "px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                 i18n.language === 'en' 
+                   ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm" 
+                   : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+               )}
+             >
+               English
+             </button>
+          </div>
+        </div>
+      </div>
       
       {/* App Theme */}
       <div>
         <div className="text-center mb-2">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">Uygulama Teması</h3>
-          <p className="text-xs text-zinc-500">Arayüz renklerinizi seçin.</p>
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">{t('settings.appearance.app_theme')}</h3>
+          <p className="text-xs text-zinc-500">{t('settings.appearance.app_theme_desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <ThemeCard 
             isActive={theme === 'light'}
             onClick={() => setTheme('light')}
-            label="Açık Mod" 
+            label={t('onboarding.light')} 
             icon={Sun} 
             previewColors={{ nav: 'bg-zinc-200', primary: '#4f46e5' }} 
           />
           <ThemeCard 
             isActive={theme === 'dark'}
             onClick={() => setTheme('dark')}
-            label="Koyu Mod" 
+            label={t('onboarding.dark')} 
             icon={Moon} 
             previewColors={{ nav: 'bg-zinc-700', primary: '#6366f1' }} 
           />
           <ThemeCard 
             isActive={theme === 'system'}
             onClick={() => setTheme('system')}
-            label="Sistem" 
+            label={t('onboarding.system')} 
             icon={Laptop} 
             previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
           />
@@ -570,8 +618,8 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
             <ImageIcon className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-sm text-zinc-900 dark:text-white">Genel Arka Plan</h4>
-            <p className="text-xs text-zinc-500">Ana sayfa görselini tüm sayfalarda kullan</p>
+            <h4 className="font-bold text-sm text-zinc-900 dark:text-white">{t('onboarding.global_bg')}</h4>
+            <p className="text-xs text-zinc-500">{t('onboarding.global_bg_desc')}</p>
           </div>
         </div>
         <button
@@ -591,15 +639,15 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
       {/* Background Image */}
       <div>
         <div className="text-center mb-2">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">Ana Sayfa Arka Planı</h3>
-          <p className="text-xs text-zinc-500">Dashboard'da görünecek görseli seçin veya yükleyin.</p>
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-0.5">{t('settings.appearance.home_bg')}</h3>
+          <p className="text-xs text-zinc-500">{t('settings.appearance.home_bg_desc')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <ThemeCard 
             isActive={bgImage === 'default' || bgImage === 'light' || bgImage === 'dark'}
             onClick={() => onBgChange('default')}
-            label="Varsayılan" 
+            label={t('settings.appearance.default')} 
             icon={Sparkles} 
             previewColors={{ nav: 'bg-zinc-400', primary: '#818cf8' }} 
           />
@@ -615,7 +663,7 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
              <ThemeCard 
                 isActive={bgImage !== 'light' && bgImage !== 'dark' && bgImage !== 'default'}
                 onClick={() => {}} // Controlled by input
-                label="Görsel Yükle" 
+                label={t('settings.appearance.upload')} 
                 icon={Upload} 
                 previewColors={{ nav: 'bg-emerald-200', primary: '#10b981' }} 
               />
@@ -629,6 +677,8 @@ const AppearanceSection = ({ bgImage, onBgChange, isGlobalBg, onToggleGlobalBg }
 
 // 3. Spotlight Section
 const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggle: (enabled: boolean) => void }) => {
+  const { t } = useTranslation();
+  
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
        {/* Hero Section */}
@@ -638,9 +688,9 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
           
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-left flex-1">
-              <h3 className="text-2xl font-bold mb-2">Spotlight Arama</h3>
+              <h3 className="text-2xl font-bold mb-2">{t('settings.spotlight.enable_title')}</h3>
               <p className="text-zinc-400 text-sm mb-4">
-                Her yerden hızlıca arama yapın, sayfalara gidin veya eylemler gerçekleştirin.
+                {t('settings.spotlight.enable_desc')}
               </p>
               <div className="flex items-center gap-2">
                 <kbd className="bg-white/10 px-3 py-1.5 rounded-lg text-white font-mono text-sm border border-white/10">Ctrl</kbd>
@@ -653,7 +703,7 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
             <div className="w-full md:w-72 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-2xl opacity-80">
               <div className="flex items-center gap-3 text-zinc-300 border-b border-white/10 pb-3 mb-3">
                 <Command className="w-4 h-4" />
-                <span className="text-sm">Ara veya komut yaz...</span>
+                <span className="text-sm">{t('settings.spotlight.search_title')}...</span>
               </div>
               <div className="space-y-2">
                 <div className="h-2 w-3/4 bg-white/10 rounded" />
@@ -674,8 +724,8 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
                  <Command className="w-6 h-6" />
                </div>
                <div>
-                 <h4 className="font-bold text-lg text-zinc-900 dark:text-white">Spotlight'ı Etkinleştir</h4>
-                 <p className="text-sm text-zinc-500 dark:text-zinc-400">Ctrl + K kısayolu ile hızlı aramayı kullanın.</p>
+                 <h4 className="font-bold text-lg text-zinc-900 dark:text-white">{t('settings.spotlight.enable_title')}</h4>
+                 <p className="text-sm text-zinc-500 dark:text-zinc-400">{t('settings.spotlight.enable_desc')}</p>
                </div>
             </div>
             
@@ -700,9 +750,9 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-3">
                <Search className="w-4 h-4" />
              </div>
-             <h5 className="font-bold text-indigo-900 dark:text-indigo-100 mb-1">Hızlı Arama</h5>
+             <h5 className="font-bold text-indigo-900 dark:text-indigo-100 mb-1">{t('settings.spotlight.search_title')}</h5>
              <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
-               Notlarınız, görevleriniz ve sayfalarınız arasında anında arama yapın.
+               {t('settings.spotlight.search_desc')}
              </p>
           </div>
           
@@ -710,9 +760,9 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
                <Zap className="w-4 h-4" />
              </div>
-             <h5 className="font-bold text-purple-900 dark:text-purple-100 mb-1">Hızlı Eylemler</h5>
+             <h5 className="font-bold text-purple-900 dark:text-purple-100 mb-1">{t('settings.spotlight.actions_title')}</h5>
              <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
-               Yeni not oluşturma veya tema değiştirme gibi işlemleri klavyeden yapın.
+               {t('settings.spotlight.actions_desc')}
              </p>
           </div>
 
@@ -720,9 +770,9 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
              <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
                <CheckSquare className="w-4 h-4" />
              </div>
-             <h5 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">Görev Yönetimi</h5>
+             <h5 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">{t('settings.spotlight.tasks_title')}</h5>
              <p className="text-xs text-emerald-700 dark:text-emerald-300 leading-relaxed">
-               Görevlerinizi arayın ve durumlarını değiştirmek için üzerine tıklayın.
+               {t('settings.spotlight.tasks_desc')}
              </p>
           </div>
        </div>
@@ -732,6 +782,7 @@ const SpotlightSection = ({ isEnabled, onToggle }: { isEnabled: boolean, onToggl
 
 // 4. Data Section
 const DataSection = () => {
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
@@ -786,7 +837,7 @@ const DataSection = () => {
       const datePart = new Date().toISOString().slice(0, 10);
       downloadJson(`fokus-backup-${datePart}.json`, backup);
     } catch (error: any) {
-      alert(error?.message || 'Yedek alınırken bir hata oluştu');
+      alert(error?.message || 'Error creating backup');
     } finally {
       setIsBusy(false);
     }
@@ -810,10 +861,10 @@ const DataSection = () => {
     const text = await file.text();
     const parsed = JSON.parse(text);
     const payload = extractData(parsed);
-    if (!payload) throw new Error('Geçersiz yedek dosyası');
+    if (!payload) throw new Error('Invalid backup file');
 
     const ok = confirm(
-      "Geri yükleme mevcut verilerinizi silmez; yedekten gelen verileri ekler. Devam edilsin mi?"
+      t('settings.data.restore_confirm')
     );
     if (!ok) return;
 
@@ -821,7 +872,7 @@ const DataSection = () => {
     const listIdMap = new Map<string, string>();
     for (const list of payload.taskLists) {
       const created = await taskListsAPI.create({
-        title: (list?.title ?? '').toString() || 'Liste',
+        title: (list?.title ?? '').toString() || 'List',
         description: list?.description ?? undefined,
         color: list?.color ?? undefined
       });
@@ -833,7 +884,7 @@ const DataSection = () => {
 
     const createNoteAndMaybeDelete = async (note: any, shouldBeDeleted: boolean) => {
       const created = await notesAPI.create({
-        title: (note?.title ?? '').toString() || 'Not',
+        title: (note?.title ?? '').toString() || 'Note',
         content: (note?.content ?? '').toString(),
         isPinned: Boolean(note?.isPinned ?? false)
       });
@@ -859,7 +910,7 @@ const DataSection = () => {
       const mappedLinkedNoteId = oldLinkedNoteId ? (noteIdMap.get(oldLinkedNoteId) ?? null) : null;
 
       const created = await tasksAPI.create({
-        title: (task?.title ?? '').toString() || 'Görev',
+        title: (task?.title ?? '').toString() || 'Task',
         description: task?.description ?? undefined,
         dueDate: safeToIso(task?.dueDate),
         listId: mappedListId ?? undefined,
@@ -920,7 +971,7 @@ const DataSection = () => {
       }
     }
 
-    alert('Geri yükleme tamamlandı. Sayfaları yenileyerek verileri görebilirsiniz.');
+    alert(t('settings.data.restore_success'));
   };
 
   const handleRestoreClick = () => {
@@ -943,7 +994,7 @@ const DataSection = () => {
             setIsBusy(true);
             await handleRestoreFile(file);
           } catch (error: any) {
-            alert(error?.message || 'Geri yükleme sırasında bir hata oluştu');
+            alert(error?.message || 'Error restoring data');
           } finally {
             setIsBusy(false);
           }
@@ -958,8 +1009,8 @@ const DataSection = () => {
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-white/20 transition-colors" />
           <Download className="w-10 h-10 text-white mb-6" />
-          <h3 className="text-2xl font-bold text-white mb-2">Yedekle</h3>
-          <p className="text-indigo-100">Tüm verilerinizi JSON formatında cihazınıza indirin.</p>
+          <h3 className="text-2xl font-bold text-white mb-2">{t('settings.data.backup_title')}</h3>
+          <p className="text-indigo-100">{t('settings.data.backup_desc')}</p>
         </button>
 
         <button
@@ -968,8 +1019,8 @@ const DataSection = () => {
           className="group relative overflow-hidden bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-8 text-left border-2 border-dashed border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <Upload className="w-10 h-10 text-zinc-400 group-hover:text-emerald-500 mb-6 transition-colors" />
-          <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Geri Yükle</h3>
-          <p className="text-zinc-500">Yedek dosyanızı sürükleyin veya seçin.</p>
+          <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">{t('settings.data.restore_title')}</h3>
+          <p className="text-zinc-500">{t('settings.data.restore_desc')}</p>
         </button>
       </div>
 
@@ -978,9 +1029,9 @@ const DataSection = () => {
           <Shield className="w-6 h-6" />
         </div>
         <div>
-          <h4 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">Uçtan Uca Yerel</h4>
+          <h4 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">{t('settings.data.local_title')}</h4>
           <p className="text-emerald-700 dark:text-emerald-300 text-sm leading-relaxed">
-            Verileriniz asla buluta gönderilmez. Cihazınızdaki veritabanında güvenle saklanır.
+            {t('settings.data.local_desc')}
           </p>
         </div>
       </div>
@@ -990,6 +1041,8 @@ const DataSection = () => {
 
 // 5. About Section (Restored - Colorful & Vibrant)
 const AboutSection = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
       {/* Hero Card */}
@@ -1004,7 +1057,7 @@ const AboutSection = () => {
           </div>
           <h2 className="text-4xl font-bold tracking-tight mb-3">FOCHUS</h2>
           <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
-            Minimalist, odaklanma dostu ve tamamen kişiselleştirilebilir üretkenlik asistanınız.
+            {t('settings.about.desc')}
           </p>
           <div className="mt-8">
              <span className="px-5 py-2 bg-white/10 rounded-full text-sm font-mono border border-white/10 backdrop-blur-md">v1.2.0</span>
@@ -1056,8 +1109,8 @@ const AboutSection = () => {
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.26.96-.27 1.98-.405 3-.405 1.02 0 2.04.135 3 .405 2.28-1.575 3.285-1.26 3.285-1.26.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.285 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               </div>
               <div>
-                <h4 className="font-bold text-lg">Kaynak Kod</h4>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">GitHub'da İncele</p>
+                <h4 className="font-bold text-lg">{t('settings.about.source_code')}</h4>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500">{t('settings.about.view_github')}</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
@@ -1075,7 +1128,7 @@ const AboutSection = () => {
                 <Laptop className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-lg">Web Sitesi</h4>
+                <h4 className="font-bold text-lg">{t('settings.about.website')}</h4>
                 <p className="text-xs text-indigo-200">fochus.app</p>
               </div>
             </div>
@@ -1107,6 +1160,7 @@ export const Settings: React.FC<SettingsProps> = ({
   isSpotlightEnabled,
   onToggleSpotlight
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
 
   const renderContent = () => {
@@ -1125,7 +1179,7 @@ export const Settings: React.FC<SettingsProps> = ({
       
       {/* Header Area - Fixed at top */}
       <div className="flex-none pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center z-10">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">Ayarlar</h1>
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-6">{t('settings.title')}</h1>
         
         {/* Segmented Control Navigation */}
         <div className="p-1 bg-white dark:bg-zinc-900 rounded-full shadow-lg shadow-zinc-200/50 dark:shadow-zinc-900/50 border border-zinc-100 dark:border-zinc-800 flex flex-wrap justify-center gap-1">
@@ -1133,31 +1187,31 @@ export const Settings: React.FC<SettingsProps> = ({
             active={activeTab === 'profile'} 
             onClick={() => setActiveTab('profile')} 
             icon={User} 
-            label="Profil" 
+            label={t('settings.tabs.profile')} 
           />
           <SettingsTab 
             active={activeTab === 'appearance'} 
             onClick={() => setActiveTab('appearance')} 
             icon={Palette} 
-            label="Görünüm" 
+            label={t('settings.tabs.appearance')} 
           />
           <SettingsTab 
             active={activeTab === 'spotlight'} 
             onClick={() => setActiveTab('spotlight')} 
             icon={Command} 
-            label="Spotlight" 
+            label={t('settings.tabs.spotlight')} 
           />
           <SettingsTab 
             active={activeTab === 'data'} 
             onClick={() => setActiveTab('data')} 
             icon={Database} 
-            label="Veri" 
+            label={t('settings.tabs.data')} 
           />
           <SettingsTab 
             active={activeTab === 'about'} 
             onClick={() => setActiveTab('about')} 
             icon={Info} 
-            label="Hakkında" 
+            label={t('settings.tabs.about')} 
           />
         </div>
       </div>

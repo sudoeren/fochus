@@ -21,6 +21,7 @@ import { cn } from '../lib/utils';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
 import { useTheme } from './ThemeProvider';
+import { useTranslation } from 'react-i18next';
 
 interface SpotlightProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   onOpenTaskModal,
   onOpenPomodoro
 }) => {
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,39 +72,39 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const quickActions: SpotlightItem[] = [
     {
       id: 'new-task',
-      label: 'Yeni Görev Oluştur',
-      detail: 'Hızlıca bir görev ekleyin',
+      label: t('spotlight.actions.new_task'),
+      detail: t('spotlight.actions.new_task_desc'),
       icon: Plus,
-      group: 'Hızlı Eylemler',
+      group: t('spotlight.groups.quick_actions'),
       action: () => { onOpenTaskModal(); onClose(); },
       shortcut: 'Ctrl+T',
       color: 'emerald'
     },
     {
       id: 'new-note',
-      label: 'Yeni Not Oluştur',
-      detail: 'Hızlıca bir not alın',
+      label: t('spotlight.actions.new_note'),
+      detail: t('spotlight.actions.new_note_desc'),
       icon: FileText,
-      group: 'Hızlı Eylemler',
+      group: t('spotlight.groups.quick_actions'),
       action: () => { onOpenNoteModal(); onClose(); },
       shortcut: 'Ctrl+N',
       color: 'amber'
     },
     {
       id: 'start-focus',
-      label: 'Odak Zamanlayıcısı',
-      detail: 'Pomodoro timer\'ı başlat',
+      label: t('spotlight.actions.focus_timer'),
+      detail: t('spotlight.actions.focus_timer_desc'),
       icon: Timer,
-      group: 'Hızlı Eylemler',
+      group: t('spotlight.groups.quick_actions'),
       action: () => { onOpenPomodoro?.(); onClose(); },
       color: 'red'
     },
     {
       id: 'toggle-theme',
-      label: theme === 'dark' ? 'Açık Moda Geç' : 'Koyu Moda Geç',
-      detail: 'Tema tercihini değiştir',
+      label: theme === 'dark' ? t('spotlight.actions.toggle_light') : t('spotlight.actions.toggle_dark'),
+      detail: t('spotlight.actions.toggle_theme_desc'),
       icon: theme === 'dark' ? Sun : Moon,
-      group: 'Hızlı Eylemler',
+      group: t('spotlight.groups.quick_actions'),
       action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); onClose(); },
       color: 'indigo'
     },
@@ -111,42 +113,42 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const navigationItems: SpotlightItem[] = [
     {
       id: 'go-dashboard',
-      label: 'Ana Sayfa',
-      detail: 'Genel bakış ve özet',
+      label: t('spotlight.pages.dashboard'),
+      detail: t('spotlight.pages.dashboard_desc'),
       icon: Layout,
-      group: 'Sayfalar',
+      group: t('spotlight.groups.pages'),
       action: () => { onNavigate('dashboard'); onClose(); }
     },
     {
       id: 'go-tasks',
-      label: 'Görevler',
-      detail: 'Tüm görevlerinizi yönetin',
+      label: t('spotlight.pages.tasks'),
+      detail: t('spotlight.pages.tasks_desc'),
       icon: CheckSquare,
-      group: 'Sayfalar',
+      group: t('spotlight.groups.pages'),
       action: () => { onNavigate('tasks'); onClose(); }
     },
     {
       id: 'go-notes',
-      label: 'Notlar',
-      detail: 'Notlarınızı görüntüleyin',
+      label: t('spotlight.pages.notes'),
+      detail: t('spotlight.pages.notes_desc'),
       icon: FileText,
-      group: 'Sayfalar',
+      group: t('spotlight.groups.pages'),
       action: () => { onNavigate('notes'); onClose(); }
     },
     {
       id: 'go-trash',
-      label: 'Çöp Kutusu',
-      detail: 'Silinen öğeler',
+      label: t('spotlight.pages.trash'),
+      detail: t('spotlight.pages.trash_desc'),
       icon: Trash2,
-      group: 'Sayfalar',
+      group: t('spotlight.groups.pages'),
       action: () => { onNavigate('trash'); onClose(); }
     },
     {
       id: 'go-settings',
-      label: 'Ayarlar',
-      detail: 'Uygulama tercihlerini düzenle',
+      label: t('spotlight.pages.settings'),
+      detail: t('spotlight.pages.settings_desc'),
       icon: Settings,
-      group: 'Sayfalar',
+      group: t('spotlight.groups.pages'),
       action: () => { onNavigate('settings'); onClose(); }
     },
   ];
@@ -155,14 +157,14 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const taskItems: SpotlightItem[] = tasks
     .filter(t => !t.isDeleted && t.title.toLowerCase().includes(query.toLowerCase()))
     .slice(0, 5)
-    .map(t => ({
-      id: `task-${t.id}`,
-      label: t.title,
-      detail: t.isCompleted ? '✓ Tamamlandı' : 'Bekliyor',
+    .map(task => ({
+      id: `task-${task.id}`,
+      label: task.title,
+      detail: task.isCompleted ? `✓ ${t('spotlight.details.completed')}` : t('spotlight.details.pending'),
       icon: CheckSquare,
-      group: 'Görevler',
+      group: t('spotlight.groups.tasks'),
       action: () => { onNavigate('tasks'); onClose(); },
-      color: t.isCompleted ? 'emerald' : 'zinc'
+      color: task.isCompleted ? 'emerald' : 'zinc'
     }));
 
   // Dynamic Content - Notes
@@ -171,10 +173,10 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     .slice(0, 5)
     .map(n => ({
       id: `note-${n.id}`,
-      label: n.title || 'Adsız Not',
-      detail: new Date(n.createdAt).toLocaleDateString('tr-TR'),
+      label: n.title || t('spotlight.details.untitled_note'),
+      detail: new Date(n.createdAt).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US'),
       icon: FileText,
-      group: 'Notlar',
+      group: t('spotlight.groups.notes'),
       action: () => { onNavigate('notes'); onClose(); },
       color: 'amber'
     }));
@@ -271,7 +273,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
             ref={inputRef}
             type="text"
             className="flex-1 bg-transparent border-none outline-none text-base text-zinc-900 dark:text-white placeholder-zinc-400 font-medium"
-            placeholder="Arama yapın veya komut yazın..."
+            placeholder={t('spotlight.placeholder')}
             value={query}
             onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             autoComplete="off"
@@ -357,8 +359,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({
               <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
                 <Search className="w-6 h-6 text-zinc-400" />
               </div>
-              <p className="text-zinc-500 dark:text-zinc-400 font-medium">Sonuç bulunamadı</p>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Farklı bir arama terimi deneyin</p>
+              <p className="text-zinc-500 dark:text-zinc-400 font-medium">{t('spotlight.no_results')}</p>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{t('spotlight.try_different')}</p>
             </div>
           )}
         </div>
@@ -369,15 +371,15 @@ export const Spotlight: React.FC<SpotlightProps> = ({
             <span className="flex items-center gap-1.5">
               <ArrowUp className="w-3 h-3" />
               <ArrowDown className="w-3 h-3" />
-              <span>Gezin</span>
+              <span>{t('spotlight.navigate')}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <CornerDownLeft className="w-3 h-3" />
-              <span>Seç</span>
+              <span>{t('spotlight.select')}</span>
             </span>
             <span className="flex items-center gap-1.5 ml-2 border-l border-zinc-200 dark:border-zinc-700 pl-4">
               <kbd className="font-mono bg-zinc-100 dark:bg-zinc-800 px-1.5 rounded text-[10px]">/</kbd>
-              <span>Aç</span>
+              <span>{t('spotlight.open')}</span>
             </span>
           </div>
           <div className="flex items-center gap-2">

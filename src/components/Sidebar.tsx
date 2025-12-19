@@ -23,6 +23,7 @@ import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   activeView: string;
@@ -33,13 +34,6 @@ interface SidebarProps {
   onOpenPomodoro: () => void;
 }
 
-const mainNav = [
-  { id: 'dashboard', label: 'Genel Bakış', icon: Home },
-  { id: 'tasks', label: 'Görevler', icon: CheckSquare },
-  { id: 'notes', label: 'Notlar', icon: FileText },
-  { id: 'timer', label: 'Fochus Timer', icon: Timer },
-];
-
 export const Sidebar: React.FC<SidebarProps> = ({
   activeView,
   onViewChange,
@@ -48,10 +42,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenTaskModal,
   onOpenPomodoro
 }) => {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const mainNav = [
+    { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
+    { id: 'tasks', label: t('sidebar.tasks'), icon: CheckSquare },
+    { id: 'notes', label: t('sidebar.notes'), icon: FileText },
+    { id: 'timer', label: t('sidebar.timer'), icon: Timer },
+  ];
 
   // Filter pending tasks for the widget (Show top 4)
   const currentTasks = tasks.filter(t => !t.isCompleted && !t.isDeleted).slice(0, 4);
@@ -106,10 +108,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={onOpenSpotlight}
               className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-2xl border border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 transition-all group text-zinc-500 dark:text-zinc-400"
-              title="Ara ( / )"
+              title={t('sidebar.quick_search') + " ( / )"}
             >
               <Search className="w-4 h-4 shrink-0 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
-              <span className="text-sm font-medium">Hızlı Ara...</span>
+              <span className="text-sm font-medium">{t('sidebar.quick_search')}</span>
               <kbd className="ml-auto text-[10px] bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded px-1.5 py-0.5 opacity-50">/</kbd>
             </button>
 
@@ -119,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="col-span-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl hover:opacity-90 transition-all shadow-md shadow-zinc-900/20 active:scale-95 group"
                 >
                   <Plus className="w-4 h-4" />
-                  <span className="text-xs font-bold">Yeni Görev</span>
+                  <span className="text-xs font-bold">{t('sidebar.new_task')}</span>
                 </button>
                 
                 <button
@@ -127,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="col-span-1 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl hover:opacity-90 transition-all shadow-md shadow-zinc-900/20 active:scale-95 group"
                 >
                    <FileText className="w-4 h-4" />
-                  <span className="text-xs font-bold">Yeni Not</span>
+                  <span className="text-xs font-bold">{t('sidebar.new_note')}</span>
                 </button>
             </div>
           </div>
@@ -176,7 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             >
               <Settings className={cn("w-5 h-5 shrink-0 transition-all", activeView === 'settings' ? "text-zinc-900 dark:text-white drop-shadow-md" : "text-zinc-400 group-hover:text-zinc-600")} />
-              <span>Ayarlar</span>
+              <span>{t('sidebar.settings')}</span>
 
             </button>
             <button
@@ -189,7 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             >
               <Trash2 className={cn("w-5 h-5 shrink-0 transition-all", activeView === 'trash' ? "text-zinc-900 dark:text-white drop-shadow-md" : "text-zinc-400 group-hover:text-zinc-600")} />
-              <span>Çöp Kutusu</span>
+              <span>{t('sidebar.trash')}</span>
 
             </button>
           </nav>
@@ -201,7 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5" /> Sırada
+                  <Briefcase className="w-3.5 h-3.5" /> {t('sidebar.up_next')}
                 </span>
                 <button onClick={() => onViewChange('tasks')} className="p-1 -mr-1 rounded-md text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -229,7 +231,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 <div className="flex flex-col items-center justify-center py-4 text-zinc-400 gap-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700">
                   <CheckCircle2 className="w-5 h-5 opacity-50" />
-                  <span className="text-xs font-medium">Her şey tamam!</span>
+                  <span className="text-xs font-medium">{t('sidebar.all_done')}</span>
                 </div>
               )}
             </div>
@@ -242,7 +244,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="relative z-10 flex flex-col items-center">
                 <div className="flex items-center gap-2 mb-3 opacity-80">
                   <Zap className={cn("w-3.5 h-3.5", isActive && "text-yellow-400 fill-yellow-400 animate-pulse")} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">FOCUS TIMER</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{t('sidebar.focus_timer')}</span>
                 </div>
                 
                 <div className="text-5xl font-mono font-bold tracking-tighter tabular-nums mb-5 text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-400">
@@ -255,7 +257,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className="flex-1 h-10 bg-white text-zinc-900 rounded-xl flex items-center justify-center font-bold text-sm hover:bg-zinc-200 transition-all active:scale-95 shadow-none"
                   >
                     {isActive ? <Pause className="w-4 h-4 fill-current mr-1" /> : <Play className="w-4 h-4 fill-current mr-1" />}
-                    {isActive ? "Duraklat" : "Başlat"}
+                    {isActive ? t('sidebar.pause') : t('sidebar.start')}
                   </button>
                   <button 
                     onClick={resetTimer}

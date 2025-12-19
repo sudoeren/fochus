@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Plus, List } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTaskLists } from '../hooks/useTaskLists';
+import { useTranslation } from 'react-i18next';
 
 interface TaskListModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
   onClose,
   editingList
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState(editingList?.title || '');
   const [color, setColor] = useState(editingList?.color || 'blue');
   const { addTaskList, updateTaskList } = useTaskLists();
@@ -59,7 +61,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
       <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl transform transition-all overflow-hidden border border-zinc-200 dark:border-zinc-800">
         <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center bg-zinc-50/50 dark:bg-zinc-900/50">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-            {editingList ? 'Listeyi Düzenle' : 'Yeni Liste'}
+            {editingList ? t('lists.edit_list') : t('lists.new_list')}
           </h2>
           <button
             onClick={onClose}
@@ -73,13 +75,13 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
           {/* Title Input */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Liste Adı
+              {t('lists.list_name')}
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Örn: Alışveriş, Projeler..."
+              placeholder={t('lists.name_placeholder')}
               className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               autoFocus
               required
@@ -89,7 +91,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
           {/* Color Selection */}
           <div className="space-y-3">
             <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Renk Teması
+              {t('lists.color_theme')}
             </label>
             <div className="flex flex-wrap gap-3">
               {colors.map((c) => (
@@ -113,7 +115,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
               className="w-full py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg shadow-zinc-900/10"
             >
               <Plus size={20} />
-              {editingList ? 'Değişiklikleri Kaydet' : 'Listeyi Oluştur'}
+              {editingList ? t('common.save_changes') : t('lists.create_list')}
             </button>
           </div>
         </form>

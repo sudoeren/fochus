@@ -10,10 +10,12 @@ import {
   Monitor, 
   ArrowRight,
   CheckSquare,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Languages
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTheme } from '../components/ThemeProvider';
+import { useTranslation } from 'react-i18next';
 
 interface OnboardingPageProps {
   onComplete: () => void;
@@ -26,15 +28,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   onBackgroundChange,
   onGlobalBgChange
 }) => {
+  const { t, i18n } = useTranslation();
   const { setTheme } = useTheme();
   const [step, setStep] = useState(1);
   const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark' | 'system'>('dark');
   const [isGlobalBg, setIsGlobalBg] = useState(false);
 
   const steps = [
-    { id: 1, title: 'Hoş Geldin', icon: Sparkles },
-    { id: 2, title: 'Spotlight', icon: Search },
-    { id: 3, title: 'Görünüm', icon: Palette },
+    { id: 1, title: t('onboarding.welcome'), icon: Sparkles },
+    { id: 2, title: t('onboarding.spotlight'), icon: Search },
+    { id: 3, title: t('onboarding.appearance'), icon: Palette },
   ];
 
   const handleNext = () => {
@@ -54,6 +57,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   const applyTheme = (theme: 'light' | 'dark' | 'system') => {
     setSelectedTheme(theme);
     setTheme(theme);
+  };
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
   };
 
   const finish = () => {
@@ -117,25 +124,24 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             {step === 1 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-4">
-                  <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                    Üretkenliğinizi <br/>
-                    Yeniden Keşfedin
+                  <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white whitespace-pre-line">
+                    {t('onboarding.title_1')}
                   </h1>
                   <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    Notlar, görevler ve odaklanma araçları tek bir yerde. Minimalist tasarım, maksimum verim.
+                    {t('onboarding.desc_1')}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
                     <CheckSquare className="w-8 h-8 text-zinc-900 dark:text-white mb-4" />
-                    <div className="font-bold mb-1">Görevler</div>
-                    <div className="text-sm text-zinc-500">Projelerinizi yönetin</div>
+                    <div className="font-bold mb-1">{t('onboarding.tasks')}</div>
+                    <div className="text-sm text-zinc-500">{t('onboarding.tasks_desc')}</div>
                   </div>
                   <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
                     <Sparkles className="w-8 h-8 text-zinc-900 dark:text-white mb-4" />
-                    <div className="font-bold mb-1">Notlar</div>
-                    <div className="text-sm text-zinc-500">Fikirlerinizi yakalayın</div>
+                    <div className="font-bold mb-1">{t('onboarding.notes')}</div>
+                    <div className="text-sm text-zinc-500">{t('onboarding.notes_desc')}</div>
                   </div>
                 </div>
               </div>
@@ -146,10 +152,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-4">
                   <h1 className="text-3xl font-bold tracking-tight">
-                    Her Şey Elinizin Altında
+                    {t('onboarding.title_2')}
                   </h1>
                   <p className="text-lg text-zinc-500 dark:text-zinc-400">
-                    Spotlight ile uygulamanın herhangi bir yerinden arama yapın veya yeni içerik oluşturun.
+                    {t('onboarding.desc_2')}
                   </p>
                 </div>
 
@@ -160,7 +166,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                     </kbd>
                   </div>
                   <p className="text-zinc-600 dark:text-zinc-300 font-medium">
-                    Sadece <span className="font-bold text-zinc-900 dark:text-white">/</span> tuşuna basarak Spotlight'ı açın.
+                    {/* Interpolation for the key hint */}
+                    <span dangerouslySetInnerHTML={{ 
+                      __html: t('onboarding.spotlight_hint').replace(
+                        '<1>/</1>', 
+                        '<span class="font-bold text-zinc-900 dark:text-white">/</span>'
+                      ) 
+                    }} />
                   </p>
                 </div>
               </div>
@@ -171,19 +183,51 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-4">
                   <h1 className="text-3xl font-bold tracking-tight">
-                    Görünüm
+                    {t('onboarding.title_3')}
                   </h1>
                   <p className="text-lg text-zinc-500 dark:text-zinc-400">
-                    Çalışma ortamınızı kişiselleştirin.
+                    {t('onboarding.desc_3')}
                   </p>
                 </div>
 
                 <div className="space-y-4">
+                  {/* Language Selection */}
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3 text-sm font-medium text-zinc-900 dark:text-white">
+                      <Languages className="w-4 h-4" />
+                      {t('onboarding.language')}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => changeLanguage('tr')}
+                        className={cn(
+                          'p-3 rounded-xl border text-sm font-medium transition-all',
+                          i18n.language === 'tr'
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent'
+                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                        )}
+                      >
+                        Türkçe
+                      </button>
+                      <button
+                        onClick={() => changeLanguage('en')}
+                        className={cn(
+                          'p-3 rounded-xl border text-sm font-medium transition-all',
+                          i18n.language === 'en'
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent'
+                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                        )}
+                      >
+                        English
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-3">
                     {[
-                      { id: 'light', label: 'Açık', icon: Sun },
-                      { id: 'dark', label: 'Koyu', icon: Moon },
-                      { id: 'system', label: 'Sistem', icon: Monitor }
+                      { id: 'light', label: t('onboarding.light'), icon: Sun },
+                      { id: 'dark', label: t('onboarding.dark'), icon: Moon },
+                      { id: 'system', label: t('onboarding.system'), icon: Monitor }
                     ].map((t) => (
                       <button
                         key={t.id}
@@ -215,8 +259,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                         <ImageIcon className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
                       </div>
                       <div>
-                        <div className="font-bold text-sm text-zinc-900 dark:text-white">Genel Arka Plan</div>
-                        <div className="text-xs text-zinc-500">Ana sayfa görselini tüm sayfalarda kullan</div>
+                        <div className="font-bold text-sm text-zinc-900 dark:text-white">{t('onboarding.global_bg')}</div>
+                        <div className="text-xs text-zinc-500">{t('onboarding.global_bg_desc')}</div>
                       </div>
                     </div>
                     <div className={cn(
@@ -245,14 +289,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
               )}
             >
               <ChevronLeft className="w-4 h-4" />
-              Geri
+              {t('onboarding.back')}
             </button>
 
             <button
               onClick={handleNext}
               className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:opacity-90 transition-all"
             >
-              {step === 3 ? 'Başla' : 'Devam Et'}
+              {step === 3 ? t('onboarding.start') : t('onboarding.continue')}
               {step !== 3 && <ArrowRight className="w-4 h-4" />}
             </button>
           </div>

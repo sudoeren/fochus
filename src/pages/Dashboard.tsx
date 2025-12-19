@@ -17,7 +17,7 @@ import { useNotes } from '../hooks/useNotes';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { authAPI, pomodoroAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
-import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardProps {
   onNavigate: (view: string) => void;
@@ -40,6 +40,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   bgImage,
   onBgChange
 }) => {
+  const { t } = useTranslation();
   const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
@@ -52,10 +53,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   
   const getGreeting = () => {
     const h = currentTime.getHours();
-    if (h < 6) return "Gece Mesaisi";
-    if (h < 12) return "Günaydın";
-    if (h < 18) return "İyi Çalışmalar";
-    return "İyi Akşamlar";
+    if (h < 6) return t('dashboard.night_shift');
+    if (h < 12) return t('dashboard.good_morning');
+    if (h < 18) return t('dashboard.good_afternoon');
+    return t('dashboard.good_evening');
   };
 
   useEffect(() => {
@@ -177,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xl font-semibold text-zinc-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        Ne arıyorsunuz?
+                        {t('dashboard.search_placeholder')}
                       </span>
                     </div>
                   </div>
@@ -206,7 +207,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         <div className="p-2.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl text-indigo-700 dark:text-indigo-300">
                            <Zap className="w-5 h-5" />
                         </div>
-                        <span className="font-bold text-zinc-800 dark:text-zinc-100">Odak Zamanı</span>
+                        <span className="font-bold text-zinc-800 dark:text-zinc-100">{t('dashboard.focus_time')}</span>
                       </div>
 
                       <div className="flex flex-col">
@@ -215,10 +216,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                          </span>
                          <span className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 font-medium">
                            {isActive
-                             ? "Süre işliyor..."
+                             ? t('dashboard.time_running')
                              : weeklyFocusSeconds > 0
-                               ? `Bu hafta: ${formatFocusDuration(weeklyFocusSeconds)}`
-                               : "Hazır mısın?"}
+                               ? `${t('dashboard.this_week')}: ${formatFocusDuration(weeklyFocusSeconds)}`
+                               : t('dashboard.ready')}
                          </span>
                       </div>
                    </div>
@@ -228,7 +229,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         className="w-full mt-6 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
                       >
                         {isActive ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
-                        {isActive ? "Duraklat" : "Başlat"}
+                        {isActive ? t('sidebar.pause') : t('sidebar.start')}
                    </button>
                 </div>
 
@@ -239,7 +240,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                          <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl text-emerald-700 dark:text-emerald-300">
                             <CheckSquare className="w-5 h-5" />
                          </div>
-                         <span className="font-bold text-zinc-800 dark:text-zinc-100">Görevler</span>
+                         <span className="font-bold text-zinc-800 dark:text-zinc-100">{t('dashboard.tasks')}</span>
                       </div>
                       <button onClick={onOpenTaskModal} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
                         <Plus className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
@@ -269,15 +270,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-2 opacity-70">
                           <CheckCircle2 className="w-8 h-8" />
-                          <span className="text-sm">Her şey tamam!</span>
+                          <span className="text-sm">{t('dashboard.no_tasks')}</span>
                         </div>
                       )}
                    </div>
                    
                    <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                      <span>{tasks.filter(t => !t.isCompleted && !t.isDeleted).length} bekleyen</span>
+                      <span>{tasks.filter(t => !t.isCompleted && !t.isDeleted).length} {t('dashboard.pending')}</span>
                       <button onClick={() => onNavigate('tasks')} className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                        Tümü <ArrowRight className="w-3 h-3" />
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
                       </button>
                    </div>
                 </div>
@@ -289,7 +290,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                          <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 rounded-xl text-amber-700 dark:text-amber-300">
                             <FileText className="w-5 h-5" />
                          </div>
-                         <span className="font-bold text-zinc-800 dark:text-zinc-100">Notlar</span>
+                         <span className="font-bold text-zinc-800 dark:text-zinc-100">{t('dashboard.notes')}</span>
                       </div>
                       <button onClick={onOpenNoteModal} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors">
                         <Plus className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
@@ -306,10 +307,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               onClick={() => onNavigate('notes')} // Ideally open specific note
                             >
                               <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate mb-1 group-hover/item:text-amber-700 dark:group-hover/item:text-amber-400 transition-colors">
-                                {note.title || "Adsız Not"}
+                                {note.title || t('dashboard.untitled_note')}
                               </h4>
                               <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                                {note.content.replace(/<[^>]*>?/gm, '') || "İçerik yok..."}
+                                {note.content.replace(/<[^>]*>?/gm, '') || t('dashboard.no_content')}
                               </p>
                             </li>
                           ))}
@@ -317,15 +318,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center text-zinc-400 gap-2 opacity-70">
                           <FileText className="w-8 h-8" />
-                          <span className="text-sm">Henüz not yok</span>
+                          <span className="text-sm">{t('dashboard.no_notes')}</span>
                         </div>
                       )}
                    </div>
 
                    <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                      <span>{notes.length} kayıt</span>
+                      <span>{notes.length} {t('dashboard.records')}</span>
                       <button onClick={() => onNavigate('notes')} className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                        Tümü <ArrowRight className="w-3 h-3" />
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
                       </button>
                    </div>
                 </div>
