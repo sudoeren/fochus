@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface NotesProps {
   onOpenNoteModal: () => void;
@@ -16,6 +17,7 @@ interface NotesProps {
 }
 
 export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => {
+  const { t } = useTranslation();
   const { notes, deleteNote, pinNote, loading } = useNotes();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -51,7 +53,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
         <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-words font-medium line-clamp-[8]">
           {note.content}
         </p>
-        {!note.content && <p className="text-sm text-zinc-400 italic">İçerik yok...</p>}
+        {!note.content && <p className="text-sm text-zinc-400 italic">{t('notes.no_content')}</p>}
       </div>
 
       {/* Footer */}
@@ -69,14 +71,14 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
               "p-2 rounded-xl transition-colors",
               note.isPinned ? "text-amber-500 bg-amber-50 dark:bg-amber-900/20" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
             )}
-            title={note.isPinned ? "Sabitlemeyi Kaldır" : "Sabitle"}
+            title={note.isPinned ? t('notes.unpin') : t('notes.pin')}
           >
             <Pin className="w-4 h-4" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); if (confirm('Not silinsin mi?')) deleteNote(note.id); }}
+            onClick={(e) => { e.stopPropagation(); if (confirm(t('notes.confirm_delete'))) deleteNote(note.id); }}
             className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-            title="Sil"
+            title={t('common.delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -99,8 +101,8 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       <div className="flex-none p-8 lg:p-10 pb-4">
         <div className="flex flex-col gap-6">
           <div>
-            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Notlar</h1>
-            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Düşüncelerini ve fikirlerini kaydet.</p>
+            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('notes.title')}</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('notes.subtitle')}</p>
           </div>
 
           {/* Search Bar */}
@@ -108,7 +110,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             <input
               type="text"
-              placeholder="Notlarda ara..."
+              placeholder={t('notes.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
@@ -127,10 +129,10 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
                 <FileText className="w-10 h-10 opacity-30" />
               </div>
               <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">
-                {searchQuery ? "Sonuç bulunamadı" : "Not defterin boş"}
+                {searchQuery ? t('notes.no_results') : t('notes.empty_title')}
               </h3>
               <p className="text-zinc-500 dark:text-zinc-500">
-                {searchQuery ? "Farklı bir arama yapmayı dene." : "Harika fikirlerini kaydetmeye başla."}
+                {searchQuery ? t('notes.no_results_desc') : t('notes.empty_desc')}
               </p>
             </div>
           )}
@@ -139,7 +141,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
             <section>
               <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 mb-6">
                 <Pin className="w-4 h-4" />
-                Sabitlenenler
+                {t('notes.pinned')}
               </div>
               <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
                 {pinnedNotes.map(note => <NoteCard key={note.id} note={note} />)}
@@ -152,7 +154,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
               {pinnedNotes.length > 0 && (
                 <div className="flex items-center gap-2 text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider pl-1 mb-6 border-t border-zinc-200/50 dark:border-zinc-800/50 pt-8">
                   <FileText className="w-4 h-4" />
-                  Diğerleri
+                  {t('notes.others')}
                 </div>
               )}
               <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
@@ -171,7 +173,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
         <div className="bg-white/20 dark:bg-black/10 p-1 rounded-full">
           <Plus className="w-5 h-5" />
         </div>
-        Yeni Not
+        {t('notes.new_note')}
       </button>
     </div>
   );

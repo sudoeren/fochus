@@ -4,6 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
+import { useTranslation } from 'react-i18next';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -11,6 +12,7 @@ interface TasksNewProps {
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
+  const { t } = useTranslation();
   const { tasks, loading, deleteTask, toggleTask, loadTasks } = useTasks();
   const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList, refetch: refetchTaskLists } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
@@ -26,11 +28,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     const diffTime = taskDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'Bugün';
-    if (diffDays === 1) return 'Yarın';
-    if (diffDays === -1) return 'Dün';
-    if (diffDays < -1) return `${Math.abs(diffDays)} gün önce`;
-    if (diffDays > 1) return `${diffDays} gün sonra`;
+    if (diffDays === 0) return t('tasks_page.today');
+    if (diffDays === 1) return t('tasks_page.tomorrow');
+    if (diffDays === -1) return t('tasks_page.yesterday');
+    if (diffDays < -1) return t('tasks_page.days_ago', { count: Math.abs(diffDays) });
+    if (diffDays > 1) return t('tasks_page.days_later', { count: diffDays });
 
     return taskDate.toLocaleDateString('tr-TR');
   };
@@ -40,13 +42,13 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
   };
 
   const handleDeleteTask = async (id: string) => {
-    if (confirm('Bu görevi silmek istediğinizden emin misiniz?')) {
+    if (confirm(t('tasks_page.confirm_delete'))) {
       await deleteTask(id);
     }
   };
 
   const handleDeleteList = async (listId: string) => {
-    if (confirm('Bu listeyi silmek istediğinizden emin misiniz? İçindeki görevler "Kategorisiz" bölümüne taşınacak.')) {
+    if (confirm(t('tasks_page.confirm_delete_list'))) {
       await deleteTaskList(listId);
       setActiveListMenu(null);
     }
@@ -135,8 +137,8 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
         <div className="flex flex-col gap-6">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Görevlerim</h1>
-              <p className="text-zinc-500 dark:text-zinc-400 mt-1">Projelerini ve işlerini listeler halinde yönet.</p>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('tasks_page.my_tasks')}</h1>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('tasks_page.subtitle')}</p>
             </div>
 
             {/* View Toggle & Actions */}
@@ -150,7 +152,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                     }`}
                 >
                   <Circle className="w-4 h-4" />
-                  <span>Mevcut</span>
+                  <span>{t('tasks_page.active')}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('completed')}
@@ -160,7 +162,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                     }`}
                 >
                   <CheckCircle className="w-4 h-4" />
-                  <span>Tamamlanan</span>
+                  <span>{t('tasks_page.completed')}</span>
                 </button>
               </div>
 
@@ -169,7 +171,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                 className="flex items-center gap-2 px-5 py-3 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white rounded-xl font-medium transition-all"
               >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Liste Ekle</span>
+                <span className="hidden sm:inline">{t('tasks_page.add_list')}</span>
               </button>
             </div>
           </div>
@@ -179,7 +181,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             <input
               type="text"
-              placeholder="Görevlerde ara..."
+              placeholder={t('tasks_page.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
@@ -198,7 +200,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
               <div className="p-5 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
-                  <h3 className="font-bold text-zinc-700 dark:text-zinc-300">Kategorisiz</h3>
+                  <h3 className="font-bold text-zinc-700 dark:text-zinc-300">{t('tasks_page.uncategorized')}</h3>
                   <span className="bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md text-xs font-bold">
                     {uncategorizedTasks.length}
                   </span>
@@ -304,7 +306,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
                         <Circle className="w-6 h-6 text-zinc-400/50" />
                       </div>
-                      <p className="text-xs font-medium text-zinc-400/50">Boş liste</p>
+                      <p className="text-xs font-medium text-zinc-400/50">{t('tasks_page.empty_list')}</p>
                     </div>
                   </div>
                 )}
@@ -334,10 +336,10 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                       {activeListMenu === list.id && (
                         <div className="absolute right-0 top-8 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl shadow-xl z-50 py-1.5 w-36 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                           <button onClick={() => handleEditList(list)} className="w-full text-left px-4 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
-                            Listeyi Düzenle
+                            {t('tasks_page.edit_list')}
                           </button>
                           <button onClick={() => handleDeleteList(list.id)} className="w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                            Listeyi Sil
+                            {t('tasks_page.delete_list')}
                           </button>
                         </div>
                       )}
@@ -444,7 +446,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                           <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
                             <Circle className="w-6 h-6 text-zinc-400/50" />
                           </div>
-                          <p className="text-xs font-medium text-zinc-400/50">Bu listede görev yok</p>
+                          <p className="text-xs font-medium text-zinc-400/50">{t('tasks_page.no_tasks_in_list')}</p>
                         </div>
                       </div>
                     )}
@@ -460,7 +462,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                 className="w-full h-16 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all flex items-center justify-center text-zinc-400 hover:text-zinc-600 dark:text-zinc-600 dark:hover:text-zinc-400 gap-2 group"
               >
                 <Plus className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                <span className="font-bold">Yeni Liste Ekle</span>
+                <span className="font-bold">{t('tasks_page.new_list')}</span>
               </button>
             </div>
 
@@ -478,7 +480,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
         <div className="bg-white/20 dark:bg-black/10 p-1 rounded-full">
           <Plus className="w-5 h-5" />
         </div>
-        Yeni Görev
+        {t('tasks_page.new_task')}
       </button>
 
       <TaskListModal

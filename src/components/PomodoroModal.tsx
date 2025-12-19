@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Play, Pause, RotateCcw, Coffee, Zap, Brain, Settings, ChevronLeft, Minus, Plus, RotateCw } from 'lucide-react';
 import { usePomodoro, TimerMode } from '../hooks/usePomodoro';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface PomodoroModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface PomodoroModalProps {
 }
 
 export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const { 
     mode, 
     timeLeft, 
@@ -77,7 +79,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">Zamanlayıcı Ayarları</h2>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white">{t('pomodoro.settings_title')}</h2>
             <button 
               onClick={onClose}
               className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
@@ -89,7 +91,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           <div className="p-6 space-y-6">
             {/* Duration Settings */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Süreler (dakika)</h3>
+              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('pomodoro.durations')}</h3>
               
               {/* Work Duration */}
               <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl">
@@ -97,7 +99,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                   <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
                     <Zap className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Odak Süresi</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.focus_duration')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -122,7 +124,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
                     <Coffee className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Kısa Mola</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.short_break')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -147,7 +149,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
                     <Brain className="w-5 h-5" />
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Uzun Mola</span>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.long_break')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -169,12 +171,12 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
 
             {/* Auto-start Settings */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Otomasyon</h3>
+              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{t('pomodoro.automation')}</h3>
               
               <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
                 <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Molaları Otomatik Başlat</span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Odak bittikten sonra mola otomatik başlar</p>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.auto_start_breaks')}</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t('pomodoro.auto_start_breaks_desc')}</p>
                 </div>
                 <button
                   onClick={() => updateSettings({ autoStartBreaks: !settings.autoStartBreaks })}
@@ -192,8 +194,8 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
 
               <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
                 <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Odağı Otomatik Başlat</span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Mola bittikten sonra odak otomatik başlar</p>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.auto_start_work')}</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t('pomodoro.auto_start_work_desc')}</p>
                 </div>
                 <button
                   onClick={() => updateSettings({ autoStartWork: !settings.autoStartWork })}
@@ -212,8 +214,8 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
               {/* Long Break Interval */}
               <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
                 <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">Uzun Mola Aralığı</span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Kaç odak sonrası uzun mola</p>
+                  <span className="font-medium text-zinc-900 dark:text-white">{t('pomodoro.long_break_interval')}</span>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{t('pomodoro.long_break_interval_desc')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
@@ -250,7 +252,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           <button 
             onClick={() => setShowSettings(true)}
             className="p-2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-            title="Ayarlar"
+            title={t('common.settings')}
           >
             <Settings className="w-5 h-5" />
           </button>
@@ -267,13 +269,13 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           {/* Cycle Counter */}
           <div className="mb-4 flex items-center gap-2">
             <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-              Tamamlanan: {cycles} odak
+              {t('pomodoro.completed_cycles', { count: cycles })}
             </span>
             {cycles > 0 && (
               <button 
                 onClick={resetCycles}
                 className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                title="Sıfırla"
+                title={t('common.reset')}
               >
                 <RotateCw className="w-3 h-3" />
               </button>
@@ -318,7 +320,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                 {formatTime(timeLeft)}
               </div>
               <div className={`text-xs font-bold uppercase tracking-[0.2em] ${getThemeColor()} opacity-80`}>
-                {mode === 'work' ? 'ODAKLAN' : mode === 'shortBreak' ? 'KISA MOLA' : 'UZUN MOLA'}
+                {mode === 'work' ? t('pomodoro.focus') : mode === 'shortBreak' ? t('pomodoro.short') : t('pomodoro.long')}
               </div>
             </div>
           </div>
@@ -328,7 +330,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
             <button
               onClick={resetTimer}
               className="w-14 h-14 flex items-center justify-center rounded-full text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
-              title="Sıfırla"
+              title={t('common.reset')}
             >
               <RotateCcw className="w-6 h-6" />
             </button>
@@ -353,9 +355,9 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
           {/* Mode Segmented Control */}
           <div className="flex p-1.5 bg-gray-100 dark:bg-zinc-800/80 rounded-2xl w-full">
             {[
-              { id: 'work', label: 'Odak', icon: Zap },
-              { id: 'shortBreak', label: 'Kısa', icon: Coffee },
-              { id: 'longBreak', label: 'Uzun', icon: Brain },
+              { id: 'work', label: t('pomodoro.mode_focus'), icon: Zap },
+              { id: 'shortBreak', label: t('pomodoro.mode_short'), icon: Coffee },
+              { id: 'longBreak', label: t('pomodoro.mode_long'), icon: Brain },
             ].map((m) => {
               const Icon = m.icon;
               const isSelected = mode === m.id;

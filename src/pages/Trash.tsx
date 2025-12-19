@@ -4,6 +4,7 @@ import { notesAPI, tasksAPI } from '../services/api';
 import { EmptyState } from '../components/EmptyState';
 import { cn } from '../lib/utils';
 import { deserializeApiDates } from '../utils/apiTransforms';
+import { useTranslation } from 'react-i18next';
 
 interface DeletedItem {
   id: string;
@@ -15,6 +16,7 @@ interface DeletedItem {
 }
 
 export const Trash: React.FC = () => {
+  const { t } = useTranslation();
   const [deletedItems, setDeletedItems] = useState<DeletedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,7 +78,7 @@ export const Trash: React.FC = () => {
   };
 
   const permanentlyDelete = async (item: DeletedItem) => {
-    if (!confirm('Bu öğe kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?')) {
+    if (!confirm(t('trash_page.confirm_item_delete'))) {
       return;
     }
 
@@ -94,7 +96,7 @@ export const Trash: React.FC = () => {
   };
 
   const clearAllTrash = async () => {
-    if (!confirm('Çöp kutusu tamamen temizlenecek. Tüm öğeler kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?')) {
+    if (!confirm(t('trash_page.confirm_clear_all'))) {
       return;
     }
 
@@ -134,8 +136,8 @@ export const Trash: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">Çöp Kutusu</h1>
-              <p className="text-zinc-500 dark:text-zinc-400 mt-1">Silinen öğeleri incele veya geri yükle.</p>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('trash_page.title')}</h1>
+              <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('trash_page.subtitle')}</p>
             </div>
 
             {deletedItems.length > 0 && (
@@ -144,7 +146,7 @@ export const Trash: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl font-medium transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                <span>Kutuyu Boşalt</span>
+                <span>{t('trash_page.empty_trash')}</span>
               </button>
             )}
           </div>
@@ -154,7 +156,7 @@ export const Trash: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             <input
               type="text"
-              placeholder="Silinenlerde ara..."
+              placeholder={t('trash_page.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3.5 bg-zinc-100 dark:bg-zinc-900/50 border-none rounded-2xl focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all font-medium"
@@ -191,7 +193,7 @@ export const Trash: React.FC = () => {
                 </h3>
 
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-6 flex-1">
-                  {item.type === 'note' ? item.content : item.description || 'Açıklama yok'}
+                  {item.type === 'note' ? item.content : item.description || t('trash_page.no_description')}
                 </p>
 
                 {/* Actions */}
@@ -201,12 +203,12 @@ export const Trash: React.FC = () => {
                     className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs font-bold transition-colors"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    Geri Yükle
+                    {t('trash_page.restore')}
                   </button>
                   <button
                     onClick={() => permanentlyDelete(item)}
                     className="p-2 rounded-xl bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
-                    title="Kalıcı Sil"
+                    title={t('trash_page.permanent_delete')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -220,10 +222,10 @@ export const Trash: React.FC = () => {
               <Trash2 className="w-10 h-10 opacity-30" />
             </div>
             <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-1">
-              {searchTerm ? "Sonuç bulunamadı" : "Çöp kutusu boş"}
+              {searchTerm ? t('trash_page.no_results') : t('trash_page.empty_title')}
             </h3>
             <p className="text-zinc-500 dark:text-zinc-500">
-              {searchTerm ? "Farklı bir arama yapmayı dene." : "Geri dönüşüm kutusu tertemiz!"}
+              {searchTerm ? t('trash_page.no_results_desc') : t('trash_page.empty_desc')}
             </p>
           </div>
         )}
