@@ -35,11 +35,11 @@ export const SpotlightTaskModal: React.FC<SpotlightTaskModalProps> = ({ isOpen, 
 
     try {
       setLoading(true);
-      
+
       const newTask = await addTask({
         title: title.trim(),
         description: description.trim() || undefined,
-        dueDate: dueDate ? new Date(dueDate) : undefined,
+        dueDate: dueDate ? new Date(dueDate) : undefined
       });
 
       // Eğer liste seçildiyse, görevi o listeye taşı
@@ -64,9 +64,21 @@ export const SpotlightTaskModal: React.FC<SpotlightTaskModalProps> = ({ isOpen, 
   };
 
   const priorityOptions = [
-    { value: 'low', label: 'Düşük', color: 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400' },
-    { value: 'medium', label: 'Orta', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400' },
-    { value: 'high', label: 'Yüksek', color: 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400' }
+    {
+      value: 'low',
+      label: 'Düşük',
+      color: 'text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400'
+    },
+    {
+      value: 'medium',
+      label: 'Orta',
+      color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400'
+    },
+    {
+      value: 'high',
+      label: 'Yüksek',
+      color: 'text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400'
+    }
   ];
 
   if (!isOpen) return null;
@@ -160,7 +172,7 @@ export const SpotlightTaskModal: React.FC<SpotlightTaskModalProps> = ({ isOpen, 
                 onChange={(e) => setPriority(e.target.value as any)}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               >
-                {priorityOptions.map(option => (
+                {priorityOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -183,7 +195,7 @@ export const SpotlightTaskModal: React.FC<SpotlightTaskModalProps> = ({ isOpen, 
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
                   <option value="">Kategorisiz</option>
-                  {taskLists.map(list => (
+                  {taskLists.map((list) => (
                     <option key={list.id} value={list.id}>
                       {list.title}
                     </option>
@@ -196,9 +208,12 @@ export const SpotlightTaskModal: React.FC<SpotlightTaskModalProps> = ({ isOpen, 
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">Ctrl+Enter</kbd> ile kaydet
+              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">
+                Ctrl+Enter
+              </kbd>{' '}
+              ile kaydet
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button
                 type="button"

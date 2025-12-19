@@ -10,11 +10,7 @@ interface TaskListModalProps {
   editingList?: any; // Replace with proper type
 }
 
-export const TaskListModal: React.FC<TaskListModalProps> = ({
-  isOpen,
-  onClose,
-  editingList
-}) => {
+export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState(editingList?.title || '');
   const [color, setColor] = useState(editingList?.color || 'blue');
@@ -48,7 +44,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
     { id: 'purple', class: 'bg-purple-500' },
     { id: 'pink', class: 'bg-pink-500' },
     { id: 'indigo', class: 'bg-indigo-500' },
-    { id: 'orange', class: 'bg-orange-500' },
+    { id: 'orange', class: 'bg-orange-500' }
   ];
 
   return (
@@ -100,9 +96,11 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({
                   type="button"
                   onClick={() => setColor(c.id)}
                   className={cn(
-                    "w-10 h-10 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900",
+                    'w-10 h-10 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
                     c.class,
-                    color === c.id ? "ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-900 scale-110" : ""
+                    color === c.id
+                      ? 'ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-900 scale-110'
+                      : ''
                   )}
                 />
               ))}

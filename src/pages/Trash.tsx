@@ -71,7 +71,7 @@ export const Trash: React.FC = () => {
         await tasksAPI.restore(item.id);
       }
 
-      setDeletedItems(prev => prev.filter(i => i.id !== item.id));
+      setDeletedItems((prev) => prev.filter((i) => i.id !== item.id));
     } catch (error) {
       console.error('Error restoring item:', error);
     }
@@ -89,7 +89,7 @@ export const Trash: React.FC = () => {
         await tasksAPI.permanentDelete(item.id);
       }
 
-      setDeletedItems(prev => prev.filter(i => i.id !== item.id));
+      setDeletedItems((prev) => prev.filter((i) => i.id !== item.id));
     } catch (error) {
       console.error('Error permanently deleting item:', error);
     }
@@ -101,13 +101,17 @@ export const Trash: React.FC = () => {
     }
 
     try {
-      await Promise.all(deletedItems.filter(item => item.type === 'note').map(item =>
-        notesAPI.permanentDelete(item.id)
-      ));
+      await Promise.all(
+        deletedItems
+          .filter((item) => item.type === 'note')
+          .map((item) => notesAPI.permanentDelete(item.id))
+      );
 
-      await Promise.all(deletedItems.filter(item => item.type === 'task').map(item =>
-        tasksAPI.permanentDelete(item.id)
-      ));
+      await Promise.all(
+        deletedItems
+          .filter((item) => item.type === 'task')
+          .map((item) => tasksAPI.permanentDelete(item.id))
+      );
 
       setDeletedItems([]);
     } catch (error) {
@@ -115,10 +119,11 @@ export const Trash: React.FC = () => {
     }
   };
 
-  const filteredItems = deletedItems.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = deletedItems.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -136,7 +141,9 @@ export const Trash: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('trash_page.title')}</h1>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                {t('trash_page.title')}
+              </h1>
               <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('trash_page.subtitle')}</p>
             </div>
 
@@ -175,13 +182,19 @@ export const Trash: React.FC = () => {
                 className="group relative flex flex-col bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={cn(
-                    "p-2 rounded-xl",
-                    item.type === 'note'
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
-                      : "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400"
-                  )}>
-                    {item.type === 'note' ? <FileText className="w-4 h-4" /> : <CheckSquare className="w-4 h-4" />}
+                  <div
+                    className={cn(
+                      'p-2 rounded-xl',
+                      item.type === 'note'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                        : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+                    )}
+                  >
+                    {item.type === 'note' ? (
+                      <FileText className="w-4 h-4" />
+                    ) : (
+                      <CheckSquare className="w-4 h-4" />
+                    )}
                   </div>
                   <span className="text-xs font-medium text-zinc-400">
                     {item.deletedAt.toLocaleDateString('tr-TR')}
@@ -193,7 +206,9 @@ export const Trash: React.FC = () => {
                 </h3>
 
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 mb-6 flex-1">
-                  {item.type === 'note' ? item.content : item.description || t('trash_page.no_description')}
+                  {item.type === 'note'
+                    ? item.content
+                    : item.description || t('trash_page.no_description')}
                 </p>
 
                 {/* Actions */}

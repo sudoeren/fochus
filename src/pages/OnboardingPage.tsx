@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Sparkles, 
-  Search, 
-  Palette, 
-  ChevronLeft, 
-  Check, 
-  Moon, 
-  Sun, 
-  Monitor, 
+import {
+  Sparkles,
+  Search,
+  Palette,
+  ChevronLeft,
+  Check,
+  Moon,
+  Sun,
+  Monitor,
   ArrowRight,
   CheckSquare,
   Image as ImageIcon,
@@ -37,12 +37,12 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   const steps = [
     { id: 1, title: t('onboarding.welcome'), icon: Sparkles },
     { id: 2, title: t('onboarding.spotlight'), icon: Search },
-    { id: 3, title: t('onboarding.appearance'), icon: Palette },
+    { id: 3, title: t('onboarding.appearance'), icon: Palette }
   ];
 
   const handleNext = () => {
     if (step < 3) {
-      setStep(prev => prev + 1);
+      setStep((prev) => prev + 1);
     } else {
       finish();
     }
@@ -50,7 +50,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
   const handlePrev = () => {
     if (step > 1) {
-      setStep(prev => prev - 1);
+      setStep((prev) => prev - 1);
     }
   };
 
@@ -72,9 +72,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white flex items-center justify-center p-6">
-      
       <div className="w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
-        
         {/* Left Sidebar */}
         <div className="w-full md:w-80 bg-zinc-50 dark:bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 p-8 flex flex-col justify-between">
           <div>
@@ -85,41 +83,44 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
             <div className="space-y-2">
               {steps.map((s) => (
-                <div 
+                <div
                   key={s.id}
                   className={cn(
-                    "flex items-center gap-3 p-3 rounded-xl transition-all duration-200",
-                    step === s.id 
-                      ? "bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800" 
-                      : "text-zinc-500 dark:text-zinc-500"
+                    'flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
+                    step === s.id
+                      ? 'bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800'
+                      : 'text-zinc-500 dark:text-zinc-500'
                   )}
                 >
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                    step === s.id 
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900" 
-                      : "bg-zinc-200 dark:bg-zinc-800"
-                  )}>
+                  <div
+                    className={cn(
+                      'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+                      step === s.id
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                        : 'bg-zinc-200 dark:bg-zinc-800'
+                    )}
+                  >
                     {step > s.id ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
                   </div>
-                  <div className={cn(
-                    "font-medium",
-                    step === s.id ? "text-zinc-900 dark:text-white" : ""
-                  )}>{s.title}</div>
+                  <div
+                    className={cn(
+                      'font-medium',
+                      step === s.id ? 'text-zinc-900 dark:text-white' : ''
+                    )}
+                  >
+                    {s.title}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="hidden md:block text-xs text-zinc-400">
-            v1.0.0
-          </div>
+          <div className="hidden md:block text-xs text-zinc-400">v1.0.0</div>
         </div>
 
         {/* Right Content */}
         <div className="flex-1 p-8 md:p-16 flex flex-col">
           <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
-            
             {/* Step 1: Welcome */}
             {step === 1 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -151,9 +152,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             {step === 2 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-4">
-                  <h1 className="text-3xl font-bold tracking-tight">
-                    {t('onboarding.title_2')}
-                  </h1>
+                  <h1 className="text-3xl font-bold tracking-tight">{t('onboarding.title_2')}</h1>
                   <p className="text-lg text-zinc-500 dark:text-zinc-400">
                     {t('onboarding.desc_2')}
                   </p>
@@ -167,12 +166,14 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                   </div>
                   <p className="text-zinc-600 dark:text-zinc-300 font-medium">
                     {/* Interpolation for the key hint */}
-                    <span dangerouslySetInnerHTML={{ 
-                      __html: t('onboarding.spotlight_hint').replace(
-                        '<1>/</1>', 
-                        '<span class="font-bold text-zinc-900 dark:text-white">/</span>'
-                      ) 
-                    }} />
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: t('onboarding.spotlight_hint').replace(
+                          '<1>/</1>',
+                          '<span class="font-bold text-zinc-900 dark:text-white">/</span>'
+                        )
+                      }}
+                    />
                   </p>
                 </div>
               </div>
@@ -182,9 +183,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
             {step === 3 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-4">
-                  <h1 className="text-3xl font-bold tracking-tight">
-                    {t('onboarding.title_3')}
-                  </h1>
+                  <h1 className="text-3xl font-bold tracking-tight">{t('onboarding.title_3')}</h1>
                   <p className="text-lg text-zinc-500 dark:text-zinc-400">
                     {t('onboarding.desc_3')}
                   </p>
@@ -245,13 +244,13 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                     ))}
                   </div>
 
-                  <div 
+                  <div
                     onClick={() => setIsGlobalBg(!isGlobalBg)}
                     className={cn(
-                      "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200",
-                      isGlobalBg 
-                        ? "border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800" 
-                        : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+                      'flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200',
+                      isGlobalBg
+                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800'
+                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                     )}
                   >
                     <div className="flex items-center gap-4">
@@ -259,21 +258,28 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                         <ImageIcon className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
                       </div>
                       <div>
-                        <div className="font-bold text-sm text-zinc-900 dark:text-white">{t('onboarding.global_bg')}</div>
-                        <div className="text-xs text-zinc-500">{t('onboarding.global_bg_desc')}</div>
+                        <div className="font-bold text-sm text-zinc-900 dark:text-white">
+                          {t('onboarding.global_bg')}
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {t('onboarding.global_bg_desc')}
+                        </div>
                       </div>
                     </div>
-                    <div className={cn(
-                      "w-5 h-5 rounded border flex items-center justify-center transition-colors",
-                      isGlobalBg ? "bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white" : "border-zinc-300 dark:border-zinc-600"
-                    )}>
+                    <div
+                      className={cn(
+                        'w-5 h-5 rounded border flex items-center justify-center transition-colors',
+                        isGlobalBg
+                          ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white'
+                          : 'border-zinc-300 dark:border-zinc-600'
+                      )}
+                    >
                       {isGlobalBg && <Check className="w-3 h-3 text-white dark:text-zinc-900" />}
                     </div>
                   </div>
                 </div>
               </div>
             )}
-
           </div>
 
           {/* Navigation Buttons */}
@@ -282,10 +288,10 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
               onClick={handlePrev}
               disabled={step === 1}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors",
-                step === 1 
-                  ? "text-zinc-300 dark:text-zinc-700 cursor-not-allowed" 
-                  : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
+                step === 1
+                  ? 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
               )}
             >
               <ChevronLeft className="w-4 h-4" />

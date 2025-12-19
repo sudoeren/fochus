@@ -31,7 +31,7 @@ class NotificationService {
 
   async show(options: NotificationOptions): Promise<void> {
     const hasPermission = await this.requestPermission();
-    
+
     if (!hasPermission) {
       console.warn('Bildirim gösterilemiyor: İzin yok');
       return;
@@ -57,7 +57,7 @@ class NotificationService {
   }
 
   async showTaskReminder(taskTitle: string, dueDate?: Date): Promise<void> {
-    const body = dueDate 
+    const body = dueDate
       ? `Son tarih: ${dueDate.toLocaleDateString('tr-TR')} ${dueDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`
       : 'Göreviniz için hatırlatıcı';
 

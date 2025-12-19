@@ -8,28 +8,32 @@ const CACHE_KEYS = {
 
 export const cacheData = (key: string, data: any) => {
   try {
-    localStorage.setItem(key, JSON.stringify({
-      data,
-      timestamp: Date.now()
-    }));
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        data,
+        timestamp: Date.now()
+      })
+    );
   } catch (error) {
     console.warn('Cache write failed:', error);
   }
 };
 
-export const getCachedData = (key: string, maxAge: number = 30000) => { // 30 seconds max age
+export const getCachedData = (key: string, maxAge: number = 30000) => {
+  // 30 seconds max age
   try {
     const cached = localStorage.getItem(key);
     if (!cached) return null;
-    
+
     const { data, timestamp } = JSON.parse(cached);
     const age = Date.now() - timestamp;
-    
+
     if (age > maxAge) {
       localStorage.removeItem(key);
       return null;
     }
-    
+
     return data;
   } catch (error) {
     console.warn('Cache read failed:', error);
@@ -42,7 +46,7 @@ export const invalidateCache = (key?: string) => {
     localStorage.removeItem(key);
   } else {
     // Clear all cache
-    Object.values(CACHE_KEYS).forEach(cacheKey => {
+    Object.values(CACHE_KEYS).forEach((cacheKey) => {
       localStorage.removeItem(cacheKey);
     });
   }

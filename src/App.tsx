@@ -19,7 +19,9 @@ import { authAPI, getAuthToken, setAuthToken } from './services/api';
 
 const App: React.FC = () => {
   const { isDark } = useTheme();
-  const [activeView, setActiveView] = useState(() => localStorage.getItem('activeView') || 'dashboard');
+  const [activeView, setActiveView] = useState(
+    () => localStorage.getItem('activeView') || 'dashboard'
+  );
 
   useEffect(() => {
     localStorage.setItem('activeView', activeView);
@@ -31,7 +33,7 @@ const App: React.FC = () => {
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
-  const [authChecked, setAuthChecked] = useState(false);
+  const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -61,6 +63,16 @@ const App: React.FC = () => {
     localStorage.setItem('isSpotlightEnabled', String(enabled));
   };
 
+  const checkOnboarding = (uid: string) => {
+    const pending = localStorage.getItem('fokus_onboarding_pending') === 'true';
+    const doneKey = `fokus_onboarding_done_${uid}`;
+    const done = localStorage.getItem(doneKey) === 'true';
+
+    if (pending && !done) {
+      setShowOnboarding(true);
+    }
+  };
+
   const handleLogin = async () => {
     const token = getAuthToken();
     if (!token) {
@@ -71,18 +83,11 @@ const App: React.FC = () => {
     try {
       const me = await authAPI.me();
       setIsAuthenticated(true);
-      setCurrentUserId((me as any)?.id ?? null);
+      const uid = (me as any)?.id ?? null;
+      setCurrentUserId(uid);
       setAuthChecked(true);
 
-      // Check onboarding after login/register
-      const pending = localStorage.getItem('fokus_onboarding_pending') === 'true';
-      const uid = (me as any)?.id;
-      const doneKey = uid ? `fokus_onboarding_done_${uid}` : null;
-      const done = doneKey ? localStorage.getItem(doneKey) === 'true' : false;
-
-      if (pending && !done) {
-        setShowOnboarding(true);
-      }
+      if (uid) checkOnboarding(uid);
     } catch {
       setAuthToken(null);
       setIsAuthenticated(false);
@@ -104,9 +109,6 @@ const App: React.FC = () => {
     const token = getAuthToken();
 
     if (!token) {
-      setIsAuthenticated(false);
-      setAuthChecked(true);
-      setCurrentUserId(null);
       return;
     }
 
@@ -114,7 +116,9 @@ const App: React.FC = () => {
       .me()
       .then((me) => {
         setIsAuthenticated(true);
-        setCurrentUserId((me as any)?.id ?? null);
+        const uid = (me as any)?.id ?? null;
+        setCurrentUserId(uid);
+        if (uid) checkOnboarding(uid);
       })
       .catch(() => {
         setAuthToken(null);
@@ -125,19 +129,6 @@ const App: React.FC = () => {
         setAuthChecked(true);
       });
   }, []);
-
-  useEffect(() => {
-    if (!isAuthenticated || !authChecked) return;
-    if (!currentUserId) return;
-
-    const pending = localStorage.getItem('fokus_onboarding_pending') === 'true';
-    const doneKey = `fokus_onboarding_done_${currentUserId}`;
-    const done = localStorage.getItem(doneKey) === 'true';
-
-    if (pending && !done) {
-      setShowOnboarding(true);
-    }
-  }, [isAuthenticated, authChecked, currentUserId]);
 
   const handleEditTask = (task: any) => {
     setEditingTask(task);
@@ -156,7 +147,7 @@ const App: React.FC = () => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
-      if (isSpotlightEnabled && (e.key === '/' && !isInputActive)) {
+      if (isSpotlightEnabled && e.key === '/' && !isInputActive) {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
@@ -179,57 +170,70 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <Dashboard
-          onNavigate={setActiveView}
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          onEditTask={handleEditTask}
-          onOpenSpotlight={() => setIsSpotlightOpen(true)}
-          onOpenPomodoro={() => setShowPomodoroModal(true)}
-          bgImage={bgImage}
-          onBgChange={handleBgChange}
-        />;
+        return (
+          <Dashboard
+            onNavigate={setActiveView}
+            onOpenNoteModal={() => setShowNoteModal(true)}
+            onOpenTaskModal={() => setShowTaskModal(true)}
+            onEditTask={handleEditTask}
+            onOpenSpotlight={() => setIsSpotlightOpen(true)}
+            onOpenPomodoro={() => setShowPomodoroModal(true)}
+            bgImage={bgImage}
+            onBgChange={handleBgChange}
+          />
+        );
       case 'note-editor':
-        return <NoteEditorPage
-          noteId={editingNoteId}
-          onBack={() => {
-            setActiveView('dashboard');
-            setEditingNoteId(undefined);
-          }}
-        />;
+        return (
+          <NoteEditorPage
+            key={editingNoteId}
+            noteId={editingNoteId}
+            onBack={() => {
+              setActiveView('dashboard');
+              setEditingNoteId(undefined);
+            }}
+          />
+        );
       case 'notes':
-        return <Notes
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onEditNote={(id) => {
-            setEditingNoteId(id);
-            setActiveView('note-editor');
-          }}
-        />;
+        return (
+          <Notes
+            onOpenNoteModal={() => setShowNoteModal(true)}
+            onEditNote={(id) => {
+              setEditingNoteId(id);
+              setActiveView('note-editor');
+            }}
+          />
+        );
       case 'tasks':
-        return <TasksWithLists
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          onEditTask={handleEditTask}
-        />;
+        return (
+          <TasksWithLists
+            onOpenTaskModal={() => setShowTaskModal(true)}
+            onEditTask={handleEditTask}
+          />
+        );
       // case 'stats': removed
       case 'trash':
         return <Trash />;
       case 'settings':
-        return <Settings
-          bgImage={bgImage}
-          onBgChange={handleBgChange}
-          isGlobalBg={isGlobalBg}
-          onToggleGlobalBg={handleGlobalBgToggle}
-          isSpotlightEnabled={isSpotlightEnabled}
-          onToggleSpotlight={handleSpotlightToggle}
-        />;
+        return (
+          <Settings
+            bgImage={bgImage}
+            onBgChange={handleBgChange}
+            isGlobalBg={isGlobalBg}
+            onToggleGlobalBg={handleGlobalBgToggle}
+            isSpotlightEnabled={isSpotlightEnabled}
+            onToggleSpotlight={handleSpotlightToggle}
+          />
+        );
       default:
-        return <Dashboard
-          onNavigate={setActiveView}
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          bgImage={bgImage}
-          onBgChange={handleBgChange}
-        />;
+        return (
+          <Dashboard
+            onNavigate={setActiveView}
+            onOpenNoteModal={() => setShowNoteModal(true)}
+            onOpenTaskModal={() => setShowTaskModal(true)}
+            bgImage={bgImage}
+            onBgChange={handleBgChange}
+          />
+        );
     }
   };
 
@@ -242,9 +246,7 @@ const App: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return (
-      <Login onLogin={handleLogin} />
-    );
+    return <Login onLogin={handleLogin} />;
   }
 
   if (showOnboarding) {
@@ -263,16 +265,16 @@ const App: React.FC = () => {
     );
   }
 
-  const isCustomBg = bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
+  const isCustomBg =
+    bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
   const showBackground = isGlobalBg || activeView === 'dashboard';
-  
+
   // Determine which background to show based on theme if default
   const showLightBg = bgImage === 'light' || (bgImage === 'default' && !isDark);
   const showDarkBg = bgImage === 'dark' || (bgImage === 'default' && isDark);
 
   return (
     <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
-
       {/* GLOBAL BACKGROUND IMAGE */}
       {showBackground && (
         <div className="fixed inset-0 z-0 pointer-events-none">
@@ -287,12 +289,18 @@ const App: React.FC = () => {
               <img
                 src="/light.png"
                 alt="Background"
-                className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", showLightBg ? 'opacity-100' : 'opacity-0')}
+                className={cn(
+                  'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
+                  showLightBg ? 'opacity-100' : 'opacity-0'
+                )}
               />
               <img
                 src="/dark.png"
                 alt="Background"
-                className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-500", showDarkBg ? 'opacity-100' : 'opacity-0')}
+                className={cn(
+                  'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
+                  showDarkBg ? 'opacity-100' : 'opacity-0'
+                )}
               />
             </>
           )}
@@ -312,44 +320,53 @@ const App: React.FC = () => {
       />
 
       {/* Main Content Area - With Padding for Sidebar */}
-      <main className={cn(
-        "relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto",
-      )}>
+      <main
+        className={cn(
+          'relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto'
+        )}
+      >
         {renderView()}
       </main>
 
-
       {/* Spotlight */}
-      <Spotlight
-        isOpen={isSpotlightOpen}
-        onClose={() => setIsSpotlightOpen(false)}
-        onNavigate={setActiveView}
-        onOpenNoteModal={() => setShowNoteModal(true)}
-        onOpenTaskModal={() => setShowTaskModal(true)}
-        onOpenPomodoro={() => setShowPomodoroModal(true)}
-      />
+      {isSpotlightOpen && (
+        <Spotlight
+          isOpen={isSpotlightOpen}
+          onClose={() => setIsSpotlightOpen(false)}
+          onNavigate={setActiveView}
+          onOpenNoteModal={() => setShowNoteModal(true)}
+          onOpenTaskModal={() => setShowTaskModal(true)}
+          onOpenPomodoro={() => setShowPomodoroModal(true)}
+        />
+      )}
 
       {/* Modals */}
-      <NewNoteWindow
-        isOpen={showNoteModal}
-        onClose={() => setShowNoteModal(false)}
-        onExpand={(id) => {
-          setEditingNoteId(id);
-          setActiveView('note-editor');
-          setShowNoteModal(false);
-        }}
-      />
+      {showNoteModal && (
+        <NewNoteWindow
+          isOpen={showNoteModal}
+          onClose={() => setShowNoteModal(false)}
+          onExpand={(id) => {
+            setEditingNoteId(id);
+            setActiveView('note-editor');
+            setShowNoteModal(false);
+          }}
+        />
+      )}
 
-      <NewTaskWindow
-        isOpen={showTaskModal}
-        onClose={closeTaskModal}
-        initialData={editingTask}
-      />
+      {showTaskModal && (
+        <NewTaskWindow
+          isOpen={showTaskModal}
+          onClose={closeTaskModal}
+          initialData={editingTask}
+        />
+      )}
 
-      <PomodoroModal
-        isOpen={showPomodoroModal}
-        onClose={() => setShowPomodoroModal(false)}
-      />
+      {showPomodoroModal && (
+        <PomodoroModal
+          isOpen={showPomodoroModal}
+          onClose={() => setShowPomodoroModal(false)}
+        />
+      )}
     </div>
   );
 };

@@ -17,7 +17,14 @@ const getStoredData = <T>(key: string): T[] => {
     if (!data) return [];
     return JSON.parse(data, (key, value) => {
       // Convert date strings back to Date objects
-      if (key.endsWith('At') || key === 'dueDate' || key === 'lastCompleted' || key === 'nextDue' || key === 'startTime' || key === 'endTime') {
+      if (
+        key.endsWith('At') ||
+        key === 'dueDate' ||
+        key === 'lastCompleted' ||
+        key === 'nextDue' ||
+        key === 'startTime' ||
+        key === 'endTime'
+      ) {
         return value ? new Date(value) : undefined;
       }
       return value;
@@ -36,10 +43,10 @@ export const storageService = {
   // Tasks
   tasks: {
     getAll: async (): Promise<Task[]> => {
-      return getStoredData<Task>(STORAGE_KEYS.TASKS).filter(t => !t.isDeleted);
+      return getStoredData<Task>(STORAGE_KEYS.TASKS).filter((t) => !t.isDeleted);
     },
     getDeleted: async (): Promise<Task[]> => {
-        return getStoredData<Task>(STORAGE_KEYS.TASKS).filter(t => t.isDeleted);
+      return getStoredData<Task>(STORAGE_KEYS.TASKS).filter((t) => t.isDeleted);
     },
     create: async (data: Partial<Task>): Promise<Task> => {
       const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
@@ -69,14 +76,14 @@ export const storageService = {
     },
     update: async (id: string, data: Partial<Task>): Promise<Task> => {
       const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
-      const index = tasks.findIndex(t => t.id === id);
+      const index = tasks.findIndex((t) => t.id === id);
       if (index === -1) throw new Error('Task not found');
-      
+
       const updatedTask = { ...tasks[index], ...data, updatedAt: new Date() };
-      
+
       // Update status if isCompleted changes
       if (data.isCompleted !== undefined) {
-          updatedTask.status = data.isCompleted ? 'COMPLETED' : 'PENDING';
+        updatedTask.status = data.isCompleted ? 'COMPLETED' : 'PENDING';
       }
 
       tasks[index] = updatedTask;
@@ -84,27 +91,27 @@ export const storageService = {
       return updatedTask;
     },
     delete: async (id: string): Promise<void> => {
-       const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
-       const index = tasks.findIndex(t => t.id === id);
-       if (index !== -1) {
-         tasks[index].isDeleted = true;
-         tasks[index].deletedAt = new Date();
-         setStoredData(STORAGE_KEYS.TASKS, tasks);
-       }
+      const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
+      const index = tasks.findIndex((t) => t.id === id);
+      if (index !== -1) {
+        tasks[index].isDeleted = true;
+        tasks[index].deletedAt = new Date();
+        setStoredData(STORAGE_KEYS.TASKS, tasks);
+      }
     },
     restore: async (id: string): Promise<void> => {
-        const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
-        const index = tasks.findIndex(t => t.id === id);
-        if (index !== -1) {
-          tasks[index].isDeleted = false;
-          tasks[index].deletedAt = undefined;
-          setStoredData(STORAGE_KEYS.TASKS, tasks);
-        }
+      const tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
+      const index = tasks.findIndex((t) => t.id === id);
+      if (index !== -1) {
+        tasks[index].isDeleted = false;
+        tasks[index].deletedAt = undefined;
+        setStoredData(STORAGE_KEYS.TASKS, tasks);
+      }
     },
     permanentlyDelete: async (id: string): Promise<void> => {
-        let tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
-        tasks = tasks.filter(t => t.id !== id);
-        setStoredData(STORAGE_KEYS.TASKS, tasks);
+      let tasks = getStoredData<Task>(STORAGE_KEYS.TASKS);
+      tasks = tasks.filter((t) => t.id !== id);
+      setStoredData(STORAGE_KEYS.TASKS, tasks);
     },
     pin: async (id: string, isPinned: boolean): Promise<Task> => {
       return storageService.tasks.update(id, { isPinned });
@@ -113,10 +120,10 @@ export const storageService = {
   // Notes
   notes: {
     getAll: async (): Promise<Note[]> => {
-      return getStoredData<Note>(STORAGE_KEYS.NOTES).filter(n => !n.isDeleted);
+      return getStoredData<Note>(STORAGE_KEYS.NOTES).filter((n) => !n.isDeleted);
     },
     getDeleted: async (): Promise<Note[]> => {
-        return getStoredData<Note>(STORAGE_KEYS.NOTES).filter(n => n.isDeleted);
+      return getStoredData<Note>(STORAGE_KEYS.NOTES).filter((n) => n.isDeleted);
     },
     create: async (data: Partial<Note>): Promise<Note> => {
       const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
@@ -136,36 +143,36 @@ export const storageService = {
     },
     update: async (id: string, data: Partial<Note>): Promise<Note> => {
       const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
-      const index = notes.findIndex(n => n.id === id);
+      const index = notes.findIndex((n) => n.id === id);
       if (index === -1) throw new Error('Note not found');
-      
+
       const updatedNote = { ...notes[index], ...data, updatedAt: new Date() };
       notes[index] = updatedNote;
       setStoredData(STORAGE_KEYS.NOTES, notes);
       return updatedNote;
     },
     delete: async (id: string): Promise<void> => {
-       const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
-       const index = notes.findIndex(n => n.id === id);
-       if (index !== -1) {
-         notes[index].isDeleted = true;
-         notes[index].deletedAt = new Date();
-         setStoredData(STORAGE_KEYS.NOTES, notes);
-       }
+      const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
+      const index = notes.findIndex((n) => n.id === id);
+      if (index !== -1) {
+        notes[index].isDeleted = true;
+        notes[index].deletedAt = new Date();
+        setStoredData(STORAGE_KEYS.NOTES, notes);
+      }
     },
     restore: async (id: string): Promise<void> => {
-        const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
-        const index = notes.findIndex(n => n.id === id);
-        if (index !== -1) {
-          notes[index].isDeleted = false;
-          notes[index].deletedAt = undefined;
-          setStoredData(STORAGE_KEYS.NOTES, notes);
-        }
+      const notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
+      const index = notes.findIndex((n) => n.id === id);
+      if (index !== -1) {
+        notes[index].isDeleted = false;
+        notes[index].deletedAt = undefined;
+        setStoredData(STORAGE_KEYS.NOTES, notes);
+      }
     },
     permanentlyDelete: async (id: string): Promise<void> => {
-        let notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
-        notes = notes.filter(n => n.id !== id);
-        setStoredData(STORAGE_KEYS.NOTES, notes);
+      let notes = getStoredData<Note>(STORAGE_KEYS.NOTES);
+      notes = notes.filter((n) => n.id !== id);
+      setStoredData(STORAGE_KEYS.NOTES, notes);
     },
     pin: async (id: string, isPinned: boolean): Promise<Note> => {
       return storageService.notes.update(id, { isPinned });
@@ -174,7 +181,7 @@ export const storageService = {
   // Task Lists
   taskLists: {
     getAll: async (): Promise<TaskList[]> => {
-      return getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS).filter(l => !l.isDeleted);
+      return getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS).filter((l) => !l.isDeleted);
     },
     create: async (data: Partial<TaskList>): Promise<TaskList> => {
       const lists = getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS);
@@ -195,21 +202,21 @@ export const storageService = {
     },
     update: async (id: string, data: Partial<TaskList>): Promise<TaskList> => {
       const lists = getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS);
-      const index = lists.findIndex(l => l.id === id);
+      const index = lists.findIndex((l) => l.id === id);
       if (index === -1) throw new Error('List not found');
-      
+
       const updatedList = { ...lists[index], ...data, updatedAt: new Date() };
       lists[index] = updatedList;
       setStoredData(STORAGE_KEYS.TASK_LISTS, lists);
       return updatedList;
     },
     delete: async (id: string): Promise<void> => {
-       const lists = getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS);
-       const index = lists.findIndex(l => l.id === id);
-       if (index !== -1) {
-         lists[index].isDeleted = true;
-         setStoredData(STORAGE_KEYS.TASK_LISTS, lists);
-       }
+      const lists = getStoredData<TaskList>(STORAGE_KEYS.TASK_LISTS);
+      const index = lists.findIndex((l) => l.id === id);
+      if (index !== -1) {
+        lists[index].isDeleted = true;
+        setStoredData(STORAGE_KEYS.TASK_LISTS, lists);
+      }
     }
   },
   // Pomodoro
@@ -227,7 +234,7 @@ export const storageService = {
         mode: session.mode || 'work',
         completed: session.completed || false
       } as PomodoroSession;
-      
+
       sessions.push(newSession);
       setStoredData(STORAGE_KEYS.POMODORO_SESSIONS, sessions);
       return newSession;

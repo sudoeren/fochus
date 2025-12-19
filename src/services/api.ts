@@ -18,13 +18,10 @@ export const setAuthToken = (token: string | null) => {
 export const getAuthToken = () => authToken;
 
 // Generic fetch wrapper
-async function fetchAPI<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...options.headers
   };
 
   if (authToken) {
@@ -33,18 +30,18 @@ async function fetchAPI<T>(
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-    headers,
+    headers
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Bir hata oluştu' }));
-    
+
     // Handle 401 - Unauthorized
     if (response.status === 401) {
       setAuthToken(null);
       window.dispatchEvent(new Event('auth:logout'));
     }
-    
+
     throw new Error(error.error || 'Bir hata oluştu');
   }
 
@@ -56,13 +53,13 @@ export const authAPI = {
   register: (data: { username: string; password: string; name?: string }) =>
     fetchAPI<{ user: any; token: string }>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   login: (data: { username: string; password: string }) =>
     fetchAPI<{ user: any; token: string }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   me: () => fetchAPI<any>('/auth/me'),
@@ -70,50 +67,50 @@ export const authAPI = {
   updateProfile: (data: { name?: string; username?: string; avatar?: string | null }) =>
     fetchAPI<any>('/auth/profile', {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>
     fetchAPI<{ message: string }>('/auth/password', {
       method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+      body: JSON.stringify(data)
+    })
 };
 
 // Notes API
 export const notesAPI = {
   getAll: () => fetchAPI<any[]>('/notes'),
-  
+
   getDeleted: () => fetchAPI<any[]>('/notes/deleted'),
-  
+
   getById: (id: string) => fetchAPI<any>(`/notes/${id}`),
-  
+
   create: (data: { title: string; content?: string; isPinned?: boolean }) =>
     fetchAPI<any>('/notes', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   update: (id: string, data: Partial<{ title: string; content: string; isPinned: boolean }>) =>
     fetchAPI<any>(`/notes/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/notes/${id}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     }),
 
   restore: (id: string) =>
     fetchAPI<any>(`/notes/${id}/restore`, {
-      method: 'POST',
+      method: 'POST'
     }),
 
   permanentDelete: (id: string) =>
     fetchAPI<{ message: string }>(`/notes/${id}/permanent`, {
-      method: 'DELETE',
-    }),
+      method: 'DELETE'
+    })
 };
 
 // Tasks API
@@ -146,40 +143,40 @@ export const tasksAPI = {
   }) =>
     fetchAPI<any>('/tasks', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   update: (id: string, data: Partial<any>) =>
     fetchAPI<any>(`/tasks/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   toggle: (id: string) =>
     fetchAPI<any>(`/tasks/${id}/toggle`, {
-      method: 'PUT',
+      method: 'PUT'
     }),
 
   reorder: (taskIds: string[]) =>
     fetchAPI<{ message: string }>('/tasks/reorder', {
       method: 'PUT',
-      body: JSON.stringify({ taskIds }),
+      body: JSON.stringify({ taskIds })
     }),
 
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/tasks/${id}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     }),
 
   restore: (id: string) =>
     fetchAPI<any>(`/tasks/${id}/restore`, {
-      method: 'POST',
+      method: 'POST'
     }),
 
   permanentDelete: (id: string) =>
     fetchAPI<{ message: string }>(`/tasks/${id}/permanent`, {
-      method: 'DELETE',
-    }),
+      method: 'DELETE'
+    })
 };
 
 // Task Lists API
@@ -191,25 +188,28 @@ export const taskListsAPI = {
   create: (data: { title: string; description?: string; color?: string }) =>
     fetchAPI<any>('/task-lists', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
-  update: (id: string, data: Partial<{ title: string; description: string; color: string; order: number }>) =>
+  update: (
+    id: string,
+    data: Partial<{ title: string; description: string; color: string; order: number }>
+  ) =>
     fetchAPI<any>(`/task-lists/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   reorder: (listIds: string[]) =>
     fetchAPI<{ message: string }>('/task-lists/reorder', {
       method: 'PUT',
-      body: JSON.stringify({ listIds }),
+      body: JSON.stringify({ listIds })
     }),
 
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/task-lists/${id}`, {
-      method: 'DELETE',
-    }),
+      method: 'DELETE'
+    })
 };
 
 // Pomodoro API
@@ -235,13 +235,13 @@ export const pomodoroAPI = {
   }) =>
     fetchAPI<any>('/pomodoro', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     }),
 
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/pomodoro/${id}`, {
-      method: 'DELETE',
-    }),
+      method: 'DELETE'
+    })
 };
 
 // Settings API
@@ -251,8 +251,8 @@ export const settingsAPI = {
   update: (data: { theme?: string; language?: string }) =>
     fetchAPI<any>('/settings', {
       method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+      body: JSON.stringify(data)
+    })
 };
 
 // Export default API object
@@ -262,7 +262,7 @@ export const api = {
   tasks: tasksAPI,
   taskLists: taskListsAPI,
   pomodoro: pomodoroAPI,
-  settings: settingsAPI,
+  settings: settingsAPI
 };
 
 export default api;

@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Plus,
-  Search,
-  Pin,
-  Calendar,
-  Trash2,
-  FileText
-} from 'lucide-react';
+import { Plus, Search, Pin, Calendar, Trash2, FileText } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -21,13 +14,14 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
   const { notes, deleteNote, pinNote, loading } = useNotes();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    note.content?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.content?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const pinnedNotes = filteredNotes.filter(n => n.isPinned);
-  const otherNotes = filteredNotes.filter(n => !n.isPinned);
+  const pinnedNotes = filteredNotes.filter((n) => n.isPinned);
+  const otherNotes = filteredNotes.filter((n) => !n.isPinned);
 
   // Masonry Card Component
   const NoteCard = ({ note }: { note: any }) => (
@@ -35,7 +29,6 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       onClick={() => onEditNote(note.id)}
       className="group relative flex flex-col mb-6 break-inside-avoid bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
     >
-
       {/* Pin Badge */}
       {note.isPinned && (
         <div className="absolute top-4 right-4 text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-1.5 rounded-full">
@@ -44,7 +37,12 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       )}
 
       {/* Title */}
-      <h3 className={cn("font-bold text-lg text-zinc-900 dark:text-zinc-100 mb-3 leading-tight", note.isPinned && "pr-8")}>
+      <h3
+        className={cn(
+          'font-bold text-lg text-zinc-900 dark:text-zinc-100 mb-3 leading-tight',
+          note.isPinned && 'pr-8'
+        )}
+      >
         {note.title}
       </h3>
 
@@ -66,17 +64,25 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
         {/* Actions - Visible on Hover */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
           <button
-            onClick={(e) => { e.stopPropagation(); pinNote(note.id, !note.isPinned); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              pinNote(note.id, !note.isPinned);
+            }}
             className={cn(
-              "p-2 rounded-xl transition-colors",
-              note.isPinned ? "text-amber-500 bg-amber-50 dark:bg-amber-900/20" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              'p-2 rounded-xl transition-colors',
+              note.isPinned
+                ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             )}
             title={note.isPinned ? t('notes.unpin') : t('notes.pin')}
           >
             <Pin className="w-4 h-4" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); if (confirm(t('notes.confirm_delete'))) deleteNote(note.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm(t('notes.confirm_delete'))) deleteNote(note.id);
+            }}
             className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
             title={t('common.delete')}
           >
@@ -101,7 +107,9 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       <div className="flex-none p-8 lg:p-10 pb-4">
         <div className="flex flex-col gap-6">
           <div>
-            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('notes.title')}</h1>
+            <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
+              {t('notes.title')}
+            </h1>
             <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('notes.subtitle')}</p>
           </div>
 
@@ -122,7 +130,6 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       {/* Masonry Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-8 lg:p-10 pt-2 pb-24">
         <div className="max-w-[1800px] mx-auto space-y-10">
-
           {filteredNotes.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
               <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center mb-6">
@@ -144,7 +151,9 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
                 {t('notes.pinned')}
               </div>
               <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-                {pinnedNotes.map(note => <NoteCard key={note.id} note={note} />)}
+                {pinnedNotes.map((note) => (
+                  <NoteCard key={note.id} note={note} />
+                ))}
               </div>
             </section>
           )}
@@ -158,7 +167,9 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
                 </div>
               )}
               <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
-                {otherNotes.map(note => <NoteCard key={note.id} note={note} />)}
+                {otherNotes.map((note) => (
+                  <NoteCard key={note.id} note={note} />
+                ))}
               </div>
             </section>
           )}

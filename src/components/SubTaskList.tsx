@@ -17,7 +17,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
   onToggle,
   onDelete,
   onReorder,
-  className = ""
+  className = ''
 }) => {
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -52,7 +52,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
+
     if (draggedIndex === null || draggedIndex === dropIndex) {
       setDraggedIndex(null);
       return;
@@ -60,25 +60,25 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
 
     const newSubtasks = [...subtasks];
     const draggedItem = newSubtasks[draggedIndex];
-    
+
     // Remove dragged item
     newSubtasks.splice(draggedIndex, 1);
-    
+
     // Insert at new position
     const insertIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex;
     newSubtasks.splice(insertIndex, 0, draggedItem);
-    
+
     // Update order
     const reorderedSubtasks = newSubtasks.map((subtask, index) => ({
       ...subtask,
       order: index
     }));
-    
+
     onReorder(reorderedSubtasks);
     setDraggedIndex(null);
   };
 
-  const completedCount = subtasks.filter(st => st.isCompleted).length;
+  const completedCount = subtasks.filter((st) => st.isCompleted).length;
   const totalCount = subtasks.length;
 
   return (
@@ -87,7 +87,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
       {totalCount > 0 && (
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
+            <div
               className="h-2 bg-blue-500 rounded-full transition-all duration-300"
               style={{ width: `${(completedCount / totalCount) * 100}%` }}
             />
@@ -129,11 +129,13 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
             </button>
 
             {/* Title */}
-            <span className={`flex-1 text-sm ${
-              subtask.isCompleted 
-                ? 'text-gray-500 dark:text-gray-400 line-through' 
-                : 'text-gray-900 dark:text-gray-100'
-            }`}>
+            <span
+              className={`flex-1 text-sm ${
+                subtask.isCompleted
+                  ? 'text-gray-500 dark:text-gray-400 line-through'
+                  : 'text-gray-900 dark:text-gray-100'
+              }`}
+            >
               {subtask.title}
             </span>
 

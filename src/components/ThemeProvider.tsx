@@ -10,16 +10,12 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>('system');
+  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>(() => {
+    return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system';
+  });
   const [isDark, setIsDark] = useState(false);
 
-  useEffect(() => {
-    // Load saved theme from localStorage
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system';
-    if (savedTheme) {
-      setThemeState(savedTheme);
-    }
-  }, []);
+  // Removed useEffect that was just syncing from localStorage on mount
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +52,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const updateTheme = () => {
       let shouldBeDark = false;
-      
+
       if (theme === 'dark') {
         shouldBeDark = true;
       } else if (theme === 'light') {
@@ -65,7 +61,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // system
         shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
-      
+
       setIsDark(shouldBeDark);
       document.documentElement.classList.toggle('dark', shouldBeDark);
     };
@@ -91,9 +87,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isDark }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, setTheme, isDark }}>{children}</ThemeContext.Provider>
   );
 };
 

@@ -17,7 +17,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   onSelect,
   isOpen,
   onClose,
-  className = ""
+  className = ''
 }) => {
   const [query, setQuery] = useState('');
   const [selectedType, setSelectedType] = useState<'all' | 'notes' | 'tasks'>('all');
@@ -32,7 +32,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
     // Search in notes
     if (selectedType === 'all' || selectedType === 'notes') {
-      notes.forEach(note => {
+      notes.forEach((note) => {
         if (note.isDeleted) return;
 
         let score = 0;
@@ -57,10 +57,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
         }
 
         // Tags match
-        if (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm))) {
+        if (note.tags && note.tags.some((tag) => tag.toLowerCase().includes(searchTerm))) {
           score += 7;
           if (!matchedText) {
-            matchedText = `Etiket: ${note.tags.find(tag => tag.toLowerCase().includes(searchTerm))}`;
+            matchedText = `Etiket: ${note.tags.find((tag) => tag.toLowerCase().includes(searchTerm))}`;
           }
         }
 
@@ -79,7 +79,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
 
     // Search in tasks
     if (selectedType === 'all' || selectedType === 'tasks') {
-      tasks.forEach(task => {
+      tasks.forEach((task) => {
         if (task.isDeleted) return;
 
         let score = 0;
@@ -127,15 +127,11 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex(prev => 
-            prev < searchResults.length - 1 ? prev + 1 : 0
-          );
+          setSelectedIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : 0));
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex(prev => 
-            prev > 0 ? prev - 1 : searchResults.length - 1
-          );
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : searchResults.length - 1));
           break;
         case 'Enter':
           e.preventDefault();
@@ -156,31 +152,30 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, searchResults, selectedIndex, onSelect, onClose]);
 
-  // Reset selection when query changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query, selectedType]);
-
   if (!isOpen) return null;
 
   const highlightMatch = (text: string, searchTerm: string) => {
     if (!searchTerm) return text;
-    
+
     const regex = new RegExp(`(${searchTerm})`, 'gi');
     const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
         <mark key={index} className="bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
           {part}
         </mark>
-      ) : part
+      ) : (
+        part
+      )
     );
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-start justify-center pt-20">
-      <div className={`w-full max-w-2xl mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 ${className}`}>
+      <div
+        className={`w-full max-w-2xl mx-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 ${className}`}
+      >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
@@ -188,7 +183,10 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedIndex(0);
+              }}
               placeholder="Notlar ve görevlerde ara..."
               className="flex-1 bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 border-none outline-none text-lg"
               autoFocus
@@ -204,34 +202,44 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           {/* Filter tabs */}
           <div className="flex gap-2 mt-3">
             <button
-              onClick={() => setSelectedType('all')}
+              onClick={() => {
+                setSelectedType('all');
+                setSelectedIndex(0);
+              }}
               className={`px-3 py-1 text-sm rounded-full border transition-colors ${
                 selectedType === 'all'
                   ? 'bg-blue-500 text-white border-blue-500'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Tümü ({notes.filter(n => !n.isDeleted).length + tasks.filter(t => !t.isDeleted).length})
+              Tümü (
+              {notes.filter((n) => !n.isDeleted).length + tasks.filter((t) => !t.isDeleted).length})
             </button>
             <button
-              onClick={() => setSelectedType('notes')}
+              onClick={() => {
+                setSelectedType('notes');
+                setSelectedIndex(0);
+              }}
               className={`px-3 py-1 text-sm rounded-full border transition-colors ${
                 selectedType === 'notes'
                   ? 'bg-blue-500 text-white border-blue-500'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Notlar ({notes.filter(n => !n.isDeleted).length})
+              Notlar ({notes.filter((n) => !n.isDeleted).length})
             </button>
             <button
-              onClick={() => setSelectedType('tasks')}
+              onClick={() => {
+                setSelectedType('tasks');
+                setSelectedIndex(0);
+              }}
               className={`px-3 py-1 text-sm rounded-full border transition-colors ${
                 selectedType === 'tasks'
                   ? 'bg-blue-500 text-white border-blue-500'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
             >
-              Görevler ({tasks.filter(t => !t.isDeleted).length})
+              Görevler ({tasks.filter((t) => !t.isDeleted).length})
             </button>
           </div>
         </div>
@@ -260,15 +268,19 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                 onClose();
               }}
               className={`w-full p-4 text-left border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                index === selectedIndex ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''
+                index === selectedIndex
+                  ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                  : ''
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${
-                  result.type === 'note' 
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
-                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                }`}>
+                <div
+                  className={`p-2 rounded-lg ${
+                    result.type === 'note'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                  }`}
+                >
                   {result.type === 'note' ? (
                     <FileText className="w-4 h-4" />
                   ) : (
@@ -281,15 +293,17 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
                     <h3 className="font-medium text-gray-900 dark:text-gray-100 truncate">
                       {highlightMatch(result.title, query)}
                     </h3>
-                    <span className={`px-2 py-1 text-xs rounded ${
-                      result.type === 'note'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${
+                        result.type === 'note'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      }`}
+                    >
                       {result.type === 'note' ? 'Not' : 'Görev'}
                     </span>
                   </div>
-                  
+
                   {result.matchedText && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                       {highlightMatch(result.matchedText, query)}

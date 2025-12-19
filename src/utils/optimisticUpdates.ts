@@ -1,10 +1,8 @@
 // Optimistic UI updates for instant feedback
 
 export const optimisticTaskUpdate = (tasks: any[], taskId: string, updates: any) => {
-  return tasks.map(task => 
-    task.id === taskId 
-      ? { ...task, ...updates, updatedAt: new Date() }
-      : task
+  return tasks.map((task) =>
+    task.id === taskId ? { ...task, ...updates, updatedAt: new Date() } : task
   );
 };
 
@@ -23,14 +21,12 @@ export const optimisticTaskAdd = (tasks: any[], newTask: any) => {
 };
 
 export const optimisticTaskDelete = (tasks: any[], taskId: string) => {
-  return tasks.filter(task => task.id !== taskId);
+  return tasks.filter((task) => task.id !== taskId);
 };
 
 export const optimisticNoteUpdate = (notes: any[], noteId: string, updates: any) => {
-  return notes.map(note => 
-    note.id === noteId 
-      ? { ...note, ...updates, updatedAt: new Date() }
-      : note
+  return notes.map((note) =>
+    note.id === noteId ? { ...note, ...updates, updatedAt: new Date() } : note
   );
 };
 
@@ -46,5 +42,5 @@ export const optimisticNoteAdd = (notes: any[], newNote: any) => {
 };
 
 export const optimisticNoteDelete = (notes: any[], noteId: string) => {
-  return notes.filter(note => note.id !== noteId);
+  return notes.filter((note) => note.id !== noteId);
 };

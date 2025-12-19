@@ -116,7 +116,9 @@ export const useTasks = () => {
         ...taskData,
         dueDate: taskData.dueDate ? toISOStringOrUndefined(taskData.dueDate) : undefined,
         reminderAt: taskData.reminderAt ? toISOStringOrUndefined(taskData.reminderAt) : undefined,
-        lastCompleted: taskData.lastCompleted ? toISOStringOrUndefined(taskData.lastCompleted) : undefined,
+        lastCompleted: taskData.lastCompleted
+          ? toISOStringOrUndefined(taskData.lastCompleted)
+          : undefined,
         nextDue: taskData.nextDue ? toISOStringOrUndefined(taskData.nextDue) : undefined
       });
       const updatedTask = normalizeTask(updatedRaw);
@@ -172,23 +174,19 @@ export const useTasks = () => {
 
     switch (filter) {
       case 'pending':
-        filteredTasks = tasks.filter(task => !task.isCompleted);
+        filteredTasks = tasks.filter((task) => !task.isCompleted);
         break;
       case 'completed':
-        filteredTasks = tasks.filter(task => task.isCompleted);
+        filteredTasks = tasks.filter((task) => task.isCompleted);
         break;
       case 'today':
-        filteredTasks = tasks.filter(task =>
-          task.dueDate &&
-          task.dueDate >= today &&
-          task.dueDate < tomorrow
+        filteredTasks = tasks.filter(
+          (task) => task.dueDate && task.dueDate >= today && task.dueDate < tomorrow
         );
         break;
       case 'overdue':
-        filteredTasks = tasks.filter(task =>
-          task.dueDate &&
-          task.dueDate < today &&
-          !task.isCompleted
+        filteredTasks = tasks.filter(
+          (task) => task.dueDate && task.dueDate < today && !task.isCompleted
         );
         break;
       default:
@@ -210,21 +208,20 @@ export const useTasks = () => {
   // Get task statistics
   const getTaskStats = () => {
     const totalTasks = tasks.length;
-    const completedTasks = tasks.filter(task => task.isCompleted).length;
+    const completedTasks = tasks.filter((task) => task.isCompleted).length;
     const pendingTasks = totalTasks - completedTasks;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayTasks = tasks.filter(task =>
-      task.dueDate &&
-      task.dueDate >= today &&
-      task.dueDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
+    const todayTasks = tasks.filter(
+      (task) =>
+        task.dueDate &&
+        task.dueDate >= today &&
+        task.dueDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
     ).length;
 
-    const overdueTasks = tasks.filter(task =>
-      task.dueDate &&
-      task.dueDate < today &&
-      !task.isCompleted
+    const overdueTasks = tasks.filter(
+      (task) => task.dueDate && task.dueDate < today && !task.isCompleted
     ).length;
 
     return {
@@ -242,21 +239,18 @@ export const useTasks = () => {
     try {
       const updatedRaw = await tasksAPI.update(id, { isPinned });
       const updatedTask = normalizeTask(updatedRaw);
-      setTasks(prev =>
-        prev.map(task =>
-          task.id === id
-            ? updatedTask
-            : task
-        )
-      );
+      setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
     } catch (error) {
       console.error('Error pinning task:', error);
     }
   };
 
   // Reorder tasks - SADECE 'ALL' FILTER IÇIN ÇALIŞIR
-  const reorderTasks = async (startIndex: number, endIndex: number, currentFilter: string = 'all') => {
-
+  const reorderTasks = async (
+    startIndex: number,
+    endIndex: number,
+    currentFilter: string = 'all'
+  ) => {
     // Sadece 'all' filter'da drag-drop yapılabilir
     if (currentFilter !== 'all') {
       console.warn('⚠️ Drag-drop sadece "Hepsi" görünümünde çalışır!');
@@ -276,9 +270,8 @@ export const useTasks = () => {
       setTasks(newTasks);
 
       // 4. Backend sıralamasını güncelle
-      await tasksAPI.reorder(newTasks.map(t => t.id));
+      await tasksAPI.reorder(newTasks.map((t) => t.id));
       await loadTasks(true);
-
     } catch (error) {
       console.error('❌ reorderTasks HATASI:', error);
       await loadTasks(true);

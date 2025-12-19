@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, CheckCircle, Circle, Trash2, Edit3, MoreVertical, Search } from 'lucide-react';
+import {
+  Plus,
+  Calendar,
+  CheckCircle,
+  Circle,
+  Trash2,
+  Edit3,
+  MoreVertical,
+  Search
+} from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
@@ -14,13 +23,18 @@ interface TasksNewProps {
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
   const { t } = useTranslation();
   const { tasks, loading, deleteTask, toggleTask, loadTasks } = useTasks();
-  const { taskLists, loading: listsLoading, deleteTaskList, moveTaskToList, refetch: refetchTaskLists } = useTaskLists();
+  const {
+    taskLists,
+    loading: listsLoading,
+    deleteTaskList,
+    moveTaskToList,
+    refetch: refetchTaskLists
+  } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
   const [editingList, setEditingList] = useState<any>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [searchTerm, setSearchTerm] = useState('');
-
 
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -82,19 +96,19 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     }
 
     // Determine target list ID (null for uncategorized)
-    const targetListId = destination.droppableId === 'uncategorized' ? null : destination.droppableId;
+    const targetListId =
+      destination.droppableId === 'uncategorized' ? null : destination.droppableId;
 
     try {
       // 1. Update backend
       await moveTaskToList(draggableId, targetListId, { skipRefresh: true });
 
       // 2. Small delay to ensure storage is fully written
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // 3. Refresh both lists and tasks from storage
       await refetchTaskLists(true);
       await loadTasks(true);
-
     } catch (error) {
       console.error('❌ Failed to move task:', error);
       // Refresh to revert UI to actual storage state
@@ -102,15 +116,14 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     }
   };
 
-
-
   const getTasksByList = (listId: string | null) => {
-    return tasks.filter(task => {
+    return tasks.filter((task) => {
       // Handle Uncategorized (null/undefined listId) vs Specific List
       const taskListId = task.listId;
-      const isListMatch = listId === null
-        ? !taskListId // null or undefined means uncategorized
-        : taskListId === listId;
+      const isListMatch =
+        listId === null
+          ? !taskListId // null or undefined means uncategorized
+          : taskListId === listId;
 
       const matchesList = isListMatch && !task.isDeleted;
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -137,7 +150,9 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
         <div className="flex flex-col gap-6">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">{t('tasks_page.my_tasks')}</h1>
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                {t('tasks_page.my_tasks')}
+              </h1>
               <p className="text-zinc-500 dark:text-zinc-400 mt-1">{t('tasks_page.subtitle')}</p>
             </div>
 
@@ -146,20 +161,22 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
               <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
                 <button
                   onClick={() => setActiveTab('active')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'active'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'active'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
                 >
                   <Circle className="w-4 h-4" />
                   <span>{t('tasks_page.active')}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('completed')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'completed'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                    }`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === 'completed'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>{t('tasks_page.completed')}</span>
@@ -194,13 +211,14 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
       <div className="flex-1 overflow-x-auto overflow-y-hidden px-8 lg:px-10 pb-8">
         <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex h-full gap-8">
-
             {/* Uncategorized List */}
             <div className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <div className="p-5 flex items-center justify-between pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full bg-zinc-400"></div>
-                  <h3 className="font-bold text-zinc-700 dark:text-zinc-300">{t('tasks_page.uncategorized')}</h3>
+                  <h3 className="font-bold text-zinc-700 dark:text-zinc-300">
+                    {t('tasks_page.uncategorized')}
+                  </h3>
                   <span className="bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md text-xs font-bold">
                     {uncategorizedTasks.length}
                   </span>
@@ -212,8 +230,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10' : ''
-                      }`}
+                    className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${
+                      snapshot.isDraggingOver
+                        ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10'
+                        : ''
+                    }`}
                   >
                     {uncategorizedTasks.map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -222,10 +243,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
-                              ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
-                              : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
-                              } ${task.isCompleted ? 'opacity-50' : ''}`}
+                            className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${
+                              snapshot.isDragging
+                                ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
+                                : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
+                            } ${task.isCompleted ? 'opacity-50' : ''}`}
                             style={provided.draggableProps.style}
                           >
                             <div className="flex gap-3">
@@ -235,20 +257,35 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                   e.stopPropagation(); // Prevent drag start when clicking button
                                   handleToggleTask(task.id);
                                 }}
-                                className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${task.isCompleted
-                                  ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
-                                  : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
-                                  }`}
+                                className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                                  task.isCompleted
+                                    ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
+                                    : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
+                                }`}
                                 onMouseDown={(e) => e.stopPropagation()}
                               >
-                                <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
-                                  <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <svg
+                                  width="10"
+                                  height="8"
+                                  viewBox="0 0 10 8"
+                                  fill="none"
+                                  className="transform scale-90"
+                                >
+                                  <path
+                                    d="M1 4L3.5 6.5L9 1"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
                                 </svg>
                               </button>
 
                               {/* Task Content */}
                               <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                <h4
+                                  className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}
+                                >
                                   {task.title}
                                 </h4>
 
@@ -261,10 +298,13 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                 {/* Meta Row - Conditional rendering */}
                                 <div className="flex items-center gap-2 mt-2">
                                   {task.dueDate && (
-                                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${new Date(task.dueDate) < new Date() && !task.isCompleted
-                                      ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                                      : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
-                                      }`}>
+                                    <div
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${
+                                        new Date(task.dueDate) < new Date() && !task.isCompleted
+                                          ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                          : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
+                                      }`}
+                                    >
                                       <Calendar className="w-3 h-3" />
                                       {formatDate(new Date(task.dueDate))}
                                     </div>
@@ -274,21 +314,30 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                 {/* Hover Actions */}
                                 <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-900 pl-2 shadow-[-10px_0_10px_-5px_rgba(255,255,255,1)] dark:shadow-[-10px_0_10px_-5px_rgba(24,24,27,1)]">
                                   <button
-                                    onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onEditTask(task);
+                                    }}
                                     className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                                    onMouseDown={(e) => { e.stopPropagation(); }}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                    }}
                                   >
                                     <Edit3 className="w-3.5 h-3.5" />
                                   </button>
                                   <button
-                                    onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteTask(task.id);
+                                    }}
                                     className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                    onMouseDown={(e) => { e.stopPropagation(); }}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                    }}
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
-
                               </div>
                             </div>
                           </div>
@@ -298,15 +347,18 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                     {provided.placeholder}
 
                     <div
-                      className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${uncategorizedTasks.length === 0 && !snapshot.isDraggingOver
-                        ? 'opacity-100'
-                        : 'opacity-0'
-                        }`}
+                      className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${
+                        uncategorizedTasks.length === 0 && !snapshot.isDraggingOver
+                          ? 'opacity-100'
+                          : 'opacity-0'
+                      }`}
                     >
                       <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
                         <Circle className="w-6 h-6 text-zinc-400/50" />
                       </div>
-                      <p className="text-xs font-medium text-zinc-400/50">{t('tasks_page.empty_list')}</p>
+                      <p className="text-xs font-medium text-zinc-400/50">
+                        {t('tasks_page.empty_list')}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -317,28 +369,44 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
             {taskLists.map((list) => {
               const listTasks = getTasksByList(list.id);
               return (
-                <div key={list.id} className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm group/list">
+                <div
+                  key={list.id}
+                  className="flex-shrink-0 w-[340px] flex flex-col h-full rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm group/list"
+                >
                   <div className="p-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: list.color }}></div>
-                      <h3 className="font-bold text-zinc-700 dark:text-zinc-300 truncate max-w-[150px]">{list.title}</h3>
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: list.color }}
+                      ></div>
+                      <h3 className="font-bold text-zinc-700 dark:text-zinc-300 truncate max-w-[150px]">
+                        {list.title}
+                      </h3>
                       <span className="bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md text-xs font-bold">
                         {listTasks.length}
                       </span>
                     </div>
                     <div className="relative">
                       <button
-                        onClick={() => setActiveListMenu(activeListMenu === list.id ? null : list.id)}
+                        onClick={() =>
+                          setActiveListMenu(activeListMenu === list.id ? null : list.id)
+                        }
                         className="p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
                       {activeListMenu === list.id && (
                         <div className="absolute right-0 top-8 bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl shadow-xl z-50 py-1.5 w-36 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                          <button onClick={() => handleEditList(list)} className="w-full text-left px-4 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                          <button
+                            onClick={() => handleEditList(list)}
+                            className="w-full text-left px-4 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors"
+                          >
                             {t('tasks_page.edit_list')}
                           </button>
-                          <button onClick={() => handleDeleteList(list.id)} className="w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                          <button
+                            onClick={() => handleDeleteList(list.id)}
+                            className="w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          >
                             {t('tasks_page.delete_list')}
                           </button>
                         </div>
@@ -347,13 +415,15 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                   </div>
 
                   <Droppable droppableId={list.id}>
-
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${snapshot.isDraggingOver ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10' : ''
-                          }`}
+                        className={`relative flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar transition-all rounded-b-3xl min-h-[150px] ${
+                          snapshot.isDraggingOver
+                            ? 'bg-zinc-50 dark:bg-zinc-800/50 ring-2 ring-indigo-500/20 dark:ring-indigo-400/10'
+                            : ''
+                        }`}
                       >
                         {listTasks.map((task, index) => (
                           <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -362,10 +432,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${snapshot.isDragging
-                                  ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
-                                  : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
-                                  } ${task.isCompleted ? 'opacity-50' : ''}`}
+                                className={`group relative mb-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${
+                                  snapshot.isDragging
+                                    ? 'shadow-2xl ring-2 ring-zinc-900 dark:ring-white border-transparent'
+                                    : 'border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
+                                } ${task.isCompleted ? 'opacity-50' : ''}`}
                                 style={provided.draggableProps.style}
                               >
                                 <div className="flex gap-3">
@@ -375,20 +446,35 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                       e.stopPropagation(); // Prevent drag start when clicking button
                                       handleToggleTask(task.id);
                                     }}
-                                    className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${task.isCompleted
-                                      ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
-                                      : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
-                                      }`}
+                                    className={`mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                                      task.isCompleted
+                                        ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
+                                        : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-500 text-transparent'
+                                    }`}
                                     onMouseDown={(e) => e.stopPropagation()}
                                   >
-                                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" className="transform scale-90">
-                                      <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <svg
+                                      width="10"
+                                      height="8"
+                                      viewBox="0 0 10 8"
+                                      fill="none"
+                                      className="transform scale-90"
+                                    >
+                                      <path
+                                        d="M1 4L3.5 6.5L9 1"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
                                     </svg>
                                   </button>
 
                                   {/* Task Content */}
                                   <div className="flex-1 min-w-0">
-                                    <h4 className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}>
+                                    <h4
+                                      className={`text-sm font-semibold leading-snug mb-1 ${task.isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-zinc-100'}`}
+                                    >
                                       {task.title}
                                     </h4>
 
@@ -401,10 +487,13 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                     {/* Meta Row - Conditional rendering */}
                                     <div className="flex items-center gap-2 mt-2">
                                       {task.dueDate && (
-                                        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${new Date(task.dueDate) < new Date() && !task.isCompleted
-                                          ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                                          : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
-                                          }`}>
+                                        <div
+                                          className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold ${
+                                            new Date(task.dueDate) < new Date() && !task.isCompleted
+                                              ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                                              : 'bg-zinc-50 text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400'
+                                          }`}
+                                        >
                                           <Calendar className="w-3 h-3" />
                                           {formatDate(new Date(task.dueDate))}
                                         </div>
@@ -414,21 +503,30 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                                     {/* Hover Actions */}
                                     <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white dark:bg-zinc-900 pl-2 shadow-[-10px_0_10px_-5px_rgba(255,255,255,1)] dark:shadow-[-10px_0_10px_-5px_rgba(24,24,27,1)]">
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onEditTask(task);
+                                        }}
                                         className="p-1.5 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                                        onMouseDown={(e) => { e.stopPropagation(); }}
+                                        onMouseDown={(e) => {
+                                          e.stopPropagation();
+                                        }}
                                       >
                                         <Edit3 className="w-3.5 h-3.5" />
                                       </button>
                                       <button
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteTask(task.id);
+                                        }}
                                         className="p-1.5 text-zinc-400 hover:text-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                        onMouseDown={(e) => { e.stopPropagation(); }}
+                                        onMouseDown={(e) => {
+                                          e.stopPropagation();
+                                        }}
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
                                       </button>
                                     </div>
-
                                   </div>
                                 </div>
                               </div>
@@ -438,15 +536,18 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
                         {provided.placeholder}
 
                         <div
-                          className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${listTasks.length === 0 && !snapshot.isDraggingOver
-                            ? 'opacity-100'
-                            : 'opacity-0'
-                            }`}
+                          className={`absolute inset-0 z-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-200 ${
+                            listTasks.length === 0 && !snapshot.isDraggingOver
+                              ? 'opacity-100'
+                              : 'opacity-0'
+                          }`}
                         >
                           <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center mb-2">
                             <Circle className="w-6 h-6 text-zinc-400/50" />
                           </div>
-                          <p className="text-xs font-medium text-zinc-400/50">{t('tasks_page.no_tasks_in_list')}</p>
+                          <p className="text-xs font-medium text-zinc-400/50">
+                            {t('tasks_page.no_tasks_in_list')}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -483,11 +584,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
         {t('tasks_page.new_task')}
       </button>
 
-      <TaskListModal
-        isOpen={showListModal}
-        onClose={closeListModal}
-        editingList={editingList}
-      />
+      <TaskListModal isOpen={showListModal} onClose={closeListModal} editingList={editingList} />
     </div>
   );
 };

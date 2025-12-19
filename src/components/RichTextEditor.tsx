@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import {
-  // Icons removed
-} from 'lucide-react';
+import {} from // Icons removed
+'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
@@ -13,8 +12,8 @@ interface RichTextEditorProps {
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
-  placeholder = "İçeriğinizi yazın...",
-  className = ""
+  placeholder = 'İçeriğinizi yazın...',
+  className = ''
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +40,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const insertLink = () => {
-    const url = prompt('Link URL\'sini girin:');
+    const url = prompt("Link URL'sini girin:");
     if (url) {
       execCommand('createLink', url);
     }
@@ -131,10 +130,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className={`relative border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 flex flex-col ${className}`}>
+    <div
+      className={`relative border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden bg-white dark:bg-zinc-900 flex flex-col ${className}`}
+    >
       {/* Toolbar */}
       {/* Toolbar removed */}
-
 
       {/* Editor */}
       <div

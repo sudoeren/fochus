@@ -31,10 +31,10 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
 
     try {
       setLoading(true);
-      
+
       await addNote({
         title: title.trim() || 'Başlıksız Not',
-        content: content.trim(),
+        content: content.trim()
       });
 
       onClose();
@@ -58,17 +58,17 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
       e.preventDefault();
       const newTag = tagInput.trim().toLowerCase();
       if (!tags.includes(newTag)) {
-        setTags(prev => [...prev, newTag]);
+        setTags((prev) => [...prev, newTag]);
       }
       setTagInput('');
     } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
       e.preventDefault();
-      setTags(prev => prev.slice(0, -1));
+      setTags((prev) => prev.slice(0, -1));
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
   };
 
   const predefinedTags = ['iş', 'kişisel', 'proje', 'toplantı', 'fikir', 'not', 'hatırlatma'];
@@ -140,7 +140,7 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Etiketler
             </label>
-            
+
             {/* Tag Display */}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
@@ -180,13 +180,13 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
             <div className="mt-3">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Hızlı etiketler:</p>
               <div className="flex flex-wrap gap-2">
-                {predefinedTags.map(tag => (
+                {predefinedTags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => {
                       if (!tags.includes(tag)) {
-                        setTags(prev => [...prev, tag]);
+                        setTags((prev) => [...prev, tag]);
                       }
                     }}
                     disabled={tags.includes(tag)}
@@ -202,9 +202,12 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="text-xs text-gray-500 dark:text-gray-400">
-              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">Ctrl+Enter</kbd> ile kaydet
+              <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded text-xs">
+                Ctrl+Enter
+              </kbd>{' '}
+              ile kaydet
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button
                 type="button"

@@ -26,13 +26,13 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   longBreakDuration: 15,
   autoStartBreaks: false,
   autoStartWork: false,
-  longBreakInterval: 4,
+  longBreakInterval: 4
 };
 
 const getDefaultTimes = (settings: PomodoroSettings) => ({
   work: settings.workDuration * 60,
   shortBreak: settings.shortBreakDuration * 60,
-  longBreak: settings.longBreakDuration * 60,
+  longBreak: settings.longBreakDuration * 60
 });
 
 const loadInitialState = (): PomodoroState => {
@@ -149,7 +149,8 @@ const tick = () => {
 
     if (prev.mode === 'work') {
       const newCycles = prev.cycles + 1;
-      const nextMode: TimerMode = newCycles % prev.settings.longBreakInterval === 0 ? 'longBreak' : 'shortBreak';
+      const nextMode: TimerMode =
+        newCycles % prev.settings.longBreakInterval === 0 ? 'longBreak' : 'shortBreak';
       const shouldAutoStart = prev.settings.autoStartBreaks;
       setStoreState(() => ({
         ...prev,

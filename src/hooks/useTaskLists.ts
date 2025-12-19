@@ -80,7 +80,7 @@ export const useTaskLists = () => {
 
   const reorderTaskLists = async (reorderedLists: TaskList[]) => {
     try {
-      await taskListsAPI.reorder(reorderedLists.map(l => l.id));
+      await taskListsAPI.reorder(reorderedLists.map((l) => l.id));
       await fetchTaskLists(true); // Silent refresh
     } catch (error) {
       console.error('Error reordering task lists:', error);
@@ -88,7 +88,11 @@ export const useTaskLists = () => {
     }
   };
 
-  const moveTaskToList = async (taskId: string, targetListId: string | null, options?: { skipRefresh?: boolean }) => {
+  const moveTaskToList = async (
+    taskId: string,
+    targetListId: string | null,
+    options?: { skipRefresh?: boolean }
+  ) => {
     try {
       await tasksAPI.update(taskId, { listId: targetListId });
 

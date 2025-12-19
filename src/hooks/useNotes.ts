@@ -125,9 +125,7 @@ export const useNotes = () => {
       const updated = await notesAPI.update(id, { isPinned });
       const updatedNote = normalizeNote(updated);
 
-      setNotes(prev => prev.map(note =>
-        note.id === id ? updatedNote : note
-      ));
+      setNotes((prev) => prev.map((note) => (note.id === id ? updatedNote : note)));
 
       return updatedNote;
     } catch (error) {
@@ -141,9 +139,10 @@ export const useNotes = () => {
     let filtered = notes;
 
     if (searchTerm) {
-      filtered = filtered.filter(note =>
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.content.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 

@@ -36,7 +36,7 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
   endDate,
   onToggleRecurring,
   onUpdatePattern,
-  className = ""
+  className = ''
 }) => {
   const [localType, setLocalType] = useState<RecurringType>(recurringType);
   const [localInterval, setLocalInterval] = useState(recurringInterval);
@@ -60,9 +60,9 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
 
   const toggleDay = (dayId: number) => {
     const newDays = localDays.includes(dayId)
-      ? localDays.filter(d => d !== dayId)
+      ? localDays.filter((d) => d !== dayId)
       : [...localDays, dayId].sort();
-    
+
     setLocalDays(newDays);
     updatePattern(localType, localInterval, newDays, localEndDate);
   };
@@ -72,7 +72,12 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
     updatePattern(localType, localInterval, localDays, dateStr);
   };
 
-  const updatePattern = (type: RecurringType, interval: number, days: number[], endDateStr: string) => {
+  const updatePattern = (
+    type: RecurringType,
+    interval: number,
+    days: number[],
+    endDateStr: string
+  ) => {
     onUpdatePattern({
       type,
       interval,
@@ -158,9 +163,7 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
 
           {/* Interval */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              Aralık
-            </label>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Aralık</label>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-400">Her</span>
               <input
@@ -178,9 +181,7 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
           {/* Weekly days selection */}
           {localType === 'WEEKLY' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Günler
-              </label>
+              <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Günler</label>
               <div className="grid grid-cols-7 gap-1">
                 {dayNames.map((day) => (
                   <button
@@ -231,9 +232,11 @@ export const RecurringTaskOptions: React.FC<RecurringTaskOptionsProps> = ({
             </div>
             <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
               {localType === 'DAILY' && `Her ${localInterval} günde bir tekrarlanır`}
-              {localType === 'WEEKLY' && `Her ${localInterval} haftada bir ${localDays.map(d => dayNames[d].name).join(', ')} günlerinde tekrarlanır`}
+              {localType === 'WEEKLY' &&
+                `Her ${localInterval} haftada bir ${localDays.map((d) => dayNames[d].name).join(', ')} günlerinde tekrarlanır`}
               {localType === 'MONTHLY' && `Her ${localInterval} ayda bir tekrarlanır`}
-              {localEndDate && ` (${new Date(localEndDate).toLocaleDateString('tr-TR')} tarihine kadar)`}
+              {localEndDate &&
+                ` (${new Date(localEndDate).toLocaleDateString('tr-TR')} tarihine kadar)`}
             </p>
           </div>
         </div>
