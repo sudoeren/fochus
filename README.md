@@ -132,7 +132,9 @@ Projeyi çalıştırmak için **Docker** (önerilen) veya manuel kurulum yöntem
     cp .env.example .env
     cp backend/.env.example backend/.env
     ```
-    *(Gerekirse `.env` dosyalarını kendi ayarlarınıza göre düzenleyin.)*
+    
+    > ⚠️ **Önemli Güvenlik Uyarısı:**
+    > `.env` dosyalarını oluşturduktan sonra, özellikle `JWT_SECRET` değerini tahmin edilmesi zor, rastgele bir karakter dizisiyle **mutlaka değiştirin**. Varsayılan değerler sadece geliştirme ortamı içindir.
 
 3.  **Uygulamayı Başlatın**
     ```bash

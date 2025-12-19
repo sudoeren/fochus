@@ -22,7 +22,13 @@ export const authenticate = async (
     }
 
     const token = authHeader.split(' ')[1];
-    const secret = process.env.JWT_SECRET || 'default-secret';
+    
+    if (!process.env.JWT_SECRET) {
+      console.error('FATAL: JWT_SECRET ortam değişkeni tanımlanmamış!');
+      return res.status(500).json({ error: 'Sunucu yapılandırma hatası' });
+    }
+    
+    const secret = process.env.JWT_SECRET;
 
     const decoded = jwt.verify(token, secret) as { userId: string; username: string };
 
