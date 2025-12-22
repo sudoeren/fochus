@@ -16,8 +16,11 @@ import { NoteEditorPage } from './pages/NoteEditorPage';
 import { setupFastPolling } from './utils/refreshUtils';
 import { cn } from './lib/utils';
 import { authAPI, getAuthToken, setAuthToken } from './services/api';
+import { useIsMobile } from './hooks/useIsMobile';
+import { MobileRestricted } from './pages/MobileRestricted';
 
 const App: React.FC = () => {
+  const isMobile = useIsMobile();
   const { isDark } = useTheme();
   const [activeView, setActiveView] = useState(
     () => localStorage.getItem('activeView') || 'dashboard'
@@ -268,6 +271,11 @@ const App: React.FC = () => {
         );
     }
   };
+
+  // Mobile Check
+  if (isMobile) {
+    return <MobileRestricted />;
+  }
 
   if (!authChecked && getAuthToken()) {
     return (
