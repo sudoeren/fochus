@@ -59,12 +59,17 @@ const App: React.FC = () => {
       const saved = localStorage.getItem('sidebarMode');
       if (saved) setSidebarMode(saved as SidebarMode);
     };
+
+    const handleSidebarModeEvent = (e: Event) => {
+      const next = (e as CustomEvent).detail as SidebarMode | undefined;
+      if (next) setSidebarMode(next);
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    // Also check periodically for same-tab changes
-    const interval = setInterval(handleStorageChange, 100);
+    window.addEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
+      window.removeEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
     };
   }, []);
 

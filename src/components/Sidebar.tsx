@@ -62,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     localStorage.setItem('sidebarMode', sidebarMode);
+    window.dispatchEvent(new CustomEvent('sidebar:mode', { detail: sidebarMode }));
   }, [sidebarMode]);
 
   const cycleSidebarMode = () => {

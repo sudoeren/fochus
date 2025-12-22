@@ -125,6 +125,7 @@ const SettingsTab = ({
 // 1. Profile Section (Updated - Compact)
 const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const { t, i18n } = useTranslation();
+  const { isDark } = useTheme();
   const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(true); // Default to true
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -307,6 +308,9 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const isCustomBg =
     bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
 
+  const showLightBg = bgImage === 'light' || (bgImage === 'default' && !isDark);
+  const showDarkBg = bgImage === 'dark' || (bgImage === 'default' && isDark);
+
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4">
       {/* User Card */}
@@ -336,7 +340,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                 src="/light.png"
                 className={cn(
                   'absolute inset-0 w-full h-full object-cover transition-opacity',
-                  bgImage === 'light' ? 'opacity-50' : 'opacity-0'
+                  showLightBg ? 'opacity-50' : 'opacity-0'
                 )}
                 alt="Light BG"
               />
@@ -344,7 +348,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                 src="/dark.png"
                 className={cn(
                   'absolute inset-0 w-full h-full object-cover transition-opacity',
-                  bgImage === 'dark' ? 'opacity-50' : 'opacity-0'
+                  showDarkBg ? 'opacity-50' : 'opacity-0'
                 )}
                 alt="Dark BG"
               />
