@@ -37,6 +37,9 @@ interface SidebarProps {
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
   onOpenPomodoro: () => void;
+  sidebarMode: SidebarMode;
+  onSidebarModeChange: (mode: SidebarMode) => void;
+  onSidebarHoverExpandedChange: (expanded: boolean) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -45,38 +48,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSpotlight,
   onOpenNoteModal,
   onOpenTaskModal,
-  onOpenPomodoro
+  onOpenPomodoro,
+  sidebarMode,
+  onSidebarModeChange,
+  onSidebarHoverExpandedChange
 }) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
-  
-  // Sidebar mode: 'open' | 'closed' | 'hover'
-  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(() => {
-    const saved = localStorage.getItem('sidebarMode');
-    return (saved as SidebarMode) || 'open';
-  });
   const [isHovered, setIsHovered] = useState(false);
 
   const isCompact = sidebarMode === 'hover' && !isHovered;
 
   useEffect(() => {
-    localStorage.setItem('sidebarMode', sidebarMode);
-    window.dispatchEvent(new CustomEvent('sidebar:mode', { detail: sidebarMode }));
-
     if (sidebarMode !== 'hover') {
       setIsHovered(false);
-      window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: false }));
+      onSidebarHoverExpandedChange(false);
     }
-  }, [sidebarMode]);
+  }, [sidebarMode, onSidebarHoverExpandedChange]);
 
   const cycleSidebarMode = () => {
     const modes: SidebarMode[] = ['open', 'hover', 'closed'];
     const currentIndex = modes.indexOf(sidebarMode);
     const nextIndex = (currentIndex + 1) % modes.length;
-    setSidebarMode(modes[nextIndex]);
+    onSidebarModeChange(modes[nextIndex]);
   };
 
   const getSidebarModeIcon = () => {
@@ -100,9 +97,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         return t('sidebar.mode_hover') || 'Hover';
     }
   };
-
-  // Calculate whether sidebar should be visible
-  const isSidebarVisible = sidebarMode === 'open' || (sidebarMode === 'hover' && isHovered);
 
   const mainNav = [
     { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
@@ -128,11 +122,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-3 h-0.5 bg-zinc-800 dark:bg-zinc-200" />
       </button>
 
-      {/* Desktop Sidebar Toggle Button - visible when fully closed */}
+      {/* Desktop reopen button when fully closed */}
       {sidebarMode === 'closed' && (
-        <div 
-          className="hidden lg:block fixed top-4 left-4 z-50"
-        >
+        <div className="hidden lg:block fixed top-4 left-4 z-50">
           <button
             onClick={cycleSidebarMode}
             className="p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
@@ -151,26 +143,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Sidebar Container - Always Open, Floating Style */}
+      {/* Sidebar Container */}
       <aside
         className={cn(
           'fixed top-4 bottom-4 left-4 z-40 w-[300px] flex flex-col transition-all duration-300 ease-spring',
-          // Mobile behavior: Slide in/out
-          mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+16px)] lg:translate-x-0',
-          // Desktop behavior: closed hides completely
-          sidebarMode === 'closed' ? 'lg:-translate-x-[calc(100%+16px)]' : 'lg:translate-x-0',
+          // Mobile: slide in/out
+          mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+16px)]',
+          // Desktop: visible unless fully closed
+          'lg:translate-x-0',
+          sidebarMode === 'closed' && 'lg:hidden',
           // Desktop width behavior: hover mode becomes a compact strip and expands on hover
           sidebarMode === 'hover' ? (isHovered ? 'lg:w-[300px]' : 'lg:w-20') : 'lg:w-[300px]'
         )}
         onMouseEnter={() => {
           if (sidebarMode !== 'hover') return;
           setIsHovered(true);
-          window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: true }));
+          onSidebarHoverExpandedChange(true);
         }}
         onMouseLeave={() => {
           if (sidebarMode !== 'hover') return;
           setIsHovered(false);
-          window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: false }));
+          onSidebarHoverExpandedChange(false);
         }}
       >
         <div
@@ -246,7 +239,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
 
           {/* 3. Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto px-5 py-2 space-y-1 custom-scrollbar">
+          <nav
+            className={cn(
+              'flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar',
+              isCompact ? 'px-2' : 'px-5'
+            )}
+          >
             {mainNav.map((item) => {
               const Icon = item.icon;
               const active = activeView === item.id;
@@ -262,6 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }
                     setMobileOpen(false);
                   }}
+                  title={isCompact ? item.label : undefined}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                     isCompact && 'justify-center px-2',
@@ -291,6 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onViewChange('settings');
                 setMobileOpen(false);
               }}
+              title={isCompact ? t('sidebar.settings') : undefined}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                 isCompact && 'justify-center px-2',
@@ -314,6 +314,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onViewChange('trash');
                 setMobileOpen(false);
               }}
+              title={isCompact ? t('sidebar.trash') : undefined}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                 isCompact && 'justify-center px-2',

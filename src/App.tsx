@@ -55,35 +55,9 @@ const App: React.FC = () => {
 
   const [sidebarHoverExpanded, setSidebarHoverExpanded] = useState(false);
 
-  // Listen for sidebar mode changes
   useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('sidebarMode');
-      if (saved) setSidebarMode(saved as SidebarMode);
-    };
-
-    const handleSidebarModeEvent = (e: Event) => {
-      const next = (e as CustomEvent).detail as SidebarMode | undefined;
-      if (next) {
-        setSidebarMode(next);
-        if (next !== 'hover') setSidebarHoverExpanded(false);
-      }
-    };
-
-    const handleSidebarHoverEvent = (e: Event) => {
-      const expanded = Boolean((e as CustomEvent).detail);
-      setSidebarHoverExpanded(expanded);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
-    window.addEventListener('sidebar:hover', handleSidebarHoverEvent as EventListener);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
-      window.removeEventListener('sidebar:hover', handleSidebarHoverEvent as EventListener);
-    };
-  }, []);
+    localStorage.setItem('sidebarMode', sidebarMode);
+  }, [sidebarMode]);
 
   // Persist background choice
   const handleBgChange = (newBg: string) => {
@@ -375,6 +349,12 @@ const App: React.FC = () => {
         onOpenNoteModal={() => setShowNoteModal(true)}
         onOpenTaskModal={() => setShowTaskModal(true)}
         onOpenPomodoro={() => setShowPomodoroModal(true)}
+        sidebarMode={sidebarMode}
+        onSidebarModeChange={(mode) => {
+          setSidebarMode(mode);
+          if (mode !== 'hover') setSidebarHoverExpanded(false);
+        }}
+        onSidebarHoverExpandedChange={setSidebarHoverExpanded}
       />
 
       {/* Main Content Area - With Padding for Sidebar */}

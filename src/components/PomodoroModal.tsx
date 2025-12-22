@@ -116,7 +116,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
         <div
-          className="relative w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden"
+          className="relative w-full max-w-4xl max-h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -138,226 +138,232 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
             </button>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
-            {/* Duration Settings */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                {t('pomodoro.durations')}
-              </h3>
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Left column */}
+              <div className="space-y-4">
+                {/* Duration Settings */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    {t('pomodoro.durations')}
+                  </h3>
 
-              {/* Work Duration */}
-              <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
-                    <Zap className="w-5 h-5" />
+                  {/* Work Duration */}
+                  <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl text-red-600 dark:text-red-400">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.focus_duration')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          updateSettings({ workDuration: Math.max(1, settings.workDuration - 5) })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                      <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
+                        {settings.workDuration}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateSettings({ workDuration: Math.min(120, settings.workDuration + 5) })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                    </div>
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.focus_duration')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateSettings({ workDuration: Math.max(1, settings.workDuration - 5) })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
-                    {settings.workDuration}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateSettings({ workDuration: Math.min(120, settings.workDuration + 5) })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                </div>
-              </div>
 
-              {/* Short Break */}
-              <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
-                    <Coffee className="w-5 h-5" />
+                  {/* Short Break */}
+                  <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                        <Coffee className="w-4 h-4" />
+                      </div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.short_break')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            shortBreakDuration: Math.max(1, settings.shortBreakDuration - 1)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                      <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
+                        {settings.shortBreakDuration}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            shortBreakDuration: Math.min(30, settings.shortBreakDuration + 1)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                    </div>
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.short_break')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        shortBreakDuration: Math.max(1, settings.shortBreakDuration - 1)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
-                    {settings.shortBreakDuration}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        shortBreakDuration: Math.min(30, settings.shortBreakDuration + 1)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                </div>
-              </div>
 
-              {/* Long Break */}
-              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
-                    <Brain className="w-5 h-5" />
+                  {/* Long Break */}
+                  <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                        <Brain className="w-4 h-4" />
+                      </div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.long_break')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            longBreakDuration: Math.max(1, settings.longBreakDuration - 5)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                      <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
+                        {settings.longBreakDuration}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            longBreakDuration: Math.min(60, settings.longBreakDuration + 5)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                    </div>
                   </div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.long_break')}
-                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        longBreakDuration: Math.max(1, settings.longBreakDuration - 5)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                  <span className="w-12 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
-                    {settings.longBreakDuration}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        longBreakDuration: Math.min(60, settings.longBreakDuration + 5)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
+
+                {/* Auto-start Settings */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    {t('pomodoro.automation')}
+                  </h3>
+
+                  <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                    <div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.auto_start_breaks')}
+                      </span>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {t('pomodoro.auto_start_breaks_desc')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        updateSettings({ autoStartBreaks: !settings.autoStartBreaks })
+                      }
+                      className={cn(
+                        'w-12 h-7 rounded-full p-1 transition-colors duration-300',
+                        settings.autoStartBreaks ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
+                          settings.autoStartBreaks ? 'translate-x-5' : 'translate-x-0'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                    <div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.auto_start_work')}
+                      </span>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {t('pomodoro.auto_start_work_desc')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => updateSettings({ autoStartWork: !settings.autoStartWork })}
+                      className={cn(
+                        'w-12 h-7 rounded-full p-1 transition-colors duration-300',
+                        settings.autoStartWork ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
+                          settings.autoStartWork ? 'translate-x-5' : 'translate-x-0'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                    <div>
+                      <span className="font-medium text-zinc-900 dark:text-white">
+                        {t('pomodoro.long_break_interval')}
+                      </span>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {t('pomodoro.long_break_interval_desc')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            longBreakInterval: Math.max(2, settings.longBreakInterval - 1)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                      <span className="w-8 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
+                        {settings.longBreakInterval}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateSettings({
+                            longBreakInterval: Math.min(10, settings.longBreakInterval + 1)
+                          })
+                        }
+                        className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Auto-start Settings */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                {t('pomodoro.automation')}
-              </h3>
-
-              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
-                <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.auto_start_breaks')}
-                  </span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {t('pomodoro.auto_start_breaks_desc')}
-                  </p>
-                </div>
-                <button
-                  onClick={() => updateSettings({ autoStartBreaks: !settings.autoStartBreaks })}
-                  className={cn(
-                    'w-12 h-7 rounded-full p-1 transition-colors duration-300',
-                    settings.autoStartBreaks ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
-                      settings.autoStartBreaks ? 'translate-x-5' : 'translate-x-0'
-                    )}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
-                <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.auto_start_work')}
-                  </span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {t('pomodoro.auto_start_work_desc')}
-                  </p>
-                </div>
-                <button
-                  onClick={() => updateSettings({ autoStartWork: !settings.autoStartWork })}
-                  className={cn(
-                    'w-12 h-7 rounded-full p-1 transition-colors duration-300',
-                    settings.autoStartWork ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
-                      settings.autoStartWork ? 'translate-x-5' : 'translate-x-0'
-                    )}
-                  />
-                </button>
-              </div>
-
-              {/* Long Break Interval */}
-              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
-                <div>
-                  <span className="font-medium text-zinc-900 dark:text-white">
-                    {t('pomodoro.long_break_interval')}
-                  </span>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {t('pomodoro.long_break_interval_desc')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        longBreakInterval: Math.max(2, settings.longBreakInterval - 1)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Minus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                  <span className="w-8 text-center font-mono font-bold text-lg text-zinc-900 dark:text-white">
-                    {settings.longBreakInterval}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateSettings({
-                        longBreakInterval: Math.min(10, settings.longBreakInterval + 1)
-                      })
-                    }
-                    className="p-2 bg-white dark:bg-zinc-800 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
-                  >
-                    <Plus className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Sound & Notification Settings */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                {t('pomodoro.sounds_notifications') || 'Ses & Bildirimler'}
-              </h3>
+              {/* Right column */}
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    {t('pomodoro.sounds_notifications') || 'Ses & Bildirimler'}
+                  </h3>
 
               {/* End Sound */}
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl space-y-3">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
-                    <Bell className="w-5 h-5" />
+                    <Bell className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="font-medium text-zinc-900 dark:text-white">
@@ -387,11 +393,11 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
               </div>
 
               {/* Halfway Warning */}
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl space-y-3">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-orange-600 dark:text-orange-400">
-                      <BellRing className="w-5 h-5" />
+                      <BellRing className="w-4 h-4" />
                     </div>
                     <div>
                       <span className="font-medium text-zinc-900 dark:text-white">
@@ -438,10 +444,10 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
               </div>
 
               {/* Push Notifications */}
-              <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl">
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
-                    <Volume2 className="w-5 h-5" />
+                    <Volume2 className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="font-medium text-zinc-900 dark:text-white">
@@ -466,6 +472,8 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                     )}
                   />
                 </button>
+              </div>
+                </div>
               </div>
             </div>
           </div>
