@@ -116,7 +116,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200">
         <div
-          className="relative w-full max-w-lg max-h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden"
+          className="relative w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

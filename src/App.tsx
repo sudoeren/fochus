@@ -53,6 +53,8 @@ const App: React.FC = () => {
     return (saved as SidebarMode) || 'open';
   });
 
+  const [sidebarHoverExpanded, setSidebarHoverExpanded] = useState(false);
+
   // Listen for sidebar mode changes
   useEffect(() => {
     const handleStorageChange = () => {
@@ -62,14 +64,24 @@ const App: React.FC = () => {
 
     const handleSidebarModeEvent = (e: Event) => {
       const next = (e as CustomEvent).detail as SidebarMode | undefined;
-      if (next) setSidebarMode(next);
+      if (next) {
+        setSidebarMode(next);
+        if (next !== 'hover') setSidebarHoverExpanded(false);
+      }
+    };
+
+    const handleSidebarHoverEvent = (e: Event) => {
+      const expanded = Boolean((e as CustomEvent).detail);
+      setSidebarHoverExpanded(expanded);
     };
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
+    window.addEventListener('sidebar:hover', handleSidebarHoverEvent as EventListener);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('sidebar:mode', handleSidebarModeEvent as EventListener);
+      window.removeEventListener('sidebar:hover', handleSidebarHoverEvent as EventListener);
     };
   }, []);
 
@@ -369,7 +381,13 @@ const App: React.FC = () => {
       <main
         className={cn(
           'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
-          sidebarMode === 'open' ? 'lg:pl-[320px]' : 'lg:pl-4'
+          sidebarMode === 'open'
+            ? 'lg:pl-[320px]'
+            : sidebarMode === 'hover'
+              ? sidebarHoverExpanded
+                ? 'lg:pl-[320px]'
+                : 'lg:pl-[96px]'
+              : 'lg:pl-4'
         )}
       >
         {renderView()}

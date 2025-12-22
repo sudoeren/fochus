@@ -60,9 +60,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   });
   const [isHovered, setIsHovered] = useState(false);
 
+  const isCompact = sidebarMode === 'hover' && !isHovered;
+
   useEffect(() => {
     localStorage.setItem('sidebarMode', sidebarMode);
     window.dispatchEvent(new CustomEvent('sidebar:mode', { detail: sidebarMode }));
+
+    if (sidebarMode !== 'hover') {
+      setIsHovered(false);
+      window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: false }));
+    }
   }, [sidebarMode]);
 
   const cycleSidebarMode = () => {
@@ -121,11 +128,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-3 h-0.5 bg-zinc-800 dark:bg-zinc-200" />
       </button>
 
-      {/* Desktop Sidebar Toggle Button - Always visible */}
-      {sidebarMode !== 'open' && (
+      {/* Desktop Sidebar Toggle Button - visible when fully closed */}
+      {sidebarMode === 'closed' && (
         <div 
           className="hidden lg:block fixed top-4 left-4 z-50"
-          onMouseEnter={() => sidebarMode === 'hover' && setIsHovered(true)}
         >
           <button
             onClick={cycleSidebarMode}
@@ -145,26 +151,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Hover detection area for hover mode */}
-      {sidebarMode === 'hover' && !isHovered && (
-        <div 
-          className="hidden lg:block fixed top-0 left-0 bottom-0 w-4 z-40"
-          onMouseEnter={() => setIsHovered(true)}
-        />
-      )}
-
       {/* Sidebar Container - Always Open, Floating Style */}
       <aside
         className={cn(
           'fixed top-4 bottom-4 left-4 z-40 w-[300px] flex flex-col transition-all duration-300 ease-spring',
           // Mobile behavior: Slide in/out
           mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+16px)] lg:translate-x-0',
-          // Desktop behavior based on mode
-          sidebarMode === 'closed' && 'lg:-translate-x-[calc(100%+16px)]',
-          sidebarMode === 'hover' && !isHovered && 'lg:-translate-x-[calc(100%+16px)]',
-          sidebarMode === 'hover' && isHovered && 'lg:translate-x-0'
+          // Desktop behavior: closed hides completely
+          sidebarMode === 'closed' ? 'lg:-translate-x-[calc(100%+16px)]' : 'lg:translate-x-0',
+          // Desktop width behavior: hover mode becomes a compact strip and expands on hover
+          sidebarMode === 'hover' ? (isHovered ? 'lg:w-[300px]' : 'lg:w-20') : 'lg:w-[300px]'
         )}
-        onMouseLeave={() => sidebarMode === 'hover' && setIsHovered(false)}
+        onMouseEnter={() => {
+          if (sidebarMode !== 'hover') return;
+          setIsHovered(true);
+          window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: true }));
+        }}
+        onMouseLeave={() => {
+          if (sidebarMode !== 'hover') return;
+          setIsHovered(false);
+          window.dispatchEvent(new CustomEvent('sidebar:hover', { detail: false }));
+        }}
       >
         <div
           className={cn(
@@ -172,17 +179,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         >
           {/* 1. Header (Custom Logo) */}
-          <div className="h-24 flex items-center justify-between px-6 shrink-0">
-            <div className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Fokus Logo" className="h-10 w-10 object-contain" />
-              <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
-                FOCHUS
-              </span>
+          <div
+            className={cn(
+              'h-24 flex items-center justify-between px-6 shrink-0',
+              isCompact && 'px-3'
+            )}
+          >
+            <div className={cn('flex items-center gap-3', isCompact && 'justify-center w-full')}> 
+              <img
+                src="/logo.svg"
+                alt="Fokus Logo"
+                className={cn('h-10 w-10 object-contain', isCompact && 'h-9 w-9')}
+              />
+              {!isCompact && (
+                <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
+                  FOCHUS
+                </span>
+              )}
             </div>
             {/* Sidebar Mode Toggle Button */}
             <button
               onClick={cycleSidebarMode}
-              className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+              className={cn(
+                'p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group',
+                isCompact && 'absolute top-4 right-3'
+              )}
               title={getSidebarModeLabel()}
             >
               <ModeIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300" />
@@ -190,6 +211,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* 2. Quick Actions */}
+          {!isCompact && (
           <div className="px-5 mb-1 space-y-4">
             <button
               onClick={onOpenSpotlight}
@@ -221,6 +243,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </div>
           </div>
+          )}
 
           {/* 3. Navigation Menu */}
           <nav className="flex-1 overflow-y-auto px-5 py-2 space-y-1 custom-scrollbar">
@@ -241,6 +264,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
+                    isCompact && 'justify-center px-2',
                     active
                       ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -254,7 +278,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         : 'text-zinc-400 group-hover:text-zinc-600'
                     )}
                   />
-                  <span>{item.label}</span>
+                  {!isCompact && <span>{item.label}</span>}
                 </button>
               );
             })}
@@ -269,6 +293,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
+                isCompact && 'justify-center px-2',
                 activeView === 'settings'
                   ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -282,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'text-zinc-400 group-hover:text-zinc-600'
                 )}
               />
-              <span>{t('sidebar.settings')}</span>
+              {!isCompact && <span>{t('sidebar.settings')}</span>}
             </button>
             <button
               onClick={() => {
@@ -291,6 +316,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
+                isCompact && 'justify-center px-2',
                 activeView === 'trash'
                   ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -304,11 +330,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'text-zinc-400 group-hover:text-zinc-600'
                 )}
               />
-              <span>{t('sidebar.trash')}</span>
+              {!isCompact && <span>{t('sidebar.trash')}</span>}
             </button>
           </nav>
 
           {/* 4. Functional Widgets Area */}
+          {!isCompact && (
           <div className="flex flex-col gap-4 px-4 pb-6 mt-2">
             {/* Functional Tasks Widget */}
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col gap-3">
@@ -405,6 +432,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
           </div>
+          )}
         </div>
       </aside>
     </>
