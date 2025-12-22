@@ -60,7 +60,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const isCompact = sidebarMode === 'hover' && !isHovered;
+  // On mobile we don't have true hover; always show the full sidebar when opened.
+  const isCompact = sidebarMode === 'hover' && !isHovered && !mobileOpen;
 
   useEffect(() => {
     if (sidebarMode !== 'hover') {
@@ -171,40 +172,138 @@ export const Sidebar: React.FC<SidebarProps> = ({
             'h-full flex flex-col bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-[24px] border border-white/20 dark:border-zinc-800/50 shadow-2xl shadow-zinc-200/20 dark:shadow-black/50 overflow-hidden relative'
           )}
         >
-          {/* 1. Header (Custom Logo) */}
-          <div
-            className={cn(
-              'h-24 flex items-center justify-between px-6 shrink-0',
-              isCompact && 'px-3'
-            )}
-          >
-            <div className={cn('flex items-center gap-3', isCompact && 'justify-center w-full')}> 
-              <img
-                src="/logo.svg"
-                alt="Fokus Logo"
-                className={cn('h-10 w-10 object-contain', isCompact && 'h-9 w-9')}
-              />
-              {!isCompact && (
-                <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
-                  FOCHUS
-                </span>
-              )}
-            </div>
-            {/* Sidebar Mode Toggle Button */}
-            <button
-              onClick={cycleSidebarMode}
-              className={cn(
-                'p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group',
-                isCompact && 'absolute top-4 right-3'
-              )}
-              title={getSidebarModeLabel()}
-            >
-              <ModeIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300" />
-            </button>
-          </div>
+          {isCompact ? (
+            // Compact icon dock (hover-collapsed)
+            <div className="h-full flex flex-col items-center py-4">
+              <button
+                onClick={() => {
+                  onViewChange('dashboard');
+                  setMobileOpen(false);
+                }}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white/70 dark:hover:bg-zinc-900/60 transition-colors"
+                title="FOCHUS"
+              >
+                <img src="/logo.svg" alt="Fokus Logo" className="h-9 w-9 object-contain" />
+              </button>
 
-          {/* 2. Quick Actions */}
-          {!isCompact && (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <button
+                  onClick={onOpenSpotlight}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-white/70 dark:hover:bg-zinc-900/60 transition-colors"
+                  title={t('sidebar.quick_search') + ' ( / )'}
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="my-4 w-10 border-t border-zinc-200/60 dark:border-zinc-800/70" />
+
+              <nav className="flex-1 w-full px-2 flex flex-col items-center gap-2 overflow-y-auto custom-scrollbar">
+                {mainNav.map((item) => {
+                  const Icon = item.icon;
+                  const active = activeView === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        if (item.id === 'timer') {
+                          onOpenPomodoro();
+                        } else {
+                          onViewChange(item.id);
+                        }
+                        setMobileOpen(false);
+                      }}
+                      title={item.label}
+                      className={cn(
+                        'w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative',
+                        active
+                          ? 'bg-white/80 dark:bg-zinc-900/70 text-zinc-900 dark:text-white'
+                          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-zinc-900/60'
+                      )}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {active && (
+                        <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-indigo-500" />
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="my-4 w-10 border-t border-zinc-200/60 dark:border-zinc-800/70" />
+
+              <div className="w-full px-2 flex flex-col items-center gap-2">
+                <button
+                  onClick={() => {
+                    onViewChange('settings');
+                    setMobileOpen(false);
+                  }}
+                  title={t('sidebar.settings')}
+                  className={cn(
+                    'w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative',
+                    activeView === 'settings'
+                      ? 'bg-white/80 dark:bg-zinc-900/70 text-zinc-900 dark:text-white'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-zinc-900/60'
+                  )}
+                >
+                  <Settings className="w-5 h-5" />
+                  {activeView === 'settings' && (
+                    <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-indigo-500" />
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    onViewChange('trash');
+                    setMobileOpen(false);
+                  }}
+                  title={t('sidebar.trash')}
+                  className={cn(
+                    'w-11 h-11 rounded-xl flex items-center justify-center transition-colors relative',
+                    activeView === 'trash'
+                      ? 'bg-white/80 dark:bg-zinc-900/70 text-zinc-900 dark:text-white'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-zinc-900/60'
+                  )}
+                >
+                  <Trash2 className="w-5 h-5" />
+                  {activeView === 'trash' && (
+                    <span className="absolute -right-0.5 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-indigo-500" />
+                  )}
+                </button>
+              </div>
+
+              <div className="mt-4">
+                <button
+                  onClick={cycleSidebarMode}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-zinc-900/60 transition-colors group"
+                  title={getSidebarModeLabel()}
+                >
+                  <ModeIcon className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* 1. Header (Custom Logo) */}
+              <div className="h-24 flex items-center justify-between px-6 shrink-0">
+                <div className="flex items-center gap-3">
+                  <img src="/logo.svg" alt="Fokus Logo" className="h-10 w-10 object-contain" />
+                  <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
+                    FOCHUS
+                  </span>
+                </div>
+                {/* Sidebar Mode Toggle Button */}
+                <button
+                  onClick={cycleSidebarMode}
+                  className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+                  title={getSidebarModeLabel()}
+                >
+                  <ModeIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300" />
+                </button>
+              </div>
+
+              {/* 2. Quick Actions */}
           <div className="px-5 mb-1 space-y-4">
             <button
               onClick={onOpenSpotlight}
@@ -236,15 +335,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             </div>
           </div>
-          )}
+ 
 
           {/* 3. Navigation Menu */}
-          <nav
-            className={cn(
-              'flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar',
-              isCompact ? 'px-2' : 'px-5'
-            )}
-          >
+              {/* 3. Navigation Menu */}
+              <nav className="flex-1 overflow-y-auto py-2 space-y-1 custom-scrollbar px-5">
             {mainNav.map((item) => {
               const Icon = item.icon;
               const active = activeView === item.id;
@@ -263,7 +358,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title={isCompact ? item.label : undefined}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
-                    isCompact && 'justify-center px-2',
                     active
                       ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -277,7 +371,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         : 'text-zinc-400 group-hover:text-zinc-600'
                     )}
                   />
-                  {!isCompact && <span>{item.label}</span>}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
@@ -293,7 +387,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               title={isCompact ? t('sidebar.settings') : undefined}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
-                isCompact && 'justify-center px-2',
                 activeView === 'settings'
                   ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -307,7 +400,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'text-zinc-400 group-hover:text-zinc-600'
                 )}
               />
-              {!isCompact && <span>{t('sidebar.settings')}</span>}
+              <span>{t('sidebar.settings')}</span>
             </button>
             <button
               onClick={() => {
@@ -317,7 +410,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               title={isCompact ? t('sidebar.trash') : undefined}
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
-                isCompact && 'justify-center px-2',
                 activeView === 'trash'
                   ? 'text-zinc-900 dark:text-white font-bold drop-shadow-md'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
@@ -331,12 +423,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     : 'text-zinc-400 group-hover:text-zinc-600'
                 )}
               />
-              {!isCompact && <span>{t('sidebar.trash')}</span>}
+              <span>{t('sidebar.trash')}</span>
             </button>
           </nav>
 
-          {/* 4. Functional Widgets Area */}
-          {!isCompact && (
+              {/* 4. Functional Widgets Area */}
           <div className="flex flex-col gap-4 px-4 pb-6 mt-2">
             {/* Functional Tasks Widget */}
             <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col gap-3">
@@ -433,6 +524,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
           </div>
+            </>
           )}
         </div>
       </aside>
