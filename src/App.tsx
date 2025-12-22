@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, SidebarMode } from './components/Sidebar';
 import { useTheme } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
 import { NewNoteWindow } from './components/NewNoteWindow';
@@ -46,6 +46,27 @@ const App: React.FC = () => {
     const stored = localStorage.getItem('isSpotlightEnabled');
     return stored === null ? true : stored === 'true';
   });
+
+  // Sidebar mode state for main content adjustment
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(() => {
+    const saved = localStorage.getItem('sidebarMode');
+    return (saved as SidebarMode) || 'open';
+  });
+
+  // Listen for sidebar mode changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('sidebarMode');
+      if (saved) setSidebarMode(saved as SidebarMode);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    // Also check periodically for same-tab changes
+    const interval = setInterval(handleStorageChange, 100);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Persist background choice
   const handleBgChange = (newBg: string) => {
@@ -147,6 +168,26 @@ const App: React.FC = () => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
 
+      // ESC key to close modals
+      if (e.key === 'Escape') {
+        if (isSpotlightOpen) {
+          setIsSpotlightOpen(false);
+          return;
+        }
+        if (showNoteModal) {
+          setShowNoteModal(false);
+          return;
+        }
+        if (showTaskModal) {
+          closeTaskModal();
+          return;
+        }
+        if (showPomodoroModal) {
+          setShowPomodoroModal(false);
+          return;
+        }
+      }
+
       if (isSpotlightEnabled && e.key === '/' && !isInputActive) {
         e.preventDefault();
         setIsSpotlightOpen(true);
@@ -165,7 +206,7 @@ const App: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, []);
+  }, [isSpotlightOpen, showNoteModal, showTaskModal, showPomodoroModal, isSpotlightEnabled]);
 
   const renderView = () => {
     switch (activeView) {
@@ -322,7 +363,8 @@ const App: React.FC = () => {
       {/* Main Content Area - With Padding for Sidebar */}
       <main
         className={cn(
-          'relative z-10 flex-1 min-h-screen lg:pl-[320px] transition-all duration-300 overflow-y-auto'
+          'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
+          sidebarMode === 'open' ? 'lg:pl-[320px]' : 'lg:pl-4'
         )}
       >
         {renderView()}
@@ -354,18 +396,11 @@ const App: React.FC = () => {
       )}
 
       {showTaskModal && (
-        <NewTaskWindow
-          isOpen={showTaskModal}
-          onClose={closeTaskModal}
-          initialData={editingTask}
-        />
+        <NewTaskWindow isOpen={showTaskModal} onClose={closeTaskModal} initialData={editingTask} />
       )}
 
       {showPomodoroModal && (
-        <PomodoroModal
-          isOpen={showPomodoroModal}
-          onClose={() => setShowPomodoroModal(false)}
-        />
+        <PomodoroModal isOpen={showPomodoroModal} onClose={() => setShowPomodoroModal(false)} />
       )}
     </div>
   );

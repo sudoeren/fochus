@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Home,
   FileText,
@@ -17,13 +17,18 @@ import {
   ChevronRight,
   CheckCircle2,
   Circle,
-  Zap
+  Zap,
+  PanelLeftClose,
+  PanelLeft,
+  MousePointer
 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+
+export type SidebarMode = 'open' | 'closed' | 'hover';
 
 interface SidebarProps {
   activeView: string;
@@ -47,6 +52,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Sidebar mode: 'open' | 'closed' | 'hover'
+  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(() => {
+    const saved = localStorage.getItem('sidebarMode');
+    return (saved as SidebarMode) || 'open';
+  });
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('sidebarMode', sidebarMode);
+  }, [sidebarMode]);
+
+  const cycleSidebarMode = () => {
+    const modes: SidebarMode[] = ['open', 'hover', 'closed'];
+    const currentIndex = modes.indexOf(sidebarMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    setSidebarMode(modes[nextIndex]);
+  };
+
+  const getSidebarModeIcon = () => {
+    switch (sidebarMode) {
+      case 'open':
+        return PanelLeft;
+      case 'closed':
+        return PanelLeftClose;
+      case 'hover':
+        return MousePointer;
+    }
+  };
+
+  const getSidebarModeLabel = () => {
+    switch (sidebarMode) {
+      case 'open':
+        return t('sidebar.mode_open') || 'Açık';
+      case 'closed':
+        return t('sidebar.mode_closed') || 'Kapalı';
+      case 'hover':
+        return t('sidebar.mode_hover') || 'Hover';
+    }
+  };
+
+  // Calculate whether sidebar should be visible
+  const isSidebarVisible = sidebarMode === 'open' || (sidebarMode === 'hover' && isHovered);
 
   const mainNav = [
     { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
@@ -57,6 +105,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Filter pending tasks for the widget (Show top 4)
   const currentTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 4);
+
+  const ModeIcon = getSidebarModeIcon();
 
   return (
     <>
@@ -70,6 +120,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-3 h-0.5 bg-zinc-800 dark:bg-zinc-200" />
       </button>
 
+      {/* Desktop Sidebar Toggle Button - Always visible */}
+      {sidebarMode !== 'open' && (
+        <div 
+          className="hidden lg:block fixed top-4 left-4 z-50"
+          onMouseEnter={() => sidebarMode === 'hover' && setIsHovered(true)}
+        >
+          <button
+            onClick={cycleSidebarMode}
+            className="p-3 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors group"
+            title={getSidebarModeLabel()}
+          >
+            <ModeIcon className="w-5 h-5 text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white" />
+          </button>
+        </div>
+      )}
+
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
@@ -78,14 +144,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
+      {/* Hover detection area for hover mode */}
+      {sidebarMode === 'hover' && !isHovered && (
+        <div 
+          className="hidden lg:block fixed top-0 left-0 bottom-0 w-4 z-40"
+          onMouseEnter={() => setIsHovered(true)}
+        />
+      )}
+
       {/* Sidebar Container - Always Open, Floating Style */}
       <aside
         className={cn(
-          'fixed top-4 bottom-4 left-4 z-40 w-[300px] flex flex-col transition-transform duration-300 ease-spring',
+          'fixed top-4 bottom-4 left-4 z-40 w-[300px] flex flex-col transition-all duration-300 ease-spring',
           // Mobile behavior: Slide in/out
-          'lg:translate-x-0',
-          mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+16px)] lg:translate-x-0'
+          mobileOpen ? 'translate-x-0' : '-translate-x-[calc(100%+16px)] lg:translate-x-0',
+          // Desktop behavior based on mode
+          sidebarMode === 'closed' && 'lg:-translate-x-[calc(100%+16px)]',
+          sidebarMode === 'hover' && !isHovered && 'lg:-translate-x-[calc(100%+16px)]',
+          sidebarMode === 'hover' && isHovered && 'lg:translate-x-0'
         )}
+        onMouseLeave={() => sidebarMode === 'hover' && setIsHovered(false)}
       >
         <div
           className={cn(
@@ -93,13 +171,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         >
           {/* 1. Header (Custom Logo) */}
-          <div className="h-24 flex items-center px-6 shrink-0">
+          <div className="h-24 flex items-center justify-between px-6 shrink-0">
             <div className="flex items-center gap-3">
               <img src="/logo.svg" alt="Fokus Logo" className="h-10 w-10 object-contain" />
               <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
                 FOCHUS
               </span>
             </div>
+            {/* Sidebar Mode Toggle Button */}
+            <button
+              onClick={cycleSidebarMode}
+              className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
+              title={getSidebarModeLabel()}
+            >
+              <ModeIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300" />
+            </button>
           </div>
 
           {/* 2. Quick Actions */}

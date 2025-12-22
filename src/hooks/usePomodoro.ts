@@ -3,6 +3,8 @@ import { pomodoroAPI } from '../services/api';
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
+export type SoundType = 'bell' | 'chime' | 'ding' | 'none';
+
 interface PomodoroSettings {
   workDuration: number;
   shortBreakDuration: number;
@@ -10,6 +12,11 @@ interface PomodoroSettings {
   autoStartBreaks: boolean;
   autoStartWork: boolean;
   longBreakInterval: number;
+  // New sound settings
+  endSound: SoundType;
+  halfwaySound: SoundType;
+  halfwayWarningEnabled: boolean;
+  pushNotificationsEnabled: boolean;
 }
 
 interface PomodoroState {
@@ -26,7 +33,40 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   longBreakDuration: 15,
   autoStartBreaks: false,
   autoStartWork: false,
-  longBreakInterval: 4
+  longBreakInterval: 4,
+  endSound: 'bell',
+  halfwaySound: 'chime',
+  halfwayWarningEnabled: true,
+  pushNotificationsEnabled: true
+};
+
+// Sound URLs for different notification types
+const SOUND_URLS: Record<SoundType, string> = {
+  bell: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+  chime: 'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg',
+  ding: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+  none: ''
+};
+
+const playSound = (soundType: SoundType) => {
+  if (soundType === 'none' || !SOUND_URLS[soundType]) return;
+  try {
+    const audio = new Audio(SOUND_URLS[soundType]);
+    audio.play().catch(() => {});
+  } catch {}
+};
+
+const sendPushNotification = (title: string, body: string) => {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '/logo.svg' });
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        new Notification(title, { body, icon: '/logo.svg' });
+      }
+    });
+  }
 };
 
 const getDefaultTimes = (settings: PomodoroSettings) => ({
@@ -127,25 +167,39 @@ const recordCompletedSession = (prev: PomodoroState) => {
 };
 
 const playFinishSound = () => {
-  try {
-    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-    audio.play().catch(() => {
-      // ignore
-    });
-  } catch {
-    // ignore
+  const settings = storeState.settings;
+  playSound(settings.endSound);
+  if (settings.pushNotificationsEnabled) {
+    const mode = storeState.mode;
+    const title = mode === 'work' ? 'Odak Süresi Bitti!' : 'Mola Bitti!';
+    const body = mode === 'work' ? 'Mola zamanı!' : 'Odaklanma zamanı!';
+    sendPushNotification(title, body);
   }
 };
+
+let halfwayNotified = false;
 
 const tick = () => {
   const prev = storeState;
   if (!prev.isActive) return;
 
+  // Check for halfway warning
+  const times = getDefaultTimes(prev.settings);
+  const totalTime = times[prev.mode];
+  const halfwayTime = Math.floor(totalTime / 2);
+  
+  if (prev.settings.halfwayWarningEnabled && prev.mode === 'work' && !halfwayNotified && prev.timeLeft === halfwayTime) {
+    halfwayNotified = true;
+    playSound(prev.settings.halfwaySound);
+    if (prev.settings.pushNotificationsEnabled) {
+      sendPushNotification('Yarı Yoldasın!', 'Odak süresinin yarısı geçti.');
+    }
+  }
+
   if (prev.timeLeft <= 1) {
     playFinishSound();
     recordCompletedSession(prev);
-
-    const times = getDefaultTimes(prev.settings);
+    halfwayNotified = false; // Reset for next session
 
     if (prev.mode === 'work') {
       const newCycles = prev.cycles + 1;
@@ -207,6 +261,7 @@ export const usePomodoro = () => {
   };
 
   const setMode = (mode: TimerMode) => {
+    halfwayNotified = false;
     setStoreState((prev) => {
       const times = getDefaultTimes(prev.settings);
       return {

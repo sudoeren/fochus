@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Save, Clock, Tag, Trash2, X, MoreHorizontal } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
+import { useTranslation } from 'react-i18next';
 
 interface NoteEditorPageProps {
   noteId?: string;
@@ -9,28 +10,45 @@ interface NoteEditorPageProps {
 }
 
 export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }) => {
+  const { t, i18n } = useTranslation();
   const { notes, addNote, updateNote, deleteNote } = useNotes();
   
-  // Find note synchronously for initialization
-  const initialNote = noteId ? notes.find((n) => n.id === noteId) : undefined;
+  // Find note from current notes array
+  const currentNote = noteId ? notes.find((n) => n.id === noteId) : undefined;
 
-  const [title, setTitle] = useState(initialNote?.title || '');
-  const [content, setContent] = useState(initialNote?.content || '');
-  const [plainContent, setPlainContent] = useState(initialNote?.plainContent || '');
-  const [tags, setTags] = useState<string[]>(initialNote?.tags || []);
+  const [title, setTitle] = useState(currentNote?.title || '');
+  const [content, setContent] = useState(currentNote?.content || '');
+  const [plainContent, setPlainContent] = useState(currentNote?.plainContent || '');
+  const [tags, setTags] = useState<string[]>(currentNote?.tags || []);
   const [tagInput, setTagInput] = useState('');
   const [lastSaved, setLastSaved] = useState<Date | null>(
-    initialNote?.updatedAt ? new Date(initialNote.updatedAt) : null
+    currentNote?.updatedAt ? new Date(currentNote.updatedAt) : null
   );
+  const [isSaving, setIsSaving] = useState(false);
+  const [createdNoteId, setCreatedNoteId] = useState<string | null>(null);
 
-  // Removed useEffect syncing state from noteId - handled by key prop
+  // Sync state when notes array updates (e.g., after initial load)
+  useEffect(() => {
+    if (currentNote && !title && !content) {
+      setTitle(currentNote.title || '');
+      setContent(currentNote.content || '');
+      setPlainContent(currentNote.plainContent || '');
+      setTags(currentNote.tags || []);
+      if (currentNote.updatedAt) {
+        setLastSaved(new Date(currentNote.updatedAt));
+      }
+    }
+  }, [currentNote]);
 
-  const handleSave = async () => {
-    if (!noteId && !title.trim() && !plainContent.trim()) return;
+  const handleSave = useCallback(async () => {
+    const effectiveNoteId = noteId || createdNoteId;
+    if (!effectiveNoteId && !title.trim() && !plainContent.trim()) return;
+    if (isSaving) return;
 
+    setIsSaving(true);
     try {
-      if (noteId) {
-        await updateNote(noteId, {
+      if (effectiveNoteId) {
+        await updateNote(effectiveNoteId, {
           title,
           content,
           plainContent,
@@ -38,7 +56,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
           updatedAt: new Date()
         });
       } else {
-        await addNote({
+        const newNote = await addNote({
           title,
           content,
           plainContent,
@@ -48,16 +66,20 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
           createdAt: new Date(),
           updatedAt: new Date()
         });
+        setCreatedNoteId(newNote.id);
       }
       setLastSaved(new Date());
     } catch (error) {
       console.error('Save error:', error);
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, [noteId, createdNoteId, title, content, plainContent, tags, isSaving, updateNote, addNote]);
 
   const handleDelete = async () => {
-    if (noteId && confirm('Bu notu silmek istediğinizden emin misiniz?')) {
-      await deleteNote(noteId);
+    const effectiveNoteId = noteId || createdNoteId;
+    if (effectiveNoteId && confirm(t('note_editor.confirm_delete') || 'Bu notu silmek istediğinizden emin misiniz?')) {
+      await deleteNote(effectiveNoteId);
       onBack();
     }
   };
@@ -84,7 +106,18 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [title, content, plainContent, tags]);
+  }, [handleSave, title, plainContent]);
+
+  // ESC key handler
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onBack();
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onBack]);
 
   return (
     <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white overflow-hidden relative transition-colors">
@@ -100,16 +133,15 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
         <div className="flex items-center gap-3">
           {lastSaved && (
             <span className="text-xs font-semibold tracking-wide text-zinc-400 uppercase hidden sm:block">
-              {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}'de
-              kaydedildi
+              {t('note_editor.saved_at', { time: lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}
             </span>
           )}
 
-          {noteId && (
+          {(noteId || createdNoteId) && (
             <button
               onClick={handleDelete}
               className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
-              title="Notu Sil"
+              title={t('note_editor.delete_note') || 'Notu Sil'}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -117,10 +149,11 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
 
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:shadow-lg hover:scale-105 transition-all"
+            disabled={isSaving}
+            className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            Kaydet
+            {t('note_editor.save') || 'Kaydet'}
           </button>
         </div>
       </div>
@@ -131,7 +164,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
           {/* Title Input */}
           <input
             type="text"
-            placeholder="Başlık"
+            placeholder={t('note_editor.title_placeholder') || 'Başlık'}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full text-5xl font-extrabold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
@@ -143,7 +176,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
             <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-lg text-zinc-500 dark:text-zinc-400 font-medium">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-xs">
-                {new Date().toLocaleDateString('tr-TR', {
+                {new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric'
@@ -157,7 +190,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
             <div className="flex items-center gap-2 flex-wrap">
               <Tag className="w-4 h-4 text-zinc-400" />
               {tags.length === 0 && !tagInput && (
-                <span className="text-zinc-400 text-sm">Etiket ekle...</span>
+                <span className="text-zinc-400 text-sm">{t('note_editor.add_tag') || 'Etiket ekle...'}</span>
               )}
               {tags.map((tag) => (
                 <span
@@ -201,7 +234,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                   setContent(val);
                   setPlainContent(plain);
                 }}
-                placeholder="Buraya yazmaya başla..."
+                placeholder={t('note_editor.placeholder') || 'Buraya yazmaya başla...'}
                 className="min-h-full border-none shadow-none bg-transparent !p-0 focus:ring-0 text-zinc-600 dark:text-zinc-300 text-lg leading-relaxed"
               />
             </div>

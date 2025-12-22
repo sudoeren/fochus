@@ -58,7 +58,10 @@
       "error_password_match": "Passwords do not match!",
       "error_password_short": "Password must be at least 6 characters.",
       "success_password": "Password updated successfully!",
-      "logout_title": "Log Out"
+      "logout_title": "Log Out",
+      "password_weak": "Weak",
+      "password_medium": "Medium",
+      "password_strong": "Strong"
     },
     "appearance": {
       "app_theme": "App Theme",
@@ -128,6 +131,9 @@
     "daily_goal": "Daily Goal",
     "completed": "Completed",
     "error_general": "An error occurred",
+    "password_weak": "Weak",
+    "password_medium": "Medium",
+    "password_strong": "Strong",
     "onboarding": {
       "step1_desc": "Your account is ready. Let's personalize Fochus.",
       "step2_title": "Spotlight",
@@ -156,7 +162,10 @@
     "all_done": "All done!",
     "focus_timer": "FOCUS TIMER",
     "start": "Start",
-    "pause": "Pause"
+    "pause": "Pause",
+    "mode_open": "Open",
+    "mode_closed": "Closed",
+    "mode_hover": "Hover"
   },
   "navbar": {
     "dashboard": "Dashboard",
@@ -316,7 +325,18 @@
     "long": "LONG BREAK",
     "mode_focus": "Focus",
     "mode_short": "Short",
-    "mode_long": "Long"
+    "mode_long": "Long",
+    "sounds_notifications": "Sounds & Notifications",
+    "end_sound": "End Sound",
+    "end_sound_desc": "Sound when timer ends",
+    "halfway_warning": "Halfway Warning",
+    "halfway_warning_desc": "Alert when half the time has passed",
+    "push_notifications": "Notifications",
+    "push_notifications_desc": "Receive desktop notifications",
+    "sound_bell": "Bell",
+    "sound_chime": "Chime",
+    "sound_ding": "Ding",
+    "sound_none": "Off"
   },
   "recurring": {
     "title": "Recurring Task",

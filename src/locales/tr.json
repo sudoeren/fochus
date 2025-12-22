@@ -58,7 +58,10 @@
       "error_password_match": "Yeni şifreler eşleşmiyor!",
       "error_password_short": "Yeni şifre en az 6 karakter olmalıdır.",
       "success_password": "Şifre başarıyla güncellendi!",
-      "logout_title": "Oturumu Kapat"
+      "logout_title": "Oturumu Kapat",
+      "password_weak": "Zayıf",
+      "password_medium": "Orta",
+      "password_strong": "Güçlü"
     },
     "appearance": {
       "app_theme": "Uygulama Teması",
@@ -128,6 +131,9 @@
     "daily_goal": "Günlük Hedef",
     "completed": "Tamamlandı",
     "error_general": "Bir hata oluştu",
+    "password_weak": "Zayıf",
+    "password_medium": "Orta",
+    "password_strong": "Güçlü",
     "onboarding": {
       "step1_desc": "Hesabın hazır. Şimdi Fochus'u kişiselleştirelim.",
       "step2_title": "Spotlight",
@@ -156,7 +162,10 @@
     "all_done": "Her şey tamam!",
     "focus_timer": "FOCUS TIMER",
     "start": "Başlat",
-    "pause": "Duraklat"
+    "pause": "Duraklat",
+    "mode_open": "Açık",
+    "mode_closed": "Kapalı",
+    "mode_hover": "Hover"
   },
   "navbar": {
     "dashboard": "Dashboard",
@@ -316,7 +325,18 @@
     "long": "UZUN MOLA",
     "mode_focus": "Odak",
     "mode_short": "Kısa",
-    "mode_long": "Uzun"
+    "mode_long": "Uzun",
+    "sounds_notifications": "Ses & Bildirimler",
+    "end_sound": "Bitiş Sesi",
+    "end_sound_desc": "Süre bitince çalacak ses",
+    "halfway_warning": "Yarı Yol Uyarısı",
+    "halfway_warning_desc": "Sürenin yarısı geçince uyar",
+    "push_notifications": "Bildirimler",
+    "push_notifications_desc": "Masaüstü bildirimleri al",
+    "sound_bell": "Zil",
+    "sound_chime": "Çan",
+    "sound_ding": "Ding",
+    "sound_none": "Kapalı"
   },
   "recurring": {
     "title": "Tekrarlanan Görev",

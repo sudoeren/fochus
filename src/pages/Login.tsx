@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
@@ -16,12 +16,65 @@ import {
   Palette,
   Monitor,
   Image as ImageIcon,
-  Languages
+  Languages,
+  Shield
 } from 'lucide-react';
 import { authAPI, setAuthToken } from '../services/api';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+
+// Password strength calculator
+const calculatePasswordStrength = (password: string): { score: number; label: string; color: string } => {
+  let score = 0;
+  
+  if (password.length >= 6) score += 1;
+  if (password.length >= 8) score += 1;
+  if (password.length >= 12) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+  
+  if (score <= 2) return { score: Math.min(score, 2), label: 'weak', color: 'bg-red-500' };
+  if (score <= 4) return { score: Math.min(score, 4), label: 'medium', color: 'bg-yellow-500' };
+  return { score, label: 'strong', color: 'bg-emerald-500' };
+};
+
+// Password Strength Indicator Component
+const PasswordStrengthIndicator: React.FC<{ password: string; theme: string; t: any }> = ({ password, theme, t }) => {
+  const strength = useMemo(() => calculatePasswordStrength(password), [password]);
+  
+  if (!password) return null;
+  
+  return (
+    <div className="mt-2 space-y-1">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5, 6].map((level) => (
+          <div
+            key={level}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors',
+              level <= strength.score ? strength.color : theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-700'
+            )}
+          />
+        ))}
+      </div>
+      <div className="flex items-center justify-between">
+        <span className={cn(
+          'text-xs font-medium',
+          strength.label === 'weak' && 'text-red-500',
+          strength.label === 'medium' && 'text-yellow-500',
+          strength.label === 'strong' && 'text-emerald-500'
+        )}>
+          {t(`login.password_${strength.label}`) || strength.label}
+        </span>
+        {strength.label === 'strong' && (
+          <Shield className="w-3.5 h-3.5 text-emerald-500" />
+        )}
+      </div>
+    </div>
+  );
+};
 
 interface LoginProps {
   onLogin: () => void;
@@ -119,10 +172,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handlePrevStep = () => {
     setError(null);
     setStep((prev) => prev - 1);
-  };
-
-  const handleGuestLogin = () => {
-    setError(t('login.error_guest'));
   };
 
   const toggleMode = () => {
@@ -708,6 +757,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       />
                     </div>
+                    {isRegister && (
+                      <PasswordStrengthIndicator password={formData.password} theme={theme} t={t} />
+                    )}
                   </div>
 
                   {isRegister && (
@@ -823,19 +875,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               />
             </div>
 
-            <div className="mt-6 space-y-4">
-              <button
-                onClick={handleGuestLogin}
-                className={cn(
-                  'w-full py-3.5 rounded-xl font-medium hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-sm border',
-                  theme === 'light'
-                    ? 'bg-zinc-100 text-zinc-600 border-zinc-200'
-                    : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
-                )}
-              >
-                {t('login.guest_btn')}
-              </button>
-
+            <div className="mt-6">
               <p className="text-center text-sm text-zinc-500">
                 {isRegister ? t('login.have_account') : t('login.no_account')}
                 <button

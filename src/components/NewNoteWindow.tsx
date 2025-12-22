@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Pin, Palette, Save, Maximize2 } from 'lucide-react';
+import { X, Pin, Save, Maximize2 } from 'lucide-react';
 import { Note } from '../types/index';
 import { useNotes } from '../hooks/useNotes';
 import clsx from 'clsx';
@@ -56,9 +56,17 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
   const [selectedColor, setSelectedColor] = useState(
     NOTE_COLORS.find((c) => c.id === initialData?.color) || NOTE_COLORS[0]
   );
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
-  // Removed useEffect syncing state from isOpen/initialData
+  // ESC key handler
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
 
   const handleExpand = async () => {
     try {
@@ -194,39 +202,13 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
 
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02]">
-          <div className="flex items-center gap-2 relative">
-            <button
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              className="p-2 rounded-full text-zinc-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-              title={t('notes.change_color')}
-            >
-              <Palette size={20} />
-            </button>
-
-            {showColorPicker && (
-              <div className="absolute bottom-full left-0 mb-2 p-2 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-700 flex gap-2 animate-in fade-in slide-in-from-bottom-2">
-                {NOTE_COLORS.map((color) => (
-                  <button
-                    key={color.id}
-                    className={clsx(
-                      'w-6 h-6 rounded-full border border-black/10 dark:border-white/10 ring-offset-2 ring-offset-white dark:ring-offset-zinc-800 transition-all',
-                      color.bg.replace('/10', ''), // Use solid color for picker
-                      selectedColor.id === color.id && 'ring-2 ring-zinc-400'
-                    )}
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setShowColorPicker(false);
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="text-xs text-zinc-400 dark:text-zinc-500">
               {content.length} {t('notes.chars')}
             </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             <button
               onClick={handleSave}
               disabled={!title.trim() && !content.trim()}

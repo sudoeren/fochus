@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   User,
   Palette,
@@ -41,6 +41,58 @@ import {
 } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
+
+// Password strength calculator
+const calculatePasswordStrength = (password: string): { score: number; label: string; color: string } => {
+  let score = 0;
+  
+  if (password.length >= 6) score += 1;
+  if (password.length >= 8) score += 1;
+  if (password.length >= 12) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+  
+  if (score <= 2) return { score: Math.min(score, 2), label: 'weak', color: 'bg-red-500' };
+  if (score <= 4) return { score: Math.min(score, 4), label: 'medium', color: 'bg-yellow-500' };
+  return { score, label: 'strong', color: 'bg-emerald-500' };
+};
+
+// Password Strength Indicator Component
+const PasswordStrengthIndicator: React.FC<{ password: string; t: any }> = ({ password, t }) => {
+  const strength = useMemo(() => calculatePasswordStrength(password), [password]);
+  
+  if (!password) return null;
+  
+  return (
+    <div className="mt-2 space-y-1">
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5, 6].map((level) => (
+          <div
+            key={level}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors',
+              level <= strength.score ? strength.color : 'bg-zinc-200 dark:bg-zinc-700'
+            )}
+          />
+        ))}
+      </div>
+      <div className="flex items-center justify-between">
+        <span className={cn(
+          'text-xs font-medium',
+          strength.label === 'weak' && 'text-red-500',
+          strength.label === 'medium' && 'text-yellow-500',
+          strength.label === 'strong' && 'text-emerald-500'
+        )}>
+          {t(`settings.profile.password_${strength.label}`) || strength.label}
+        </span>
+        {strength.label === 'strong' && (
+          <Shield className="w-3.5 h-3.5 text-emerald-500" />
+        )}
+      </div>
+    </div>
+  );
+};
 
 // --- Tab Component ---
 const SettingsTab = ({
@@ -499,6 +551,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
                   )}
                 </button>
               </div>
+              <PasswordStrengthIndicator password={newPassword} t={t} />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 ml-1">
