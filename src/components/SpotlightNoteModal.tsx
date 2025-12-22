@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, BookOpen, Tag, Hash } from 'lucide-react';
+import { X, BookOpen } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 
 interface SpotlightNoteModalProps {
@@ -10,8 +10,6 @@ interface SpotlightNoteModalProps {
 export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { addNote } = useNotes();
@@ -20,8 +18,6 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
     if (isOpen) {
       setTitle('');
       setContent('');
-      setTags([]);
-      setTagInput('');
     }
   }, [isOpen]);
 
@@ -52,26 +48,6 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
       handleSubmit(e as any);
     }
   };
-
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      const newTag = tagInput.trim().toLowerCase();
-      if (!tags.includes(newTag)) {
-        setTags((prev) => [...prev, newTag]);
-      }
-      setTagInput('');
-    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
-      e.preventDefault();
-      setTags((prev) => prev.slice(0, -1));
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
-  };
-
-  const predefinedTags = ['iş', 'kişisel', 'proje', 'toplantı', 'fikir', 'not', 'hatırlatma'];
 
   if (!isOpen) return null;
 
@@ -133,70 +109,6 @@ export const SpotlightNoteModal: React.FC<SpotlightNoteModalProps> = ({ isOpen, 
               rows={8}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
             />
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Etiketler
-            </label>
-
-            {/* Tag Display */}
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-sm rounded-md"
-                  >
-                    <Hash className="w-3 h-3" />
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-green-900 dark:hover:text-green-100"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Tag Input */}
-            <div className="relative">
-              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagInput}
-                placeholder="Etiket eklemek için yazın ve Enter'a basın..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Predefined Tags */}
-            <div className="mt-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Hızlı etiketler:</p>
-              <div className="flex flex-wrap gap-2">
-                {predefinedTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => {
-                      if (!tags.includes(tag)) {
-                        setTags((prev) => [...prev, tag]);
-                      }
-                    }}
-                    disabled={tags.includes(tag)}
-                    className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Actions */}

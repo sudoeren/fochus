@@ -5,7 +5,6 @@ export interface Note {
   title: string;
   content: string;
   plainContent?: string;
-  tags?: string[];
   color?: string;
   createdAt: Date;
   updatedAt: Date;

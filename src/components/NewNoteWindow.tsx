@@ -86,9 +86,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
           title,
           content,
           isPinned,
-          tags: [], // Default tags
-          plainContent: content, // Approximation for now
-          color: selectedColor.id
+          plainContent: content // Approximation for now
         });
         noteId = newNote.id;
       }
@@ -110,16 +108,16 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
           title,
           content,
           isPinned,
-          color: selectedColor.id
+          color: selectedColor.id,
+          plainContent: content
         });
       } else {
         await addNote({
           title,
           content,
           isPinned,
-          tags: [],
-          plainContent: content,
-          color: selectedColor.id
+          color: selectedColor.id,
+          plainContent: content
         });
       }
       onClose();
@@ -137,9 +135,8 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
 
       <div
         className={clsx(
-          'relative w-full max-w-2xl transform rounded-2xl shadow-2xl transition-all flex flex-col overflow-hidden',
+          'w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl shadow-2xl border',
           selectedColor.bg,
-          'border',
           selectedColor.border
         )}
       >

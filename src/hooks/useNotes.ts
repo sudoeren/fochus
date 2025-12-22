@@ -19,7 +19,6 @@ export const useNotes = () => {
       hasReminder: Boolean(note.hasReminder ?? false),
       reminderAt: note.reminderAt ?? undefined,
       plainContent: note.plainContent ?? note.content ?? '',
-      tags: note.tags ?? [],
       color: note.color
     } as Note;
   };

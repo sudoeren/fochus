@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Lightbulb, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EmptyStateProps {
   type: 'notes' | 'tasks' | 'trash' | 'search' | 'dashboard';
@@ -136,6 +137,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   className = ''
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in-95 duration-500 ${className}`}
@@ -172,13 +175,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         {type === 'notes' && (
           <div className="flex items-center gap-2 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-full border border-blue-100 dark:border-blue-800">
             <Lightbulb className="w-3.5 h-3.5" />
-            <span>İpucu: Notlarınızı #etiketler ile düzenleyebilirsiniz</span>
+            <span>
+              {t('empty.tip')}: {t('empty.notes_tip')}
+            </span>
           </div>
         )}
         {type === 'tasks' && (
           <div className="flex items-center gap-2 text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-4 py-2 rounded-full border border-purple-100 dark:border-purple-800">
             <Lightbulb className="w-3.5 h-3.5" />
-            <span>İpucu: Görevleri sürükleyip bırakarak sıralayabilirsiniz</span>
+            <span>
+              {t('empty.tip')}: {t('empty.tasks_tip')}
+            </span>
           </div>
         )}
       </div>

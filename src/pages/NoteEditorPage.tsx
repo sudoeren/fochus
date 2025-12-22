@@ -1,5 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Save, Clock, Tag, Trash2, X, MoreHorizontal } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import {
+  ArrowLeft,
+  Save,
+  Clock,
+  Trash2,
+  Wrench,
+  Copy,
+  Download
+} from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { useTranslation } from 'react-i18next';
@@ -19,13 +27,19 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentNote?.content || '');
   const [plainContent, setPlainContent] = useState(currentNote?.plainContent || '');
-  const [tags, setTags] = useState<string[]>(currentNote?.tags || []);
-  const [tagInput, setTagInput] = useState('');
   const [lastSaved, setLastSaved] = useState<Date | null>(
     currentNote?.updatedAt ? new Date(currentNote.updatedAt) : null
   );
   const [isSaving, setIsSaving] = useState(false);
   const [createdNoteId, setCreatedNoteId] = useState<string | null>(null);
+
+  const tt = useCallback(
+    (key: string, fallback: string) => {
+      const val = t(key);
+      return !val || val === key ? fallback : val;
+    },
+    [t]
+  );
 
   // Sync state when notes array updates (e.g., after initial load)
   useEffect(() => {
@@ -33,7 +47,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
       setTitle(currentNote.title || '');
       setContent(currentNote.content || '');
       setPlainContent(currentNote.plainContent || '');
-      setTags(currentNote.tags || []);
       if (currentNote.updatedAt) {
         setLastSaved(new Date(currentNote.updatedAt));
       }
@@ -52,7 +65,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
           title,
           content,
           plainContent,
-          tags,
           updatedAt: new Date()
         });
       } else {
@@ -60,7 +72,6 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
           title,
           content,
           plainContent,
-          tags,
           color: 'default',
           isPinned: false,
           createdAt: new Date(),
@@ -74,28 +85,17 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     } finally {
       setIsSaving(false);
     }
-  }, [noteId, createdNoteId, title, content, plainContent, tags, isSaving, updateNote, addNote]);
+  }, [noteId, createdNoteId, title, content, plainContent, isSaving, updateNote, addNote]);
 
   const handleDelete = async () => {
     const effectiveNoteId = noteId || createdNoteId;
-    if (effectiveNoteId && confirm(t('note_editor.confirm_delete') || 'Bu notu silmek istediğinizden emin misiniz?')) {
+    if (
+      effectiveNoteId &&
+      confirm(tt('note_editor.confirm_delete', 'Bu notu silmek istediğinizden emin misiniz?'))
+    ) {
       await deleteNote(effectiveNoteId);
       onBack();
     }
-  };
-
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
-      }
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
   // Auto-save
@@ -119,124 +119,265 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     return () => document.removeEventListener('keydown', handleEsc);
   }, [onBack]);
 
+  const canDelete = Boolean(noteId || createdNoteId);
+
+  const effectiveNoteId = noteId || createdNoteId;
+  const createdAtDate = useMemo(() => {
+    const source = currentNote?.createdAt;
+    if (!source) return null;
+    const d = new Date(source as any);
+    return isNaN(d.getTime()) ? null : d;
+  }, [currentNote?.createdAt]);
+
+  const updatedAtDate = useMemo(() => {
+    const source = currentNote?.updatedAt;
+    if (!source) return lastSaved;
+    const d = new Date(source as any);
+    return isNaN(d.getTime()) ? lastSaved : d;
+  }, [currentNote?.updatedAt, lastSaved]);
+
+  const wordCount = useMemo(() => {
+    const text = (plainContent || '').trim();
+    if (!text) return 0;
+    return text.split(/\s+/).filter(Boolean).length;
+  }, [plainContent]);
+
+  const charCount = useMemo(() => (plainContent || '').length, [plainContent]);
+
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const downloadFile = (filename: string, content: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white overflow-hidden relative transition-colors">
-      {/* Header - Integrated into app flow */}
-      <div className="flex-none px-6 py-4 flex items-center justify-between z-20">
-        <button
-          onClick={onBack}
-          className="p-2 -ml-2 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-
-        <div className="flex items-center gap-3">
-          {lastSaved && (
-            <span className="text-xs font-semibold tracking-wide text-zinc-400 uppercase hidden sm:block">
-              {t('note_editor.saved_at', { time: lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })}
-            </span>
-          )}
-
-          {(noteId || createdNoteId) && (
-            <button
-              onClick={handleDelete}
-              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
-              title={t('note_editor.delete_note') || 'Notu Sil'}
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          )}
-
+    <div className="min-h-full bg-transparent text-zinc-900 dark:text-white transition-colors">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-30 border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/10 dark:bg-black/10 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-3">
           <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
+            onClick={onBack}
+            className="p-2 -ml-1 rounded-xl hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 text-zinc-600 dark:text-zinc-300 transition-colors"
+            title={tt('common.back', 'Geri')}
           >
-            <Save className="w-4 h-4" />
-            {t('note_editor.save') || 'Kaydet'}
+            <ArrowLeft className="w-5 h-5" />
           </button>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="max-w-4xl mx-auto px-8 py-8 flex flex-col gap-6">
-          {/* Title Input */}
-          <input
-            type="text"
-            placeholder={t('note_editor.title_placeholder') || 'Başlık'}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-5xl font-extrabold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
-          />
-
-          {/* Metadata Row */}
-          <div className="flex items-center gap-4 text-sm flex-wrap">
-            {/* Date Pill */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-lg text-zinc-500 dark:text-zinc-400 font-medium">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="text-xs">
-                {new Date().toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-              </span>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold text-zinc-900 dark:text-white">
+              {title?.trim() || tt('note_editor.untitled', 'Başlıksız Not')}
             </div>
-
-            <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800" />
-
-            {/* Tags */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Tag className="w-4 h-4 text-zinc-400" />
-              {tags.length === 0 && !tagInput && (
-                <span className="text-zinc-400 text-sm">{t('note_editor.add_tag') || 'Etiket ekle...'}</span>
-              )}
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors text-xs font-bold group cursor-pointer border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
-                >
-                  #{tag}
-                  <button
-                    onClick={() => removeTag(tag)}
-                    className="opacity-0 group-hover:opacity-100 hover:text-red-500 ml-1"
-                  >
-                    <X size={10} />
-                  </button>
+            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              {isSaving ? (
+                <span>{tt('note_editor.saving', 'Kaydediliyor…')}</span>
+              ) : updatedAtDate ? (
+                <span>
+                  {t('note_editor.saved_at', {
+                    defaultValue: 'Kaydedildi: {{time}}',
+                    time: updatedAtDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  })}
                 </span>
-              ))}
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleAddTag}
-                className="bg-transparent border-none focus:ring-0 p-0 w-32 text-sm text-zinc-900 dark:text-zinc-300 placeholder-transparent focus:placeholder-zinc-300 dark:focus:placeholder-zinc-700 transition-all font-medium"
-                placeholder=" "
-              />
+              ) : (
+                <span>{tt('note_editor.not_saved_yet', 'Henüz kaydedilmedi')}</span>
+              )}
             </div>
           </div>
 
-          {/* Editor Container */}
-          <div className="min-h-[60vh] mt-4">
-            <div
-              className="prose prose-lg dark:prose-invert max-w-none 
-                            prose-p:text-zinc-600 dark:prose-p:text-zinc-400 
-                            prose-headings:text-zinc-900 dark:prose-headings:text-white 
-                            prose-strong:text-zinc-900 dark:prose-strong:text-white 
-                            prose-a:text-indigo-500 dark:prose-a:text-indigo-400
-                            prose-blockquote:border-l-4 prose-blockquote:border-zinc-200 dark:prose-blockquote:border-zinc-700
-                            prose-code:text-indigo-500 dark:prose-code:text-indigo-300 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:rounded prose-code:px-1"
+          <div className="flex items-center gap-2">
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                title={tt('note_editor.delete_note', 'Notu Sil')}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
+
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold hover:opacity-95 transition-colors disabled:opacity-50"
+              title={tt('note_editor.save', 'Kaydet')}
             >
-              <RichTextEditor
-                value={content}
-                onChange={(val, plain) => {
-                  setContent(val);
-                  setPlainContent(plain);
-                }}
-                placeholder={t('note_editor.placeholder') || 'Buraya yazmaya başla...'}
-                className="min-h-full border-none shadow-none bg-transparent !p-0 focus:ring-0 text-zinc-600 dark:text-zinc-300 text-lg leading-relaxed"
+              <Save className="w-4 h-4" />
+              <span className="hidden sm:inline">{tt('note_editor.save', 'Kaydet')}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          {/* Editor column */}
+          <div className="space-y-4">
+            <div className="bg-white/50 dark:bg-zinc-950/40 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-6 backdrop-blur-xl">
+              <input
+                type="text"
+                placeholder={tt('note_editor.title_placeholder', 'Başlık')}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full text-3xl sm:text-4xl font-extrabold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-0 p-0 leading-tight tracking-tight"
               />
+            </div>
+
+            <div className="bg-white/50 dark:bg-zinc-950/40 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-6 backdrop-blur-xl">
+              <div className="prose prose-lg dark:prose-invert max-w-none 
+                              prose-p:text-zinc-600 dark:prose-p:text-zinc-400 
+                              prose-headings:text-zinc-900 dark:prose-headings:text-white 
+                              prose-strong:text-zinc-900 dark:prose-strong:text-white 
+                              prose-a:text-indigo-500 dark:prose-a:text-indigo-400
+                              prose-blockquote:border-l-4 prose-blockquote:border-zinc-200 dark:prose-blockquote:border-zinc-700
+                              prose-code:text-indigo-500 dark:prose-code:text-indigo-300 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:rounded prose-code:px-1">
+                <RichTextEditor
+                  value={content}
+                  onChange={(val, plain) => {
+                    setContent(val);
+                    setPlainContent(plain);
+                  }}
+                  placeholder={tt('note_editor.placeholder', 'Buraya yazmaya başla...')}
+                  className="min-h-[60vh] border-none shadow-none bg-transparent !p-0 focus:ring-0 text-zinc-700 dark:text-zinc-300 text-lg leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Side panel */}
+          <div className="space-y-4">
+            <div className="bg-white/50 dark:bg-zinc-950/40 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-5 backdrop-blur-xl">
+              <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <Clock className="w-4 h-4" />
+                <span>{tt('note_editor.details', 'Detaylar')}</span>
+              </div>
+              <div className="mt-3 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.created', 'Oluşturma')}</span>
+                  <span className="font-medium">{createdAtDate ? formatDate(createdAtDate) : '—'}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.updated', 'Güncelleme')}</span>
+                  <span className="font-medium">{updatedAtDate ? formatDate(updatedAtDate) : '—'}</span>
+                </div>
+                <div className="pt-2 mt-2 border-t border-zinc-200/50 dark:border-zinc-800/60">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.words', 'Kelime')}</span>
+                    <span className="font-medium">{wordCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.characters', 'Karakter')}</span>
+                    <span className="font-medium">{charCount}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/50 dark:bg-zinc-950/40 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-5 backdrop-blur-xl">
+              <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                <Wrench className="w-4 h-4" />
+                <span>{tt('note_editor.toolbox', 'Araç Kutusu')}</span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-1 gap-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="h-10 px-3 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-bold inline-flex items-center justify-center gap-2 hover:opacity-95 transition-colors disabled:opacity-50"
+                  title={tt('note_editor.save', 'Kaydet')}
+                >
+                  <Save className="w-4 h-4" />
+                  {tt('note_editor.save', 'Kaydet')}
+                </button>
+
+                <button
+                  onClick={async () => {
+                    const ok = await copyToClipboard(plainContent || '');
+                    if (!ok) alert(tt('note_editor.copy_failed', 'Kopyalanamadı'));
+                  }}
+                  className="h-10 px-3 rounded-xl bg-white/40 dark:bg-zinc-900/50 border border-zinc-200/40 dark:border-zinc-800/60 text-sm font-semibold text-zinc-900 dark:text-zinc-100 inline-flex items-center justify-center gap-2 hover:bg-white/60 dark:hover:bg-zinc-900/70 transition-colors"
+                  title={tt('note_editor.copy_text', 'Metni Kopyala')}
+                >
+                  <Copy className="w-4 h-4" />
+                  {tt('note_editor.copy_text', 'Metni Kopyala')}
+                </button>
+
+                <button
+                  onClick={async () => {
+                    const ok = await copyToClipboard(content || '');
+                    if (!ok) alert(tt('note_editor.copy_failed', 'Kopyalanamadı'));
+                  }}
+                  className="h-10 px-3 rounded-xl bg-white/40 dark:bg-zinc-900/50 border border-zinc-200/40 dark:border-zinc-800/60 text-sm font-semibold text-zinc-900 dark:text-zinc-100 inline-flex items-center justify-center gap-2 hover:bg-white/60 dark:hover:bg-zinc-900/70 transition-colors"
+                  title={tt('note_editor.copy_html', 'HTML Kopyala')}
+                >
+                  <Copy className="w-4 h-4" />
+                  {tt('note_editor.copy_html', 'HTML Kopyala')}
+                </button>
+
+                <button
+                  onClick={() => {
+                    const safeTitle = (title || 'note').trim().replace(/[\\/:*?"<>|]+/g, '-');
+                    downloadFile(`${safeTitle}.txt`, plainContent || '', 'text/plain;charset=utf-8');
+                  }}
+                  className="h-10 px-3 rounded-xl bg-white/40 dark:bg-zinc-900/50 border border-zinc-200/40 dark:border-zinc-800/60 text-sm font-semibold text-zinc-900 dark:text-zinc-100 inline-flex items-center justify-center gap-2 hover:bg-white/60 dark:hover:bg-zinc-900/70 transition-colors"
+                  title={tt('note_editor.download_txt', 'TXT İndir')}
+                >
+                  <Download className="w-4 h-4" />
+                  {tt('note_editor.download_txt', 'TXT İndir')}
+                </button>
+
+                <button
+                  onClick={() => {
+                    const safeTitle = (title || 'note').trim().replace(/[\\/:*?"<>|]+/g, '-');
+                    const html = `<!doctype html><
+html lang="${i18n.language === 'tr' ? 'tr' : 'en'}"><head><meta charset="utf-8" />\n<title>${safeTitle}</title></head><body>${content || ''}</body></html>`;
+                    downloadFile(`${safeTitle}.html`, html, 'text/html;charset=utf-8');
+                  }}
+                  className="h-10 px-3 rounded-xl bg-white/40 dark:bg-zinc-900/50 border border-zinc-200/40 dark:border-zinc-800/60 text-sm font-semibold text-zinc-900 dark:text-zinc-100 inline-flex items-center justify-center gap-2 hover:bg-white/60 dark:hover:bg-zinc-900/70 transition-colors"
+                  title={tt('note_editor.download_html', 'HTML İndir')}
+                >
+                  <Download className="w-4 h-4" />
+                  {tt('note_editor.download_html', 'HTML İndir')}
+                </button>
+
+                {canDelete && (
+                  <button
+                    onClick={handleDelete}
+                    className="h-10 px-3 rounded-xl bg-red-50/60 dark:bg-red-900/10 border border-red-200/50 dark:border-red-900/30 text-sm font-semibold text-red-600 dark:text-red-400 inline-flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    title={tt('note_editor.delete_note', 'Notu Sil')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {tt('note_editor.delete_note', 'Notu Sil')}
+                  </button>
+                )}
+
+                {!effectiveNoteId && (
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400 pt-1">
+                    {tt('note_editor.toolbox_hint', 'Not kaydedilince silme aktif olur')}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

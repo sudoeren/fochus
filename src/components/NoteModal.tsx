@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Bell, BellOff, Tag, Clock } from 'lucide-react';
+import { X, FileText, Bell, BellOff, Clock } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from './RichTextEditor';
 import { notificationService } from '../services/NotificationService';
@@ -22,11 +22,9 @@ export const NoteModal: React.FC<NoteModalProps> = ({
     title: editingNote?.title || '',
     content: editingNote?.content || '',
     plainContent: editingNote?.plainContent || '',
-    tags: (editingNote?.tags || []) as string[],
     hasReminder: editingNote?.hasReminder || false,
     reminderAt: editingNote?.reminderAt ? new Date(editingNote.reminderAt) : (undefined as Date | undefined)
   });
-  const [newTag, setNewTag] = useState('');
 
   // Removed useEffect syncing state from isOpen/editingNote
 
@@ -49,7 +47,7 @@ export const NoteModal: React.FC<NoteModalProps> = ({
     if (!noteData.title.trim()) return;
 
     try {
-      const dataToSave = { ...noteData, tags: noteData.tags.filter((tag) => tag.trim()) };
+      const dataToSave = { ...noteData };
       if (editingNote) {
         await updateNote(editingNote.id, dataToSave);
       } else {
@@ -73,28 +71,9 @@ export const NoteModal: React.FC<NoteModalProps> = ({
       title: '',
       content: '',
       plainContent: '',
-      tags: [],
       hasReminder: false,
       reminderAt: undefined
     });
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !noteData.tags.includes(newTag.trim())) {
-      setNoteData((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setNoteData((prev) => ({ ...prev, tags: prev.tags.filter((tag) => tag !== tagToRemove) }));
-  };
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
   };
 
   return (
@@ -141,37 +120,6 @@ export const NoteModal: React.FC<NoteModalProps> = ({
 
           {/* Metadata Section */}
           <div className="space-y-6 pt-6 border-t border-gray-100 dark:border-zinc-800">
-            {/* Tags */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase tracking-wide">
-                <Tag className="w-3 h-3" /> Etiketler
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {noteData.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm border border-amber-100 dark:border-amber-900/30"
-                  >
-                    #{tag}
-                    <button
-                      onClick={() => removeTag(tag)}
-                      className="hover:text-amber-900 dark:hover:text-amber-200"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={handleTagInputKeyDown}
-                  placeholder="Etiket ekle..."
-                  className="bg-transparent border-none text-sm text-gray-700 dark:text-zinc-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:ring-0 p-0 min-w-[100px]"
-                />
-              </div>
-            </div>
-
             {/* Reminder */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase tracking-wide">

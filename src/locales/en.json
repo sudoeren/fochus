@@ -212,7 +212,7 @@
   },
   "empty": {
     "tip": "Tip",
-    "notes_tip": "You can organize notes with #tags",
+    "notes_tip": "You can pin notes and change their color",
     "tasks_tip": "You can reorder tasks by dragging and dropping"
   },
   "tasks": {
@@ -261,6 +261,8 @@
     "save": "Save",
     "save_task": "Save Task",
     "delete": "Delete",
+    "back": "Back",
+    "remove": "Remove",
     "reset": "Reset",
     "settings": "Settings"
   },
@@ -399,8 +401,22 @@
     "delete_note": "Delete Note",
     "save": "Save",
     "title_placeholder": "Title",
-    "add_tag": "Add tag...",
     "placeholder": "Start typing here...",
+    "details": "Details",
+    "toolbox": "Toolbox",
+    "toolbox_hint": "Delete becomes available after saving",
+    "copy_text": "Copy Text",
+    "copy_html": "Copy HTML",
+    "download_txt": "Download TXT",
+    "download_html": "Download HTML",
+    "copy_failed": "Copy failed",
+    "untitled": "Untitled Note",
+    "saving": "Saving…",
+    "not_saved_yet": "Not saved yet",
+    "created": "Created",
+    "updated": "Updated",
+    "words": "Words",
+    "characters": "Characters",
     "confirm_delete": "Are you sure you want to delete this note?"
   },
   "spotlight_modal": {
@@ -410,9 +426,6 @@
     "note_title_placeholder": "Give your note a title...",
     "content": "Content",
     "content_placeholder": "Write your note content here...",
-    "tags": "Tags",
-    "tags_placeholder": "Type to add tag and press Enter...",
-    "quick_tags": "Quick tags:",
     "save_shortcut": "to save",
     "cancel": "Cancel",
     "create_note": "Create Note",

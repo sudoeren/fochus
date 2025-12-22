@@ -56,14 +56,6 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
           }
         }
 
-        // Tags match
-        if (note.tags && note.tags.some((tag) => tag.toLowerCase().includes(searchTerm))) {
-          score += 7;
-          if (!matchedText) {
-            matchedText = `Etiket: ${note.tags.find((tag) => tag.toLowerCase().includes(searchTerm))}`;
-          }
-        }
-
         if (score > 0) {
           results.push({
             type: 'note',

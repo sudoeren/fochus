@@ -212,7 +212,7 @@
   },
   "empty": {
     "tip": "İpucu",
-    "notes_tip": "Notlarınızı #etiketler ile düzenleyebilirsiniz",
+    "notes_tip": "Notlarınızı sabitleyebilir ve renklerini değiştirebilirsiniz",
     "tasks_tip": "Görevleri sürükleyip bırakarak sıralayabilirsiniz"
   },
   "tasks": {
@@ -261,6 +261,8 @@
     "save": "Kaydet",
     "save_task": "Görevi Kaydet",
     "delete": "Sil",
+    "back": "Geri",
+    "remove": "Kaldır",
     "reset": "Sıfırla",
     "settings": "Ayarlar"
   },
@@ -399,8 +401,22 @@
     "delete_note": "Notu Sil",
     "save": "Kaydet",
     "title_placeholder": "Başlık",
-    "add_tag": "Etiket ekle...",
     "placeholder": "Buraya yazmaya başla...",
+    "details": "Detaylar",
+    "toolbox": "Araç Kutusu",
+    "toolbox_hint": "Not kaydedilince silme aktif olur",
+    "copy_text": "Metni Kopyala",
+    "copy_html": "HTML Kopyala",
+    "download_txt": "TXT İndir",
+    "download_html": "HTML İndir",
+    "copy_failed": "Kopyalanamadı",
+    "untitled": "Başlıksız Not",
+    "saving": "Kaydediliyor…",
+    "not_saved_yet": "Henüz kaydedilmedi",
+    "created": "Oluşturma",
+    "updated": "Güncelleme",
+    "words": "Kelime",
+    "characters": "Karakter",
     "confirm_delete": "Bu notu silmek istediğinizden emin misiniz?"
   },
   "spotlight_modal": {
@@ -410,9 +426,6 @@
     "note_title_placeholder": "Notunuza bir başlık verin...",
     "content": "İçerik",
     "content_placeholder": "Notunuzun içeriğini buraya yazın...",
-    "tags": "Etiketler",
-    "tags_placeholder": "Etiket eklemek için yazın ve Enter'a basın...",
-    "quick_tags": "Hızlı etiketler:",
     "save_shortcut": "ile kaydet",
     "cancel": "İptal",
     "create_note": "Not Oluştur",
