@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 
 import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 import notesRoutes from './routes/notes.js';
 import tasksRoutes from './routes/tasks.js';
 import taskListsRoutes from './routes/taskLists.js';
@@ -44,6 +45,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/task-lists', taskListsRoutes);

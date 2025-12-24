@@ -16,6 +16,7 @@ model User {
   password  String
   name      String?
   avatar    String?
+  role      String   @default("USER") // USER, ADMIN
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -26,6 +27,15 @@ model User {
   settings        UserSettings?
 
   @@map("users")
+}
+
+// Global System Settings (Managed by Admin)
+model SystemSettings {
+  id                String   @id @default(cuid())
+  allowRegistration Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+
+  @@map("system_settings")
 }
 
 // User Settings

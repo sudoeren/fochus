@@ -42,10 +42,23 @@ const generateToken = (userId: string, username: string): string => {
 // POST /api/auth/register
 router.post('/register', authLimiter, async (req, res: Response, next: NextFunction) => {
   try {
-    // Check if registration is allowed
-    const allowRegistration = process.env.ALLOW_REGISTRATION !== 'false';
+    // 1. Check System Settings (DB)
+    const settings = await prisma.systemSettings.findFirst();
+    let allowRegistration = true;
+
+    if (settings) {
+      allowRegistration = settings.allowRegistration;
+    } else {
+      // 2. Fallback to Env if DB settings not exist
+      allowRegistration = process.env.ALLOW_REGISTRATION !== 'false';
+    }
+
     if (!allowRegistration) {
-      return res.status(403).json({ error: 'Yeni kullanıcı kaydı devre dışı bırakılmıştır.' });
+      // 3. Exception: Allow registration if NO users exist (First Admin Setup)
+      const userCount = await prisma.user.count();
+      if (userCount > 0) {
+        return res.status(403).json({ error: 'Yeni kullanıcı kaydı devre dışı bırakılmıştır.' });
+      }
     }
 
     const validation = registerSchema.safeParse(req.body);
@@ -70,12 +83,17 @@ router.post('/register', authLimiter, async (req, res: Response, next: NextFunct
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Check if this is the first user
+    const userCount = await prisma.user.count();
+    const role = userCount === 0 ? 'ADMIN' : 'USER';
+
     // Create user
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
         name,
+        role,
         settings: {
           create: {
             theme: 'dark',
@@ -87,6 +105,7 @@ router.post('/register', authLimiter, async (req, res: Response, next: NextFunct
         id: true,
         username: true,
         name: true,
+        role: true,
         createdAt: true
       }
     });

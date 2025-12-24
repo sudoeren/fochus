@@ -26,7 +26,13 @@ import {
   Search,
   Zap,
   Globe,
-  Languages
+  Languages,
+  Users,
+  UserX,
+  UserCheck,
+  ToggleLeft,
+  ToggleRight,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { cn } from '../lib/utils';
@@ -37,10 +43,157 @@ import {
   setAuthToken,
   taskListsAPI,
   tasksAPI,
-  settingsAPI
+  settingsAPI,
+  adminAPI
 } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// ... (Password Strength Code remains same)
+
+// 6. Admin Section
+const AdminSection = () => {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ['admin', 'users'],
+    queryFn: () => adminAPI.getUsers()
+  });
+
+  const { data: settings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['admin', 'settings'],
+    queryFn: () => adminAPI.getSettings()
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: (data: { allowRegistration: boolean }) => adminAPI.updateSettings(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
+    }
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (id: string) => adminAPI.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      alert('Kullanıcı silindi');
+    },
+    onError: (err: any) => {
+      alert(err.message || 'Silme işlemi başarısız');
+    }
+  });
+
+  const promoteUserMutation = useMutation({
+    mutationFn: (id: string) => adminAPI.promoteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      alert('Kullanıcı yönetici yapıldı');
+    }
+  });
+
+  const handleDeleteUser = (id: string, username: string) => {
+    if (confirm(`"${username}" kullanıcısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`)) {
+      deleteUserMutation.mutate(id);
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      {/* System Settings */}
+      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+            <SettingsIcon className="w-5 h-5" />
+          </div>
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Sistem Ayarları</h3>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+          <div>
+            <h4 className="font-bold text-zinc-900 dark:text-white mb-1">Yeni Üye Kaydı</h4>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Yeni kullanıcıların kayıt olmasına izin ver veya kapat.
+            </p>
+          </div>
+          <button
+            onClick={() => updateSettingsMutation.mutate({ allowRegistration: !settings?.allowRegistration })}
+            disabled={settingsLoading || updateSettingsMutation.isPending}
+            className={cn(
+              "text-3xl transition-colors",
+              settings?.allowRegistration ? "text-emerald-500" : "text-zinc-300 dark:text-zinc-600"
+            )}
+          >
+            {settings?.allowRegistration ? <ToggleRight className="w-12 h-12" /> : <ToggleLeft className="w-12 h-12" />}
+          </button>
+        </div>
+      </div>
+
+      {/* User Management */}
+      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
+            <Users className="w-5 h-5" />
+          </div>
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Kullanıcı Yönetimi</h3>
+        </div>
+
+        <div className="space-y-4">
+          {usersLoading ? (
+            <div className="text-center py-4 text-zinc-500">Yükleniyor...</div>
+          ) : users.map((user: any) => (
+            <div key={user.id} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg",
+                  user.role === 'ADMIN' ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300" : "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                )}>
+                  {user.username.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-zinc-900 dark:text-white">{user.username}</h4>
+                    {user.role === 'ADMIN' && (
+                      <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">ADMIN</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-500">
+                    {user.name} • {new Date(user.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">
+                    Notlar: {user._count?.notes || 0} • Görevler: {user._count?.tasks || 0}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {user.role !== 'ADMIN' && (
+                  <button
+                    onClick={() => promoteUserMutation.mutate(user.id)}
+                    className="p-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 rounded-lg transition-colors"
+                    title="Yönetici Yap"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDeleteUser(user.id, user.username)}
+                  className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
+                  title="Kullanıcıyı Sil"
+                >
+                  <UserX className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Page Component ---
 
 // Password strength calculator
 const calculatePasswordStrength = (password: string): { score: number; label: string; color: string } => {
@@ -1343,6 +1496,14 @@ export const Settings: React.FC<SettingsProps> = ({
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
 
+  // Fetch current user to check role
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => authAPI.me()
+  });
+
+  const isAdmin = (currentUser as any)?.role === 'ADMIN';
+
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -1360,6 +1521,8 @@ export const Settings: React.FC<SettingsProps> = ({
         return <SpotlightSection isEnabled={isSpotlightEnabled} onToggle={onToggleSpotlight} />;
       case 'data':
         return <DataSection />;
+      case 'admin':
+        return isAdmin ? <AdminSection /> : <ProfileSection bgImage={bgImage} />;
       case 'about':
         return <AboutSection />;
       default:
@@ -1401,6 +1564,14 @@ export const Settings: React.FC<SettingsProps> = ({
             icon={Database}
             label={t('settings.tabs.data')}
           />
+          {isAdmin && (
+            <SettingsTab
+              active={activeTab === 'admin'}
+              onClick={() => setActiveTab('admin')}
+              icon={Shield}
+              label="Yönetim"
+            />
+          )}
           <SettingsTab
             active={activeTab === 'about'}
             onClick={() => setActiveTab('about')}

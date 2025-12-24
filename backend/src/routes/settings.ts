@@ -73,7 +73,6 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
         id: true,
         username: true,
         name: true,
-        email: true, // If exists in schema
         createdAt: true,
         updatedAt: true,
         settings: true,

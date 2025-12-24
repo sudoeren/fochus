@@ -268,9 +268,33 @@ export const settingsAPI = {
   }
 };
 
+// Admin API
+export const adminAPI = {
+  getUsers: () => fetchAPI<any[]>('/admin/users'),
+
+  deleteUser: (id: string) => 
+    fetchAPI<{ message: string }>(`/admin/users/${id}`, {
+      method: 'DELETE'
+    }),
+
+  getSettings: () => fetchAPI<{ allowRegistration: boolean }>('/admin/settings'),
+
+  updateSettings: (data: { allowRegistration: boolean }) =>
+    fetchAPI<{ message: string; allowRegistration: boolean }>('/admin/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    }),
+    
+  promoteUser: (id: string) =>
+    fetchAPI<{ message: string }>(`/admin/promote/${id}`, {
+      method: 'POST'
+    })
+};
+
 // Export default API object
 export const api = {
   auth: authAPI,
+  admin: adminAPI,
   notes: notesAPI,
   tasks: tasksAPI,
   taskLists: taskListsAPI,
