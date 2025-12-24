@@ -94,7 +94,11 @@ const AdminSection = () => {
   });
 
   const handleDeleteUser = (id: string, username: string) => {
-    if (confirm(`"${username}" kullanıcısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`)) {
+    if (
+      confirm(
+        `"${username}" kullanıcısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`
+      )
+    ) {
       deleteUserMutation.mutate(id);
     }
   };
@@ -118,14 +122,20 @@ const AdminSection = () => {
             </p>
           </div>
           <button
-            onClick={() => updateSettingsMutation.mutate({ allowRegistration: !settings?.allowRegistration })}
+            onClick={() =>
+              updateSettingsMutation.mutate({ allowRegistration: !settings?.allowRegistration })
+            }
             disabled={settingsLoading || updateSettingsMutation.isPending}
             className={cn(
-              "text-3xl transition-colors",
-              settings?.allowRegistration ? "text-emerald-500" : "text-zinc-300 dark:text-zinc-600"
+              'text-3xl transition-colors',
+              settings?.allowRegistration ? 'text-emerald-500' : 'text-zinc-300 dark:text-zinc-600'
             )}
           >
-            {settings?.allowRegistration ? <ToggleRight className="w-12 h-12" /> : <ToggleLeft className="w-12 h-12" />}
+            {settings?.allowRegistration ? (
+              <ToggleRight className="w-12 h-12" />
+            ) : (
+              <ToggleLeft className="w-12 h-12" />
+            )}
           </button>
         </div>
       </div>
@@ -142,51 +152,62 @@ const AdminSection = () => {
         <div className="space-y-4">
           {usersLoading ? (
             <div className="text-center py-4 text-zinc-500">Yükleniyor...</div>
-          ) : users.map((user: any) => (
-            <div key={user.id} className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg",
-                  user.role === 'ADMIN' ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300" : "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                )}>
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-zinc-900 dark:text-white">{user.username}</h4>
-                    {user.role === 'ADMIN' && (
-                      <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">ADMIN</span>
+          ) : (
+            users.map((user: any) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg',
+                      user.role === 'ADMIN'
+                        ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-300'
+                        : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
                     )}
+                  >
+                    {user.username.charAt(0).toUpperCase()}
                   </div>
-                  <p className="text-xs text-zinc-500">
-                    {user.name} • {new Date(user.createdAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-[10px] text-zinc-400 mt-0.5">
-                    Notlar: {user._count?.notes || 0} • Görevler: {user._count?.tasks || 0}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-zinc-900 dark:text-white">{user.username}</h4>
+                      {user.role === 'ADMIN' && (
+                        <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold rounded-full">
+                          ADMIN
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      {user.name} • {new Date(user.createdAt).toLocaleDateString()}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                      Notlar: {user._count?.notes || 0} • Görevler: {user._count?.tasks || 0}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {user.role !== 'ADMIN' && (
+                    <button
+                      onClick={() => promoteUserMutation.mutate(user.id)}
+                      className="p-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 rounded-lg transition-colors"
+                      title="Yönetici Yap"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteUser(user.id, user.username)}
+                    className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
+                    title="Kullanıcıyı Sil"
+                  >
+                    <UserX className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                {user.role !== 'ADMIN' && (
-                  <button
-                    onClick={() => promoteUserMutation.mutate(user.id)}
-                    className="p-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 rounded-lg transition-colors"
-                    title="Yönetici Yap"
-                  >
-                    <UserCheck className="w-4 h-4" />
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDeleteUser(user.id, user.username)}
-                  className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
-                  title="Kullanıcıyı Sil"
-                >
-                  <UserX className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -196,16 +217,18 @@ const AdminSection = () => {
 // --- Main Page Component ---
 
 // Password strength calculator
-const calculatePasswordStrength = (password: string): { score: number; label: string; color: string } => {
+const calculatePasswordStrength = (
+  password: string
+): { score: number; label: string; color: string } => {
   let score = 0;
-  
+
   if (password.length >= 6) score += 1;
   if (password.length >= 8) score += 1;
   if (password.length >= 12) score += 1;
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
   if (/\d/.test(password)) score += 1;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
-  
+
   if (score <= 2) return { score: Math.min(score, 2), label: 'weak', color: 'bg-red-500' };
   if (score <= 4) return { score: Math.min(score, 4), label: 'medium', color: 'bg-yellow-500' };
   return { score, label: 'strong', color: 'bg-emerald-500' };
@@ -214,9 +237,9 @@ const calculatePasswordStrength = (password: string): { score: number; label: st
 // Password Strength Indicator Component
 const PasswordStrengthIndicator: React.FC<{ password: string; t: any }> = ({ password, t }) => {
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
-  
+
   if (!password) return null;
-  
+
   return (
     <div className="mt-2 space-y-1">
       <div className="flex gap-1">
@@ -231,17 +254,17 @@ const PasswordStrengthIndicator: React.FC<{ password: string; t: any }> = ({ pas
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <span className={cn(
-          'text-xs font-medium',
-          strength.label === 'weak' && 'text-red-500',
-          strength.label === 'medium' && 'text-yellow-500',
-          strength.label === 'strong' && 'text-emerald-500'
-        )}>
+        <span
+          className={cn(
+            'text-xs font-medium',
+            strength.label === 'weak' && 'text-red-500',
+            strength.label === 'medium' && 'text-yellow-500',
+            strength.label === 'strong' && 'text-emerald-500'
+          )}
+        >
           {t(`settings.profile.password_${strength.label}`) || strength.label}
         </span>
-        {strength.label === 'strong' && (
-          <Shield className="w-3.5 h-3.5 text-emerald-500" />
-        )}
+        {strength.label === 'strong' && <Shield className="w-3.5 h-3.5 text-emerald-500" />}
       </div>
     </div>
   );
@@ -1416,7 +1439,7 @@ const AboutSection = () => {
         <div className="flex flex-col gap-4">
           {/* GitHub Link */}
           <a
-            href="https://github.com/metehan-kaya/fochus"
+            href="https://github.com/erencakkar/fochus"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
@@ -1443,7 +1466,7 @@ const AboutSection = () => {
 
           {/* Website Link */}
           <a
-            href="https://fochus.app"
+            href="https://fochus.pages.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 bg-indigo-600 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-indigo-500/20 text-white"
@@ -1454,7 +1477,7 @@ const AboutSection = () => {
               </div>
               <div>
                 <h4 className="font-bold text-lg">{t('settings.about.website')}</h4>
-                <p className="text-xs text-indigo-200">fochus.app</p>
+                <p className="text-xs text-indigo-200">fochus.pages.dev</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
