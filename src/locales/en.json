@@ -159,6 +159,17 @@
       "spotlight_new": "NEW"
     }
   },
+  "errors": {
+    "generic": "An error occurred",
+    "invalid_credentials": "Incorrect username or password",
+    "username_taken": "This username is already taken",
+    "username_min_3": "Username must be at least 3 characters",
+    "password_min_6": "Password must be at least 6 characters",
+    "username_required": "Username is required",
+    "password_required": "Password is required",
+    "too_many_login_attempts": "Too many failed login attempts. Please try again in 15 minutes",
+    "registration_disabled": "New user registration is disabled."
+  },
   "sidebar": {
     "overview": "Overview",
     "tasks": "Tasks",

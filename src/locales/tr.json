@@ -159,6 +159,17 @@
       "spotlight_new": "YENİ"
     }
   },
+  "errors": {
+    "generic": "Bir hata oluştu",
+    "invalid_credentials": "Kullanıcı adı veya şifre hatalı",
+    "username_taken": "Bu kullanıcı adı zaten alınmış",
+    "username_min_3": "Kullanıcı adı en az 3 karakter olmalı",
+    "password_min_6": "Şifre en az 6 karakter olmalı",
+    "username_required": "Kullanıcı adı gerekli",
+    "password_required": "Şifre gerekli",
+    "too_many_login_attempts": "Çok fazla başarısız giriş denemesi, lütfen 15 dakika sonra tekrar deneyin",
+    "registration_disabled": "Yeni kullanıcı kaydı devre dışı bırakılmıştır."
+  },
   "sidebar": {
     "overview": "Genel Bakış",
     "tasks": "Görevler",

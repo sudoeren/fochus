@@ -1,6 +1,8 @@
 // API Client for Fokus Backend
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+import i18n from '../i18n';
+
 // Token management
 let authToken: string | null = localStorage.getItem('fokus_token');
 
@@ -16,6 +18,30 @@ export const setAuthToken = (token: string | null) => {
 };
 
 export const getAuthToken = () => authToken;
+
+const translateApiError = (rawMessage: unknown): string => {
+  if (typeof rawMessage !== 'string' || !rawMessage.trim()) {
+    return i18n.t('errors.generic');
+  }
+
+  const message = rawMessage.trim();
+
+  const map: Record<string, string> = {
+    'Kullanıcı adı veya şifre hatalı': 'errors.invalid_credentials',
+    'Bu kullanıcı adı zaten alınmış': 'errors.username_taken',
+    'Kullanıcı adı en az 3 karakter olmalı': 'errors.username_min_3',
+    'Şifre en az 6 karakter olmalı': 'errors.password_min_6',
+    'Kullanıcı adı gerekli': 'errors.username_required',
+    'Şifre gerekli': 'errors.password_required',
+    'Çok fazla başarısız giriş denemesi, lütfen 15 dakika sonra tekrar deneyin':
+      'errors.too_many_login_attempts',
+    'Yeni kullanıcı kaydı devre dışı bırakılmıştır.': 'errors.registration_disabled',
+    'Bir hata oluştu': 'errors.generic'
+  };
+
+  const key = map[message];
+  return key ? i18n.t(key) : message;
+};
 
 // Generic fetch wrapper
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -42,7 +68,8 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
       window.dispatchEvent(new Event('auth:logout'));
     }
 
-    throw new Error(error.error || 'Bir hata oluştu');
+    const rawMessage = (error as any)?.error ?? (error as any)?.message ?? 'Bir hata oluştu';
+    throw new Error(translateApiError(rawMessage));
   }
 
   return response.json();
