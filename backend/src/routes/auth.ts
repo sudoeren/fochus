@@ -2,10 +2,20 @@ import { Router, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import rateLimit from 'express-rate-limit';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+
+// Rate limiter for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { error: 'Çok fazla başarısız giriş denemesi, lütfen 15 dakika sonra tekrar deneyin' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Validation Schemas
 const registerSchema = z.object({
@@ -21,13 +31,16 @@ const loginSchema = z.object({
 
 // Generate JWT
 const generateToken = (userId: string, username: string): string => {
-  const secret = process.env.JWT_SECRET || 'default-secret';
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET ortam değişkeni tanımlanmamış!');
+  }
+  const secret = process.env.JWT_SECRET;
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   return jwt.sign({ userId, username }, secret, { expiresIn: expiresIn as any });
 };
 
 // POST /api/auth/register
-router.post('/register', async (req, res: Response, next: NextFunction) => {
+router.post('/register', authLimiter, async (req, res: Response, next: NextFunction) => {
   try {
     const validation = registerSchema.safeParse(req.body);
     
@@ -85,7 +98,7 @@ router.post('/register', async (req, res: Response, next: NextFunction) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res: Response, next: NextFunction) => {
+router.post('/login', authLimiter, async (req, res: Response, next: NextFunction) => {
   try {
     const validation = loginSchema.safeParse(req.body);
     

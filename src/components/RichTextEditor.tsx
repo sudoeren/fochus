@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import {} from // Icons removed
 'lucide-react';
 
@@ -19,9 +20,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   useEffect(() => {
     if (editorRef.current && value !== editorRef.current.innerHTML) {
-      // Only update if the logic/content is significantly different to avoid cursor jumps
-      // For now, we trust the value prop if it differs
-      editorRef.current.innerHTML = value;
+      // Sanitize content before setting innerHTML to prevent XSS
+      editorRef.current.innerHTML = DOMPurify.sanitize(value);
     }
   }, [value]);
 

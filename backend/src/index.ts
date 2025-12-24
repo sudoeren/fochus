@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 
 import authRoutes from './routes/auth.js';
 import notesRoutes from './routes/notes.js';
@@ -17,12 +18,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Global Rate Limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Çok fazla istek gönderdiniz, lütfen daha sonra tekrar deneyin.' }
+});
+
 // Middleware
 app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true
 }));
+app.use(limiter);
 app.use(morgan('dev'));
 app.use(express.json());
 
