@@ -125,7 +125,7 @@ You can use **Docker** (recommended) or manual installation methods to run the p
 Don't get lost in the app! Access your notes, tasks, and settings in seconds with the **Spotlight** feature (`/` key).
 
 <div align="center">
-  <img src="spotlight_dark.png" alt="Spotlight Search Feature" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+  <img src="spotlight.png" alt="Spotlight Search Feature" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
 </div>
 
 ---
