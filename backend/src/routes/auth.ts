@@ -159,7 +159,8 @@ router.post('/login', authLimiter, async (req, res: Response, next: NextFunction
         id: user.id,
         username: user.username,
         name: user.name,
-        avatar: user.avatar
+        avatar: user.avatar,
+        role: user.role
       },
       token
     });
@@ -178,6 +179,7 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response, next: Ne
         username: true,
         name: true,
         avatar: true,
+        role: true,
         createdAt: true
       }
     });
