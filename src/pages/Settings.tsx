@@ -1565,7 +1565,7 @@ export const Settings: React.FC<SettingsProps> = ({
               active={activeTab === 'admin'}
               onClick={() => setActiveTab('admin')}
               icon={Shield}
-              label="Yönetim"
+              label={t('settings.tabs.admin')}
             />
           )}
           <SettingsTab
