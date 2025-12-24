@@ -1440,7 +1440,7 @@ const AboutSection = () => {
         <div className="flex flex-col gap-4">
           {/* GitHub Link */}
           <a
-            href="https://github.com/erencakkar/fochus"
+            href="https://github.com/sudoeren/fochus"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
