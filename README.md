@@ -48,40 +48,6 @@ Fochus comes with an eye-friendly dark mode and a spacious light mode. You can u
 
 ---
 
-## Spotlight: Everything at Your Fingertips
-
-Don't get lost in the app! Access your notes, tasks, and settings in seconds with the **Spotlight** feature (`/` key).
-
-<div align="center">
-  <img src="spotlight_dark.png" alt="Spotlight Search Feature" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-</div>
-
----
-
-## Features
-
-Fochus is developed with user experience and efficiency in mind.
-
-### Smart Notes
-*   **Rich Text Editor:** Format and detail your notes.
-*   **Pinning & Organization:** Keep important notes at the top.
-*   **Trash System:** Safely restore deleted notes or delete them permanently.
-*   **Task Integration:** Link your notes directly with your tasks.
-
-### Advanced Task Management
-*   **Custom Lists:** Separate tasks into project-based lists and use color codes.
-*   **Recurring Tasks:** Create daily, weekly, or monthly routines.
-*   **Drag & Drop:** Easily sort tasks with `@hello-pangea/dnd`.
-*   **Subtasks:** Break down complex jobs into manageable small parts.
-*   **Smart Statuses:** Track Pending, Completed, or Deferred jobs.
-
-### Integrated Pomodoro Timer
-*   **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
-*   **Session Tracking:** Automatically save sessions to track your productivity history.
-*   **Distraction-Free Interface:** Simplified view to help you stay in the flow.
-
----
-
 ## Installation
 
 You can use **Docker** (recommended) or manual installation methods to run the project.
@@ -150,6 +116,40 @@ You can use **Docker** (recommended) or manual installation methods to run the p
     ```bash
     npm run dev
     ```
+
+---
+
+## Spotlight: Everything at Your Fingertips
+
+Don't get lost in the app! Access your notes, tasks, and settings in seconds with the **Spotlight** feature (`/` key).
+
+<div align="center">
+  <img src="spotlight_dark.png" alt="Spotlight Search Feature" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+</div>
+
+---
+
+## Features
+
+Fochus is developed with user experience and efficiency in mind.
+
+### Smart Notes
+*   **Rich Text Editor:** Format and detail your notes.
+*   **Pinning & Organization:** Keep important notes at the top.
+*   **Trash System:** Safely restore deleted notes or delete them permanently.
+*   **Task Integration:** Link your notes directly with your tasks.
+
+### Advanced Task Management
+*   **Custom Lists:** Separate tasks into project-based lists and use color codes.
+*   **Recurring Tasks:** Create daily, weekly, or monthly routines.
+*   **Drag & Drop:** Easily sort tasks with `@hello-pangea/dnd`.
+*   **Subtasks:** Break down complex jobs into manageable small parts.
+*   **Smart Statuses:** Track Pending, Completed, or Deferred jobs.
+
+### Integrated Pomodoro Timer
+*   **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
+*   **Session Tracking:** Automatically save sessions to track your productivity history.
+*   **Distraction-Free Interface:** Simplified view to help you stay in the flow.
 
 ---
 
