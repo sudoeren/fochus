@@ -1377,11 +1377,6 @@ const AboutSection = () => {
           <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
             {t('settings.about.desc')}
           </p>
-          <div className="mt-8">
-            <span className="px-5 py-2 bg-white/10 rounded-full text-sm font-mono border border-white/10 backdrop-blur-md">
-              v1.2.0
-            </span>
-          </div>
         </div>
       </div>
 
