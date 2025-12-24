@@ -855,6 +855,7 @@ const AppearanceSection = ({
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
+    localStorage.setItem('i18nextLng', lang);
   };
 
   return (
@@ -879,7 +880,7 @@ const AppearanceSection = ({
               onClick={() => changeLanguage('tr')}
               className={cn(
                 'px-4 py-2 rounded-lg text-xs font-bold transition-all',
-                i18n.language === 'tr'
+                i18n.language.startsWith('tr')
                   ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               )}
@@ -890,7 +891,7 @@ const AppearanceSection = ({
               onClick={() => changeLanguage('en')}
               className={cn(
                 'px-4 py-2 rounded-lg text-xs font-bold transition-all',
-                i18n.language === 'en'
+                i18n.language.startsWith('en')
                   ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
                   : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
               )}
