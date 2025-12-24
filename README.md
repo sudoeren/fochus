@@ -24,6 +24,7 @@
 
 [Features](#features) •
 [Installation](#installation) •
+[FAQ](#faq) •
 [License](#license)
 
 </div>
@@ -150,6 +151,22 @@ Fochus is developed with user experience and efficiency in mind.
 *   **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
 *   **Session Tracking:** Automatically save sessions to track your productivity history.
 *   **Distraction-Free Interface:** Simplified view to help you stay in the flow.
+
+---
+
+## FAQ
+
+**Q: What are the main keyboard shortcuts?**  
+A: You can open the **Spotlight** with the `/` key to quickly access all features and search your data.
+
+**Q: Where is my data stored?**  
+A: Your data is stored securely in a local PostgreSQL database when using Docker or manual setup. Fochus also supports manual data backup and restore via the Settings page.
+
+**Q: Can I customize the Pomodoro timer?**  
+A: Yes! You can switch between Work, Short Break, and Long Break modes. Future updates will include custom duration settings.
+
+**Q: Is there a mobile version?**  
+A: Fochus is currently optimized for desktop use, but the interface is responsive. A dedicated mobile view is in our roadmap.
 
 ---
 
