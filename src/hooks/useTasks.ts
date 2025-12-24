@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Task } from '../types/index';
-import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { tasksAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useTasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const normalizeTask = (raw: any): Task => {
     const task = deserializeApiDates(raw) as any;
-
     return {
       ...task,
       title: (task.title ?? '').toString(),
@@ -39,47 +36,21 @@ export const useTasks = () => {
     return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
   };
 
-  // Load tasks from storage
-  // Load tasks from storage
-  const loadTasks = async (silent: boolean = false) => {
-    try {
-      if (!silent) setLoading(true);
+  const { data: tasks = [], isLoading: loading } = useQuery({
+    queryKey: ['tasks'],
+    queryFn: async () => {
       const apiTasks = await tasksAPI.getAll();
       const normalized = apiTasks.map(normalizeTask);
-      const sortedTasks = normalized.sort((a, b) => {
+      return normalized.sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         return (a.order || 0) - (b.order || 0);
       });
-      setTasks(sortedTasks);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-    } finally {
-      if (!silent) setLoading(false);
     }
-  };
+  });
 
-  useEffect(() => {
-    // İlk yüklemede tasks'ları al
-    loadTasks();
-
-    // INSTANT refresh event listener
-    const handleInstantRefresh = () => {
-      loadTasks(true); // Silent refresh
-    };
-
-    // Custom event for instant refresh
-    window.addEventListener('refresh-tasks', handleInstantRefresh);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('refresh-tasks', handleInstantRefresh);
-    };
-  }, []);
-
-  // Add new task
-  const addTask = async (taskData: Partial<Task>) => {
-    try {
+  const addTaskMutation = useMutation({
+    mutationFn: async (taskData: Partial<Task>) => {
       const newTaskRaw = await tasksAPI.create({
         title: taskData.title || '',
         description: taskData.description,
@@ -96,73 +67,59 @@ export const useTasks = () => {
           : (taskData.recurringDays as any),
         linkedNoteId: (taskData as any).linkedNoteId
       });
-      const newTask = normalizeTask(newTaskRaw);
-
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
-      await loadTasks(true); // Local silent refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-      return newTask;
-    } catch (error) {
-      console.error('Error adding task:', error);
-      throw error;
+      return normalizeTask(newTaskRaw);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
-  };
+  });
 
-  // Update task
-  const updateTask = async (id: string, taskData: Partial<Task>) => {
-    try {
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Task> }) => {
       const updatedRaw = await tasksAPI.update(id, {
-        ...taskData,
-        dueDate: taskData.dueDate ? toISOStringOrUndefined(taskData.dueDate) : undefined,
-        reminderAt: taskData.reminderAt ? toISOStringOrUndefined(taskData.reminderAt) : undefined,
-        lastCompleted: taskData.lastCompleted
-          ? toISOStringOrUndefined(taskData.lastCompleted)
+        ...data,
+        dueDate: data.dueDate ? toISOStringOrUndefined(data.dueDate) : undefined,
+        reminderAt: data.reminderAt ? toISOStringOrUndefined(data.reminderAt) : undefined,
+        lastCompleted: data.lastCompleted
+          ? toISOStringOrUndefined(data.lastCompleted)
           : undefined,
-        nextDue: taskData.nextDue ? toISOStringOrUndefined(taskData.nextDue) : undefined
+        nextDue: data.nextDue ? toISOStringOrUndefined(data.nextDue) : undefined
       });
-      const updatedTask = normalizeTask(updatedRaw);
-
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
-      await loadTasks(true); // Local silent refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-      return updatedTask;
-    } catch (error) {
-      console.error('Error updating task:', error);
-      throw error;
+      return normalizeTask(updatedRaw);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
-  };
+  });
 
-  // Delete task
-  const deleteTask = async (id: string) => {
-    try {
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
       await tasksAPI.delete(id);
-      await loadTasks(true); // Local silent refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-    } catch (error) {
-      console.error('Error deleting task:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
-  };
+  });
 
-  // Toggle task completion
-  const toggleTask = async (id: string) => {
-    try {
+  const toggleTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
       const updated = await tasksAPI.toggle(id);
-      triggerInstantRefresh();
-      await loadTasks(true);
-      triggerInstantRefresh();
       return normalizeTask(updated);
-    } catch (error) {
-      console.error('Error toggling task:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
-  };
+  });
 
-  // Get tasks by filter
+  const reorderTasksMutation = useMutation({
+    mutationFn: async (taskIds: string[]) => {
+      await tasksAPI.reorder(taskIds);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    }
+  });
+
   const getTasksByFilter = (filter: 'all' | 'pending' | 'completed' | 'today' | 'overdue') => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -194,18 +151,13 @@ export const useTasks = () => {
         break;
     }
 
-    // Filtrelenmiş görevleri de sırala (pinned görevler önce, sonra order)
     return filteredTasks.sort((a, b) => {
-      // Pinned görevler önce
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-
-      // Sonra order değerine göre sırala
       return (a.order || 0) - (b.order || 0);
     });
   };
 
-  // Get task statistics
   const getTaskStats = () => {
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter((task) => task.isCompleted).length;
@@ -234,62 +186,53 @@ export const useTasks = () => {
     };
   };
 
-  // Pin/unpin task
-  const pinTask = async (id: string, isPinned: boolean) => {
-    try {
-      const updatedRaw = await tasksAPI.update(id, { isPinned });
-      const updatedTask = normalizeTask(updatedRaw);
-      setTasks((prev) => prev.map((task) => (task.id === id ? updatedTask : task)));
-    } catch (error) {
-      console.error('Error pinning task:', error);
-    }
-  };
-
-  // Reorder tasks - SADECE 'ALL' FILTER IÇIN ÇALIŞIR
   const reorderTasks = async (
     startIndex: number,
     endIndex: number,
     currentFilter: string = 'all'
   ) => {
-    // Sadece 'all' filter'da drag-drop yapılabilir
     if (currentFilter !== 'all') {
       console.warn('⚠️ Drag-drop sadece "Hepsi" görünümünde çalışır!');
       return;
     }
 
+    const allTasks = [...tasks].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const newTasks = Array.from(allTasks);
+    const [movedTask] = newTasks.splice(startIndex, 1);
+    newTasks.splice(endIndex, 0, movedTask);
+
+    // Optimistic update
+    queryClient.setQueryData(['tasks'], newTasks);
+
     try {
-      // 1. Tüm görevleri al (filtresiz)
-      const allTasks = [...tasks].sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      // 2. Yerel state'i hemen güncelle (immediate feedback)
-      const newTasks = Array.from(allTasks);
-      const [movedTask] = newTasks.splice(startIndex, 1);
-      newTasks.splice(endIndex, 0, movedTask);
-
-      // 3. Hemen local state'i güncelle
-      setTasks(newTasks);
-
-      // 4. Backend sıralamasını güncelle
-      await tasksAPI.reorder(newTasks.map((t) => t.id));
-      await loadTasks(true);
+      await reorderTasksMutation.mutateAsync(newTasks.map((t) => t.id));
     } catch (error) {
-      console.error('❌ reorderTasks HATASI:', error);
-      await loadTasks(true);
+      console.error('Reorder error', error);
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
   };
 
   return {
     tasks,
     loading,
-    addTask,
-    updateTask,
-    deleteTask,
-    toggleTask,
-    pinTask,
+    addTask: (data: Partial<Task>) => addTaskMutation.mutateAsync(data),
+    updateTask: (id: string, data: Partial<Task>) => updateTaskMutation.mutateAsync({ id, data }),
+    deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
+    toggleTask: (id: string) => toggleTaskMutation.mutateAsync(id),
+    pinTask: (id: string, isPinned: boolean) => updateTaskMutation.mutateAsync({ id, data: { isPinned } }),
     reorderTasks,
     getTasksByFilter,
     getTaskStats,
-    loadTasks,
-    setTasks
+    loadTasks: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+    setTasks: (newTasks: Task[] | ((prev: Task[]) => Task[])) => {
+       // Manual override for local drag-drop state if needed, though react-query handles this via cache
+       // This signature was in the old hook, mapping it to cache update for compatibility if strictly needed
+       // But ideally components should rely on 'tasks' from the hook.
+       if (typeof newTasks === 'function') {
+         queryClient.setQueryData(['tasks'], newTasks);
+       } else {
+         queryClient.setQueryData(['tasks'], newTasks);
+       }
+    }
   };
 };

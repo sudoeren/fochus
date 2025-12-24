@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Note } from '../types/index';
-import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { notesAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useNotes = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const normalizeNote = (raw: any): Note => {
     const note = deserializeApiDates(raw) as any;
@@ -23,120 +21,60 @@ export const useNotes = () => {
     } as Note;
   };
 
-  // Load notes from storage
-  const loadNotes = async () => {
-    try {
-      setLoading(true);
+  const { data: notes = [], isLoading: loading } = useQuery({
+    queryKey: ['notes'],
+    queryFn: async () => {
       const apiNotes = await notesAPI.getAll();
-      setNotes(apiNotes.map(normalizeNote));
-    } catch (error) {
-      console.error('Error loading notes:', error);
-    } finally {
-      setLoading(false);
+      return apiNotes.map(normalizeNote);
     }
-  };
+  });
 
-  useEffect(() => {
-    // İlk yüklemede notes'ları al
-    loadNotes();
-
-    // INSTANT refresh event listener
-    const handleInstantRefresh = () => {
-      loadNotes();
-    };
-
-    // Custom event for instant refresh
-    window.addEventListener('refresh-notes', handleInstantRefresh);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('refresh-notes', handleInstantRefresh);
-    };
-  }, []);
-
-  // Add new note
-  const addNote = async (noteData: Partial<Note>) => {
-    try {
+  const addNoteMutation = useMutation({
+    mutationFn: async (noteData: Partial<Note>) => {
       const title = noteData.title?.trim() ? noteData.title.trim() : 'Adsız Not';
       const created = await notesAPI.create({
         title,
         content: noteData.content ?? '',
         isPinned: noteData.isPinned ?? false
       });
-      const newNote = normalizeNote(created);
-
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
-      await loadNotes(); // Local refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-      return newNote;
-    } catch (error) {
-      console.error('Error adding note:', error);
-      throw error;
+      return normalizeNote(created);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     }
-  };
+  });
 
-  // Update note
-  const updateNote = async (id: string, noteData: Partial<Note>) => {
-    try {
+  const updateNoteMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Note> }) => {
       const payload: any = {};
-      if (noteData.title !== undefined) {
-        payload.title = noteData.title?.trim() ? noteData.title.trim() : 'Adsız Not';
+      if (data.title !== undefined) {
+        payload.title = data.title?.trim() ? data.title.trim() : 'Adsız Not';
       }
-      if (noteData.content !== undefined) {
-        payload.content = noteData.content ?? '';
+      if (data.content !== undefined) {
+        payload.content = data.content ?? '';
       }
-      if (noteData.isPinned !== undefined) {
-        payload.isPinned = noteData.isPinned;
+      if (data.isPinned !== undefined) {
+        payload.isPinned = data.isPinned;
       }
-
       const updated = await notesAPI.update(id, payload);
-      const updatedNote = normalizeNote(updated);
-
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
-      await loadNotes(); // Local refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-      return updatedNote;
-    } catch (error) {
-      console.error('Error updating note:', error);
-      throw error;
+      return normalizeNote(updated);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     }
-  };
+  });
 
-  // Delete note
-  const deleteNote = async (id: string) => {
-    try {
-      // ULTRA FAST refresh - hemen tetikle!
-      triggerInstantRefresh(); // Hemen global refresh
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (id: string) => {
       await notesAPI.delete(id);
-      await loadNotes(); // Local refresh
-      triggerInstantRefresh(); // Bir kez daha global refresh
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     }
-  };
+  });
 
-  // Pin/unpin note
-  const pinNote = async (id: string, isPinned: boolean) => {
-    try {
-      const updated = await notesAPI.update(id, { isPinned });
-      const updatedNote = normalizeNote(updated);
-
-      setNotes((prev) => prev.map((note) => (note.id === id ? updatedNote : note)));
-
-      return updatedNote;
-    } catch (error) {
-      console.error('Error pinning note:', error);
-      throw error;
-    }
-  };
-
-  // Search notes
   const searchNotes = (searchTerm: string) => {
     let filtered = notes;
-
     if (searchTerm) {
       filtered = filtered.filter(
         (note) =>
@@ -144,18 +82,17 @@ export const useNotes = () => {
           note.content.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     return filtered;
   };
 
   return {
     notes,
     loading,
-    addNote,
-    updateNote,
-    deleteNote,
-    pinNote,
+    addNote: (data: Partial<Note>) => addNoteMutation.mutateAsync(data),
+    updateNote: (id: string, data: Partial<Note>) => updateNoteMutation.mutateAsync({ id, data }),
+    deleteNote: (id: string) => deleteNoteMutation.mutateAsync(id),
+    pinNote: (id: string, isPinned: boolean) => updateNoteMutation.mutateAsync({ id, data: { isPinned } }),
     searchNotes,
-    loadNotes
+    loadNotes: () => queryClient.invalidateQueries({ queryKey: ['notes'] })
   };
 };
