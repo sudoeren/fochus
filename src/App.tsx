@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sidebar, SidebarMode } from './components/Sidebar';
 import { useTheme } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
@@ -22,17 +22,87 @@ import { MobileRestricted } from './pages/MobileRestricted';
 const App: React.FC = () => {
   const isMobile = useIsMobile();
   const { isDark } = useTheme();
-  const [activeView, setActiveView] = useState(
-    () => localStorage.getItem('activeView') || 'dashboard'
-  );
+
+  const [activeView, setActiveView] = useState(() => {
+    const hash = window.location.hash.slice(1).split('?')[0];
+    if (hash && ['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(hash)) {
+      return hash;
+    }
+    return localStorage.getItem('activeView') || 'dashboard';
+  });
 
   useEffect(() => {
     localStorage.setItem('activeView', activeView);
   }, [activeView]);
+
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
+
+  // Navigation Handlers
+  const handleNavigate = useCallback((view: string) => {
+    if (view === activeView) return;
+    window.history.pushState(null, '', `#${view}`);
+    setActiveView(view);
+    setShowNoteModal(false);
+    setShowTaskModal(false);
+    setShowPomodoroModal(false);
+    setIsSpotlightOpen(false);
+  }, [activeView]);
+
+  const handleOpenModal = useCallback((modalName: string) => {
+    const currentHash = window.location.hash.slice(1).split('?')[0] || activeView;
+    window.history.pushState({ modal: modalName }, '', `#${currentHash}?modal=${modalName}`);
+    
+    if (modalName === 'note') setShowNoteModal(true);
+    if (modalName === 'task') setShowTaskModal(true);
+    if (modalName === 'pomodoro') setShowPomodoroModal(true);
+    if (modalName === 'spotlight') setIsSpotlightOpen(true);
+  }, [activeView]);
+
+  const handleCloseModal = useCallback(() => {
+    if (window.history.state?.modal) {
+      window.history.back();
+    } else {
+      const hash = window.location.hash.slice(1).split('?')[0] || activeView;
+      window.history.replaceState(null, '', `#${hash}`);
+      setShowNoteModal(false);
+      setShowTaskModal(false);
+      setShowPomodoroModal(false);
+      setIsSpotlightOpen(false);
+    }
+  }, [activeView]);
+
+  // Sync Effect
+  useEffect(() => {
+    const handleStateChange = () => {
+      const hash = window.location.hash.slice(1);
+      const [view, query] = hash.split('?');
+      const params = new URLSearchParams(query);
+      const modal = params.get('modal');
+      
+      if (['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(view)) {
+        setActiveView(view);
+      }
+
+      setShowNoteModal(modal === 'note');
+      setShowTaskModal(modal === 'task');
+      setShowPomodoroModal(modal === 'pomodoro');
+      setIsSpotlightOpen(modal === 'spotlight');
+    };
+
+    window.addEventListener('popstate', handleStateChange);
+    window.addEventListener('hashchange', handleStateChange);
+    
+    // Initial sync
+    handleStateChange();
+
+    return () => {
+      window.removeEventListener('popstate', handleStateChange);
+      window.removeEventListener('hashchange', handleStateChange);
+    };
+  }, []);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
@@ -147,13 +217,14 @@ const App: React.FC = () => {
 
   const handleEditTask = (task: any) => {
     setEditingTask(task);
-    setShowTaskModal(true);
+    handleOpenModal('task');
   };
 
-  const closeTaskModal = () => {
-    setShowTaskModal(false);
-    setEditingTask(null);
-  };
+  useEffect(() => {
+    if (!showTaskModal) {
+      setEditingTask(null);
+    }
+  }, [showTaskModal]);
 
   useEffect(() => {
     setupFastPolling();
@@ -164,20 +235,8 @@ const App: React.FC = () => {
 
       // ESC key to close modals
       if (e.key === 'Escape') {
-        if (isSpotlightOpen) {
-          setIsSpotlightOpen(false);
-          return;
-        }
-        if (showNoteModal) {
-          setShowNoteModal(false);
-          return;
-        }
-        if (showTaskModal) {
-          closeTaskModal();
-          return;
-        }
-        if (showPomodoroModal) {
-          setShowPomodoroModal(false);
+        if (isSpotlightOpen || showNoteModal || showTaskModal || showPomodoroModal) {
+          handleCloseModal();
           return;
         }
       }
@@ -199,12 +258,12 @@ const App: React.FC = () => {
       case 'dashboard':
         return (
           <Dashboard
-            onNavigate={setActiveView}
-            onOpenNoteModal={() => setShowNoteModal(true)}
-            onOpenTaskModal={() => setShowTaskModal(true)}
+            onNavigate={handleNavigate}
+            onOpenNoteModal={() => handleOpenModal('note')}
+            onOpenTaskModal={() => handleOpenModal('task')}
             onEditTask={handleEditTask}
-            onOpenSpotlight={() => setIsSpotlightOpen(true)}
-            onOpenPomodoro={() => setShowPomodoroModal(true)}
+            onOpenSpotlight={() => handleOpenModal('spotlight')}
+            onOpenPomodoro={() => handleOpenModal('pomodoro')}
             bgImage={bgImage}
             onBgChange={handleBgChange}
           />
@@ -215,7 +274,7 @@ const App: React.FC = () => {
             key={editingNoteId}
             noteId={editingNoteId}
             onBack={() => {
-              setActiveView('dashboard');
+              handleNavigate('dashboard');
               setEditingNoteId(undefined);
             }}
           />
@@ -223,17 +282,17 @@ const App: React.FC = () => {
       case 'notes':
         return (
           <Notes
-            onOpenNoteModal={() => setShowNoteModal(true)}
+            onOpenNoteModal={() => handleOpenModal('note')}
             onEditNote={(id) => {
               setEditingNoteId(id);
-              setActiveView('note-editor');
+              handleNavigate('note-editor');
             }}
           />
         );
       case 'tasks':
         return (
           <TasksWithLists
-            onOpenTaskModal={() => setShowTaskModal(true)}
+            onOpenTaskModal={() => handleOpenModal('task')}
             onEditTask={handleEditTask}
           />
         );
@@ -254,9 +313,9 @@ const App: React.FC = () => {
       default:
         return (
           <Dashboard
-            onNavigate={setActiveView}
-            onOpenNoteModal={() => setShowNoteModal(true)}
-            onOpenTaskModal={() => setShowTaskModal(true)}
+            onNavigate={handleNavigate}
+            onOpenNoteModal={() => handleOpenModal('note')}
+            onOpenTaskModal={() => handleOpenModal('task')}
             bgImage={bgImage}
             onBgChange={handleBgChange}
           />
@@ -344,11 +403,11 @@ const App: React.FC = () => {
       {/* Floating Sidebar (Fixed Position) */}
       <Sidebar
         activeView={activeView}
-        onViewChange={setActiveView}
-        onOpenSpotlight={() => setIsSpotlightOpen(true)}
-        onOpenNoteModal={() => setShowNoteModal(true)}
-        onOpenTaskModal={() => setShowTaskModal(true)}
-        onOpenPomodoro={() => setShowPomodoroModal(true)}
+        onViewChange={handleNavigate}
+        onOpenSpotlight={() => handleOpenModal('spotlight')}
+        onOpenNoteModal={() => handleOpenModal('note')}
+        onOpenTaskModal={() => handleOpenModal('task')}
+        onOpenPomodoro={() => handleOpenModal('pomodoro')}
         sidebarMode={sidebarMode}
         onSidebarModeChange={(mode) => {
           setSidebarMode(mode);
@@ -377,11 +436,11 @@ const App: React.FC = () => {
       {isSpotlightOpen && (
         <Spotlight
           isOpen={isSpotlightOpen}
-          onClose={() => setIsSpotlightOpen(false)}
-          onNavigate={setActiveView}
-          onOpenNoteModal={() => setShowNoteModal(true)}
-          onOpenTaskModal={() => setShowTaskModal(true)}
-          onOpenPomodoro={() => setShowPomodoroModal(true)}
+          onClose={handleCloseModal}
+          onNavigate={handleNavigate}
+          onOpenNoteModal={() => handleOpenModal('note')}
+          onOpenTaskModal={() => handleOpenModal('task')}
+          onOpenPomodoro={() => handleOpenModal('pomodoro')}
         />
       )}
 
@@ -389,21 +448,20 @@ const App: React.FC = () => {
       {showNoteModal && (
         <NewNoteWindow
           isOpen={showNoteModal}
-          onClose={() => setShowNoteModal(false)}
+          onClose={handleCloseModal}
           onExpand={(id) => {
             setEditingNoteId(id);
-            setActiveView('note-editor');
-            setShowNoteModal(false);
+            handleNavigate('note-editor');
           }}
         />
       )}
 
       {showTaskModal && (
-        <NewTaskWindow isOpen={showTaskModal} onClose={closeTaskModal} initialData={editingTask} />
+        <NewTaskWindow isOpen={showTaskModal} onClose={handleCloseModal} initialData={editingTask} />
       )}
 
       {showPomodoroModal && (
-        <PomodoroModal isOpen={showPomodoroModal} onClose={() => setShowPomodoroModal(false)} />
+        <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />
       )}
     </div>
   );
