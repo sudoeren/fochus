@@ -62,4 +62,63 @@ router.put('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/settings/export - Export all user data
+router.get('/export', async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.id;
+
+    const data = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        email: true, // If exists in schema
+        createdAt: true,
+        updatedAt: true,
+        settings: true,
+        notes: {
+          where: { isDeleted: false }
+        },
+        taskLists: {
+          where: { isDeleted: false },
+          include: {
+            tasks: {
+              where: { isDeleted: false }
+            }
+          }
+        },
+        pomodoroSessions: true
+      }
+    });
+
+    if (!data) {
+      return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
+    }
+
+    // Tasks that are not in a list (orphaned or default list)
+    const independentTasks = await prisma.task.findMany({
+      where: {
+        userId,
+        listId: null,
+        isDeleted: false
+      }
+    });
+
+    const exportData = {
+      ...data,
+      independentTasks,
+      exportedAt: new Date().toISOString(),
+      version: '1.0.0'
+    };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=fokus-export-${userId}-${Date.now()}.json`);
+    res.json(exportData);
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({ error: 'Veri dışa aktarılırken bir hata oluştu' });
+  }
+});
+
 export default router;

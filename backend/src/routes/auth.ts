@@ -42,6 +42,12 @@ const generateToken = (userId: string, username: string): string => {
 // POST /api/auth/register
 router.post('/register', authLimiter, async (req, res: Response, next: NextFunction) => {
   try {
+    // Check if registration is allowed
+    const allowRegistration = process.env.ALLOW_REGISTRATION !== 'false';
+    if (!allowRegistration) {
+      return res.status(403).json({ error: 'Yeni kullanıcı kaydı devre dışı bırakılmıştır.' });
+    }
+
     const validation = registerSchema.safeParse(req.body);
     
     if (!validation.success) {

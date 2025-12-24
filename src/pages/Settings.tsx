@@ -993,36 +993,17 @@ const DataSection = () => {
     try {
       setIsBusy(true);
 
-      const [notes, deletedNotes, tasks, deletedTasks, taskLists, settings, pomodoroSessions] =
-        await Promise.all([
-          notesAPI.getAll(),
-          notesAPI.getDeleted(),
-          tasksAPI.getAll(),
-          tasksAPI.getDeleted(),
-          taskListsAPI.getAll(),
-          settingsAPI.get(),
-          pomodoroAPI.getAll()
-        ]);
-
-      const backup = {
-        app: 'fokus',
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        data: {
-          notes,
-          deletedNotes,
-          tasks,
-          deletedTasks,
-          taskLists,
-          settings,
-          pomodoroSessions
-        }
-      };
-
-      const datePart = new Date().toISOString().slice(0, 10);
-      downloadJson(`fokus-backup-${datePart}.json`, backup);
+      const blob = await settingsAPI.exportData();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fokus-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error: any) {
-      alert(error?.message || 'Error creating backup');
+      alert(error?.message || 'Yedekleme oluşturulurken hata oluştu');
     } finally {
       setIsBusy(false);
     }

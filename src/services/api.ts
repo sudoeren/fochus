@@ -252,7 +252,20 @@ export const settingsAPI = {
     fetchAPI<any>('/settings', {
       method: 'PUT',
       body: JSON.stringify(data)
-    })
+    }),
+
+  exportData: async () => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/settings/export`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) throw new Error('Export failed');
+    return response.blob();
+  }
 };
 
 // Export default API object

@@ -55,5 +55,5 @@ EXPOSE 3001
 
 ENV PORT=3001
 
-# Apply migrations if present; fall back safely for DBs bootstrapped via db push
-CMD ["sh", "-c", "set -e; if [ -d prisma/migrations ] && [ \"$(ls -A prisma/migrations 2>/dev/null)\" ]; then if npx prisma migrate deploy; then :; else echo 'migrate deploy failed; attempting baseline (db push + migrate resolve)'; npx prisma db push; LATEST=\"$(ls -1d prisma/migrations/*/ 2>/dev/null | sed 's#.*/##' | sed 's#/$##' | sort | tail -n 1)\"; if [ -n \"$LATEST\" ]; then npx prisma migrate resolve --applied \"$LATEST\" || true; fi; npx prisma migrate deploy; fi; else npx prisma db push; fi; node dist/index.js"]
+# Apply migrations and start the server
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
