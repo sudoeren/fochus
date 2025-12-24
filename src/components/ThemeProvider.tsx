@@ -11,7 +11,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>(() => {
-    return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'light';
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+    // First launch (no saved preference): follow device theme.
+    return 'system';
   });
   const [isDark, setIsDark] = useState(false);
 
