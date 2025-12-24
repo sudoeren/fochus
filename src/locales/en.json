@@ -75,7 +75,7 @@
     },
     "spotlight": {
       "enable_title": "Enable Spotlight",
-      "enable_desc": "Use Ctrl + K shortcut for quick search.",
+      "enable_desc": "Use / key for quick search.",
       "search_title": "Quick Search",
       "search_desc": "Search instantly through your notes, tasks, and pages.",
       "actions_title": "Quick Actions",

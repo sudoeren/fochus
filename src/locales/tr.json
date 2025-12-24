@@ -75,7 +75,7 @@
     },
     "spotlight": {
       "enable_title": "Spotlight'ı Etkinleştir",
-      "enable_desc": "Ctrl + K kısayolu ile hızlı aramayı kullanın.",
+      "enable_desc": "/ tuşu ile hızlı aramayı kullanın.",
       "search_title": "Hızlı Arama",
       "search_desc": "Notlarınız, görevleriniz ve sayfalarınız arasında anında arama yapın.",
       "actions_title": "Hızlı Eylemler",

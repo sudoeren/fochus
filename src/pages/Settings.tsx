@@ -1011,11 +1011,7 @@ const SpotlightSection = ({
             <p className="text-zinc-400 text-sm mb-4">{t('settings.spotlight.enable_desc')}</p>
             <div className="flex items-center gap-2">
               <kbd className="bg-white/10 px-3 py-1.5 rounded-lg text-white font-mono text-sm border border-white/10">
-                Ctrl
-              </kbd>
-              <span className="text-zinc-500">+</span>
-              <kbd className="bg-white/10 px-3 py-1.5 rounded-lg text-white font-mono text-sm border border-white/10">
-                K
+                /
               </kbd>
             </div>
           </div>
