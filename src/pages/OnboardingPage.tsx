@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Sparkles,
-  Search,
-  Palette,
-  ChevronLeft,
+  ArrowRight,
   Check,
   Moon,
   Sun,
   Monitor,
-  ArrowRight,
-  CheckSquare,
   Image as ImageIcon,
-  Languages
+  LayoutTemplate,
+  Languages,
+  Sparkles,
+  Command,
+  Search,
+  Bell
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTheme } from '../components/ThemeProvider';
@@ -29,284 +29,307 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   onGlobalBgChange
 }) => {
   const { t, i18n } = useTranslation();
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   const [step, setStep] = useState(1);
-  const [selectedTheme, setSelectedTheme] = useState<'light' | 'dark' | 'system'>('dark');
   const [isGlobalBg, setIsGlobalBg] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const steps = [
-    { id: 1, title: t('onboarding.welcome'), icon: Sparkles },
-    { id: 2, title: t('onboarding.spotlight'), icon: Search },
-    { id: 3, title: t('onboarding.appearance'), icon: Palette }
-  ];
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const totalSteps = 3;
 
   const handleNext = () => {
-    if (step < 3) {
+    if (step < totalSteps) {
       setStep((prev) => prev + 1);
     } else {
       finish();
     }
   };
 
-  const handlePrev = () => {
-    if (step > 1) {
-      setStep((prev) => prev - 1);
-    }
-  };
-
-  const applyTheme = (theme: 'light' | 'dark' | 'system') => {
-    setSelectedTheme(theme);
-    setTheme(theme);
-  };
-
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
-
   const finish = () => {
-    setTheme(selectedTheme);
-    onBackgroundChange('default');
     onGlobalBgChange(isGlobalBg);
+    onBackgroundChange('default');
     onComplete();
   };
 
+  // --- Visual Preview Components ---
+
+  const LanguagePreview = () => (
+    <div className="relative w-full h-full flex items-center justify-center p-8">
+      <div className="relative z-10 space-y-4">
+        <div className={cn(
+          "bg-white dark:bg-zinc-800 p-6 rounded-2xl shadow-xl transform transition-all duration-700",
+          mounted ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+        )}>
+           <div className="flex items-center gap-3 mb-2">
+             <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
+               <Sparkles className="w-4 h-4" />
+             </div>
+             <div className="font-bold text-lg text-zinc-900 dark:text-white">
+               {i18n.language === 'en' ? 'Hello!' : 'Merhaba!'}
+             </div>
+           </div>
+           <p className="text-zinc-500 dark:text-zinc-400">
+             {i18n.language === 'en' ? 'Welcome to your new workspace.' : 'Yeni çalışma alanına hoş geldin.'}
+           </p>
+        </div>
+
+        <div className={cn(
+          "bg-zinc-900 dark:bg-white p-6 rounded-2xl shadow-xl transform transition-all duration-700 delay-100",
+          mounted ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+        )}>
+           <div className="flex items-center gap-3 mb-2">
+             <div className="w-8 h-8 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center text-white dark:text-zinc-900">
+               <Command className="w-4 h-4" />
+             </div>
+             <div className="font-bold text-lg text-white dark:text-zinc-900">
+               {i18n.language === 'en' ? 'Ready?' : 'Hazır mısın?'}
+             </div>
+           </div>
+        </div>
+      </div>
+      
+      {/* Decorative Circles */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-tr from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse-slow" />
+    </div>
+  );
+
+  const ThemePreview = () => (
+    <div className="relative w-full h-full flex items-center justify-center p-10 bg-zinc-100/50 dark:bg-zinc-900/50 transition-colors duration-500">
+        {/* Mock Interface */}
+        <div className="w-full max-w-sm bg-white dark:bg-black rounded-xl overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800 transition-colors duration-500">
+           {/* Header */}
+           <div className="h-12 border-b border-zinc-100 dark:border-zinc-800 flex items-center px-4 justify-between">
+              <div className="flex gap-1.5">
+                 <div className="w-3 h-3 rounded-full bg-red-400" />
+                 <div className="w-3 h-3 rounded-full bg-amber-400" />
+                 <div className="w-3 h-3 rounded-full bg-emerald-400" />
+              </div>
+              <div className="w-20 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800" />
+           </div>
+           {/* Body */}
+           <div className="p-6 space-y-4">
+               <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-zinc-100 dark:bg-zinc-900" />
+                  <div className="flex-1 space-y-2">
+                     <div className="w-3/4 h-3 rounded-full bg-zinc-100 dark:bg-zinc-900" />
+                     <div className="w-1/2 h-3 rounded-full bg-zinc-50 dark:bg-zinc-900/50" />
+                  </div>
+               </div>
+               <div className="h-24 rounded-lg bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 p-3">
+                   <div className="w-full h-full rounded bg-zinc-200/50 dark:bg-zinc-800/50" />
+               </div>
+               <div className="flex justify-between items-center pt-2">
+                   <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-900" />
+                   <div className="px-4 py-1.5 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-bold">Button</div>
+               </div>
+           </div>
+        </div>
+    </div>
+  );
+
+  const BackgroundPreview = () => (
+    <div className="relative w-full h-full overflow-hidden">
+        {/* The Wallpaper */}
+        <div className={cn(
+            "absolute inset-0 bg-cover bg-center transition-all duration-700",
+            isGlobalBg ? "scale-100 blur-0" : "scale-110 blur-sm opacity-50"
+        )} style={{ backgroundImage: `url(${theme === 'dark' ? '/dark.png' : '/light.png'})` }} />
+        
+        {/* Overlay for Minimal Mode */}
+        <div className={cn(
+            "absolute inset-0 bg-zinc-50 dark:bg-black transition-opacity duration-700",
+            isGlobalBg ? "opacity-0" : "opacity-100"
+        )}>
+            {/* Minimal Grid Pattern */}
+             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+        </div>
+
+        {/* Content Container (Floating) */}
+        <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-64 h-40 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-2xl flex items-center justify-center">
+                {isGlobalBg ? (
+                    <div className="text-center text-white">
+                        <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-80" />
+                        <span className="font-medium text-sm">Immersive Mode</span>
+                    </div>
+                ) : (
+                    <div className="text-center text-zinc-900 dark:text-white">
+                        <LayoutTemplate className="w-8 h-8 mx-auto mb-2 opacity-80" />
+                        <span className="font-medium text-sm">Minimal Mode</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black text-zinc-900 dark:text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
-        {/* Left Sidebar */}
-        <div className="w-full md:w-80 bg-zinc-50 dark:bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 p-8 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-12">
-              <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
-              <span className="text-xl font-bold tracking-tight">FOCHUS</span>
+    <div className="min-h-screen bg-zinc-100 dark:bg-black text-zinc-900 dark:text-zinc-100 flex items-center justify-center p-4 lg:p-8 transition-colors duration-500 font-sans">
+      
+      <div className="w-full max-w-6xl aspect-[16/10] lg:aspect-[16/9] bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-zinc-200 dark:border-zinc-800 relative">
+         
+         {/* LEFT SIDE: VISUAL SHOWCASE */}
+         <div className="relative w-full lg:w-5/12 h-64 lg:h-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 transition-colors duration-500">
+            {step === 1 && <LanguagePreview />}
+            {step === 2 && <ThemePreview />}
+            {step === 3 && <BackgroundPreview />}
+            
+            {/* Step Number Indicator */}
+            <div className="absolute top-6 left-6 font-mono text-xs font-bold text-zinc-400 tracking-widest">
+                0{step} — 0{totalSteps}
+            </div>
+         </div>
+
+         {/* RIGHT SIDE: CONTROLS */}
+         <div className="flex-1 flex flex-col p-8 lg:p-16 relative">
+            <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+                
+                {/* HEADLINES */}
+                <div className="mb-10 space-y-3">
+                    <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                        {step === 1 && t('onboarding.select_language')}
+                        {step === 2 && t('onboarding.select_theme')}
+                        {step === 3 && t('onboarding.background_title')}
+                    </h1>
+                    <p className="text-lg text-zinc-500 dark:text-zinc-400">
+                        {step === 1 && t('onboarding.language_desc')}
+                        {step === 2 && t('onboarding.desc_3')}
+                        {step === 3 && t('onboarding.background_desc')}
+                    </p>
+                </div>
+
+                {/* CONTROLS */}
+                <div className="space-y-4">
+                    
+                    {/* STEP 1: Language Buttons */}
+                    {step === 1 && (
+                        <div className="grid grid-cols-1 gap-3">
+                            {[
+                                { code: 'en', label: 'English' },
+                                { code: 'tr', label: 'Türkçe' }
+                            ].map((lang) => (
+                                <button
+                                    key={lang.code}
+                                    onClick={() => i18n.changeLanguage(lang.code)}
+                                    className={cn(
+                                        "w-full flex items-center justify-between p-5 rounded-xl border-2 transition-all duration-200 group hover:border-zinc-300 dark:hover:border-zinc-600",
+                                        i18n.language === lang.code
+                                            ? "border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800"
+                                            : "border-zinc-100 dark:border-zinc-800 bg-transparent"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-2xl">{lang.code === 'en' ? '🇺🇸' : '🇹🇷'}</span>
+                                        <span className={cn("font-medium text-lg", i18n.language === lang.code ? "font-bold" : "")}>
+                                            {lang.label}
+                                        </span>
+                                    </div>
+                                    <div className={cn(
+                                        "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+                                        i18n.language === lang.code
+                                            ? "border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-black"
+                                            : "border-zinc-300 dark:border-zinc-700"
+                                    )}>
+                                        {i18n.language === lang.code && <Check className="w-3 h-3" />}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* STEP 2: Theme Buttons */}
+                    {step === 2 && (
+                        <div className="grid grid-cols-3 gap-3">
+                             {[
+                                { id: 'light', label: t('onboarding.theme_light'), icon: Sun },
+                                { id: 'dark', label: t('onboarding.theme_dark'), icon: Moon },
+                                { id: 'system', label: t('onboarding.theme_system'), icon: Monitor }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => setTheme(mode.id as any)}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all duration-200 gap-3 hover:border-zinc-300 dark:hover:border-zinc-600",
+                                        theme === mode.id
+                                            ? "border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800"
+                                            : "border-zinc-100 dark:border-zinc-800 bg-transparent"
+                                    )}
+                                >
+                                    <mode.icon className={cn("w-6 h-6", theme === mode.id ? "text-zinc-900 dark:text-white" : "text-zinc-400")} />
+                                    <span className={cn("text-sm font-medium", theme === mode.id ? "text-zinc-900 dark:text-white" : "text-zinc-500")}>
+                                        {mode.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* STEP 3: Background Toggle */}
+                    {step === 3 && (
+                        <div className="space-y-4">
+                             <button
+                                onClick={() => setIsGlobalBg(!isGlobalBg)}
+                                className={cn(
+                                    "w-full flex items-center justify-between p-6 rounded-2xl border-2 transition-all duration-300 group text-left",
+                                    isGlobalBg
+                                        ? "border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800"
+                                        : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300"
+                                )}
+                             >
+                                <div className="flex items-center gap-4">
+                                     <div className={cn(
+                                         "p-3 rounded-xl transition-colors",
+                                         isGlobalBg ? "bg-white dark:bg-black shadow-sm" : "bg-zinc-100 dark:bg-zinc-800"
+                                     )}>
+                                         {isGlobalBg ? <ImageIcon className="w-6 h-6" /> : <LayoutTemplate className="w-6 h-6" />}
+                                     </div>
+                                     <div>
+                                         <div className="font-bold text-lg text-zinc-900 dark:text-white">
+                                             {isGlobalBg ? t('onboarding.background_immersive') : t('onboarding.background_minimal')}
+                                         </div>
+                                         <div className="text-zinc-500 text-sm">
+                                             {isGlobalBg ? "Rich visual experience" : "Clean, distraction-free"}
+                                         </div>
+                                     </div>
+                                </div>
+                                
+                                <div className={cn(
+                                    "w-14 h-8 rounded-full border-2 border-transparent transition-colors relative",
+                                    isGlobalBg ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-700"
+                                )}>
+                                    <div className={cn(
+                                        "absolute top-1 bottom-1 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300",
+                                        isGlobalBg ? "left-[calc(100%-24px)]" : "left-1"
+                                    )} />
+                                </div>
+                             </button>
+                             <p className="text-xs text-center text-zinc-400">
+                                 {t('onboarding.background_desc')}
+                             </p>
+                        </div>
+                    )}
+
+                </div>
             </div>
 
-            <div className="space-y-2">
-              {steps.map((s) => (
-                <div
-                  key={s.id}
-                  className={cn(
-                    'flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-                    step === s.id
-                      ? 'bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200 dark:border-zinc-800'
-                      : 'text-zinc-500 dark:text-zinc-500'
-                  )}
+            {/* Navigation Footer */}
+            <div className="mt-auto pt-12 flex justify-end">
+                <button
+                    onClick={handleNext}
+                    className={cn(
+                        "group flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 active:translate-y-0",
+                        theme === 'light' ? "bg-zinc-900 text-white hover:bg-zinc-800" : "bg-white text-black hover:bg-zinc-200"
+                    )}
                 >
-                  <div
-                    className={cn(
-                      'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
-                      step === s.id
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
-                        : 'bg-zinc-200 dark:bg-zinc-800'
-                    )}
-                  >
-                    {step > s.id ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
-                  </div>
-                  <div
-                    className={cn(
-                      'font-medium',
-                      step === s.id ? 'text-zinc-900 dark:text-white' : ''
-                    )}
-                  >
-                    {s.title}
-                  </div>
-                </div>
-              ))}
+                    <span>{step === totalSteps ? t('onboarding.finish') : t('onboarding.continue')}</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
             </div>
-          </div>
+         </div>
 
-          <div className="hidden md:block text-xs text-zinc-400">v1.0.0</div>
-        </div>
-
-        {/* Right Content */}
-        <div className="flex-1 p-8 md:p-16 flex flex-col">
-          <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
-            {/* Step 1: Welcome */}
-            {step === 1 && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="space-y-4">
-                  <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-white whitespace-pre-line">
-                    {t('onboarding.title_1')}
-                  </h1>
-                  <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    {t('onboarding.desc_1')}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
-                    <CheckSquare className="w-8 h-8 text-zinc-900 dark:text-white mb-4" />
-                    <div className="font-bold mb-1">{t('onboarding.tasks')}</div>
-                    <div className="text-sm text-zinc-500">{t('onboarding.tasks_desc')}</div>
-                  </div>
-                  <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
-                    <Sparkles className="w-8 h-8 text-zinc-900 dark:text-white mb-4" />
-                    <div className="font-bold mb-1">{t('onboarding.notes')}</div>
-                    <div className="text-sm text-zinc-500">{t('onboarding.notes_desc')}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Spotlight */}
-            {step === 2 && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold tracking-tight">{t('onboarding.title_2')}</h1>
-                  <p className="text-lg text-zinc-500 dark:text-zinc-400">
-                    {t('onboarding.desc_2')}
-                  </p>
-                </div>
-
-                <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-12 flex flex-col items-center justify-center text-center space-y-6 border border-zinc-200 dark:border-zinc-700">
-                  <div className="flex items-center gap-3">
-                    <kbd className="h-16 w-16 flex items-center justify-center rounded-xl bg-white dark:bg-zinc-900 border-b-4 border-zinc-200 dark:border-zinc-950 text-3xl font-bold text-zinc-900 dark:text-white shadow-sm">
-                      /
-                    </kbd>
-                  </div>
-                  <p className="text-zinc-600 dark:text-zinc-300 font-medium">
-                    {/* Interpolation for the key hint */}
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: t('onboarding.spotlight_hint').replace(
-                          '<1>/</1>',
-                          '<span class="font-bold text-zinc-900 dark:text-white">/</span>'
-                        )
-                      }}
-                    />
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Appearance */}
-            {step === 3 && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold tracking-tight">{t('onboarding.title_3')}</h1>
-                  <p className="text-lg text-zinc-500 dark:text-zinc-400">
-                    {t('onboarding.desc_3')}
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Language Selection */}
-                  <div className="mb-6">
-                    <div className="flex items-center gap-2 mb-3 text-sm font-medium text-zinc-900 dark:text-white">
-                      <Languages className="w-4 h-4" />
-                      {t('onboarding.language')}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => changeLanguage('tr')}
-                        className={cn(
-                          'p-3 rounded-xl border text-sm font-medium transition-all',
-                          i18n.language === 'tr'
-                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                        )}
-                      >
-                        Türkçe
-                      </button>
-                      <button
-                        onClick={() => changeLanguage('en')}
-                        className={cn(
-                          'p-3 rounded-xl border text-sm font-medium transition-all',
-                          i18n.language === 'en'
-                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-transparent'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                        )}
-                      >
-                        English
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    {[
-                      { id: 'light', label: t('onboarding.light'), icon: Sun },
-                      { id: 'dark', label: t('onboarding.dark'), icon: Moon },
-                      { id: 'system', label: t('onboarding.system'), icon: Monitor }
-                    ].map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => applyTheme(t.id as any)}
-                        className={cn(
-                          'flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200',
-                          selectedTheme === t.id
-                            ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500'
-                        )}
-                      >
-                        <t.icon className="w-6 h-6" />
-                        <span className="font-medium text-sm">{t.label}</span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div
-                    onClick={() => setIsGlobalBg(!isGlobalBg)}
-                    className={cn(
-                      'flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200',
-                      isGlobalBg
-                        ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800'
-                        : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                    )}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg">
-                        <ImageIcon className="w-5 h-5 text-zinc-700 dark:text-zinc-300" />
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm text-zinc-900 dark:text-white">
-                          {t('onboarding.global_bg')}
-                        </div>
-                        <div className="text-xs text-zinc-500">
-                          {t('onboarding.global_bg_desc')}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={cn(
-                        'w-5 h-5 rounded border flex items-center justify-center transition-colors',
-                        isGlobalBg
-                          ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white'
-                          : 'border-zinc-300 dark:border-zinc-600'
-                      )}
-                    >
-                      {isGlobalBg && <Check className="w-3 h-3 text-white dark:text-zinc-900" />}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between pt-8 mt-auto">
-            <button
-              onClick={handlePrev}
-              disabled={step === 1}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
-                step === 1
-                  ? 'text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-              )}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              {t('onboarding.back')}
-            </button>
-
-            <button
-              onClick={handleNext}
-              className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl font-bold hover:opacity-90 transition-all"
-            >
-              {step === 3 ? t('onboarding.start') : t('onboarding.continue')}
-              {step !== 3 && <ArrowRight className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
