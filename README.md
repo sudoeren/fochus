@@ -23,7 +23,6 @@
 <div align="center">
 
 [Features](#features) •
-[Technologies](#technologies) •
 [Installation](#installation) •
 [License](#license)
 
@@ -80,34 +79,6 @@ Fochus is developed with user experience and efficiency in mind.
 *   **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
 *   **Session Tracking:** Automatically save sessions to track your productivity history.
 *   **Distraction-Free Interface:** Simplified view to help you stay in the flow.
-
----
-
-## Technologies
-
-Developed with the most modern web technologies for performance and scalability.
-
-### Frontend
-| Technology | Description |
-| --- | --- |
-| ![React](https://img.shields.io/badge/React_19-20232A?style=flat&logo=react&logoColor=61DAFB) | User interface library. |
-| ![Vite](https://img.shields.io/badge/Vite_7-646CFF?style=flat&logo=vite&logoColor=white) | Next generation frontend tooling. |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white) | JavaScript superset providing type safety. |
-| ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | Utility-first CSS framework. |
-| **Lucide React** | Consistent and beautiful icon set. |
-
-### Backend
-| Technology | Description |
-| --- | --- |
-| ![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white) | JS runtime built on Chrome's V8 engine. |
-| ![Express](https://img.shields.io/badge/Express.js-000000?style=flat&logo=express&logoColor=white) | Fast, minimalist web framework. |
-| ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white) | Next-generation Node.js and TypeScript ORM. |
-| ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white) | The world's most advanced open source relational database. |
-| **Zod** | TypeScript-first schema validation library. |
-
-### Infrastructure
-*   **Docker & Docker Compose:** Containerization for easy setup and deployment.
-*   **Nginx:** For serving static files and reverse proxy operations.
 
 ---
 
@@ -179,29 +150,6 @@ You can use **Docker** (recommended) or manual installation methods to run the p
     ```bash
     npm run dev
     ```
-
----
-
-## Project Structure
-
-```bash
-fochus/
-├── backend/                # Express API & Database logic
-│   ├── prisma/            # Database schema & migrations
-│   ├── src/
-│   │   ├── middleware/    # Authentication & Error handling
-│   │   ├── routes/        # API Routes (Auth, Notes, Tasks etc.)
-│   │   └── index.ts       # Server entry point
-│   └── ...
-├── src/                    # Frontend React App
-│   ├── components/        # Reusable UI components
-│   ├── hooks/             # Custom React hooks
-│   ├── pages/             # App pages/routes
-│   ├── services/          # API service layer
-│   └── ...
-├── docker-compose.yml      # Container orchestration
-└── ...
-```
 
 ---
 
