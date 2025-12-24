@@ -4,14 +4,6 @@
   <p>Manage Your Productivity and Focus Time</p>
 </div>
 
-<div align="center">
-
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-active-success.svg?style=for-the-badge)
-
-</div>
-
 <p align="center">
   <strong>Fochus</strong> is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
 </p>
@@ -55,65 +47,83 @@ You can use **Docker** (recommended) or manual installation methods to run the p
 
 ### Prerequisites
 
-*   [Node.js](https://nodejs.org/) (v18 or higher)
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop)
-*   [Git](https://git-scm.com/)
+* [Node.js](https://nodejs.org/) (v18 or higher)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [Git](https://git-scm.com/)
 
 ### Option 1: Quick Setup with Docker (Recommended)
 
-1.  **Clone the repository**
+1. **Clone the repository**
+
     ```bash
     git clone https://github.com/username/fochus.git
     cd fochus
     ```
 
-2.  **Set Environment Variables**
+2. **Set Environment Variables**
     Copy example files:
+
     ```bash
     cp .env.example .env
     cp backend/.env.example backend/.env
     ```
-    
+
     > ⚠️ **Important Security Warning:**
     > After creating the `.env` files, **make sure to change** the `JWT_SECRET` value to a hard-to-guess, random string of characters. Default values are for development environment only.
 
-3.  **Start the App**
+3. **Start the App**
+
     ```bash
     docker-compose up -d --build
     ```
+
     The application will start running at `http://localhost:5173`.
 
 ### Option 2: Manual Installation
 
 #### Backend Setup
-1.  Go to the backend folder:
+
+1. Go to the backend folder:
+
     ```bash
     cd backend
     ```
-2.  Install dependencies:
+
+2. Install dependencies:
+
     ```bash
     npm install
     ```
-3.  Create the database and configure the `DATABASE_URL` in the `backend/.env` file.
-4.  Run migrations:
+
+3. Create the database and configure the `DATABASE_URL` in the `backend/.env` file.
+4. Run migrations:
+
     ```bash
     npx prisma migrate dev
     ```
-5.  Start the server:
+
+5. Start the server:
+
     ```bash
     npm run dev
     ```
 
 #### Frontend Setup
-1.  Open a new terminal and return to the main directory:
+
+1. Open a new terminal and return to the main directory:
+
     ```bash
     cd ..
     ```
-2.  Install dependencies:
+
+2. Install dependencies:
+
     ```bash
     npm install
     ```
-3.  Start the development server:
+
+3. Start the development server:
+
     ```bash
     npm run dev
     ```
@@ -135,22 +145,25 @@ Don't get lost in the app! Access your notes, tasks, and settings in seconds wit
 Fochus is developed with user experience and efficiency in mind.
 
 ### Smart Notes
-*   **Rich Text Editor:** Format and detail your notes.
-*   **Pinning & Organization:** Keep important notes at the top.
-*   **Trash System:** Safely restore deleted notes or delete them permanently.
-*   **Task Integration:** Link your notes directly with your tasks.
+
+* **Rich Text Editor:** Format and detail your notes.
+* **Pinning & Organization:** Keep important notes at the top.
+* **Trash System:** Safely restore deleted notes or delete them permanently.
+* **Task Integration:** Link your notes directly with your tasks.
 
 ### Advanced Task Management
-*   **Custom Lists:** Separate tasks into project-based lists and use color codes.
-*   **Recurring Tasks:** Create daily, weekly, or monthly routines.
-*   **Drag & Drop:** Easily sort tasks with `@hello-pangea/dnd`.
-*   **Subtasks:** Break down complex jobs into manageable small parts.
-*   **Smart Statuses:** Track Pending, Completed, or Deferred jobs.
+
+* **Custom Lists:** Separate tasks into project-based lists and use color codes.
+* **Recurring Tasks:** Create daily, weekly, or monthly routines.
+* **Drag & Drop:** Easily sort tasks with `@hello-pangea/dnd`.
+* **Subtasks:** Break down complex jobs into manageable small parts.
+* **Smart Statuses:** Track Pending, Completed, or Deferred jobs.
 
 ### Integrated Pomodoro Timer
-*   **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
-*   **Session Tracking:** Automatically save sessions to track your productivity history.
-*   **Distraction-Free Interface:** Simplified view to help you stay in the flow.
+
+* **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
+* **Session Tracking:** Automatically save sessions to track your productivity history.
+* **Distraction-Free Interface:** Simplified view to help you stay in the flow.
 
 ---
 
