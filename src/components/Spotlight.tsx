@@ -76,7 +76,6 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         onOpenTaskModal();
         onClose();
       },
-      shortcut: 'Ctrl+T',
       color: 'emerald'
     },
     {
@@ -89,7 +88,6 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         onOpenNoteModal();
         onClose();
       },
-      shortcut: 'Ctrl+N',
       color: 'amber'
     },
     {

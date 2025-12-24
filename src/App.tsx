@@ -186,14 +186,6 @@ const App: React.FC = () => {
         e.preventDefault();
         setIsSpotlightOpen(true);
       }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
-        e.preventDefault();
-        setShowNoteModal(true);
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key === 't') {
-        e.preventDefault();
-        setShowTaskModal(true);
-      }
     };
 
     document.addEventListener('keydown', handleGlobalKeyDown);
