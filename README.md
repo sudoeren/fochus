@@ -1,5 +1,8 @@
-# Fochus
-### Üretkenliğinizi ve Odaklanma Sürenizi Yönetin
+<div align="center">
+  <img src="public/logo.svg" alt="Fochus Logo" width="120">
+  <h1>Fochus</h1>
+  <p>Üretkenliğinizi ve Odaklanma Sürenizi Yönetin</p>
+</div>
 
 <div align="center">
 
