@@ -65,7 +65,7 @@ router.post('/register', authLimiter, async (req, res: Response, next: NextFunct
     
     if (!validation.success) {
       return res.status(400).json({ 
-        error: validation.error.errors[0].message 
+        error: validation.error.issues[0].message 
       });
     }
 
@@ -129,7 +129,7 @@ router.post('/login', authLimiter, async (req, res: Response, next: NextFunction
     
     if (!validation.success) {
       return res.status(400).json({ 
-        error: validation.error.errors[0].message 
+        error: validation.error.issues[0].message 
       });
     }
 
