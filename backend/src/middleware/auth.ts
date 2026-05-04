@@ -10,28 +10,32 @@ export interface AuthRequest extends Request<ParamsFlatDictionary> {
   };
 }
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET ortam değişkeni tanımlanmamış!');
+  process.exit(1);
+}
+
+const extractToken = (authHeader: unknown): string | null => {
+  if (typeof authHeader !== 'string') return null;
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return null;
+  return parts[1];
+};
+
 export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = extractToken(req.headers.authorization);
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       return res.status(401).json({ error: 'Yetkilendirme gerekli' });
     }
 
-    const token = authHeader.split(' ')[1];
-    
-    if (!process.env.JWT_SECRET) {
-      console.error('FATAL: JWT_SECRET ortam değişkeni tanımlanmamış!');
-      return res.status(500).json({ error: 'Sunucu yapılandırma hatası' });
-    }
-    
-    const secret = process.env.JWT_SECRET;
-
-    const decoded = jwt.verify(token, secret) as { userId: string; username: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
