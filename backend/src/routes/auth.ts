@@ -42,16 +42,11 @@ const generateToken = (userId: string, username: string): string => {
 // POST /api/auth/register
 router.post('/register', authLimiter, async (req, res: Response, next: NextFunction) => {
   try {
-    // 1. Check System Settings (DB)
+    // 1. Check System Settings (DB) with fallback to Env
     const settings = await prisma.systemSettings.findFirst();
-    let allowRegistration = true;
-
-    if (settings) {
-      allowRegistration = settings.allowRegistration;
-    } else {
-      // 2. Fallback to Env if DB settings not exist
-      allowRegistration = process.env.ALLOW_REGISTRATION !== 'false';
-    }
+    const allowRegistration = settings
+      ? settings.allowRegistration
+      : process.env.ALLOW_REGISTRATION !== 'false';
 
     if (!allowRegistration) {
       // 3. Exception: Allow registration if NO users exist (First Admin Setup)
