@@ -22,7 +22,6 @@ import {
   Image as ImageIcon,
   Sparkles,
   CheckSquare,
-  FileText,
   Search,
   Zap,
   Globe,
@@ -54,7 +53,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // 6. Admin Section
 const AdminSection = () => {
-  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
@@ -80,7 +78,7 @@ const AdminSection = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       alert('Kullanıcı silindi');
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       alert(err.message || 'Silme işlemi başarısız');
     }
   });
@@ -153,7 +151,7 @@ const AdminSection = () => {
           {usersLoading ? (
             <div className="text-center py-4 text-zinc-500">Yükleniyor...</div>
           ) : (
-            users.map((user: any) => (
+            users.map((user: Record<string, unknown>) => (
               <div
                 key={user.id}
                 className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors"
@@ -235,7 +233,10 @@ const calculatePasswordStrength = (
 };
 
 // Password Strength Indicator Component
-const PasswordStrengthIndicator: React.FC<{ password: string; t: any }> = ({ password, t }) => {
+const PasswordStrengthIndicator: React.FC<{ password: string; t: (key: string) => string }> = ({
+  password,
+  t
+}) => {
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   if (!password) return null;
@@ -279,7 +280,7 @@ const SettingsTab = ({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
 }) => (
   <button
@@ -302,7 +303,6 @@ const SettingsTab = ({
 const ProfileSection = ({ bgImage }: { bgImage: string }) => {
   const { t, i18n } = useTranslation();
   const { isDark } = useTheme();
-  const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(true); // Default to true
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -336,7 +336,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
     const loadProfile = async () => {
       try {
         const meRaw = await authAPI.me();
-        const me = deserializeApiDates(meRaw) as any;
+        const me = deserializeApiDates(meRaw) as Record<string, unknown>;
 
         if (cancelled) return;
 
@@ -417,9 +417,9 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       const updatedRaw = await authAPI.updateProfile({
         name: nextName,
         username: nextUsername
-      } as any);
+      } as Record<string, unknown>);
 
-      const updated = deserializeApiDates(updatedRaw) as any;
+      const updated = deserializeApiDates(updatedRaw) as Record<string, unknown>;
       const resolvedUsername = (updated?.username ?? nextUsername).toString();
       const resolvedName =
         (updated?.name ?? nextName).toString().trim() ||
@@ -434,8 +434,8 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       setProfileDraft({ name: resolvedName, username: resolvedUsername });
       setIsEditingProfile(false);
       setProfileSaveMessage(t('settings.profile.success_update') || 'Profile updated');
-    } catch (e: any) {
-      setProfileSaveError(e?.message || 'Error updating profile');
+    } catch (e) {
+      setProfileSaveError(e instanceof Error ? e.message : 'Error updating profile');
     } finally {
       setIsProfileSaving(false);
     }
@@ -474,8 +474,8 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
       setNewPassword('');
       setConfirmNewPassword('');
       // Keep form open
-    } catch (err: any) {
-      setPasswordChangeError(err.message || 'Error updating password');
+    } catch (err) {
+      setPasswordChangeError(err instanceof Error ? err.message : 'Error updating password');
     } finally {
       setIsPasswordLoading(false);
     }
@@ -780,7 +780,19 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 };
 
 // 2. Appearance Section
-const ThemeCard = ({ id, label, icon: Icon, previewColors, isActive, onClick }: any) => (
+const ThemeCard = ({
+  label,
+  icon: Icon,
+  previewColors,
+  isActive,
+  onClick
+}: {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  previewColors: { nav: string; primary: string };
+  isActive: boolean;
+  onClick: () => void;
+}) => (
   <button
     onClick={onClick}
     className={cn(
@@ -1143,21 +1155,9 @@ const DataSection = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
-  const downloadJson = (filename: string, data: unknown) => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
-
   const safeToIso = (value: unknown): string | undefined => {
     if (!value) return undefined;
-    const date = value instanceof Date ? value : new Date(value as any);
+    const date = value instanceof Date ? value : new Date(value as string);
     if (Number.isNaN(date.getTime())) return undefined;
     return date.toISOString();
   };
@@ -1175,14 +1175,14 @@ const DataSection = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error: any) {
-      alert(error?.message || 'Yedekleme oluşturulurken hata oluştu');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Yedekleme oluşturulurken hata oluştu');
     } finally {
       setIsBusy(false);
     }
   };
 
-  const extractData = (parsed: any) => {
+  const extractData = (parsed: Record<string, unknown>) => {
     if (!parsed) return null;
     const data = parsed.data ?? parsed;
     return {
@@ -1219,7 +1219,10 @@ const DataSection = () => {
     // Create notes (build ID map for linked tasks)
     const noteIdMap = new Map<string, string>();
 
-    const createNoteAndMaybeDelete = async (note: any, shouldBeDeleted: boolean) => {
+    const createNoteAndMaybeDelete = async (
+      note: Record<string, unknown>,
+      shouldBeDeleted: boolean
+    ) => {
       const created = await notesAPI.create({
         title: (note?.title ?? '').toString() || 'Note',
         content: (note?.content ?? '').toString(),
@@ -1239,7 +1242,10 @@ const DataSection = () => {
     }
 
     // Create tasks
-    const createTaskAndMaybeDelete = async (task: any, shouldBeDeleted: boolean) => {
+    const createTaskAndMaybeDelete = async (
+      task: Record<string, unknown>,
+      shouldBeDeleted: boolean
+    ) => {
       const oldListId = task?.listId ? String(task.listId) : null;
       const mappedListId = oldListId ? (listIdMap.get(oldListId) ?? null) : null;
 
@@ -1265,7 +1271,7 @@ const DataSection = () => {
       });
 
       if (created?.id) {
-        const updates: any = {};
+        const updates: Record<string, unknown> = {};
         if (typeof task?.order === 'number') updates.order = task.order;
         if (task?.status !== undefined) updates.status = task.status;
         if (task?.isCompleted !== undefined) updates.isCompleted = Boolean(task.isCompleted);
@@ -1301,7 +1307,7 @@ const DataSection = () => {
           startTime: safeToIso(session?.startTime) ?? new Date().toISOString(),
           endTime: safeToIso(session?.endTime) ?? new Date().toISOString(),
           duration: Number(session?.duration ?? 0),
-          mode: (session?.mode ?? 'work') as any,
+          mode: (session?.mode ?? 'work') as 'work' | 'shortBreak' | 'longBreak',
           completed: Boolean(session?.completed ?? true)
         });
       } catch {
@@ -1331,8 +1337,8 @@ const DataSection = () => {
           try {
             setIsBusy(true);
             await handleRestoreFile(file);
-          } catch (error: any) {
-            alert(error?.message || 'Error restoring data');
+          } catch (error) {
+            alert(error instanceof Error ? error.message : 'Error restoring data');
           } finally {
             setIsBusy(false);
           }
@@ -1517,7 +1523,7 @@ export const Settings: React.FC<SettingsProps> = ({
     queryFn: () => authAPI.me()
   });
 
-  const isAdmin = (currentUser as any)?.role === 'ADMIN';
+  const isAdmin = (currentUser as Record<string, unknown>)?.role === 'ADMIN';
 
   const renderContent = () => {
     switch (activeTab) {

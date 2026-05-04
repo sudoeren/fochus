@@ -34,11 +34,11 @@ const calculatePasswordStrength = (
 };
 
 // Password Strength Indicator Component
-const PasswordStrengthIndicator: React.FC<{ password: string; theme: string; t: any }> = ({
-  password,
-  theme,
-  t
-}) => {
+const PasswordStrengthIndicator: React.FC<{
+  password: string;
+  theme: string;
+  t: (key: string) => string;
+}> = ({ password, theme, t }) => {
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   if (!password) return null;
@@ -133,8 +133,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         setAuthToken(token);
         onLogin();
       }
-    } catch (err: any) {
-      setError(err.message || t('login.error_general'));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('login.error_general'));
     } finally {
       setIsLoading(false);
     }

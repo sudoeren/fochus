@@ -18,6 +18,7 @@ import { cn } from './lib/utils';
 import { authAPI, getAuthToken, setAuthToken } from './services/api';
 import { useIsMobile } from './hooks/useIsMobile';
 import { MobileRestricted } from './pages/MobileRestricted';
+import type { Task } from './types';
 
 const App: React.FC = () => {
   const isMobile = useIsMobile();
@@ -112,7 +113,7 @@ const App: React.FC = () => {
       window.removeEventListener('hashchange', handleStateChange);
     };
   }, []);
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
   const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
@@ -177,7 +178,7 @@ const App: React.FC = () => {
     try {
       const me = await authAPI.me();
       setIsAuthenticated(true);
-      const uid = (me as any)?.id ?? null;
+      const uid = (me as { id?: string })?.id ?? null;
       setCurrentUserId(uid);
       setAuthChecked(true);
 
@@ -210,7 +211,7 @@ const App: React.FC = () => {
       .me()
       .then((me) => {
         setIsAuthenticated(true);
-        const uid = (me as any)?.id ?? null;
+        const uid = (me as { id?: string })?.id ?? null;
         setCurrentUserId(uid);
         if (uid) checkOnboarding(uid);
       })
@@ -224,7 +225,7 @@ const App: React.FC = () => {
       });
   }, []);
 
-  const handleEditTask = (task: any) => {
+  const handleEditTask = (task: Task) => {
     setEditingTask(task);
     handleOpenModal('task');
   };
@@ -261,7 +262,14 @@ const App: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, [isSpotlightOpen, showNoteModal, showTaskModal, showPomodoroModal, isSpotlightEnabled]);
+  }, [
+    isSpotlightOpen,
+    showNoteModal,
+    showTaskModal,
+    showPomodoroModal,
+    isSpotlightEnabled,
+    handleCloseModal
+  ]);
 
   const renderView = () => {
     switch (activeView) {

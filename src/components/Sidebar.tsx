@@ -3,12 +3,10 @@ import {
   Home,
   FileText,
   CheckSquare,
-  Calendar,
   Settings,
   Trash2,
   Search,
   Timer,
-  BarChart,
   Plus,
   Play,
   Pause,
@@ -22,7 +20,6 @@ import {
   PanelLeft,
   MousePointer
 } from 'lucide-react';
-import { useTheme } from './ThemeProvider';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
 import { cn } from '../lib/utils';
@@ -54,7 +51,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSidebarHoverExpandedChange
 }) => {
   const { t } = useTranslation();
-  const { theme } = useTheme();
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -65,11 +61,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   useEffect(() => {
     if (sidebarMode !== 'hover') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsHovered(false);
+    }
+  }, [sidebarMode]);
+
+  useEffect(() => {
+    if (sidebarMode !== 'hover') {
       onSidebarHoverExpandedChange(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidebarMode]);
+  }, [sidebarMode, onSidebarHoverExpandedChange]);
 
   const cycleSidebarMode = () => {
     const modes: SidebarMode[] = ['open', 'hover', 'closed'];

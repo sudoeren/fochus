@@ -3,6 +3,7 @@ import { Plus, Search, Pin, Calendar, Trash2, FileText } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+import type { Note } from '../types';
 
 interface NotesProps {
   onOpenNoteModal: () => void;
@@ -24,7 +25,7 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
   const otherNotes = filteredNotes.filter((n) => !n.isPinned);
 
   // Masonry Card Component
-  const NoteCard = ({ note }: { note: any }) => (
+  const NoteCard = ({ note }: { note: Note }) => (
     <div
       onClick={() => onEditNote(note.id)}
       className="group relative flex flex-col mb-6 break-inside-avoid bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"

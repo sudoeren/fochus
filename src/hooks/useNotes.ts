@@ -6,8 +6,8 @@ import { deserializeApiDates } from '../utils/apiTransforms';
 export const useNotes = () => {
   const queryClient = useQueryClient();
 
-  const normalizeNote = (raw: any): Note => {
-    const note = deserializeApiDates(raw) as any;
+  const normalizeNote = (raw: Record<string, unknown>): Note => {
+    const note = deserializeApiDates(raw) as Record<string, unknown>;
     return {
       ...note,
       title: (note.title ?? '').toString(),
@@ -17,7 +17,7 @@ export const useNotes = () => {
       hasReminder: Boolean(note.hasReminder ?? false),
       reminderAt: note.reminderAt ?? undefined,
       plainContent: note.plainContent ?? note.content ?? '',
-      color: note.color
+      color: note.color as string | undefined
     } as Note;
   };
 
@@ -46,7 +46,7 @@ export const useNotes = () => {
 
   const updateNoteMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Note> }) => {
-      const payload: any = {};
+      const payload: Record<string, unknown> = {};
       if (data.title !== undefined) {
         payload.title = data.title?.trim() ? data.title.trim() : 'Adsız Not';
       }

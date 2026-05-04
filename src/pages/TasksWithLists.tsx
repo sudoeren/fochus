@@ -14,10 +14,11 @@ import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
 import { useTranslation } from 'react-i18next';
+import type { Task, TaskList } from '../types';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
-  onEditTask: (task: any) => void;
+  onEditTask: (task: Task) => void;
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
@@ -31,7 +32,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     refetch: refetchTaskLists
   } = useTaskLists();
   const [showListModal, setShowListModal] = useState(false);
-  const [editingList, setEditingList] = useState<any>(null);
+  const [editingList, setEditingList] = useState<Partial<TaskList> | null>(null);
   const [activeListMenu, setActiveListMenu] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,7 +69,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     }
   };
 
-  const handleEditList = (list: any) => {
+  const handleEditList = (list: TaskList) => {
     setEditingList(list);
     setShowListModal(true);
     setActiveListMenu(null);

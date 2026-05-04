@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
+import type { Task } from '../types';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { authAPI, pomodoroAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
@@ -24,7 +25,7 @@ interface DashboardProps {
   onNavigate: (view: string) => void;
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
-  onEditTask?: (task: any) => void;
+  onEditTask?: (task: Task) => void;
   onOpenSpotlight?: () => void;
   onOpenPomodoro?: () => void;
   bgImage: string;
@@ -38,8 +39,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onEditTask,
   onOpenSpotlight,
   onOpenPomodoro,
-  bgImage,
-  onBgChange
+  bgImage
 }) => {
   const { t } = useTranslation();
   const { tasks, toggleTask } = useTasks();
@@ -71,7 +71,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const loadMe = async () => {
       try {
         const meRaw = await authAPI.me();
-        const me = deserializeApiDates(meRaw) as any;
+        const me = deserializeApiDates(meRaw) as Record<string, unknown>;
         const resolved =
           (me?.name ?? '').toString().trim() || (me?.username ?? '').toString().trim();
         if (!cancelled) setDisplayName(resolved);

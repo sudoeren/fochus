@@ -68,7 +68,10 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
       window.dispatchEvent(new Event('auth:logout'));
     }
 
-    const rawMessage = (error as any)?.error ?? (error as any)?.message ?? 'Bir hata oluştu';
+    const rawMessage =
+      (error as Record<string, unknown>)?.error ??
+      (error as Record<string, unknown>)?.message ??
+      'Bir hata oluştu';
     throw new Error(translateApiError(rawMessage));
   }
 
@@ -78,21 +81,21 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 // Auth API
 export const authAPI = {
   register: (data: { username: string; password: string; name?: string }) =>
-    fetchAPI<{ user: any; token: string }>('/auth/register', {
+    fetchAPI<{ user: Record<string, unknown>; token: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
   login: (data: { username: string; password: string }) =>
-    fetchAPI<{ user: any; token: string }>('/auth/login', {
+    fetchAPI<{ user: Record<string, unknown>; token: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
-  me: () => fetchAPI<any>('/auth/me'),
+  me: () => fetchAPI<Record<string, unknown>>('/auth/me'),
 
   updateProfile: (data: { name?: string; username?: string; avatar?: string | null }) =>
-    fetchAPI<any>('/auth/profile', {
+    fetchAPI<Record<string, unknown>>('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
@@ -106,20 +109,20 @@ export const authAPI = {
 
 // Notes API
 export const notesAPI = {
-  getAll: () => fetchAPI<any[]>('/notes'),
+  getAll: () => fetchAPI<Record<string, unknown>[]>('/notes'),
 
-  getDeleted: () => fetchAPI<any[]>('/notes/deleted'),
+  getDeleted: () => fetchAPI<Record<string, unknown>[]>('/notes/deleted'),
 
-  getById: (id: string) => fetchAPI<any>(`/notes/${id}`),
+  getById: (id: string) => fetchAPI<Record<string, unknown>>(`/notes/${id}`),
 
   create: (data: { title: string; content?: string; isPinned?: boolean }) =>
-    fetchAPI<any>('/notes', {
+    fetchAPI<Record<string, unknown>>('/notes', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
   update: (id: string, data: Partial<{ title: string; content: string; isPinned: boolean }>) =>
-    fetchAPI<any>(`/notes/${id}`, {
+    fetchAPI<Record<string, unknown>>(`/notes/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
@@ -130,7 +133,7 @@ export const notesAPI = {
     }),
 
   restore: (id: string) =>
-    fetchAPI<any>(`/notes/${id}/restore`, {
+    fetchAPI<Record<string, unknown>>(`/notes/${id}/restore`, {
       method: 'POST'
     }),
 
@@ -147,12 +150,12 @@ export const tasksAPI = {
     if (params?.listId) searchParams.set('listId', params.listId);
     if (params?.completed !== undefined) searchParams.set('completed', String(params.completed));
     const query = searchParams.toString();
-    return fetchAPI<any[]>(`/tasks${query ? `?${query}` : ''}`);
+    return fetchAPI<Record<string, unknown>[]>(`/tasks${query ? `?${query}` : ''}`);
   },
 
-  getDeleted: () => fetchAPI<any[]>('/tasks/deleted'),
+  getDeleted: () => fetchAPI<Record<string, unknown>[]>('/tasks/deleted'),
 
-  getById: (id: string) => fetchAPI<any>(`/tasks/${id}`),
+  getById: (id: string) => fetchAPI<Record<string, unknown>>(`/tasks/${id}`),
 
   create: (data: {
     title: string;
@@ -168,19 +171,19 @@ export const tasksAPI = {
     recurringDays?: string;
     linkedNoteId?: string;
   }) =>
-    fetchAPI<any>('/tasks', {
+    fetchAPI<Record<string, unknown>>('/tasks', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
 
-  update: (id: string, data: Partial<any>) =>
-    fetchAPI<any>(`/tasks/${id}`, {
+  update: (id: string, data: Partial<Record<string, unknown>>) =>
+    fetchAPI<Record<string, unknown>>(`/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
 
   toggle: (id: string) =>
-    fetchAPI<any>(`/tasks/${id}/toggle`, {
+    fetchAPI<Record<string, unknown>>(`/tasks/${id}/toggle`, {
       method: 'PUT'
     }),
 
@@ -196,7 +199,7 @@ export const tasksAPI = {
     }),
 
   restore: (id: string) =>
-    fetchAPI<any>(`/tasks/${id}/restore`, {
+    fetchAPI<Record<string, unknown>>(`/tasks/${id}/restore`, {
       method: 'POST'
     }),
 
@@ -208,12 +211,12 @@ export const tasksAPI = {
 
 // Task Lists API
 export const taskListsAPI = {
-  getAll: () => fetchAPI<any[]>('/task-lists'),
+  getAll: () => fetchAPI<Record<string, unknown>[]>('/task-lists'),
 
-  getById: (id: string) => fetchAPI<any>(`/task-lists/${id}`),
+  getById: (id: string) => fetchAPI<Record<string, unknown>>(`/task-lists/${id}`),
 
   create: (data: { title: string; description?: string; color?: string }) =>
-    fetchAPI<any>('/task-lists', {
+    fetchAPI<Record<string, unknown>>('/task-lists', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
@@ -222,7 +225,7 @@ export const taskListsAPI = {
     id: string,
     data: Partial<{ title: string; description: string; color: string; order: number }>
   ) =>
-    fetchAPI<any>(`/task-lists/${id}`, {
+    fetchAPI<Record<string, unknown>>(`/task-lists/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
@@ -247,11 +250,11 @@ export const pomodoroAPI = {
     if (params?.endDate) searchParams.set('endDate', params.endDate);
     if (params?.limit) searchParams.set('limit', String(params.limit));
     const query = searchParams.toString();
-    return fetchAPI<any[]>(`/pomodoro${query ? `?${query}` : ''}`);
+    return fetchAPI<Record<string, unknown>[]>(`/pomodoro${query ? `?${query}` : ''}`);
   },
 
   getStats: (period?: 'week' | 'month' | 'all') =>
-    fetchAPI<any>(`/pomodoro/stats${period ? `?period=${period}` : ''}`),
+    fetchAPI<Record<string, unknown>>(`/pomodoro/stats${period ? `?period=${period}` : ''}`),
 
   create: (data: {
     startTime: string;
@@ -260,7 +263,7 @@ export const pomodoroAPI = {
     mode: 'work' | 'shortBreak' | 'longBreak';
     completed?: boolean;
   }) =>
-    fetchAPI<any>('/pomodoro', {
+    fetchAPI<Record<string, unknown>>('/pomodoro', {
       method: 'POST',
       body: JSON.stringify(data)
     }),
@@ -273,10 +276,10 @@ export const pomodoroAPI = {
 
 // Settings API
 export const settingsAPI = {
-  get: () => fetchAPI<any>('/settings'),
+  get: () => fetchAPI<Record<string, unknown>>('/settings'),
 
   update: (data: { theme?: string; language?: string }) =>
-    fetchAPI<any>('/settings', {
+    fetchAPI<Record<string, unknown>>('/settings', {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
@@ -297,7 +300,7 @@ export const settingsAPI = {
 
 // Admin API
 export const adminAPI = {
-  getUsers: () => fetchAPI<any[]>('/admin/users'),
+  getUsers: () => fetchAPI<Record<string, unknown>[]>('/admin/users'),
 
   deleteUser: (id: string) =>
     fetchAPI<{ message: string }>(`/admin/users/${id}`, {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, RotateCcw, X, AlertTriangle, FileText, CheckSquare, Search } from 'lucide-react';
+import { Trash2, RotateCcw, X, FileText, CheckSquare, Search } from 'lucide-react';
 import { notesAPI, tasksAPI } from '../services/api';
-import { EmptyState } from '../components/EmptyState';
 import { cn } from '../lib/utils';
 import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
@@ -20,44 +19,6 @@ export const Trash: React.FC = () => {
   const [deletedItems, setDeletedItems] = useState<DeletedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const loadDeletedItems = async () => {
-    setLoading(true);
-    try {
-      // Load deleted notes
-      const deletedNotesRaw = await notesAPI.getDeleted();
-      const deletedNotes = deserializeApiDates(deletedNotesRaw) as any[];
-      const formattedNotes: DeletedItem[] = deletedNotes.map((note) => ({
-        id: note.id,
-        title: note.title,
-        content: note.content,
-        type: 'note' as const,
-        deletedAt: new Date(note.deletedAt!)
-      }));
-
-      // Load deleted tasks
-      const deletedTasksRaw = await tasksAPI.getDeleted();
-      const deletedTasks = deserializeApiDates(deletedTasksRaw) as any[];
-      const formattedTasks: DeletedItem[] = deletedTasks.map((task) => ({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        type: 'task' as const,
-        deletedAt: new Date(task.deletedAt!)
-      }));
-
-      // Combine and sort by deletion date
-      const allItems = [...formattedNotes, ...formattedTasks].sort(
-        (a, b) => b.deletedAt.getTime() - a.deletedAt.getTime()
-      );
-
-      setDeletedItems(allItems);
-    } catch (error) {
-      console.error('Error loading deleted items:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const restoreItem = async (item: DeletedItem) => {
     try {
@@ -116,7 +77,48 @@ export const Trash: React.FC = () => {
   };
 
   useEffect(() => {
-    loadDeletedItems();
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const deletedNotesRaw = await notesAPI.getDeleted();
+        const deletedNotes = deserializeApiDates(deletedNotesRaw) as Record<string, unknown>[];
+        const formattedNotes: DeletedItem[] = deletedNotes.map((note) => ({
+          id: note.id as string,
+          title: (note.title ?? '') as string,
+          content: note.content as string | undefined,
+          type: 'note' as const,
+          deletedAt: new Date(note.deletedAt as string)
+        }));
+
+        const deletedTasksRaw = await tasksAPI.getDeleted();
+        const deletedTasks = deserializeApiDates(deletedTasksRaw) as Record<string, unknown>[];
+        const formattedTasks: DeletedItem[] = deletedTasks.map((task) => ({
+          id: task.id as string,
+          title: (task.title ?? '') as string,
+          description: task.description as string | undefined,
+          type: 'task' as const,
+          deletedAt: new Date(task.deletedAt as string)
+        }));
+
+        if (!cancelled) {
+          const allItems = [...formattedNotes, ...formattedTasks].sort(
+            (a, b) => b.deletedAt.getTime() - a.deletedAt.getTime()
+          );
+          setDeletedItems(allItems);
+        }
+      } catch (error) {
+        console.error('Error loading deleted items:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredItems = deletedItems.filter(

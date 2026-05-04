@@ -1,13 +1,20 @@
 // Optimistic UI updates for instant feedback
 
-export const optimisticTaskUpdate = (tasks: any[], taskId: string, updates: any) => {
+export const optimisticTaskUpdate = (
+  tasks: Record<string, unknown>[],
+  taskId: string,
+  updates: Record<string, unknown>
+) => {
   return tasks.map((task) =>
     task.id === taskId ? { ...task, ...updates, updatedAt: new Date() } : task
   );
 };
 
-export const optimisticTaskAdd = (tasks: any[], newTask: any) => {
-  const tempTask = {
+export const optimisticTaskAdd = (
+  tasks: Record<string, unknown>[],
+  newTask: Record<string, unknown>
+) => {
+  const tempTask: Record<string, unknown> = {
     ...newTask,
     id: 'temp-' + Date.now(),
     createdAt: new Date(),
@@ -20,18 +27,25 @@ export const optimisticTaskAdd = (tasks: any[], newTask: any) => {
   return [...tasks, tempTask];
 };
 
-export const optimisticTaskDelete = (tasks: any[], taskId: string) => {
+export const optimisticTaskDelete = (tasks: Record<string, unknown>[], taskId: string) => {
   return tasks.filter((task) => task.id !== taskId);
 };
 
-export const optimisticNoteUpdate = (notes: any[], noteId: string, updates: any) => {
+export const optimisticNoteUpdate = (
+  notes: Record<string, unknown>[],
+  noteId: string,
+  updates: Record<string, unknown>
+) => {
   return notes.map((note) =>
     note.id === noteId ? { ...note, ...updates, updatedAt: new Date() } : note
   );
 };
 
-export const optimisticNoteAdd = (notes: any[], newNote: any) => {
-  const tempNote = {
+export const optimisticNoteAdd = (
+  notes: Record<string, unknown>[],
+  newNote: Record<string, unknown>
+) => {
+  const tempNote: Record<string, unknown> = {
     ...newNote,
     id: 'temp-' + Date.now(),
     createdAt: new Date(),
@@ -41,6 +55,6 @@ export const optimisticNoteAdd = (notes: any[], newNote: any) => {
   return [...notes, tempNote];
 };
 
-export const optimisticNoteDelete = (notes: any[], noteId: string) => {
+export const optimisticNoteDelete = (notes: Record<string, unknown>[], noteId: string) => {
   return notes.filter((note) => note.id !== noteId);
 };

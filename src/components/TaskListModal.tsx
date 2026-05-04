@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { X, Plus, List } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { useTranslation } from 'react-i18next';
+import type { TaskList } from '../types';
 
 interface TaskListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  editingList?: any; // Replace with proper type
+  editingList?: Partial<TaskList>;
 }
 
 export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {

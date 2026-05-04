@@ -7,11 +7,8 @@ import {
   Monitor,
   Image as ImageIcon,
   LayoutTemplate,
-  Languages,
   Sparkles,
-  Command,
-  Search,
-  Bell
+  Command
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTheme } from '../components/ThemeProvider';
@@ -142,7 +139,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                   ].map((mode) => (
                     <button
                       key={mode.id}
-                      onClick={() => setTheme(mode.id as any)}
+                      onClick={() => setTheme(mode.id as 'light' | 'dark' | 'system')}
                       className={cn(
                         'flex flex-col items-center justify-center p-6 rounded-xl border-2 transition-all duration-200 gap-3 hover:border-zinc-300 dark:hover:border-zinc-600',
                         theme === mode.id

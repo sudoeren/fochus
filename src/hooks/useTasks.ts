@@ -6,8 +6,8 @@ import { deserializeApiDates } from '../utils/apiTransforms';
 export const useTasks = () => {
   const queryClient = useQueryClient();
 
-  const normalizeTask = (raw: any): Task => {
-    const task = deserializeApiDates(raw) as any;
+  const normalizeTask = (raw: Record<string, unknown>): Task => {
+    const task = deserializeApiDates(raw) as Record<string, unknown>;
     return {
       ...task,
       title: (task.title ?? '').toString(),
@@ -20,7 +20,7 @@ export const useTasks = () => {
       lastCompleted: task.lastCompleted ?? undefined,
       nextDue: task.nextDue ?? undefined,
       isCompleted: Boolean(task.isCompleted),
-      status: (task.status ?? (task.isCompleted ? 'COMPLETED' : 'PENDING')) as any,
+      status: (task.status ?? (task.isCompleted ? 'COMPLETED' : 'PENDING')) as Task['status'],
       isPinned: Boolean(task.isPinned ?? false),
       isDeleted: Boolean(task.isDeleted ?? false),
       order: Number(task.order ?? 0),
@@ -32,7 +32,7 @@ export const useTasks = () => {
 
   const toISOStringOrUndefined = (value: unknown): string | undefined => {
     if (!value) return undefined;
-    const date = value instanceof Date ? value : new Date(value as any);
+    const date = value instanceof Date ? value : new Date(value as string);
     return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
   };
 
@@ -60,12 +60,12 @@ export const useTasks = () => {
         hasReminder: taskData.hasReminder,
         reminderAt: toISOStringOrUndefined(taskData.reminderAt),
         isRecurring: taskData.isRecurring,
-        recurringType: taskData.recurringType as any,
-        recurringInterval: taskData.recurringInterval as any,
+        recurringType: taskData.recurringType,
+        recurringInterval: taskData.recurringInterval,
         recurringDays: Array.isArray(taskData.recurringDays)
           ? JSON.stringify(taskData.recurringDays)
-          : (taskData.recurringDays as any),
-        linkedNoteId: (taskData as any).linkedNoteId
+          : taskData.recurringDays,
+        linkedNoteId: taskData.linkedNoteId
       });
       return normalizeTask(newTaskRaw);
     },

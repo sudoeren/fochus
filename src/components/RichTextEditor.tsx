@@ -53,7 +53,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Toolbar definition removed
 
   // Simple Markdown-like auto-formatting
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+  const handleInput = (_e: React.FormEvent<HTMLDivElement>) => {
     handleContentChange();
 
     const selection = window.getSelection();

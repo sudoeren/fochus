@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Calendar, Flag, CheckCircle2, ListTodo, Clock } from 'lucide-react';
 import { Task } from '../types/index';
 import { useTasks } from '../hooks/useTasks';
@@ -28,26 +28,16 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
   const [isPinned, setIsPinned] = useState(initialData?.isPinned || false);
   const [listId, setListId] = useState<string | null>(initialData?.listId || null);
 
-  // Reset state when opening fresh
+  // Focus title on open
   useEffect(() => {
     if (isOpen) {
-      setTitle(initialData?.title || '');
-      setDescription(initialData?.description || '');
-      setDueDate(
-        initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : ''
-      );
-      setIsPinned(initialData?.isPinned || false);
-      setListId(initialData?.listId || null);
-
-      // Focus title after a short delay to ensure render
       setTimeout(() => {
         titleInputRef.current?.focus();
       }, 50);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!title.trim()) return;
 
     try {
@@ -72,7 +62,7 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
     } catch (error) {
       console.error('Error saving task:', error);
     }
-  };
+  }, [title, description, dueDate, isPinned, listId, initialData, updateTask, addTask, onClose]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -92,7 +82,7 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, title, description, dueDate, isPinned, listId]);
+  }, [isOpen, onClose, handleSave]);
 
   if (!isOpen) return null;
 

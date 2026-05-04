@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Pin, Save, Maximize2, Clock } from 'lucide-react';
 import { Note } from '../types/index';
 import { useNotes } from '../hooks/useNotes';
@@ -70,11 +70,11 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
   const [title, setTitle] = useState(initialData?.title || '');
   const [content, setContent] = useState(initialData?.content || '');
   const [isPinned, setIsPinned] = useState(initialData?.isPinned || false);
-  const [selectedColor, setSelectedColor] = useState(
+  const [selectedColor] = useState(
     NOTE_COLORS.find((c) => c.id === initialData?.color) || NOTE_COLORS[0]
   );
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!title.trim() && !content.trim()) return;
 
     try {
@@ -99,7 +99,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
     } catch (error) {
       console.error('Error saving note:', error);
     }
-  };
+  }, [title, content, isPinned, selectedColor, initialData, updateNote, addNote, onClose]);
 
   const handleExpand = async () => {
     try {
@@ -156,7 +156,7 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, title, content, isPinned, selectedColor]);
+  }, [isOpen, onClose, handleSave]);
 
   if (!isOpen) return null;
 

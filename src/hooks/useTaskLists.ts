@@ -8,13 +8,13 @@ export const useTaskLists = () => {
   const [taskLists, setTaskLists] = useState<TaskList[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const normalizeList = (raw: any): TaskList => {
-    const list = deserializeApiDates(raw) as any;
+  const normalizeList = (raw: Record<string, unknown>): TaskList => {
+    const list = deserializeApiDates(raw) as Record<string, unknown>;
     return {
       ...list,
       title: (list.title ?? '').toString(),
       description: list.description ?? undefined,
-      color: list.color ?? '#3B82F6',
+      color: (list.color as string) ?? '#3B82F6',
       order: Number(list.order ?? 0),
       isDeleted: Boolean(list.isDeleted ?? false),
       createdAt: list.createdAt,
@@ -54,10 +54,10 @@ export const useTaskLists = () => {
   const updateTaskList = async (id: string, data: Partial<TaskList>) => {
     try {
       const updatedRaw = await taskListsAPI.update(id, {
-        title: data.title as any,
-        description: data.description as any,
-        color: data.color as any,
-        order: data.order as any
+        title: data.title ?? undefined,
+        description: data.description ?? undefined,
+        color: data.color ?? undefined,
+        order: data.order ?? undefined
       });
       const updatedList = normalizeList(updatedRaw);
       await fetchTaskLists(true); // Silent refresh
@@ -108,7 +108,24 @@ export const useTaskLists = () => {
   };
 
   useEffect(() => {
-    fetchTaskLists();
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        const lists = await taskListsAPI.getAll();
+        if (!cancelled) setTaskLists(lists.map(normalizeList));
+      } catch (error) {
+        console.error('Error fetching task lists:', error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return {

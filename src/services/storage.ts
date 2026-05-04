@@ -35,7 +35,7 @@ const getStoredData = <T>(key: string): T[] => {
   }
 };
 
-const setStoredData = (key: string, data: any[]) => {
+const setStoredData = (key: string, data: unknown[]) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 

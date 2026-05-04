@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Search,
-  Command,
   FileText,
   CheckSquare,
   Settings,
-  ArrowRight,
   Layout,
   Plus,
-  Hash,
   CornerDownLeft,
   Moon,
   Sun,
@@ -36,7 +33,7 @@ interface SpotlightItem {
   id: string;
   label: string;
   detail?: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   group: string;
   action: () => void;
   shortcut?: string;
@@ -65,115 +62,123 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   }, []);
 
   // Static items definition
-  const quickActions: SpotlightItem[] = [
-    {
-      id: 'new-task',
-      label: t('spotlight.actions.new_task'),
-      detail: t('spotlight.actions.new_task_desc'),
-      icon: Plus,
-      group: t('spotlight.groups.quick_actions'),
-      action: () => {
-        onOpenTaskModal();
-        onClose();
+  const quickActions: SpotlightItem[] = useMemo(
+    () => [
+      {
+        id: 'new-task',
+        label: t('spotlight.actions.new_task'),
+        detail: t('spotlight.actions.new_task_desc'),
+        icon: Plus,
+        group: t('spotlight.groups.quick_actions'),
+        action: () => {
+          onOpenTaskModal();
+          onClose();
+        },
+        color: 'emerald'
       },
-      color: 'emerald'
-    },
-    {
-      id: 'new-note',
-      label: t('spotlight.actions.new_note'),
-      detail: t('spotlight.actions.new_note_desc'),
-      icon: FileText,
-      group: t('spotlight.groups.quick_actions'),
-      action: () => {
-        onOpenNoteModal();
-        onClose();
+      {
+        id: 'new-note',
+        label: t('spotlight.actions.new_note'),
+        detail: t('spotlight.actions.new_note_desc'),
+        icon: FileText,
+        group: t('spotlight.groups.quick_actions'),
+        action: () => {
+          onOpenNoteModal();
+          onClose();
+        },
+        color: 'amber'
       },
-      color: 'amber'
-    },
-    {
-      id: 'start-focus',
-      label: t('spotlight.actions.focus_timer'),
-      detail: t('spotlight.actions.focus_timer_desc'),
-      icon: Timer,
-      group: t('spotlight.groups.quick_actions'),
-      action: () => {
-        onOpenPomodoro?.();
-        onClose();
+      {
+        id: 'start-focus',
+        label: t('spotlight.actions.focus_timer'),
+        detail: t('spotlight.actions.focus_timer_desc'),
+        icon: Timer,
+        group: t('spotlight.groups.quick_actions'),
+        action: () => {
+          onOpenPomodoro?.();
+          onClose();
+        },
+        color: 'red'
       },
-      color: 'red'
-    },
-    {
-      id: 'toggle-theme',
-      label:
-        theme === 'dark' ? t('spotlight.actions.toggle_light') : t('spotlight.actions.toggle_dark'),
-      detail: t('spotlight.actions.toggle_theme_desc'),
-      icon: theme === 'dark' ? Sun : Moon,
-      group: t('spotlight.groups.quick_actions'),
-      action: () => {
-        setTheme(theme === 'dark' ? 'light' : 'dark');
-        onClose();
-      },
-      color: 'indigo'
-    }
-  ];
+      {
+        id: 'toggle-theme',
+        label:
+          theme === 'dark'
+            ? t('spotlight.actions.toggle_light')
+            : t('spotlight.actions.toggle_dark'),
+        detail: t('spotlight.actions.toggle_theme_desc'),
+        icon: theme === 'dark' ? Sun : Moon,
+        group: t('spotlight.groups.quick_actions'),
+        action: () => {
+          setTheme(theme === 'dark' ? 'light' : 'dark');
+          onClose();
+        },
+        color: 'indigo'
+      }
+    ],
+    [t, onOpenTaskModal, onClose, onOpenNoteModal, onOpenPomodoro, theme, setTheme]
+  );
 
-  const navigationItems: SpotlightItem[] = [
-    {
-      id: 'go-dashboard',
-      label: t('spotlight.pages.dashboard'),
-      detail: t('spotlight.pages.dashboard_desc'),
-      icon: Layout,
-      group: t('spotlight.groups.pages'),
-      action: () => {
-        onNavigate('dashboard');
-        onClose();
+  const navigationItems: SpotlightItem[] = useMemo(
+    () => [
+      {
+        id: 'go-dashboard',
+        label: t('spotlight.pages.dashboard'),
+        detail: t('spotlight.pages.dashboard_desc'),
+        icon: Layout,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('dashboard');
+          onClose();
+        }
+      },
+      {
+        id: 'go-tasks',
+        label: t('spotlight.pages.tasks'),
+        detail: t('spotlight.pages.tasks_desc'),
+        icon: CheckSquare,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('tasks');
+          onClose();
+        }
+      },
+      {
+        id: 'go-notes',
+        label: t('spotlight.pages.notes'),
+        detail: t('spotlight.pages.notes_desc'),
+        icon: FileText,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('notes');
+          onClose();
+        }
+      },
+      {
+        id: 'go-trash',
+        label: t('spotlight.pages.trash'),
+        detail: t('spotlight.pages.trash_desc'),
+        icon: Trash2,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('trash');
+          onClose();
+        }
+      },
+      {
+        id: 'go-settings',
+        label: t('spotlight.pages.settings'),
+        detail: t('spotlight.pages.settings_desc'),
+        icon: Settings,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('settings');
+          onClose();
+        }
       }
-    },
-    {
-      id: 'go-tasks',
-      label: t('spotlight.pages.tasks'),
-      detail: t('spotlight.pages.tasks_desc'),
-      icon: CheckSquare,
-      group: t('spotlight.groups.pages'),
-      action: () => {
-        onNavigate('tasks');
-        onClose();
-      }
-    },
-    {
-      id: 'go-notes',
-      label: t('spotlight.pages.notes'),
-      detail: t('spotlight.pages.notes_desc'),
-      icon: FileText,
-      group: t('spotlight.groups.pages'),
-      action: () => {
-        onNavigate('notes');
-        onClose();
-      }
-    },
-    {
-      id: 'go-trash',
-      label: t('spotlight.pages.trash'),
-      detail: t('spotlight.pages.trash_desc'),
-      icon: Trash2,
-      group: t('spotlight.groups.pages'),
-      action: () => {
-        onNavigate('trash');
-        onClose();
-      }
-    },
-    {
-      id: 'go-settings',
-      label: t('spotlight.pages.settings'),
-      detail: t('spotlight.pages.settings_desc'),
-      icon: Settings,
-      group: t('spotlight.groups.pages'),
-      action: () => {
-        onNavigate('settings');
-        onClose();
-      }
-    }
-  ];
+    ],
+    [t, onNavigate, onClose]
+  );
 
   // Dynamic Content - Tasks
   const taskItems: SpotlightItem[] = tasks
@@ -212,13 +217,10 @@ export const Spotlight: React.FC<SpotlightProps> = ({
     }));
 
   // Combine all items based on query
-  let allItems: SpotlightItem[] = [];
-
-  if (query.length === 0) {
-    // Show quick actions and navigation when no query
-    allItems = [...quickActions, ...navigationItems];
-  } else {
-    // Filter everything when there's a query
+  const allItems = useMemo(() => {
+    if (query.length === 0) {
+      return [...quickActions, ...navigationItems];
+    }
     const filteredQuickActions = quickActions.filter(
       (i) =>
         i.label.toLowerCase().includes(query.toLowerCase()) ||
@@ -229,8 +231,8 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         i.label.toLowerCase().includes(query.toLowerCase()) ||
         i.detail?.toLowerCase().includes(query.toLowerCase())
     );
-    allItems = [...filteredQuickActions, ...filteredNavigation, ...taskItems, ...noteItems];
-  }
+    return [...filteredQuickActions, ...filteredNavigation, ...taskItems, ...noteItems];
+  }, [query, quickActions, navigationItems, taskItems, noteItems]);
 
   // Scroll selected item into view
   useEffect(() => {

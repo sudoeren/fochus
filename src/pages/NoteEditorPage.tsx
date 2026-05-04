@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, Save, Clock, Trash2, Wrench, Copy, Download } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
@@ -19,11 +19,11 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
   const [title, setTitle] = useState(currentNote?.title || '');
   const [content, setContent] = useState(currentNote?.content || '');
   const [plainContent, setPlainContent] = useState(currentNote?.plainContent || '');
-  const [lastSaved, setLastSaved] = useState<Date | null>(
-    currentNote?.updatedAt ? new Date(currentNote.updatedAt) : null
-  );
   const [isSaving, setIsSaving] = useState(false);
   const [createdNoteId, setCreatedNoteId] = useState<string | null>(null);
+  const [lastSavedDate, setLastSavedDate] = useState<Date | null>(
+    currentNote?.updatedAt ? new Date(currentNote.updatedAt) : null
+  );
 
   const tt = useCallback(
     (key: string, fallback: string) => {
@@ -34,14 +34,13 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
   );
 
   // Sync state when notes array updates (e.g., after initial load)
+  const noteIdRef = useRef(currentNote?.id);
   useEffect(() => {
-    if (currentNote && !title && !content) {
+    if (currentNote && noteIdRef.current !== currentNote.id) {
+      noteIdRef.current = currentNote.id;
       setTitle(currentNote.title || '');
       setContent(currentNote.content || '');
       setPlainContent(currentNote.plainContent || '');
-      if (currentNote.updatedAt) {
-        setLastSaved(new Date(currentNote.updatedAt));
-      }
     }
   }, [currentNote]);
 
@@ -71,13 +70,25 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
         });
         setCreatedNoteId(newNote.id);
       }
-      setLastSaved(new Date());
+      setLastSavedDate(new Date());
     } catch (error) {
       console.error('Save error:', error);
     } finally {
       setIsSaving(false);
     }
-  }, [noteId, createdNoteId, title, content, plainContent, isSaving, updateNote, addNote]);
+  }, [
+    noteId,
+    createdNoteId,
+    title,
+    content,
+    plainContent,
+    isSaving,
+    updateNote,
+    addNote,
+    setLastSavedDate,
+    setIsSaving,
+    setCreatedNoteId
+  ]);
 
   const handleDelete = async () => {
     const effectiveNoteId = noteId || createdNoteId;
@@ -117,16 +128,16 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
   const createdAtDate = useMemo(() => {
     const source = currentNote?.createdAt;
     if (!source) return null;
-    const d = new Date(source as any);
+    const d = new Date(source);
     return isNaN(d.getTime()) ? null : d;
   }, [currentNote?.createdAt]);
 
   const updatedAtDate = useMemo(() => {
     const source = currentNote?.updatedAt;
-    if (!source) return lastSaved;
-    const d = new Date(source as any);
-    return isNaN(d.getTime()) ? lastSaved : d;
-  }, [currentNote?.updatedAt, lastSaved]);
+    if (!source) return lastSavedDate;
+    const d = new Date(source);
+    return isNaN(d.getTime()) ? lastSavedDate : d;
+  }, [currentNote?.updatedAt, lastSavedDate]);
 
   const wordCount = useMemo(() => {
     const text = (plainContent || '').trim();

@@ -6,7 +6,7 @@ const CACHE_KEYS = {
   LAST_UPDATE: 'fokus_last_update'
 };
 
-export const cacheData = (key: string, data: any) => {
+export const cacheData = (key: string, data: unknown) => {
   try {
     localStorage.setItem(
       key,
@@ -52,7 +52,7 @@ export const invalidateCache = (key?: string) => {
   }
 };
 
-export const cacheTasks = (tasks: any[]) => {
+export const cacheTasks = (tasks: unknown[]) => {
   cacheData(CACHE_KEYS.TASKS, tasks);
 };
 
@@ -60,7 +60,7 @@ export const getCachedTasks = () => {
   return getCachedData(CACHE_KEYS.TASKS, 10000); // 10 seconds max age for tasks
 };
 
-export const cacheNotes = (notes: any[]) => {
+export const cacheNotes = (notes: unknown[]) => {
   cacheData(CACHE_KEYS.NOTES, notes);
 };
 

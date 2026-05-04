@@ -1,6 +1,5 @@
 import React from 'react';
 import { Laptop, Smartphone, ArrowRight, X } from 'lucide-react';
-import { cn } from '../lib/utils';
 
 export const MobileRestricted: React.FC = () => {
   return (
