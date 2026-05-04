@@ -21,10 +21,6 @@ export const Trash: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadDeletedItems();
-  }, []);
-
   const loadDeletedItems = async () => {
     setLoading(true);
     try {
@@ -118,6 +114,10 @@ export const Trash: React.FC = () => {
       console.error('Error clearing trash:', error);
     }
   };
+
+  useEffect(() => {
+    loadDeletedItems();
+  }, []);
 
   const filteredItems = deletedItems.filter(
     (item) =>
