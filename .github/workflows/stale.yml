@@ -1,0 +1,24 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-label: stale
+          stale-issue-message: "Bu issue 60 gündür güncellenmedi. 7 gün içinde yanıtlanmazsa kapatılacak."
+          stale-pr-label: stale
+          stale-pr-message: "Bu PR 60 gündür güncellenmedi. 7 gün içinde yanıtlanmazsa kapatılacak."
+          close-issue-message: "Bu issue süre dolduğu için kapatıldı."
+          close-pr-message: "Bu PR süre dolduğu için kapatıldı."
