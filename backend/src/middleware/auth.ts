@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
+import { ParamsFlatDictionary } from 'express-serve-static-core';
 import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma.js';
 
-export interface AuthRequest extends Request {
+export interface AuthRequest extends Request<ParamsFlatDictionary> {
   user?: {
     id: string;
     username: string;
