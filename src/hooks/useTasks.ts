@@ -65,7 +65,7 @@ export const useTasks = () => {
         recurringDays: Array.isArray(taskData.recurringDays)
           ? JSON.stringify(taskData.recurringDays)
           : taskData.recurringDays,
-        linkedNoteId: taskData.linkedNoteId
+        linkedNoteId: taskData.linkedNoteId ?? undefined
       });
       return normalizeTask(newTaskRaw);
     },

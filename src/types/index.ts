@@ -41,6 +41,7 @@ export interface Task {
   isDeleted?: boolean;
   deletedAt?: Date;
   listId?: string | null;
+  linkedNoteId?: string | null;
 }
 
 export interface SubTask {
@@ -84,6 +85,26 @@ export interface NotificationOptions {
   icon?: string;
   silent?: boolean;
   tag?: string;
+}
+
+export interface PomodoroSession {
+  id: string;
+  startTime: Date;
+  endTime: Date;
+  duration: number;
+  mode: 'work' | 'shortBreak' | 'longBreak';
+  completed: boolean;
+}
+
+export interface TaskList {
+  id: string;
+  title: string;
+  description?: string;
+  color: string;
+  order: number;
+  isDeleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SearchResult {

@@ -52,15 +52,24 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // ... (Password Strength Code remains same)
 
 // 6. Admin Section
+interface AdminUser {
+  id: string;
+  username: string;
+  name?: string;
+  role?: string;
+  createdAt: string;
+  _count?: { notes?: number; tasks?: number };
+}
+
 const AdminSection = () => {
   const queryClient = useQueryClient();
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery<AdminUser[]>({
     queryKey: ['admin', 'users'],
-    queryFn: () => adminAPI.getUsers()
+    queryFn: () => adminAPI.getUsers() as unknown as Promise<AdminUser[]>
   });
 
-  const { data: settings, isLoading: settingsLoading } = useQuery({
+  const { data: settings, isLoading: settingsLoading } = useQuery<{ allowRegistration: boolean }>({
     queryKey: ['admin', 'settings'],
     queryFn: () => adminAPI.getSettings()
   });
@@ -151,7 +160,7 @@ const AdminSection = () => {
           {usersLoading ? (
             <div className="text-center py-4 text-zinc-500">Yükleniyor...</div>
           ) : (
-            users.map((user: Record<string, unknown>) => (
+            users.map((user: AdminUser) => (
               <div
                 key={user.id}
                 className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors"
@@ -342,7 +351,7 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 
         const resolvedUsername = (me?.username ?? '').toString();
         const resolvedName = (me?.name ?? '').toString().trim() || resolvedUsername;
-        const createdAt = me?.createdAt ? new Date(me.createdAt) : new Date();
+        const createdAt = me?.createdAt ? new Date(me.createdAt as string) : new Date();
 
         // Only update if we have real data
         if (resolvedUsername) {
@@ -369,7 +378,9 @@ const ProfileSection = ({ bgImage }: { bgImage: string }) => {
 
         const tasks = Array.isArray(tasksRaw) ? tasksRaw : [];
         const notes = Array.isArray(notesRaw) ? notesRaw : [];
-        const focusSeconds = Number(focusRaw?.work?.duration ?? 0);
+        const focusSeconds = Number(
+          (focusRaw as { work?: { duration?: number } })?.work?.duration ?? 0
+        );
         const focusHours = Number.isFinite(focusSeconds) ? focusSeconds / 3600 : 0;
 
         setStats({
@@ -1182,7 +1193,26 @@ const DataSection = () => {
     }
   };
 
-  const extractData = (parsed: Record<string, unknown>) => {
+  interface BackupPayload {
+    data?: {
+      notes?: unknown[];
+      deletedNotes?: unknown[];
+      tasks?: unknown[];
+      deletedTasks?: unknown[];
+      taskLists?: unknown[];
+      settings?: unknown;
+      pomodoroSessions?: unknown[];
+    };
+    notes?: unknown[];
+    deletedNotes?: unknown[];
+    tasks?: unknown[];
+    deletedTasks?: unknown[];
+    taskLists?: unknown[];
+    settings?: unknown;
+    pomodoroSessions?: unknown[];
+  }
+
+  const extractData = (parsed: BackupPayload) => {
     if (!parsed) return null;
     const data = parsed.data ?? parsed;
     return {
@@ -1207,7 +1237,12 @@ const DataSection = () => {
 
     // Create task lists first (build ID map)
     const listIdMap = new Map<string, string>();
-    for (const list of payload.taskLists) {
+    for (const list of payload.taskLists as {
+      id?: string;
+      title?: string;
+      description?: string;
+      color?: string;
+    }[]) {
       const created = await taskListsAPI.create({
         title: (list?.title ?? '').toString() || 'List',
         description: list?.description ?? undefined,
@@ -1220,7 +1255,7 @@ const DataSection = () => {
     const noteIdMap = new Map<string, string>();
 
     const createNoteAndMaybeDelete = async (
-      note: Record<string, unknown>,
+      note: { id?: string; title?: string; content?: string; isPinned?: boolean },
       shouldBeDeleted: boolean
     ) => {
       const created = await notesAPI.create({
@@ -1234,16 +1269,43 @@ const DataSection = () => {
       }
     };
 
-    for (const note of payload.notes) {
+    for (const note of payload.notes as {
+      id?: string;
+      title?: string;
+      content?: string;
+      isPinned?: boolean;
+    }[]) {
       await createNoteAndMaybeDelete(note, false);
     }
-    for (const note of payload.deletedNotes) {
+    for (const note of payload.deletedNotes as {
+      id?: string;
+      title?: string;
+      content?: string;
+      isPinned?: boolean;
+    }[]) {
       await createNoteAndMaybeDelete(note, true);
     }
 
     // Create tasks
     const createTaskAndMaybeDelete = async (
-      task: Record<string, unknown>,
+      task: {
+        id?: string;
+        title?: string;
+        description?: string;
+        dueDate?: string;
+        isPinned?: boolean;
+        hasReminder?: boolean;
+        reminderAt?: string;
+        isRecurring?: boolean;
+        listId?: string;
+        linkedNoteId?: string;
+        order?: number;
+        status?: string;
+        isCompleted?: boolean;
+        recurringType?: string;
+        recurringInterval?: number;
+        recurringDays?: string;
+      },
       shouldBeDeleted: boolean
     ) => {
       const oldListId = task?.listId ? String(task.listId) : null;
@@ -1285,23 +1347,64 @@ const DataSection = () => {
       }
     };
 
-    for (const task of payload.tasks) {
+    for (const task of payload.tasks as {
+      id?: string;
+      title?: string;
+      description?: string;
+      dueDate?: string;
+      isPinned?: boolean;
+      hasReminder?: boolean;
+      reminderAt?: string;
+      isRecurring?: boolean;
+      listId?: string;
+      linkedNoteId?: string;
+      order?: number;
+      status?: string;
+      isCompleted?: boolean;
+      recurringType?: string;
+      recurringInterval?: number;
+      recurringDays?: string;
+    }[]) {
       await createTaskAndMaybeDelete(task, false);
     }
-    for (const task of payload.deletedTasks) {
+    for (const task of payload.deletedTasks as {
+      id?: string;
+      title?: string;
+      description?: string;
+      dueDate?: string;
+      isPinned?: boolean;
+      hasReminder?: boolean;
+      reminderAt?: string;
+      isRecurring?: boolean;
+      listId?: string;
+      linkedNoteId?: string;
+      order?: number;
+      status?: string;
+      isCompleted?: boolean;
+      recurringType?: string;
+      recurringInterval?: number;
+      recurringDays?: string;
+    }[]) {
       await createTaskAndMaybeDelete(task, true);
     }
 
     // Restore settings (best-effort)
-    if (payload.settings) {
+    const settingsPayload = payload.settings as { theme?: string; language?: string } | undefined;
+    if (settingsPayload) {
       await settingsAPI.update({
-        theme: payload.settings?.theme,
-        language: payload.settings?.language
+        theme: settingsPayload.theme,
+        language: settingsPayload.language
       });
     }
 
     // Restore pomodoro sessions (best-effort)
-    for (const session of payload.pomodoroSessions) {
+    for (const session of payload.pomodoroSessions as {
+      mode?: string;
+      startTime?: string;
+      endTime?: string;
+      duration?: number;
+      completed?: boolean;
+    }[]) {
       try {
         await pomodoroAPI.create({
           startTime: safeToIso(session?.startTime) ?? new Date().toISOString(),

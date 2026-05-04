@@ -18,7 +18,7 @@ import { cn } from './lib/utils';
 import { authAPI, getAuthToken, setAuthToken } from './services/api';
 import { useIsMobile } from './hooks/useIsMobile';
 import { MobileRestricted } from './pages/MobileRestricted';
-import type { Task } from './types';
+import type { Task } from './types/index';
 
 const App: React.FC = () => {
   const isMobile = useIsMobile();
@@ -113,7 +113,7 @@ const App: React.FC = () => {
       window.removeEventListener('hashchange', handleStateChange);
     };
   }, []);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
   const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
@@ -233,7 +233,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!showTaskModal) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEditingTask(null);
+      setEditingTask(undefined);
     }
   }, [showTaskModal]);
 
@@ -478,7 +478,7 @@ const App: React.FC = () => {
         <NewTaskWindow
           isOpen={showTaskModal}
           onClose={handleCloseModal}
-          initialData={editingTask}
+          initialData={editingTask as Partial<Task>}
         />
       )}
 

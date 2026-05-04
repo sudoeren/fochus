@@ -3,7 +3,7 @@ import { X, Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { useTranslation } from 'react-i18next';
-import type { TaskList } from '../types';
+import type { TaskList } from '../types/index';
 
 interface TaskListModalProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ interface TaskListModalProps {
 export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState(editingList?.title || '');
-  const [color, setColor] = useState(editingList?.color || 'blue');
+  const [color, setColor] = useState(editingList?.color ?? 'blue');
   const { addTaskList, updateTaskList } = useTaskLists();
 
   if (!isOpen) return null;
@@ -23,7 +23,7 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
     e.preventDefault();
     try {
       if (editingList) {
-        await updateTaskList(editingList.id, { title, color });
+        if (editingList.id) await updateTaskList(editingList.id, { title, color });
       } else {
         await addTaskList({
           title,

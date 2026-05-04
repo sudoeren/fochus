@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Repeat, X } from 'lucide-react';
-import { RecurringType } from '../types';
+import { RecurringType } from '../types/index';
 
 interface RecurringTaskOptionsProps {
   isRecurring: boolean;

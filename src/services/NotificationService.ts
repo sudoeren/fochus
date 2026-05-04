@@ -1,4 +1,4 @@
-import { NotificationOptions } from '../types';
+import { NotificationOptions } from '../types/index';
 
 class NotificationService {
   private isSupported: boolean;

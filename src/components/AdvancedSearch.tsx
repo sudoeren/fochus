@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, FileText, CheckSquare, X } from 'lucide-react';
-import { SearchResult, Note, Task } from '../types';
+import { SearchResult, Note, Task } from '../types/index';
 
 interface AdvancedSearchProps {
   notes: Note[];

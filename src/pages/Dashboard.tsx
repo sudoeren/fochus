@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
-import type { Task } from '../types';
+import type { Task } from '../types/index';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { authAPI, pomodoroAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
@@ -91,7 +91,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     const loadStats = async () => {
       try {
-        const stats = await pomodoroAPI.getStats('week');
+        const stats = (await pomodoroAPI.getStats('week')) as { work?: { duration?: number } };
         const seconds = Number(stats?.work?.duration ?? 0);
         if (!cancelled) setWeeklyFocusSeconds(Number.isFinite(seconds) ? seconds : 0);
       } catch {
@@ -355,7 +355,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                               {note.title || t('dashboard.untitled_note')}
                             </h4>
                             <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                              {note.content.replace(/<[^>]*>?/gm, '') || t('dashboard.no_content')}
+                              {note.content
+                                ? new DOMParser().parseFromString(note.content, 'text/html').body
+                                    .textContent || t('dashboard.no_content')
+                                : t('dashboard.no_content')}
                             </p>
                           </li>
                         ))}

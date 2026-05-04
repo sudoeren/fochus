@@ -14,7 +14,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
 import { useTranslation } from 'react-i18next';
-import type { Task, TaskList } from '../types';
+import type { Task, TaskList } from '../types/index';
 
 interface TasksNewProps {
   onOpenTaskModal: () => void;
@@ -109,11 +109,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
       // 3. Refresh both lists and tasks from storage
       await refetchTaskLists(true);
-      await loadTasks(true);
+      await loadTasks();
     } catch (error) {
       console.error('❌ Failed to move task:', error);
       // Refresh to revert UI to actual storage state
-      await loadTasks(true);
+      await loadTasks();
     }
   };
 
@@ -585,7 +585,11 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
         {t('tasks_page.new_task')}
       </button>
 
-      <TaskListModal isOpen={showListModal} onClose={closeListModal} editingList={editingList} />
+      <TaskListModal
+        isOpen={showListModal}
+        onClose={closeListModal}
+        editingList={editingList ?? undefined}
+      />
     </div>
   );
 };
