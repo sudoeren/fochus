@@ -25,7 +25,10 @@ const App: React.FC = () => {
 
   const [activeView, setActiveView] = useState(() => {
     const hash = window.location.hash.slice(1).split('?')[0];
-    if (hash && ['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(hash)) {
+    if (
+      hash &&
+      ['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(hash)
+    ) {
       return hash;
     }
     return localStorage.getItem('activeView') || 'dashboard';
@@ -41,25 +44,31 @@ const App: React.FC = () => {
   const [showPomodoroModal, setShowPomodoroModal] = useState(false);
 
   // Navigation Handlers
-  const handleNavigate = useCallback((view: string) => {
-    if (view === activeView) return;
-    window.history.pushState(null, '', `#${view}`);
-    setActiveView(view);
-    setShowNoteModal(false);
-    setShowTaskModal(false);
-    setShowPomodoroModal(false);
-    setIsSpotlightOpen(false);
-  }, [activeView]);
+  const handleNavigate = useCallback(
+    (view: string) => {
+      if (view === activeView) return;
+      window.history.pushState(null, '', `#${view}`);
+      setActiveView(view);
+      setShowNoteModal(false);
+      setShowTaskModal(false);
+      setShowPomodoroModal(false);
+      setIsSpotlightOpen(false);
+    },
+    [activeView]
+  );
 
-  const handleOpenModal = useCallback((modalName: string) => {
-    const currentHash = window.location.hash.slice(1).split('?')[0] || activeView;
-    window.history.pushState({ modal: modalName }, '', `#${currentHash}?modal=${modalName}`);
-    
-    if (modalName === 'note') setShowNoteModal(true);
-    if (modalName === 'task') setShowTaskModal(true);
-    if (modalName === 'pomodoro') setShowPomodoroModal(true);
-    if (modalName === 'spotlight') setIsSpotlightOpen(true);
-  }, [activeView]);
+  const handleOpenModal = useCallback(
+    (modalName: string) => {
+      const currentHash = window.location.hash.slice(1).split('?')[0] || activeView;
+      window.history.pushState({ modal: modalName }, '', `#${currentHash}?modal=${modalName}`);
+
+      if (modalName === 'note') setShowNoteModal(true);
+      if (modalName === 'task') setShowTaskModal(true);
+      if (modalName === 'pomodoro') setShowPomodoroModal(true);
+      if (modalName === 'spotlight') setIsSpotlightOpen(true);
+    },
+    [activeView]
+  );
 
   const handleCloseModal = useCallback(() => {
     if (window.history.state?.modal) {
@@ -81,7 +90,7 @@ const App: React.FC = () => {
       const [view, query] = hash.split('?');
       const params = new URLSearchParams(query);
       const modal = params.get('modal');
-      
+
       if (['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(view)) {
         setActiveView(view);
       }
@@ -94,7 +103,7 @@ const App: React.FC = () => {
 
     window.addEventListener('popstate', handleStateChange);
     window.addEventListener('hashchange', handleStateChange);
-    
+
     // Initial sync
     handleStateChange();
 
@@ -222,6 +231,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!showTaskModal) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEditingTask(null);
     }
   }, [showTaskModal]);
@@ -457,12 +467,14 @@ const App: React.FC = () => {
       )}
 
       {showTaskModal && (
-        <NewTaskWindow isOpen={showTaskModal} onClose={handleCloseModal} initialData={editingTask} />
+        <NewTaskWindow
+          isOpen={showTaskModal}
+          onClose={handleCloseModal}
+          initialData={editingTask}
+        />
       )}
 
-      {showPomodoroModal && (
-        <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />
-      )}
+      {showPomodoroModal && <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />}
     </div>
   );
 };

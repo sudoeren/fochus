@@ -286,7 +286,7 @@ export const settingsAPI = {
     const response = await fetch(`${API_URL}/settings/export`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       }
     });
 
@@ -299,7 +299,7 @@ export const settingsAPI = {
 export const adminAPI = {
   getUsers: () => fetchAPI<any[]>('/admin/users'),
 
-  deleteUser: (id: string) => 
+  deleteUser: (id: string) =>
     fetchAPI<{ message: string }>(`/admin/users/${id}`, {
       method: 'DELETE'
     }),
@@ -311,7 +311,7 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify(data)
     }),
-    
+
   promoteUser: (id: string) =>
     fetchAPI<{ message: string }>(`/admin/promote/${id}`, {
       method: 'POST'

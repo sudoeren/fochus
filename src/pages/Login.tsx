@@ -16,27 +16,33 @@ import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 
 // Password strength calculator
-const calculatePasswordStrength = (password: string): { score: number; label: string; color: string } => {
+const calculatePasswordStrength = (
+  password: string
+): { score: number; label: string; color: string } => {
   let score = 0;
-  
+
   if (password.length >= 6) score += 1;
   if (password.length >= 8) score += 1;
   if (password.length >= 12) score += 1;
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
   if (/\d/.test(password)) score += 1;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
-  
+
   if (score <= 2) return { score: Math.min(score, 2), label: 'weak', color: 'bg-red-500' };
   if (score <= 4) return { score: Math.min(score, 4), label: 'medium', color: 'bg-yellow-500' };
   return { score, label: 'strong', color: 'bg-emerald-500' };
 };
 
 // Password Strength Indicator Component
-const PasswordStrengthIndicator: React.FC<{ password: string; theme: string; t: any }> = ({ password, theme, t }) => {
+const PasswordStrengthIndicator: React.FC<{ password: string; theme: string; t: any }> = ({
+  password,
+  theme,
+  t
+}) => {
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
-  
+
   if (!password) return null;
-  
+
   return (
     <div className="mt-2 space-y-1">
       <div className="flex gap-1">
@@ -45,23 +51,27 @@ const PasswordStrengthIndicator: React.FC<{ password: string; theme: string; t: 
             key={level}
             className={cn(
               'h-1 flex-1 rounded-full transition-colors',
-              level <= strength.score ? strength.color : theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-700'
+              level <= strength.score
+                ? strength.color
+                : theme === 'light'
+                  ? 'bg-zinc-200'
+                  : 'bg-zinc-700'
             )}
           />
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <span className={cn(
-          'text-xs font-medium',
-          strength.label === 'weak' && 'text-red-500',
-          strength.label === 'medium' && 'text-yellow-500',
-          strength.label === 'strong' && 'text-emerald-500'
-        )}>
+        <span
+          className={cn(
+            'text-xs font-medium',
+            strength.label === 'weak' && 'text-red-500',
+            strength.label === 'medium' && 'text-yellow-500',
+            strength.label === 'strong' && 'text-emerald-500'
+          )}
+        >
           {t(`login.password_${strength.label}`) || strength.label}
         </span>
-        {strength.label === 'strong' && (
-          <Shield className="w-3.5 h-3.5 text-emerald-500" />
-        )}
+        {strength.label === 'strong' && <Shield className="w-3.5 h-3.5 text-emerald-500" />}
       </div>
     </div>
   );
@@ -111,7 +121,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           name: formData.name
         });
         setAuthToken(token);
-        
+
         // Trigger global onboarding flow
         localStorage.setItem('fokus_onboarding_pending', 'true');
         onLogin();
@@ -170,7 +180,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       {/* Top Left Branding */}
       <div className="absolute top-6 left-6 z-50 flex items-center gap-2">
         <img src="/logo.svg" alt="Fochus" className="w-6 h-6" />
-        <span className={cn("font-bold text-lg tracking-tight", theme === 'light' ? 'text-zinc-900' : 'text-white')}>FOCHUS</span>
+        <span
+          className={cn(
+            'font-bold text-lg tracking-tight',
+            theme === 'light' ? 'text-zinc-900' : 'text-white'
+          )}
+        >
+          FOCHUS
+        </span>
       </div>
 
       {/* Top Right Controls */}
@@ -595,7 +612,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   theme === 'light'
                     ? 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-900/10'
                     : 'bg-white text-black hover:bg-zinc-200 shadow-white/10'
-                  )}
+                )}
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
@@ -635,9 +652,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            <div
-              className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')}
-            />
+            <div className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')} />
             <span
               className={cn(
                 'text-xs uppercase font-medium',
@@ -646,9 +661,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             >
               {t('login.or')}
             </span>
-            <div
-              className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')}
-            />
+            <div className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')} />
           </div>
 
           <div className="mt-6">

@@ -80,9 +80,7 @@ export const useTasks = () => {
         ...data,
         dueDate: data.dueDate ? toISOStringOrUndefined(data.dueDate) : undefined,
         reminderAt: data.reminderAt ? toISOStringOrUndefined(data.reminderAt) : undefined,
-        lastCompleted: data.lastCompleted
-          ? toISOStringOrUndefined(data.lastCompleted)
-          : undefined,
+        lastCompleted: data.lastCompleted ? toISOStringOrUndefined(data.lastCompleted) : undefined,
         nextDue: data.nextDue ? toISOStringOrUndefined(data.nextDue) : undefined
       });
       return normalizeTask(updatedRaw);
@@ -219,20 +217,21 @@ export const useTasks = () => {
     updateTask: (id: string, data: Partial<Task>) => updateTaskMutation.mutateAsync({ id, data }),
     deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
     toggleTask: (id: string) => toggleTaskMutation.mutateAsync(id),
-    pinTask: (id: string, isPinned: boolean) => updateTaskMutation.mutateAsync({ id, data: { isPinned } }),
+    pinTask: (id: string, isPinned: boolean) =>
+      updateTaskMutation.mutateAsync({ id, data: { isPinned } }),
     reorderTasks,
     getTasksByFilter,
     getTaskStats,
     loadTasks: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
     setTasks: (newTasks: Task[] | ((prev: Task[]) => Task[])) => {
-       // Manual override for local drag-drop state if needed, though react-query handles this via cache
-       // This signature was in the old hook, mapping it to cache update for compatibility if strictly needed
-       // But ideally components should rely on 'tasks' from the hook.
-       if (typeof newTasks === 'function') {
-         queryClient.setQueryData(['tasks'], newTasks);
-       } else {
-         queryClient.setQueryData(['tasks'], newTasks);
-       }
+      // Manual override for local drag-drop state if needed, though react-query handles this via cache
+      // This signature was in the old hook, mapping it to cache update for compatibility if strictly needed
+      // But ideally components should rely on 'tasks' from the hook.
+      if (typeof newTasks === 'function') {
+        queryClient.setQueryData(['tasks'], newTasks);
+      } else {
+        queryClient.setQueryData(['tasks'], newTasks);
+      }
     }
   };
 };

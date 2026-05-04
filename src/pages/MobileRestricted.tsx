@@ -9,7 +9,7 @@ export const MobileRestricted: React.FC = () => {
       <div className="absolute inset-0 z-0">
         {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        
+
         {/* Gradient Orbs */}
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-purple-500/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
@@ -18,19 +18,18 @@ export const MobileRestricted: React.FC = () => {
       <div className="relative z-10 w-full max-w-md px-6">
         {/* Main Card */}
         <div className="backdrop-blur-xl bg-white/70 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-3xl p-8 transform transition-all hover:scale-[1.02] duration-500">
-          
           {/* Icon Composition */}
           <div className="relative flex justify-center items-center mb-10 h-32">
             {/* Connection Line */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-1 bg-gradient-to-r from-rose-500/20 to-indigo-500/20 rounded-full" />
-            
+
             {/* Mobile Icon (Dimmed & Left) */}
             <div className="absolute left-10 top-1/2 -translate-y-1/2 transform -rotate-12 opacity-50 blur-[1px] scale-90">
               <div className="relative p-3 bg-rose-50 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/50">
-                 <Smartphone className="w-8 h-8 text-rose-400 dark:text-rose-500/50" />
-                 <div className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1 shadow-lg">
-                   <X className="w-3 h-3 text-white" strokeWidth={3} />
-                 </div>
+                <Smartphone className="w-8 h-8 text-rose-400 dark:text-rose-500/50" />
+                <div className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1 shadow-lg">
+                  <X className="w-3 h-3 text-white" strokeWidth={3} />
+                </div>
               </div>
             </div>
 
@@ -42,7 +41,10 @@ export const MobileRestricted: React.FC = () => {
             {/* Desktop Icon (Highlighted & Right) */}
             <div className="absolute right-8 top-1/2 -translate-y-1/2 transform rotate-6 z-10">
               <div className="relative p-5 bg-gradient-to-br from-white to-indigo-50 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl border border-indigo-100 dark:border-indigo-500/30 shadow-[0_0_30px_-10px_rgba(79,70,229,0.3)] animate-[float_6s_ease-in-out_infinite]">
-                <Laptop className="w-12 h-12 text-indigo-600 dark:text-indigo-400" strokeWidth={1.5} />
+                <Laptop
+                  className="w-12 h-12 text-indigo-600 dark:text-indigo-400"
+                  strokeWidth={1.5}
+                />
                 {/* Screen Glow */}
                 <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/10 blur-xl rounded-full" />
               </div>
@@ -56,9 +58,10 @@ export const MobileRestricted: React.FC = () => {
                 Masaüstü Deneyimi
               </span>
             </h1>
-            
+
             <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm">
-              Fochus, üretkenliğinizi en üst düzeye çıkarmak için geniş ekranlar ve klavye kısayolları düşünülerek tasarlandı.
+              Fochus, üretkenliğinizi en üst düzeye çıkarmak için geniş ekranlar ve klavye
+              kısayolları düşünülerek tasarlandı.
             </p>
 
             <div className="pt-6">

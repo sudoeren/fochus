@@ -91,7 +91,8 @@ export const useNotes = () => {
     addNote: (data: Partial<Note>) => addNoteMutation.mutateAsync(data),
     updateNote: (id: string, data: Partial<Note>) => updateNoteMutation.mutateAsync({ id, data }),
     deleteNote: (id: string) => deleteNoteMutation.mutateAsync(id),
-    pinNote: (id: string, isPinned: boolean) => updateNoteMutation.mutateAsync({ id, data: { isPinned } }),
+    pinNote: (id: string, isPinned: boolean) =>
+      updateNoteMutation.mutateAsync({ id, data: { isPinned } }),
     searchNotes,
     loadNotes: () => queryClient.invalidateQueries({ queryKey: ['notes'] })
   };

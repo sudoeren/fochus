@@ -272,9 +272,7 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                       </p>
                     </div>
                     <button
-                      onClick={() =>
-                        updateSettings({ autoStartBreaks: !settings.autoStartBreaks })
-                      }
+                      onClick={() => updateSettings({ autoStartBreaks: !settings.autoStartBreaks })}
                       className={cn(
                         'w-12 h-7 rounded-full p-1 transition-colors duration-300',
                         settings.autoStartBreaks ? 'bg-indigo-600' : 'bg-zinc-200 dark:bg-zinc-700'
@@ -359,120 +357,130 @@ export const PomodoroModal: React.FC<PomodoroModalProps> = ({ isOpen, onClose })
                     {t('pomodoro.sounds_notifications') || 'Ses & Bildirimler'}
                   </h3>
 
-              {/* End Sound */}
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
-                    <Bell className="w-4 h-4" />
+                  {/* End Sound */}
+                  <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-medium text-zinc-900 dark:text-white">
+                          {t('pomodoro.end_sound') || 'Bitiş Sesi'}
+                        </span>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {t('pomodoro.end_sound_desc') || 'Süre bitince çalacak ses'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {soundOptions.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => updateSettings({ endSound: opt.id })}
+                          className={cn(
+                            'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                            settings.endSound === opt.id
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600'
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-medium text-zinc-900 dark:text-white">
-                      {t('pomodoro.end_sound') || 'Bitiş Sesi'}
-                    </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {t('pomodoro.end_sound_desc') || 'Süre bitince çalacak ses'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  {soundOptions.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => updateSettings({ endSound: opt.id })}
-                      className={cn(
-                        'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                        settings.endSound === opt.id
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600'
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* Halfway Warning */}
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-orange-600 dark:text-orange-400">
-                      <BellRing className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="font-medium text-zinc-900 dark:text-white">
-                        {t('pomodoro.halfway_warning') || 'Yarı Yol Uyarısı'}
-                      </span>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        {t('pomodoro.halfway_warning_desc') || 'Sürenin yarısı geçince uyar'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => updateSettings({ halfwayWarningEnabled: !settings.halfwayWarningEnabled })}
-                    className={cn(
-                      'w-12 h-7 rounded-full p-1 transition-colors duration-300',
-                      settings.halfwayWarningEnabled ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-zinc-700'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
-                        settings.halfwayWarningEnabled ? 'translate-x-5' : 'translate-x-0'
-                      )}
-                    />
-                  </button>
-                </div>
-                {settings.halfwayWarningEnabled && (
-                  <div className="flex gap-2 flex-wrap pt-2">
-                    {soundOptions.map((opt) => (
+                  {/* Halfway Warning */}
+                  <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl text-orange-600 dark:text-orange-400">
+                          <BellRing className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="font-medium text-zinc-900 dark:text-white">
+                            {t('pomodoro.halfway_warning') || 'Yarı Yol Uyarısı'}
+                          </span>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {t('pomodoro.halfway_warning_desc') || 'Sürenin yarısı geçince uyar'}
+                          </p>
+                        </div>
+                      </div>
                       <button
-                        key={opt.id}
-                        onClick={() => updateSettings({ halfwaySound: opt.id })}
+                        onClick={() =>
+                          updateSettings({ halfwayWarningEnabled: !settings.halfwayWarningEnabled })
+                        }
                         className={cn(
-                          'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                          settings.halfwaySound === opt.id
-                            ? 'bg-orange-500 text-white'
-                            : 'bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600'
+                          'w-12 h-7 rounded-full p-1 transition-colors duration-300',
+                          settings.halfwayWarningEnabled
+                            ? 'bg-orange-500'
+                            : 'bg-zinc-200 dark:bg-zinc-700'
                         )}
                       >
-                        {opt.label}
+                        <div
+                          className={cn(
+                            'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
+                            settings.halfwayWarningEnabled ? 'translate-x-5' : 'translate-x-0'
+                          )}
+                        />
                       </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Push Notifications */}
-              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
-                    <Volume2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-medium text-zinc-900 dark:text-white">
-                      {t('pomodoro.push_notifications') || 'Bildirimler'}
-                    </span>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {t('pomodoro.push_notifications_desc') || 'Masaüstü bildirimleri al'}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => updateSettings({ pushNotificationsEnabled: !settings.pushNotificationsEnabled })}
-                  className={cn(
-                    'w-12 h-7 rounded-full p-1 transition-colors duration-300',
-                    settings.pushNotificationsEnabled ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
-                      settings.pushNotificationsEnabled ? 'translate-x-5' : 'translate-x-0'
+                    </div>
+                    {settings.halfwayWarningEnabled && (
+                      <div className="flex gap-2 flex-wrap pt-2">
+                        {soundOptions.map((opt) => (
+                          <button
+                            key={opt.id}
+                            onClick={() => updateSettings({ halfwaySound: opt.id })}
+                            className={cn(
+                              'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                              settings.halfwaySound === opt.id
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-600'
+                            )}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                     )}
-                  />
-                </button>
-              </div>
+                  </div>
+
+                  {/* Push Notifications */}
+                  <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
+                        <Volume2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-medium text-zinc-900 dark:text-white">
+                          {t('pomodoro.push_notifications') || 'Bildirimler'}
+                        </span>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {t('pomodoro.push_notifications_desc') || 'Masaüstü bildirimleri al'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        updateSettings({
+                          pushNotificationsEnabled: !settings.pushNotificationsEnabled
+                        })
+                      }
+                      className={cn(
+                        'w-12 h-7 rounded-full p-1 transition-colors duration-300',
+                        settings.pushNotificationsEnabled
+                          ? 'bg-emerald-500'
+                          : 'bg-zinc-200 dark:bg-zinc-700'
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300',
+                          settings.pushNotificationsEnabled ? 'translate-x-5' : 'translate-x-0'
+                        )}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

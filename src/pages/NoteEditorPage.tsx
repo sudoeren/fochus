@@ -1,13 +1,5 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  ArrowLeft,
-  Save,
-  Clock,
-  Trash2,
-  Wrench,
-  Copy,
-  Download
-} from 'lucide-react';
+import { ArrowLeft, Save, Clock, Trash2, Wrench, Copy, Download } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +12,7 @@ interface NoteEditorPageProps {
 export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }) => {
   const { t, i18n } = useTranslation();
   const { notes, addNote, updateNote, deleteNote } = useNotes();
-  
+
   // Find note from current notes array
   const currentNote = noteId ? notes.find((n) => n.id === noteId) : undefined;
 
@@ -196,7 +188,10 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 <span>
                   {t('note_editor.saved_at', {
                     defaultValue: 'Kaydedildi: {{time}}',
-                    time: updatedAtDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    time: updatedAtDate.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
                   })}
                 </span>
               ) : (
@@ -245,13 +240,15 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
             </div>
 
             <div className="bg-white/50 dark:bg-zinc-950/40 border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl p-4 sm:p-6 backdrop-blur-xl">
-              <div className="prose prose-lg dark:prose-invert max-w-none 
+              <div
+                className="prose prose-lg dark:prose-invert max-w-none 
                               prose-p:text-zinc-600 dark:prose-p:text-zinc-400 
                               prose-headings:text-zinc-900 dark:prose-headings:text-white 
                               prose-strong:text-zinc-900 dark:prose-strong:text-white 
                               prose-a:text-indigo-500 dark:prose-a:text-indigo-400
                               prose-blockquote:border-l-4 prose-blockquote:border-zinc-200 dark:prose-blockquote:border-zinc-700
-                              prose-code:text-indigo-500 dark:prose-code:text-indigo-300 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:rounded prose-code:px-1">
+                              prose-code:text-indigo-500 dark:prose-code:text-indigo-300 prose-code:bg-zinc-100 dark:prose-code:bg-zinc-800 prose-code:rounded prose-code:px-1"
+              >
                 <RichTextEditor
                   value={content}
                   onChange={(val, plain) => {
@@ -274,20 +271,32 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
               </div>
               <div className="mt-3 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.created', 'Oluşturma')}</span>
-                  <span className="font-medium">{createdAtDate ? formatDate(createdAtDate) : '—'}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">
+                    {tt('note_editor.created', 'Oluşturma')}
+                  </span>
+                  <span className="font-medium">
+                    {createdAtDate ? formatDate(createdAtDate) : '—'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.updated', 'Güncelleme')}</span>
-                  <span className="font-medium">{updatedAtDate ? formatDate(updatedAtDate) : '—'}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">
+                    {tt('note_editor.updated', 'Güncelleme')}
+                  </span>
+                  <span className="font-medium">
+                    {updatedAtDate ? formatDate(updatedAtDate) : '—'}
+                  </span>
                 </div>
                 <div className="pt-2 mt-2 border-t border-zinc-200/50 dark:border-zinc-800/60">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.words', 'Kelime')}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {tt('note_editor.words', 'Kelime')}
+                    </span>
                     <span className="font-medium">{wordCount}</span>
                   </div>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-zinc-500 dark:text-zinc-400">{tt('note_editor.characters', 'Karakter')}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      {tt('note_editor.characters', 'Karakter')}
+                    </span>
                     <span className="font-medium">{charCount}</span>
                   </div>
                 </div>
@@ -338,7 +347,11 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
                 <button
                   onClick={() => {
                     const safeTitle = (title || 'note').trim().replace(/[\\/:*?"<>|]+/g, '-');
-                    downloadFile(`${safeTitle}.txt`, plainContent || '', 'text/plain;charset=utf-8');
+                    downloadFile(
+                      `${safeTitle}.txt`,
+                      plainContent || '',
+                      'text/plain;charset=utf-8'
+                    );
                   }}
                   className="h-10 px-3 rounded-xl bg-white/40 dark:bg-zinc-900/50 border border-zinc-200/40 dark:border-zinc-800/60 text-sm font-semibold text-zinc-900 dark:text-zinc-100 inline-flex items-center justify-center gap-2 hover:bg-white/60 dark:hover:bg-zinc-900/70 transition-colors"
                   title={tt('note_editor.download_txt', 'TXT İndir')}

@@ -33,16 +33,19 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
     if (isOpen) {
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
-      setDueDate(initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '');
+      setDueDate(
+        initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : ''
+      );
       setIsPinned(initialData?.isPinned || false);
       setListId(initialData?.listId || null);
-      
+
       // Focus title after a short delay to ensure render
       setTimeout(() => {
         titleInputRef.current?.focus();
       }, 50);
     }
-  }, [isOpen, initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleSave = async () => {
     if (!title.trim()) return;
@@ -80,7 +83,7 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
         e.preventDefault();
         onClose();
       }
-      
+
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         handleSave();
@@ -94,7 +97,7 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
@@ -109,7 +112,10 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
       <div className="relative w-full max-w-lg transform rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-all flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-          <h2 id="task-modal-title" className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+          <h2
+            id="task-modal-title"
+            className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2"
+          >
             <div className="w-2 h-2 rounded-full bg-blue-500" aria-hidden="true" />
             {initialData?.id ? t('tasks.edit_task') : t('tasks.new_task')}
           </h2>
@@ -126,7 +132,9 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
         <div className="p-6 space-y-6">
           {/* Title Input */}
           <div className="space-y-2">
-            <label htmlFor="task-title" className="sr-only">{t('tasks.title_placeholder')}</label>
+            <label htmlFor="task-title" className="sr-only">
+              {t('tasks.title_placeholder')}
+            </label>
             <input
               ref={titleInputRef}
               id="task-title"
@@ -140,7 +148,9 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
 
           {/* Description Input */}
           <div className="space-y-2">
-            <label htmlFor="task-desc" className="sr-only">{t('tasks.desc_placeholder')}</label>
+            <label htmlFor="task-desc" className="sr-only">
+              {t('tasks.desc_placeholder')}
+            </label>
             <textarea
               id="task-desc"
               placeholder={t('tasks.desc_placeholder')}
@@ -157,19 +167,22 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
               <button
                 onClick={() => dateInputRef.current?.showPicker()}
                 className={clsx(
-                  "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500",
-                  dueDate 
-                    ? "bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800" 
-                    : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                  'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500',
+                  dueDate
+                    ? 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
+                    : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700'
                 )}
                 aria-label={t('tasks.date')}
               >
                 <Calendar size={16} aria-hidden="true" />
                 {dueDate
-                  ? new Date(dueDate).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US', {
-                      day: 'numeric',
-                      month: 'short'
-                    })
+                  ? new Date(dueDate).toLocaleDateString(
+                      i18n.language === 'tr' ? 'tr-TR' : 'en-US',
+                      {
+                        day: 'numeric',
+                        month: 'short'
+                      }
+                    )
                   : t('tasks.date')}
               </button>
               <input
@@ -186,10 +199,10 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
             <button
               onClick={() => setIsPinned(!isPinned)}
               className={clsx(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500",
-                isPinned 
-                  ? "bg-yellow-50 text-yellow-600 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800" 
-                  : "bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500',
+                isPinned
+                  ? 'bg-yellow-50 text-yellow-600 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
+                  : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700'
               )}
               aria-pressed={isPinned}
               aria-label={t('tasks.priority')}

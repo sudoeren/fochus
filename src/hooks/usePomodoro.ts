@@ -53,7 +53,9 @@ const playSound = (soundType: SoundType) => {
   try {
     const audio = new Audio(SOUND_URLS[soundType]);
     audio.play().catch(() => {});
-  } catch {}
+  } catch {
+    void 0;
+  }
 };
 
 const sendPushNotification = (title: string, body: string) => {
@@ -61,7 +63,7 @@ const sendPushNotification = (title: string, body: string) => {
   if (Notification.permission === 'granted') {
     new Notification(title, { body, icon: '/logo.svg' });
   } else if (Notification.permission !== 'denied') {
-    Notification.requestPermission().then(permission => {
+    Notification.requestPermission().then((permission) => {
       if (permission === 'granted') {
         new Notification(title, { body, icon: '/logo.svg' });
       }
@@ -187,8 +189,13 @@ const tick = () => {
   const times = getDefaultTimes(prev.settings);
   const totalTime = times[prev.mode];
   const halfwayTime = Math.floor(totalTime / 2);
-  
-  if (prev.settings.halfwayWarningEnabled && prev.mode === 'work' && !halfwayNotified && prev.timeLeft === halfwayTime) {
+
+  if (
+    prev.settings.halfwayWarningEnabled &&
+    prev.mode === 'work' &&
+    !halfwayNotified &&
+    prev.timeLeft === halfwayTime
+  ) {
     halfwayNotified = true;
     playSound(prev.settings.halfwaySound);
     if (prev.settings.pushNotificationsEnabled) {

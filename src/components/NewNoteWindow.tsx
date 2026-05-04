@@ -48,9 +48,9 @@ const NOTE_COLORS = [
     ring: 'ring-purple-200 dark:ring-purple-800',
     dot: 'bg-purple-500'
   },
-  { 
-    id: 'red', 
-    bg: 'bg-red-50 dark:bg-red-950/30', 
+  {
+    id: 'red',
+    bg: 'bg-red-50 dark:bg-red-950/30',
     border: 'border-red-200 dark:border-red-800/30',
     ring: 'ring-red-200 dark:ring-red-800',
     dot: 'bg-red-500'
@@ -74,33 +74,32 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
     NOTE_COLORS.find((c) => c.id === initialData?.color) || NOTE_COLORS[0]
   );
 
-  // Focus title on open
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        titleInputRef.current?.focus();
-      }, 50);
+  const handleSave = async () => {
+    if (!title.trim() && !content.trim()) return;
+
+    try {
+      if (initialData && initialData.id) {
+        await updateNote(initialData.id, {
+          title,
+          content,
+          isPinned,
+          color: selectedColor.id,
+          plainContent: content
+        });
+      } else {
+        await addNote({
+          title,
+          content,
+          isPinned,
+          color: selectedColor.id,
+          plainContent: content
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error saving note:', error);
     }
-  }, [isOpen]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
-      
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        handleSave();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, title, content, isPinned, selectedColor]);
+  };
 
   const handleExpand = async () => {
     try {
@@ -131,37 +130,38 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
     }
   };
 
-  const handleSave = async () => {
-    if (!title.trim() && !content.trim()) return;
-
-    try {
-      if (initialData && initialData.id) {
-        await updateNote(initialData.id, {
-          title,
-          content,
-          isPinned,
-          color: selectedColor.id,
-          plainContent: content
-        });
-      } else {
-        await addNote({
-          title,
-          content,
-          isPinned,
-          color: selectedColor.id,
-          plainContent: content
-        });
-      }
-      onClose();
-    } catch (error) {
-      console.error('Error saving note:', error);
+  // Focus title on open
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        titleInputRef.current?.focus();
+      }, 50);
     }
-  };
+  }, [isOpen]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, title, content, isPinned, selectedColor]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
@@ -183,7 +183,10 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02]">
           <div className="flex items-center gap-2">
-            <h2 id="note-modal-title" className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            <h2
+              id="note-modal-title"
+              className="text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+            >
               {initialData?.id ? t('notes.edit_note') : t('notes.new_note')}
             </h2>
           </div>
@@ -225,7 +228,9 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
         {/* Body */}
         <div className="p-8 flex flex-col gap-6 flex-1 overflow-y-auto">
           <div className="space-y-2">
-            <label htmlFor="note-title" className="sr-only">{t('notes.title_placeholder')}</label>
+            <label htmlFor="note-title" className="sr-only">
+              {t('notes.title_placeholder')}
+            </label>
             <input
               ref={titleInputRef}
               id="note-title"
@@ -238,7 +243,9 @@ export const NewNoteWindow: React.FC<NewNoteWindowProps> = ({
           </div>
 
           <div className="flex-1">
-            <label htmlFor="note-content" className="sr-only">{t('notes.content_placeholder')}</label>
+            <label htmlFor="note-content" className="sr-only">
+              {t('notes.content_placeholder')}
+            </label>
             <textarea
               id="note-content"
               placeholder={t('notes.content_placeholder')}

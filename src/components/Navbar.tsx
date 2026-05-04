@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Home,
-  FileText,
-  CheckSquare,
-  Calendar,
-  BarChart,
-  Search,
-  Plus,
-  Timer
-} from 'lucide-react';
+import { Home, FileText, CheckSquare, Calendar, BarChart, Search, Plus, Timer } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTranslation } from 'react-i18next';

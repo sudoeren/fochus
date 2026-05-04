@@ -1000,7 +1000,7 @@ const AppearanceSection = ({
             />
             <ThemeCard
               isActive={bgImage !== 'light' && bgImage !== 'dark' && bgImage !== 'default'}
-              onClick={() => {}} // Controlled by input
+              onClick={() => undefined} // Controlled by input
               label={t('settings.appearance.upload')}
               icon={Upload}
               previewColors={{ nav: 'bg-emerald-200', primary: '#10b981' }}
