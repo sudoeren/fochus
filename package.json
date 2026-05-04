@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.100.9",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "clsx": "^2.1.1",
