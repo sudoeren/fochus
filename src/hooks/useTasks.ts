@@ -125,7 +125,7 @@ export const useTasks = () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    let filteredTasks: Task[] = [];
+    let filteredTasks: Task[];
 
     switch (filter) {
       case 'pending':

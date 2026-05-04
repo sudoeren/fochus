@@ -54,7 +54,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const updateTheme = () => {
-      let shouldBeDark = false;
+      let shouldBeDark: boolean;
 
       if (theme === 'dark') {
         shouldBeDark = true;
