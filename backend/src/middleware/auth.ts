@@ -23,19 +23,21 @@ const extractToken = (authHeader: unknown): string | null => {
   return parts[1];
 };
 
+const verifyAuth = (authHeader: unknown): { userId: string; username: string } => {
+  const token = extractToken(authHeader);
+  if (!token) {
+    throw new Error('Missing token');
+  }
+  return jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
+};
+
 export const authenticate = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const token = extractToken(req.headers.authorization);
-
-    if (!token) {
-      return res.status(401).json({ error: 'Yetkilendirme gerekli' });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
+    const decoded = verifyAuth(req.headers.authorization);
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -48,7 +50,7 @@ export const authenticate = async (
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: 'Geçersiz token' });
   }
 };
