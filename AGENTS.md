@@ -29,9 +29,14 @@ Monorepo with two independent Node.js packages:
 - `npm run setup` — one-command setup (installs deps, creates DB, generates Prisma)
 - `npm start` — runs backend + frontend concurrently
 
-### Docker
+### Self-hosted (Linux)
+- `bash install.sh` or `curl -sSL .../install.sh | bash` — one-line setup
+- `bash uninstall.sh` — removes container, volume, and image
+- Builds and runs single Docker image with SQLite
+
+### Docker Compose
 - `docker-compose up -d --build` — full stack at `localhost:3000`
-- Copy `.env.example` → `.env` (root) and `backend/.env.example` → `backend/.env` first
+- Copy `.env.example` → `.env` (root) and `backend/.env.example` → `.env` first
 
 ## Architecture notes
 

@@ -41,42 +41,61 @@ Fochus comes with an eye-friendly dark mode and a spacious light mode. You can u
 
 ---
 
-## Installation
+## One-Line Install (Linux)
 
-You can run Fochus as a **self-hosted** single container, with **Docker Compose**, or **directly** with Node.js.
-
-### Prerequisites
-
-- For self-hosted / Compose: [Docker](https://docker.com)
-- For direct: [Node.js](https://nodejs.org/) (v18+)
-
-### Option 1: Self-Hosted (Single Container — Recommended)
-
-Everything in one container — frontend, backend, SQLite database, no external dependencies:
+Any Linux machine with Docker — one command, zero configuration:
 
 ```bash
-docker build -f Dockerfile.selfhost -t fochus .
-docker run -d -p 3000:3000 -v fochus_data:/app/data fochus
+curl -sSL https://github.com/sudoeren/fochus/raw/main/install.sh | bash
 ```
 
-Open **http://localhost:3000**.
-
-> Data persists in the `fochus_data` volume. `JWT_SECRET` is auto-generated.
-
-### Option 2: Quick Setup (Direct, No Docker)
-
-SQLite backend, no PostgreSQL needed:
+Or if you prefer to review first:
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
 cd fochus
-npm run setup    # installs deps, creates DB, generates Prisma client
-npm start        # launches backend + frontend simultaneously
+bash install.sh
+```
+
+The script will:
+- Clone the repository
+- Build a single Docker image (backend + frontend + SQLite)
+- Start the container with auto-restart
+- Open port `3000` in the firewall (if using `ufw`)
+- Show your local and network access URLs
+
+> **External access:** The app binds to `0.0.0.0:3000`. Access from anywhere on your network via `http://<server-ip>:3000`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
+
+### Uninstall
+
+```bash
+bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
+```
+
+Or from a local clone:
+
+```bash
+bash uninstall.sh
+```
+
+This stops the container, removes it, deletes the data volume and Docker image.
+
+---
+
+### Other Setup Methods
+
+#### Node.js (Direct, No Docker)
+
+```bash
+git clone https://github.com/sudoeren/fochus.git
+cd fochus
+npm run setup    # installs deps, creates SQLite DB, generates Prisma
+npm start        # runs backend + frontend simultaneously
 ```
 
 Open **http://localhost:5173**.
 
-### Option 3: Docker Compose (PostgreSQL)
+#### Docker Compose (PostgreSQL)
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -86,9 +105,7 @@ docker-compose up -d --build
 
 Open **http://localhost:3000**.
 
-> `JWT_SECRET` is auto-generated on first run. To customize, copy `.env.example` to `.env` and edit.
-
-### Option 4: Manual (Development)
+#### Development
 
 ```bash
 # Terminal 1: Backend
@@ -148,7 +165,7 @@ Fochus is developed with user experience and efficiency in mind.
 A: You can open the **Spotlight** with the `/` key to quickly access all features and search your data.
 
 **Q: Where is my data stored?**  
-A: Your data is stored securely in a local PostgreSQL database when using Docker or manual setup. Fochus also supports manual data backup and restore via the Settings page.
+A: With the self-hosted Docker setup, data is stored in a SQLite database inside the `fochus_data` Docker volume. You can back up and restore via the Settings page.
 
 **Q: Can I customize the Pomodoro timer?**  
 A: Yes! You can switch between Work, Short Break, and Long Break modes. Future updates will include custom duration settings.
