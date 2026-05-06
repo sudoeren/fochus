@@ -3,6 +3,7 @@ import { Plus, Search, Pin, Calendar, Trash2, FileText } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import type { Note } from '../types';
 
 interface NotesProps {
@@ -59,7 +60,10 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
       <div className="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
           <Calendar className="w-3 h-3" />
-          {new Date(note.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+          {new Date(note.createdAt).toLocaleDateString(i18n.language, {
+            day: 'numeric',
+            month: 'long'
+          })}
         </div>
 
         {/* Actions - Visible on Hover */}

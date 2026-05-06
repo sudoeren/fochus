@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authenticate);
 
-// Validation Schema
+// Validation Schemas
 const taskSchema = z.object({
   title: z.string().min(1, 'Başlık gerekli'),
   description: z.string().optional(),
@@ -21,6 +21,24 @@ const taskSchema = z.object({
   recurringInterval: z.number().optional().nullable(),
   recurringDays: z.string().optional().nullable(),
   linkedNoteId: z.string().optional().nullable()
+});
+
+const taskUpdateSchema = z.object({
+  title: z.string().min(1, 'Başlık gerekli').optional(),
+  description: z.string().optional(),
+  dueDate: z.string().optional().nullable(),
+  listId: z.string().optional().nullable(),
+  isPinned: z.boolean().optional(),
+  isCompleted: z.boolean().optional(),
+  status: z.string().optional(),
+  hasReminder: z.boolean().optional(),
+  reminderAt: z.string().optional().nullable(),
+  isRecurring: z.boolean().optional(),
+  recurringType: z.string().optional().nullable(),
+  recurringInterval: z.number().optional().nullable(),
+  recurringDays: z.string().optional().nullable(),
+  linkedNoteId: z.string().optional().nullable(),
+  order: z.number().optional()
 });
 
 // GET /api/tasks - Get all tasks
@@ -84,7 +102,7 @@ router.get('/deleted', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// GET /api/tasks/:id - Get single task
+// GET /api/tasks/:id - Get single task with subtasks
 router.get('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const task = await prisma.task.findFirst({
@@ -94,7 +112,11 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
       },
       include: {
         list: true,
-        linkedNote: true
+        linkedNote: true,
+        subtasks: {
+          where: { isDeleted: false },
+          orderBy: { order: 'asc' }
+        }
       }
     });
 
@@ -166,6 +188,13 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/tasks/:id - Update task
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
+    const validation = taskUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: validation.error.issues[0].message 
+      });
+    }
+
     const existingTask = await prisma.task.findFirst({
       where: {
         id: req.params.id,
@@ -193,7 +222,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       recurringDays,
       linkedNoteId,
       order
-    } = req.body;
+    } = validation.data;
 
     const updateData: any = {};
 
@@ -260,19 +289,100 @@ router.put('/:id/toggle', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Görev bulunamadı' });
     }
 
+    const isCompleting = !existingTask.isCompleted;
+
     const task = await prisma.task.update({
       where: { id: req.params.id },
       data: {
-        isCompleted: !existingTask.isCompleted,
-        status: !existingTask.isCompleted ? 'COMPLETED' : 'PENDING',
-        lastCompleted: !existingTask.isCompleted ? new Date() : existingTask.lastCompleted
+        isCompleted: isCompleting,
+        status: isCompleting ? 'COMPLETED' : 'PENDING',
+        lastCompleted: isCompleting ? new Date() : existingTask.lastCompleted
       }
     });
+
+    // Recurring task engine: create next occurrence when completing
+    if (isCompleting && existingTask.isRecurring && existingTask.recurringType) {
+      const now = new Date();
+      let nextDue: Date;
+
+      switch (existingTask.recurringType) {
+        case 'DAILY':
+          nextDue = new Date(now);
+          nextDue.setDate(nextDue.getDate() + (existingTask.recurringInterval || 1));
+          break;
+        case 'WEEKLY':
+          nextDue = new Date(now);
+          nextDue.setDate(nextDue.getDate() + 7 * (existingTask.recurringInterval || 1));
+          break;
+        case 'MONTHLY':
+          nextDue = new Date(now);
+          nextDue.setMonth(nextDue.getMonth() + (existingTask.recurringInterval || 1));
+          break;
+        default:
+          nextDue = now;
+      }
+
+      await prisma.task.create({
+        data: {
+          title: existingTask.title,
+          description: existingTask.description,
+          status: 'PENDING',
+          dueDate: nextDue,
+          listId: existingTask.listId,
+          isPinned: false,
+          order: existingTask.order,
+          isRecurring: existingTask.isRecurring,
+          recurringType: existingTask.recurringType,
+          recurringInterval: existingTask.recurringInterval,
+          recurringDays: existingTask.recurringDays,
+          linkedNoteId: existingTask.linkedNoteId,
+          nextDue,
+          userId: existingTask.userId
+        }
+      });
+    }
 
     res.json(task);
   } catch (error) {
     console.error('Toggle task error:', error);
     res.status(500).json({ error: 'Görev güncellenirken bir hata oluştu' });
+  }
+});
+
+// POST /api/tasks/:id/subtasks - Create subtask
+router.post('/:id/subtasks', async (req: AuthRequest, res: Response) => {
+  try {
+    const parentTask = await prisma.task.findFirst({
+      where: {
+        id: req.params.id,
+        userId: req.user!.id
+      }
+    });
+
+    if (!parentTask) {
+      return res.status(404).json({ error: 'Görev bulunamadı' });
+    }
+
+    const validation = z.object({
+      title: z.string().min(1, 'Başlık gerekli')
+    }).safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.issues[0].message });
+    }
+
+    const subtask = await prisma.task.create({
+      data: {
+        title: validation.data.title,
+        parentId: req.params.id,
+        userId: req.user!.id
+      }
+    });
+
+    res.status(201).json(subtask);
+  } catch (error) {
+    console.error('Create subtask error:', error);
+    res.status(500).json({ error: 'Alt görev oluşturulurken bir hata oluştu' });
   }
 });
 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TaskList } from '../types';
 import { taskListsAPI, tasksAPI } from '../services/api';
-import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useTaskLists = () => {
@@ -97,9 +96,7 @@ export const useTaskLists = () => {
       await tasksAPI.update(taskId, { listId: targetListId });
 
       if (!options?.skipRefresh) {
-        // Refresh lists to update task counts
-        await fetchTaskLists(true); // Silent refresh
-        triggerInstantRefresh();
+        await fetchTaskLists(true);
       }
     } catch (error) {
       console.error('Error moving task to list:', error);

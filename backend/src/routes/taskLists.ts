@@ -7,11 +7,18 @@ const router = Router();
 
 router.use(authenticate);
 
-// Validation Schema
+// Validation Schemas
 const taskListSchema = z.object({
   title: z.string().min(1, 'Başlık gerekli'),
   description: z.string().optional(),
   color: z.string().optional().default('#3B82F6')
+});
+
+const taskListUpdateSchema = z.object({
+  title: z.string().min(1, 'Başlık gerekli').optional(),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  order: z.number().optional()
 });
 
 // GET /api/task-lists - Get all task lists
@@ -106,6 +113,13 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/task-lists/:id - Update task list
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
+    const validation = taskListUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: validation.error.issues[0].message 
+      });
+    }
+
     const existingList = await prisma.taskList.findFirst({
       where: {
         id: req.params.id,
@@ -117,7 +131,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Liste bulunamadı' });
     }
 
-    const { title, description, color, order } = req.body;
+    const { title, description, color, order } = validation.data;
 
     const list = await prisma.taskList.update({
       where: { id: req.params.id },

@@ -257,6 +257,7 @@ export const usePomodoro = () => {
   };
 
   const resetTimer = () => {
+    halfwayNotified = false;
     setStoreState((prev) => {
       const times = getDefaultTimes(prev.settings);
       return {

@@ -14,20 +14,24 @@ interface TaskListModalProps {
 export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState(editingList?.title || '');
-  const [color, setColor] = useState(editingList?.color ?? 'blue');
+  const colorIdToHex = (id: string) => colorPalette.find((c) => c.id === id)?.hex ?? '#3B82F6';
+  const hexToColorId = (hex: string) =>
+    colorPalette.find((c) => c.hex === hex || c.id === hex)?.id ?? 'blue';
+  const [colorId, setColorId] = useState(hexToColorId(editingList?.color ?? '#3B82F6'));
   const { addTaskList, updateTaskList } = useTaskLists();
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const colorHex = colorIdToHex(colorId);
     try {
       if (editingList) {
-        if (editingList.id) await updateTaskList(editingList.id, { title, color });
+        if (editingList.id) await updateTaskList(editingList.id, { title, color: colorHex });
       } else {
         await addTaskList({
           title,
-          color
+          color: colorHex
         });
       }
       onClose();
@@ -37,15 +41,15 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
     }
   };
 
-  const colors = [
-    { id: 'blue', class: 'bg-blue-500' },
-    { id: 'red', class: 'bg-red-500' },
-    { id: 'green', class: 'bg-green-500' },
-    { id: 'yellow', class: 'bg-yellow-500' },
-    { id: 'purple', class: 'bg-purple-500' },
-    { id: 'pink', class: 'bg-pink-500' },
-    { id: 'indigo', class: 'bg-indigo-500' },
-    { id: 'orange', class: 'bg-orange-500' }
+  const colorPalette = [
+    { id: 'blue', hex: '#3B82F6', class: 'bg-blue-500' },
+    { id: 'red', hex: '#EF4444', class: 'bg-red-500' },
+    { id: 'green', hex: '#22C55E', class: 'bg-green-500' },
+    { id: 'yellow', hex: '#EAB308', class: 'bg-yellow-500' },
+    { id: 'purple', hex: '#A855F7', class: 'bg-purple-500' },
+    { id: 'pink', hex: '#EC4899', class: 'bg-pink-500' },
+    { id: 'indigo', hex: '#6366F1', class: 'bg-indigo-500' },
+    { id: 'orange', hex: '#F97316', class: 'bg-orange-500' }
   ];
 
   return (
@@ -91,15 +95,15 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
               {t('lists.color_theme')}
             </label>
             <div className="flex flex-wrap gap-3">
-              {colors.map((c) => (
+              {colorPalette.map((c) => (
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setColor(c.id)}
+                  onClick={() => setColorId(c.id)}
                   className={cn(
                     'w-10 h-10 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-900',
                     c.class,
-                    color === c.id
+                    colorId === c.id
                       ? 'ring-2 ring-offset-2 ring-zinc-400 dark:ring-offset-zinc-900 scale-110'
                       : ''
                   )}

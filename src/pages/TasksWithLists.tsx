@@ -13,6 +13,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
 import { TaskListModal } from '../components/TaskListModal';
+import { tasksAPI } from '../services/api';
 import { useTranslation } from 'react-i18next';
 import type { Task, TaskList } from '../types/index';
 
@@ -22,7 +23,7 @@ interface TasksNewProps {
 }
 
 export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEditTask }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { tasks, loading, deleteTask, toggleTask, loadTasks } = useTasks();
   const {
     taskLists,
@@ -49,7 +50,7 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
     if (diffDays < -1) return t('tasks_page.days_ago', { count: Math.abs(diffDays) });
     if (diffDays > 1) return t('tasks_page.days_later', { count: diffDays });
 
-    return taskDate.toLocaleDateString('tr-TR');
+    return taskDate.toLocaleDateString(i18n.language);
   };
 
   const handleToggleTask = async (id: string) => {
@@ -91,28 +92,41 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
 
     const { source, destination, draggableId } = result;
 
-    // Same container? No change needed
+    // Same container — reorder within the list
     if (source.droppableId === destination.droppableId) {
+      const listId = source.droppableId === 'uncategorized' ? null : source.droppableId;
+      const listTasks = getTasksByList(listId)
+        .filter((t) => !t.isCompleted)
+        .sort(
+          (a, b) =>
+            a.order - b.order || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
+      const taskIds = listTasks.map((t) => t.id);
+      const [moved] = taskIds.splice(source.index, 1);
+      taskIds.splice(destination.index, 0, moved);
+
+      try {
+        await tasksAPI.reorder(taskIds);
+        await loadTasks();
+      } catch (error) {
+        console.error('Failed to reorder tasks:', error);
+        await loadTasks();
+      }
       return;
     }
 
-    // Determine target list ID (null for uncategorized)
+    // Different container — move task between lists
     const targetListId =
       destination.droppableId === 'uncategorized' ? null : destination.droppableId;
 
     try {
-      // 1. Update backend
       await moveTaskToList(draggableId, targetListId, { skipRefresh: true });
-
-      // 2. Small delay to ensure storage is fully written
       await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // 3. Refresh both lists and tasks from storage
       await refetchTaskLists(true);
       await loadTasks();
     } catch (error) {
-      console.error('❌ Failed to move task:', error);
-      // Refresh to revert UI to actual storage state
+      console.error('Failed to move task:', error);
       await loadTasks();
     }
   };

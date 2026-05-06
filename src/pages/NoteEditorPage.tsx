@@ -24,6 +24,12 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
   const [lastSavedDate, setLastSavedDate] = useState<Date | null>(
     currentNote?.updatedAt ? new Date(currentNote.updatedAt) : null
   );
+  const dirtyRef = useRef(false);
+
+  // Mark dirty when content changes
+  useEffect(() => {
+    dirtyRef.current = true;
+  }, [title, content, plainContent]);
 
   const tt = useCallback(
     (key: string, fallback: string) => {
@@ -71,6 +77,7 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
         setCreatedNoteId(newNote.id);
       }
       setLastSavedDate(new Date());
+      dirtyRef.current = false;
     } catch (error) {
       console.error('Save error:', error);
     } finally {
@@ -101,15 +108,15 @@ export const NoteEditorPage: React.FC<NoteEditorPageProps> = ({ noteId, onBack }
     }
   };
 
-  // Auto-save
+  // Auto-save — only fires when content actually changed
   useEffect(() => {
     const interval = setInterval(() => {
-      if (title || plainContent) {
+      if (dirtyRef.current) {
         handleSave();
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [handleSave, title, plainContent]);
+  }, [handleSave]);
 
   // ESC key handler
   useEffect(() => {

@@ -4,6 +4,7 @@ import { notesAPI, tasksAPI } from '../services/api';
 import { cn } from '../lib/utils';
 import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 
 interface DeletedItem {
   id: string;
@@ -199,7 +200,7 @@ export const Trash: React.FC = () => {
                     )}
                   </div>
                   <span className="text-xs font-medium text-zinc-400">
-                    {item.deletedAt.toLocaleDateString('tr-TR')}
+                    {item.deletedAt.toLocaleDateString(i18n.language)}
                   </span>
                 </div>
 

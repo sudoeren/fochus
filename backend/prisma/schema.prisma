@@ -126,8 +126,13 @@ model Task {
   linkedNoteId String?
   linkedNote   Note?   @relation("NoteToTask", fields: [linkedNoteId], references: [id], onDelete: SetNull)
 
+  parentId  String?
+  parent    Task?   @relation("SubTask", fields: [parentId], references: [id], onDelete: Cascade)
+  subtasks  Task[]  @relation("SubTask")
+
   @@index([userId])
   @@index([listId])
+  @@index([parentId])
   @@index([isDeleted])
   @@index([isCompleted])
   @@map("tasks")

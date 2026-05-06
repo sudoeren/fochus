@@ -13,9 +13,8 @@ import { Settings } from './pages/Settings';
 import { Trash } from './pages/Trash';
 import { Login } from './pages/Login';
 import { NoteEditorPage } from './pages/NoteEditorPage';
-import { setupFastPolling } from './utils/refreshUtils';
 import { cn } from './lib/utils';
-import { authAPI, getAuthToken, setAuthToken } from './services/api';
+import { authAPI, tasksAPI, getAuthToken, setAuthToken } from './services/api';
 import { useIsMobile } from './hooks/useIsMobile';
 import { MobileRestricted } from './pages/MobileRestricted';
 import type { Task } from './types/index';
@@ -238,8 +237,6 @@ const App: React.FC = () => {
   }, [showTaskModal]);
 
   useEffect(() => {
-    setupFastPolling();
-
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       const activeTag = document.activeElement?.tagName.toLowerCase();
       const isInputActive = activeTag === 'input' || activeTag === 'textarea';
@@ -270,6 +267,35 @@ const App: React.FC = () => {
     isSpotlightEnabled,
     handleCloseModal
   ]);
+
+  // Reminder polling
+  useEffect(() => {
+    if (!getAuthToken()) return;
+    const notified = new Set<string>();
+    const interval = setInterval(async () => {
+      try {
+        const tasks = (await tasksAPI.getAll()) as Array<Record<string, unknown>>;
+        const now = new Date();
+        for (const task of tasks) {
+          if (
+            task.hasReminder &&
+            task.reminderAt &&
+            !task.isCompleted &&
+            !notified.has(task.id as string) &&
+            new Date(task.reminderAt as string) <= now
+          ) {
+            notified.add(task.id as string);
+            if ('Notification' in window && Notification.permission === 'granted') {
+              new Notification(task.title as string, { body: 'Hatırlatıcı', icon: '/logo.svg' });
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const renderView = () => {
     switch (activeView) {
@@ -314,7 +340,6 @@ const App: React.FC = () => {
             onEditTask={handleEditTask}
           />
         );
-      // case 'stats': removed
       case 'trash':
         return <Trash />;
       case 'settings':

@@ -12,7 +12,14 @@ export interface AuthRequest extends Request<ParamsFlatDictionary> {
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET ortam değişkeni tanımlanmamış!');
+  console.error('');
+  console.error('╔══════════════════════════════════════════════════════╗');
+  console.error('║  FATAL: JWT_SECRET is not set!                      ║');
+  console.error('║                                                     ║');
+  console.error('║  Set it in backend/.env or the container env.       ║');
+  console.error('║  With Docker self-hosted mode it is auto-generated. ║');
+  console.error('╚══════════════════════════════════════════════════════╝');
+  console.error('');
   process.exit(1);
 }
 

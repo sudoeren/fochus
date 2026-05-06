@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "test": "vitest run",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -22,8 +23,6 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.2",
-    "express-validator": "^7.2.0",
-    "google-auth-library": "^10.6.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
@@ -39,6 +38,7 @@
     "@types/node": "^25.6.0",
     "prisma": "^6.19.3",
     "tsx": "^4.19.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   }
 }

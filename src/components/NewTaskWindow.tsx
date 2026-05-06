@@ -3,7 +3,6 @@ import { X, Calendar, Flag, CheckCircle2, ListTodo, Clock } from 'lucide-react';
 import { Task } from '../types/index';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
-import { triggerInstantRefresh } from '../utils/refreshUtils';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
@@ -57,7 +56,6 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
           listId: listId || undefined
         });
       }
-      triggerInstantRefresh();
       onClose();
     } catch (error) {
       console.error('Error saving task:', error);

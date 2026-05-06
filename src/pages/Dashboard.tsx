@@ -41,7 +41,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenPomodoro,
   bgImage
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
@@ -166,7 +166,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {' '}
             {/* Added margin-top */}
             <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
-              {currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+              {currentTime.toLocaleTimeString(i18n.language, {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
             </h1>
             <div className="flex items-center ml-2">
               <span className="text-3xl font-light text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.2em]">

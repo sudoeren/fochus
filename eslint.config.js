@@ -9,7 +9,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['dist', 'node_modules', 'backend'],
+    ignores: ['dist', 'node_modules', 'backend', 'setup.js'],
   },
   js.configs.recommended,
   {
