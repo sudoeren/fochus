@@ -43,51 +43,52 @@ Fochus comes with an eye-friendly dark mode and a spacious light mode. You can u
 
 ## Installation
 
-You can use **Docker** (recommended) or manual installation methods to run the project.
+You can use **Docker** or **direct** (recommended for daily use) methods.
 
 ### Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Node.js](https://nodejs.org/) (v18+)
 - [Git](https://git-scm.com/)
 
-### Option 1: Quick Setup with Docker (Recommended)
+### Option 1: Quick Setup (Recommended)
+
+No database required — Fochus uses **SQLite** and runs everything with two commands:
 
 ```bash
-# 1. Clone
 git clone https://github.com/sudoeren/fochus.git
 cd fochus
+npm run setup    # installs deps, creates DB, generates Prisma client
+npm start        # launches backend + frontend simultaneously
+```
 
-# 2. Start — no .env needed, everything works out of the box
+Open **http://localhost:5173**.
+
+### Option 2: Docker Setup
+
+```bash
+git clone https://github.com/sudoeren/fochus.git
+cd fochus
 docker-compose up -d --build
 ```
 
-Open **http://localhost:3000** — that's it.
+Open **http://localhost:3000**. No Node.js needed.
 
-> `JWT_SECRET` is auto-generated on first run. To set a custom secret or override ports, copy `.env.example` to `.env` and edit.
+> `JWT_SECRET` is auto-generated on first run. To customize, copy `.env.example` to `.env` and edit.
 
-### Option 2: Manual Installation (Development)
-
-> Requires [Node.js](https://nodejs.org/) (v18+) and a running PostgreSQL instance.
-
-#### Backend Setup
+### Option 3: Manual (Development)
 
 ```bash
+# Terminal 1: Backend
 cd backend
-cp .env.example .env   # edit DATABASE_URL to point to your PostgreSQL
+cp .env.example .env
 npm install
-npx prisma migrate dev
-npm run dev
-```
+npx prisma db push
+npm run dev      # http://localhost:3001
 
-#### Frontend Setup
-
-```bash
-# New terminal, project root
+# Terminal 2: Frontend
 npm install
-npm run dev
+npm run dev      # http://localhost:5173
 ```
-
-Open **http://localhost:5173** (Vite dev server). The frontend proxies API calls to `http://localhost:3001`.
 
 ---
 

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Kişisel üretkenlik uygulaması - Not alma, görev yönetimi ve haftalık planlama",
   "scripts": {
+    "setup": "node setup.js",
+    "start": "concurrently --names backend,frontend --prefix-colors blue,green \"cd backend && npm run dev\" \"vite\"",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -31,6 +33,7 @@
     "@typescript-eslint/parser": "^8.59.2",
     "@vitejs/plugin-react": "^6.0.0",
     "autoprefixer": "^10.5.0",
+    "concurrently": "^9.1.2",
     "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
