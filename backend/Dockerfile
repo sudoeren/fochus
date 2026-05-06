@@ -46,6 +46,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 
+# Copy entrypoint
+COPY --chmod=755 docker-entrypoint.sh /docker-entrypoint.sh
+
 # Set ownership
 RUN chown -R fokus:nodejs /app
 
@@ -55,5 +58,4 @@ EXPOSE 3001
 
 ENV PORT=3001
 
-# Apply migrations and start the server
-CMD ["sh", "-c", "npx prisma db push && node dist/index.js"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
