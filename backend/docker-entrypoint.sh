@@ -8,10 +8,24 @@ if [ -z "$JWT_SECRET" ] || [ "$JWT_SECRET" = "your-super-secret-jwt-key" ] || [ 
   echo "🔑 Auto-generated JWT_SECRET"
 fi
 
-# Apply database schema
-echo "📦 Running prisma db push..."
-npx prisma db push
+# Detect database type and pick the right Prisma schema
+case "$DATABASE_URL" in
+  postgresql://*|postgres://*)
+    SCHEMA="prisma/schema.prisma"
+    ;;
+  *)
+    SCHEMA="prisma/schema.sqlite.prisma"
+    # Ensure the data directory exists for SQLite
+    DB_PATH="${DATABASE_URL#file:}"
+    DB_DIR=$(dirname "$DB_PATH")
+    if [ "$DB_DIR" != "." ]; then
+      mkdir -p "$DB_DIR"
+    fi
+    ;;
+esac
 
-# Start the server
+echo "📦 Running prisma db push ($SCHEMA)..."
+npx prisma db push --schema="$SCHEMA"
+
 echo "🚀 Starting Fokus API..."
 exec node dist/index.js

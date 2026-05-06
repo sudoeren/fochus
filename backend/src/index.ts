@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'node:path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -51,6 +52,15 @@ app.use('/api/tasks', tasksRoutes);
 app.use('/api/task-lists', taskListsRoutes);
 app.use('/api/pomodoro', pomodoroRoutes);
 app.use('/api/settings', settingsRoutes);
+
+// Serve built frontend in production (self-hosted mode)
+if (process.env.NODE_ENV === 'production') {
+  const publicDir = path.resolve(process.cwd(), 'public');
+  app.use(express.static(publicDir));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(publicDir, 'index.html'));
+  });
+}
 
 // Error Handler
 app.use(errorHandler);

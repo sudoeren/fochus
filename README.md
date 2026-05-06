@@ -43,16 +43,29 @@ Fochus comes with an eye-friendly dark mode and a spacious light mode. You can u
 
 ## Installation
 
-You can use **Docker** or **direct** (recommended for daily use) methods.
+You can run Fochus as a **self-hosted** single container, with **Docker Compose**, or **directly** with Node.js.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+)
-- [Git](https://git-scm.com/)
+- For self-hosted / Compose: [Docker](https://docker.com)
+- For direct: [Node.js](https://nodejs.org/) (v18+)
 
-### Option 1: Quick Setup (Recommended)
+### Option 1: Self-Hosted (Single Container — Recommended)
 
-No database required — Fochus uses **SQLite** and runs everything with two commands:
+Everything in one container — frontend, backend, SQLite database, no external dependencies:
+
+```bash
+docker build -f Dockerfile.selfhost -t fochus .
+docker run -d -p 3000:3000 -v fochus_data:/app/data fochus
+```
+
+Open **http://localhost:3000**.
+
+> Data persists in the `fochus_data` volume. `JWT_SECRET` is auto-generated.
+
+### Option 2: Quick Setup (Direct, No Docker)
+
+SQLite backend, no PostgreSQL needed:
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -63,7 +76,7 @@ npm start        # launches backend + frontend simultaneously
 
 Open **http://localhost:5173**.
 
-### Option 2: Docker Setup
+### Option 3: Docker Compose (PostgreSQL)
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -71,11 +84,11 @@ cd fochus
 docker-compose up -d --build
 ```
 
-Open **http://localhost:3000**. No Node.js needed.
+Open **http://localhost:3000**.
 
 > `JWT_SECRET` is auto-generated on first run. To customize, copy `.env.example` to `.env` and edit.
 
-### Option 3: Manual (Development)
+### Option 4: Manual (Development)
 
 ```bash
 # Terminal 1: Backend

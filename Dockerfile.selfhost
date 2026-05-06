@@ -1,0 +1,55 @@
+# Self-hosted Docker image for Fochus
+# Single container: backend + frontend + SQLite
+# Usage: docker run -p 3000:3000 -v fochus_data:/app/data fochus
+
+# ── Build frontend ──────────────────────────────
+FROM node:25-alpine AS frontend
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# ── Build backend ───────────────────────────────
+FROM node:25-alpine AS backend
+
+WORKDIR /app
+
+COPY backend/package.json backend/package-lock.json* ./
+RUN npm ci
+
+COPY backend/ .
+RUN npx prisma generate --schema=prisma/schema.sqlite.prisma
+RUN npm run build
+
+# ── Production image ────────────────────────────
+FROM node:25-alpine
+
+WORKDIR /app
+
+# OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
+# Copy backend
+COPY --from=backend /app/dist ./dist
+COPY --from=backend /app/node_modules ./node_modules
+COPY --from=backend /app/package.json ./package.json
+COPY --from=backend /app/prisma ./prisma
+
+# Copy built frontend
+COPY --from=frontend /app/dist ./public
+
+# Copy entrypoint
+COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV DATABASE_URL=file:./data/fokus.db
+
+EXPOSE 3000
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

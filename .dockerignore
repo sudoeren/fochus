@@ -9,4 +9,5 @@ dist
 .gitignore
 README.md
 .DS_Store
-backend
+*.db
+data
