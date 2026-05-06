@@ -47,86 +47,47 @@ You can use **Docker** (recommended) or manual installation methods to run the p
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [Git](https://git-scm.com/)
 
 ### Option 1: Quick Setup with Docker (Recommended)
 
-1. **Clone the repository**
+```bash
+# 1. Clone
+git clone https://github.com/sudoeren/fochus.git
+cd fochus
 
-   ```bash
-   git clone https://github.com/sudoeren/fochus.git
-   cd fochus
-   ```
+# 2. Start — no .env needed, everything works out of the box
+docker-compose up -d --build
+```
 
-2. **Set Environment Variables**
-   Copy example files:
+Open **http://localhost:3000** — that's it.
 
-   ```bash
-   cp .env.example .env
-   cp backend/.env.example backend/.env
-   ```
+> `JWT_SECRET` is auto-generated on first run. To set a custom secret or override ports, copy `.env.example` to `.env` and edit.
 
-   > ⚠️ **Important Security Warning:**
-   > After creating the `.env` files, **make sure to change** the `JWT_SECRET` value to a hard-to-guess, random string of characters. Default values are for development environment only.
+### Option 2: Manual Installation (Development)
 
-3. **Start the App**
-
-   ```bash
-   docker-compose up -d --build
-   ```
-
-   The application will start running at `http://localhost:5173`.
-
-### Option 2: Manual Installation
+> Requires [Node.js](https://nodejs.org/) (v18+) and a running PostgreSQL instance.
 
 #### Backend Setup
 
-1. Go to the backend folder:
-
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Create the database and configure the `DATABASE_URL` in the `backend/.env` file.
-4. Run migrations:
-
-   ```bash
-   npx prisma migrate dev
-   ```
-
-5. Start the server:
-
-   ```bash
-   npm run dev
-   ```
+```bash
+cd backend
+cp .env.example .env   # edit DATABASE_URL to point to your PostgreSQL
+npm install
+npx prisma migrate dev
+npm run dev
+```
 
 #### Frontend Setup
 
-1. Open a new terminal and return to the main directory:
+```bash
+# New terminal, project root
+npm install
+npm run dev
+```
 
-   ```bash
-   cd ..
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-
-   ```bash
-   npm run dev
-   ```
+Open **http://localhost:5173** (Vite dev server). The frontend proxies API calls to `http://localhost:3001`.
 
 ---
 
