@@ -24,6 +24,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -46,6 +49,10 @@ jobs:
       - name: Generate Prisma client
         working-directory: backend
         run: npx prisma generate
+
+      - name: Test
+        working-directory: backend
+        run: npm test
 
       - name: Build (type-check)
         working-directory: backend
