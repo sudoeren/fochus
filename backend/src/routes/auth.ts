@@ -91,7 +91,7 @@ router.post('/register', authLimiter, async (req, res: Response, next: NextFunct
         role,
         settings: {
           create: {
-            theme: 'dark',
+            theme: 'system',
             language: 'tr'
           }
         }
