@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import DOMPurify from 'dompurify';
+import { useTranslation } from 'react-i18next';
 import {} from // Icons removed
 'lucide-react';
 
@@ -13,9 +14,10 @@ interface RichTextEditorProps {
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
-  placeholder = 'İçeriğinizi yazın...',
+  placeholder = 'Start writing...',
   className = ''
 }) => {
+  const { t } = useTranslation();
   const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const insertLink = () => {
-    const url = prompt("Link URL'sini girin:");
+    const url = prompt(t('note_editor.link_url') || 'Enter link URL:');
     if (url) {
       execCommand('createLink', url);
     }

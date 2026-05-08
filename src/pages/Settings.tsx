@@ -62,6 +62,7 @@ interface AdminUser {
 }
 
 const AdminSection = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading: usersLoading } = useQuery<AdminUser[]>({
@@ -85,10 +86,10 @@ const AdminSection = () => {
     mutationFn: (id: string) => adminAPI.deleteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      alert('Kullanıcı silindi');
+      alert(t('admin.user_deleted'));
     },
     onError: (err: Error) => {
-      alert(err.message || 'Silme işlemi başarısız');
+      alert(err.message || t('admin.delete_failed'));
     }
   });
 
@@ -96,16 +97,12 @@ const AdminSection = () => {
     mutationFn: (id: string) => adminAPI.promoteUser(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      alert('Kullanıcı yönetici yapıldı');
+      alert(t('admin.user_promoted'));
     }
   });
 
   const handleDeleteUser = (id: string, username: string) => {
-    if (
-      confirm(
-        `"${username}" kullanıcısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz!`
-      )
-    ) {
+    if (confirm(t('admin.confirm_delete_user', { username }))) {
       deleteUserMutation.mutate(id);
     }
   };
@@ -118,14 +115,18 @@ const AdminSection = () => {
           <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
             <SettingsIcon className="w-5 h-5" />
           </div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Sistem Ayarları</h3>
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+            {t('admin.system_settings')}
+          </h3>
         </div>
 
         <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-black/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
           <div>
-            <h4 className="font-bold text-zinc-900 dark:text-white mb-1">Yeni Üye Kaydı</h4>
+            <h4 className="font-bold text-zinc-900 dark:text-white mb-1">
+              {t('admin.registration')}
+            </h4>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Yeni kullanıcıların kayıt olmasına izin ver veya kapat.
+              {t('admin.registration_desc')}
             </p>
           </div>
           <button
@@ -153,12 +154,14 @@ const AdminSection = () => {
           <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl text-purple-600 dark:text-purple-400">
             <Users className="w-5 h-5" />
           </div>
-          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Kullanıcı Yönetimi</h3>
+          <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
+            {t('admin.user_management')}
+          </h3>
         </div>
 
         <div className="space-y-4">
           {usersLoading ? (
-            <div className="text-center py-4 text-zinc-500">Yükleniyor...</div>
+            <div className="text-center py-4 text-zinc-500">{t('admin.loading')}</div>
           ) : (
             users.map((user: AdminUser) => (
               <div
@@ -189,7 +192,8 @@ const AdminSection = () => {
                       {user.name} • {new Date(user.createdAt).toLocaleDateString()}
                     </p>
                     <p className="text-[10px] text-zinc-400 mt-0.5">
-                      Notlar: {user._count?.notes || 0} • Görevler: {user._count?.tasks || 0}
+                      {t('admin.notes_label', { count: user._count?.notes || 0 })} •{' '}
+                      {t('admin.tasks_label', { count: user._count?.tasks || 0 })}
                     </p>
                   </div>
                 </div>
@@ -199,7 +203,7 @@ const AdminSection = () => {
                     <button
                       onClick={() => promoteUserMutation.mutate(user.id)}
                       className="p-2 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 rounded-lg transition-colors"
-                      title="Yönetici Yap"
+                      title={t('admin.make_admin_title')}
                     >
                       <UserCheck className="w-4 h-4" />
                     </button>
@@ -207,7 +211,7 @@ const AdminSection = () => {
                   <button
                     onClick={() => handleDeleteUser(user.id, user.username)}
                     className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 rounded-lg transition-colors"
-                    title="Kullanıcıyı Sil"
+                    title={t('admin.delete_user_title')}
                   >
                     <UserX className="w-4 h-4" />
                   </button>
@@ -1187,7 +1191,7 @@ const DataSection = () => {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Yedekleme oluşturulurken hata oluştu');
+      alert(error instanceof Error ? error.message : t('settings.data.backup_error'));
     } finally {
       setIsBusy(false);
     }
@@ -1441,7 +1445,7 @@ const DataSection = () => {
             setIsBusy(true);
             await handleRestoreFile(file);
           } catch (error) {
-            alert(error instanceof Error ? error.message : 'Error restoring data');
+            alert(error instanceof Error ? error.message : t('settings.data.restore_error'));
           } finally {
             setIsBusy(false);
           }

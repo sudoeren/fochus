@@ -101,6 +101,8 @@
       "restore_desc": "Yedek dosyanızı sürükleyin veya seçin.",
       "restore_confirm": "Yedekten geri yükleme verileri birleştirecek. Devam edilsin mi?",
       "restore_success": "Geri yükleme tamamlandı. Verileri görmek için sayfayı yenileyin.",
+      "backup_error": "Yedekleme oluşturulurken hata oluştu",
+      "restore_error": "Veri geri yükleme başarısız",
       "local_title": "Uçtan Uca Yerel",
       "local_desc": "Verileriniz asla buluta gönderilmez. Cihazınızdaki veritabanında güvenle saklanır."
     },
@@ -110,6 +112,21 @@
       "view_github": "GitHub'da İncele",
       "website": "Web Sitesi"
     }
+  },
+  "admin": {
+    "system_settings": "Sistem Ayarları",
+    "registration": "Yeni Üye Kaydı",
+    "registration_desc": "Yeni kullanıcıların kayıt olmasına izin ver veya kapat.",
+    "user_management": "Kullanıcı Yönetimi",
+    "loading": "Yükleniyor...",
+    "notes_label": "Notlar: {{count}}",
+    "tasks_label": "Görevler: {{count}}",
+    "make_admin_title": "Yönetici Yap",
+    "delete_user_title": "Kullanıcıyı Sil",
+    "user_deleted": "Kullanıcı silindi",
+    "delete_failed": "Silme işlemi başarısız",
+    "user_promoted": "Kullanıcı yönetici yapıldı",
+    "confirm_delete_user": "\"{{username}}\" kullanıcısını silmek istediğinize emin misiniz? Bu işlem geri alınamaz!"
   },
   "login": {
     "welcome_back": "Tekrar Hoş Geldiniz",
@@ -286,7 +303,8 @@
     "back": "Geri",
     "remove": "Kaldır",
     "reset": "Sıfırla",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "close": "Kapat"
   },
   "spotlight": {
     "placeholder": "Arama yapın veya komut yazın...",
@@ -418,6 +436,19 @@
     "confirm_clear_all": "Çöp kutusu tamamen temizlenecek. Tüm öğeler kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?",
     "no_description": "Açıklama yok"
   },
+  "notifications": {
+    "reminder": "Hatırlatıcı",
+    "task_reminder": "Göreviniz için hatırlatıcı",
+    "note_reminder": "Notunuz için hatırlatıcı",
+    "recurring_reminder": "Tekrarlanan göreviniz için hatırlatıcı",
+    "due_date": "Son tarih: {{date}} {{time}}",
+    "pomodoro_focus_end_title": "Odak Süresi Bitti!",
+    "pomodoro_focus_end_body": "Mola zamanı!",
+    "pomodoro_break_end_title": "Mola Bitti!",
+    "pomodoro_break_end_body": "Odaklanma zamanı!",
+    "pomodoro_halfway_title": "Yarı Yoldasın!",
+    "pomodoro_halfway_body": "Odak süresinin yarısı geçti."
+  },
   "note_editor": {
     "saved_at": "{{time}}'de kaydedildi",
     "delete_note": "Notu Sil",
@@ -439,7 +470,8 @@
     "updated": "Güncelleme",
     "words": "Kelime",
     "characters": "Karakter",
-    "confirm_delete": "Bu notu silmek istediğinizden emin misiniz?"
+    "confirm_delete": "Bu notu silmek istediğinizden emin misiniz?",
+    "link_url": "Link URL'sini girin:"
   },
   "spotlight_modal": {
     "create_note_title": "Hızlı Not Oluştur",

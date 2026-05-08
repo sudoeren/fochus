@@ -1,4 +1,5 @@
 import { NotificationOptions } from '../types/index';
+import i18n from '../i18n';
 
 class NotificationService {
   private isSupported: boolean;
@@ -58,8 +59,11 @@ class NotificationService {
 
   async showTaskReminder(taskTitle: string, dueDate?: Date): Promise<void> {
     const body = dueDate
-      ? `Son tarih: ${dueDate.toLocaleDateString('tr-TR')} ${dueDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`
-      : 'Göreviniz için hatırlatıcı';
+      ? i18n.t('notifications.due_date', {
+          date: dueDate.toLocaleDateString(),
+          time: dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        })
+      : i18n.t('notifications.task_reminder');
 
     await this.show({
       title: `📋 ${taskTitle}`,
@@ -71,7 +75,7 @@ class NotificationService {
   async showNoteReminder(noteTitle: string): Promise<void> {
     await this.show({
       title: `📝 ${noteTitle}`,
-      body: 'Notunuz için hatırlatıcı',
+      body: i18n.t('notifications.note_reminder'),
       tag: 'note-reminder'
     });
   }
@@ -79,7 +83,7 @@ class NotificationService {
   async showRecurringTaskReminder(taskTitle: string): Promise<void> {
     await this.show({
       title: `🔄 ${taskTitle}`,
-      body: 'Tekrarlanan göreviniz için hatırlatıcı',
+      body: i18n.t('notifications.recurring_reminder'),
       tag: 'recurring-task'
     });
   }

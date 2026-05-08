@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { pomodoroAPI } from '../services/api';
+import i18n from '../i18n';
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
@@ -173,8 +174,14 @@ const playFinishSound = () => {
   playSound(settings.endSound);
   if (settings.pushNotificationsEnabled) {
     const mode = storeState.mode;
-    const title = mode === 'work' ? 'Odak Süresi Bitti!' : 'Mola Bitti!';
-    const body = mode === 'work' ? 'Mola zamanı!' : 'Odaklanma zamanı!';
+    const title =
+      mode === 'work'
+        ? i18n.t('notifications.pomodoro_focus_end_title')
+        : i18n.t('notifications.pomodoro_break_end_title');
+    const body =
+      mode === 'work'
+        ? i18n.t('notifications.pomodoro_focus_end_body')
+        : i18n.t('notifications.pomodoro_break_end_body');
     sendPushNotification(title, body);
   }
 };
@@ -199,7 +206,10 @@ const tick = () => {
     halfwayNotified = true;
     playSound(prev.settings.halfwaySound);
     if (prev.settings.pushNotificationsEnabled) {
-      sendPushNotification('Yarı Yoldasın!', 'Odak süresinin yarısı geçti.');
+      sendPushNotification(
+        i18n.t('notifications.pomodoro_halfway_title'),
+        i18n.t('notifications.pomodoro_halfway_body')
+      );
     }
   }
 

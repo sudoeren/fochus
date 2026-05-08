@@ -101,6 +101,8 @@
       "restore_desc": "Drag or select your backup file.",
       "restore_confirm": "Restore will merge data from backup. Continue?",
       "restore_success": "Restore complete. Refresh page to see data.",
+      "backup_error": "Failed to create backup",
+      "restore_error": "Failed to restore data",
       "local_title": "End-to-End Local",
       "local_desc": "Your data is never sent to the cloud. It is safely stored in the database on your device."
     },
@@ -110,6 +112,21 @@
       "view_github": "View on GitHub",
       "website": "Website"
     }
+  },
+  "admin": {
+    "system_settings": "System Settings",
+    "registration": "New User Registration",
+    "registration_desc": "Allow or prevent new users from registering.",
+    "user_management": "User Management",
+    "loading": "Loading...",
+    "notes_label": "Notes: {{count}}",
+    "tasks_label": "Tasks: {{count}}",
+    "make_admin_title": "Make Admin",
+    "delete_user_title": "Delete User",
+    "user_deleted": "User deleted",
+    "delete_failed": "Delete failed",
+    "user_promoted": "User promoted to admin",
+    "confirm_delete_user": "Are you sure you want to delete \"{{username}}\"? This action cannot be undone!"
   },
   "login": {
     "welcome_back": "Welcome Back",
@@ -286,7 +303,8 @@
     "back": "Back",
     "remove": "Remove",
     "reset": "Reset",
-    "settings": "Settings"
+    "settings": "Settings",
+    "close": "Close"
   },
   "spotlight": {
     "placeholder": "Type a command or search...",
@@ -418,6 +436,19 @@
     "confirm_clear_all": "Trash will be completely emptied. All items will be permanently deleted. This cannot be undone. Are you sure?",
     "no_description": "No description"
   },
+  "notifications": {
+    "reminder": "Reminder",
+    "task_reminder": "Reminder for your task",
+    "note_reminder": "Reminder for your note",
+    "recurring_reminder": "Reminder for your recurring task",
+    "due_date": "Due date: {{date}} {{time}}",
+    "pomodoro_focus_end_title": "Focus Time Ended!",
+    "pomodoro_focus_end_body": "Time for a break!",
+    "pomodoro_break_end_title": "Break Ended!",
+    "pomodoro_break_end_body": "Time to focus!",
+    "pomodoro_halfway_title": "Halfway There!",
+    "pomodoro_halfway_body": "Half of your focus time has passed."
+  },
   "note_editor": {
     "saved_at": "Saved at {{time}}",
     "delete_note": "Delete Note",
@@ -439,7 +470,8 @@
     "updated": "Updated",
     "words": "Words",
     "characters": "Characters",
-    "confirm_delete": "Are you sure you want to delete this note?"
+    "confirm_delete": "Are you sure you want to delete this note?",
+    "link_url": "Enter link URL:"
   },
   "spotlight_modal": {
     "create_note_title": "Create Quick Note",

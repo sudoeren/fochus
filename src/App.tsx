@@ -286,7 +286,10 @@ const App: React.FC = () => {
           ) {
             notified.add(task.id as string);
             if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(task.title as string, { body: 'Hatırlatıcı', icon: '/logo.svg' });
+              new Notification(task.title as string, {
+                body: t('notifications.reminder'),
+                icon: '/logo.svg'
+              });
             }
           }
         }
