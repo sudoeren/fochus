@@ -68,6 +68,7 @@ Monorepo with two independent Node.js packages:
 ## Prisma
 
 - Single schema: `prisma/schema.prisma` — SQLite for all environments
+- Uses `engineType = "library"` with `binaryTargets = ["native"]` for reliable cross-platform engine downloads
 - Production Dockerfile runs `npx prisma db push` (not migrate) on container start
 - `npx prisma generate` generates the Prisma client
 
