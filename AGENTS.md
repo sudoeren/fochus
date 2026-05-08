@@ -8,7 +8,7 @@ Monorepo with two independent Node.js packages:
 |-----------|------|------|----------|
 | root `./` | Frontend SPA | React 19 + Vite 8 + Tailwind 4 + React Query | `:5173` |
 | `backend/` | REST API | Express 5 + Prisma + SQLite | `:3001` |
-| Docker Compose | Full stack | nginx → backend → postgres | `:3000` → `:3001` → `:5432` |
+| Docker Compose | Full stack | nginx → backend | `:3000` → `:3001` |
 
 ## Commands
 
@@ -36,7 +36,7 @@ Monorepo with two independent Node.js packages:
 
 ### Docker Compose
 - `docker-compose up -d --build` — full stack at `localhost:3000`
-- Copy `.env.example` → `.env` (root) and `backend/.env.example` → `.env` first
+- Copy `.env.example` → `.env` (root) first
 
 ## Architecture notes
 
@@ -67,13 +67,9 @@ Monorepo with two independent Node.js packages:
 
 ## Prisma
 
-- `binaryTargets: ["native", "linux-musl-openssl-3.0.x"]` (required for Alpine Docker)
+- Single schema: `prisma/schema.prisma` — SQLite for all environments
 - Production Dockerfile runs `npx prisma db push` (not migrate) on container start
-- Two schemas:
-  - `prisma/schema.prisma` — PostgreSQL for Docker/production
-  - `prisma/schema.sqlite.prisma` — SQLite for local dev (used by `npm run setup`)
-- Local dev: run `npx prisma generate --schema=prisma/schema.sqlite.prisma` and `npx prisma db push --schema=prisma/schema.sqlite.prisma`
-- SQLite for local dev, PostgreSQL for Docker deployment
+- `npx prisma generate` generates the Prisma client
 
 ## Deployment
 

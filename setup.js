@@ -21,10 +21,10 @@ if (!existsSync(resolve(backendDir, '.env'))) {
 }
 
 console.log('\n🔧 Generating Prisma client...');
-run('npx prisma generate --schema=prisma/schema.sqlite.prisma', backendDir);
+run('npx prisma generate', backendDir);
 
 console.log('\n🗄️  Creating database...');
-run('npx prisma db push --schema=prisma/schema.sqlite.prisma', backendDir);
+run('npx prisma db push', backendDir);
 
 // ── Frontend ─────────────────────────────────
 console.log('\n📦 Installing frontend dependencies...');

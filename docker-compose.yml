@@ -2,27 +2,6 @@
 # Local development and production deployment
 
 services:
-  # PostgreSQL Database
-  db:
-    image: postgres:16-alpine
-    container_name: fokus-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-fokus}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fokus_password}
-      POSTGRES_DB: ${POSTGRES_DB:-fokus_db}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${DB_HOST_PORT:-5433}:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fokus} -d ${POSTGRES_DB:-fokus_db}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - fokus-network
-
   # Backend API
   backend:
     build:
@@ -31,7 +10,7 @@ services:
     container_name: fokus-backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-fokus}:${POSTGRES_PASSWORD:-fokus_password}@db:5432/${POSTGRES_DB:-fokus_db}?schema=public
+      DATABASE_URL: file:./data/fokus.db
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
@@ -41,9 +20,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
     ports:
       - "${BACKEND_HOST_PORT:-3001}:3001"
-    depends_on:
-      db:
-        condition: service_healthy
+    volumes:
+      - fokus_data:/app/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
@@ -77,7 +55,7 @@ services:
       - fokus-network
 
 volumes:
-  postgres_data:
+  fokus_data:
     driver: local
 
 networks:

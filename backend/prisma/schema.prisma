@@ -1,22 +1,19 @@
-// Prisma Schema for Fokus App
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// User Model
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
   password  String
   name      String?
   avatar    String?
-  role      String   @default("USER") // USER, ADMIN
+  role      String   @default("USER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -29,7 +26,6 @@ model User {
   @@map("users")
 }
 
-// Global System Settings (Managed by Admin)
 model SystemSettings {
   id                String   @id @default(cuid())
   allowRegistration Boolean  @default(true)
@@ -38,19 +34,17 @@ model SystemSettings {
   @@map("system_settings")
 }
 
-// User Settings
 model UserSettings {
   id       String @id @default(cuid())
   userId   String @unique
-  theme    String @default("system") // light, dark, system
-  language String @default("tr") // tr, en
+  theme    String @default("system")
+  language String @default("tr")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
 }
 
-// Notes
 model Note {
   id        String    @id @default(cuid())
   title     String
@@ -71,7 +65,6 @@ model Note {
   @@map("notes")
 }
 
-// Task Lists
 model TaskList {
   id          String   @id @default(cuid())
   title       String
@@ -91,12 +84,11 @@ model TaskList {
   @@map("task_lists")
 }
 
-// Tasks
 model Task {
   id          String    @id @default(cuid())
   title       String
   description String?
-  status      String    @default("PENDING") // PENDING, COMPLETED, POSTPONED
+  status      String    @default("PENDING")
   dueDate     DateTime?
   isCompleted Boolean   @default(false)
   isPinned    Boolean   @default(false)
@@ -106,17 +98,15 @@ model Task {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // Reminder & Recurring
   hasReminder       Boolean   @default(false)
   reminderAt        DateTime?
   isRecurring       Boolean   @default(false)
-  recurringType     String?   // daily, weekly, monthly
+  recurringType     String?
   recurringInterval Int?
-  recurringDays     String?   // JSON array of days for weekly
+  recurringDays     String?
   lastCompleted     DateTime?
   nextDue           DateTime?
 
-  // Relations
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -138,13 +128,12 @@ model Task {
   @@map("tasks")
 }
 
-// Pomodoro Sessions
 model PomodoroSession {
   id        String   @id @default(cuid())
   startTime DateTime
   endTime   DateTime
-  duration  Int      // in seconds
-  mode      String   // work, shortBreak, longBreak
+  duration  Int
+  mode      String
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
 

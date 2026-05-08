@@ -95,7 +95,7 @@ npm start        # runs backend + frontend simultaneously
 
 Open **http://localhost:5173**.
 
-#### Docker Compose (PostgreSQL)
+#### Docker Compose
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
