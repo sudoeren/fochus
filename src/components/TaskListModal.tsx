@@ -14,6 +14,18 @@ interface TaskListModalProps {
 export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, editingList }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState(editingList?.title || '');
+
+  const colorPalette = [
+    { id: 'blue', hex: '#3B82F6', class: 'bg-blue-500' },
+    { id: 'red', hex: '#EF4444', class: 'bg-red-500' },
+    { id: 'green', hex: '#22C55E', class: 'bg-green-500' },
+    { id: 'yellow', hex: '#EAB308', class: 'bg-yellow-500' },
+    { id: 'purple', hex: '#A855F7', class: 'bg-purple-500' },
+    { id: 'pink', hex: '#EC4899', class: 'bg-pink-500' },
+    { id: 'indigo', hex: '#6366F1', class: 'bg-indigo-500' },
+    { id: 'orange', hex: '#F97316', class: 'bg-orange-500' }
+  ];
+
   const colorIdToHex = (id: string) => colorPalette.find((c) => c.id === id)?.hex ?? '#3B82F6';
   const hexToColorId = (hex: string) =>
     colorPalette.find((c) => c.hex === hex || c.id === hex)?.id ?? 'blue';
@@ -40,17 +52,6 @@ export const TaskListModal: React.FC<TaskListModalProps> = ({ isOpen, onClose, e
       console.error('Failed to save list:', error);
     }
   };
-
-  const colorPalette = [
-    { id: 'blue', hex: '#3B82F6', class: 'bg-blue-500' },
-    { id: 'red', hex: '#EF4444', class: 'bg-red-500' },
-    { id: 'green', hex: '#22C55E', class: 'bg-green-500' },
-    { id: 'yellow', hex: '#EAB308', class: 'bg-yellow-500' },
-    { id: 'purple', hex: '#A855F7', class: 'bg-purple-500' },
-    { id: 'pink', hex: '#EC4899', class: 'bg-pink-500' },
-    { id: 'indigo', hex: '#6366F1', class: 'bg-indigo-500' },
-    { id: 'orange', hex: '#F97316', class: 'bg-orange-500' }
-  ];
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
