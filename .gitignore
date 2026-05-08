@@ -13,6 +13,8 @@ docs
 /generated/prisma
 backend/node_modules
 backend/dist
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
 
 # Logs
 *.log
