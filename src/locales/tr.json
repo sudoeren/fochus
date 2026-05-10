@@ -330,7 +330,8 @@
       "quick_actions": "Hızlı Eylemler",
       "pages": "Sayfalar",
       "tasks": "Görevler",
-      "notes": "Notlar"
+      "notes": "Notlar",
+      "recent": "Son Kullanılanlar"
     },
     "actions": {
       "new_task": "Yeni Görev Oluştur",

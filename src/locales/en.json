@@ -330,7 +330,8 @@
       "quick_actions": "Quick Actions",
       "pages": "Pages",
       "tasks": "Tasks",
-      "notes": "Notes"
+      "notes": "Notes",
+      "recent": "Recent"
     },
     "actions": {
       "new_task": "Create New Task",

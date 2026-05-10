@@ -33,12 +33,46 @@ interface SpotlightItem {
   id: string;
   label: string;
   detail?: string;
+  searchText?: string;
   icon: React.ComponentType<{ className?: string }>;
   group: string;
   action: () => void;
   shortcut?: string;
   color?: string;
 }
+
+const normalizeSearch = (value: string) =>
+  value
+    .toLocaleLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
+const isSubsequence = (needle: string, haystack: string) => {
+  let index = 0;
+  for (const char of haystack) {
+    if (char === needle[index]) index += 1;
+    if (index === needle.length) return true;
+  }
+  return false;
+};
+
+const scoreText = (query: string, text: string) => {
+  const q = normalizeSearch(query);
+  const value = normalizeSearch(text);
+
+  if (!q) return 1;
+  if (!value) return 0;
+  if (value === q) return 100;
+  if (value.startsWith(q)) return 85;
+  if (value.includes(q)) return 65;
+  if (value.split(/\s+/).some((word) => word.startsWith(q))) return 50;
+  if (q.length >= 2 && isSubsequence(q, value)) return 25;
+  return 0;
+};
+
+const stripHtml = (value?: string) =>
+  value ? new DOMParser().parseFromString(value, 'text/html').body.textContent || '' : '';
 
 export const Spotlight: React.FC<SpotlightProps> = ({
   isOpen,
@@ -181,58 +215,93 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   );
 
   // Dynamic Content - Tasks
-  const taskItems: SpotlightItem[] = tasks
-    .filter((t) => !t.isDeleted && t.title.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 5)
-    .map((task) => ({
-      id: `task-${task.id}`,
-      label: task.title,
-      detail: task.isCompleted
-        ? `✓ ${t('spotlight.details.completed')}`
-        : t('spotlight.details.pending'),
-      icon: CheckSquare,
-      group: t('spotlight.groups.tasks'),
-      action: () => {
-        onNavigate('tasks');
-        onClose();
-      },
-      color: task.isCompleted ? 'emerald' : 'zinc'
-    }));
+  const taskItems: SpotlightItem[] = useMemo(
+    () =>
+      tasks
+        .filter((task) => !task.isDeleted)
+        .map((task) => ({
+          id: `task-${task.id}`,
+          label: task.title,
+          detail: task.isCompleted
+            ? `✓ ${t('spotlight.details.completed')}`
+            : t('spotlight.details.pending'),
+          searchText: [task.title, task.description ?? '', task.status ?? ''].join(' '),
+          icon: CheckSquare,
+          group: t('spotlight.groups.tasks'),
+          action: () => {
+            onNavigate('tasks');
+            onClose();
+          },
+          color: task.isCompleted ? 'emerald' : 'zinc'
+        })),
+    [tasks, t, onNavigate, onClose]
+  );
 
   // Dynamic Content - Notes
-  const noteItems: SpotlightItem[] = notes
-    .filter((n) => !n.isDeleted && n.title.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 5)
-    .map((n) => ({
-      id: `note-${n.id}`,
-      label: n.title || t('spotlight.details.untitled_note'),
-      detail: new Date(n.createdAt).toLocaleDateString(i18n.language === 'tr' ? 'tr-TR' : 'en-US'),
-      icon: FileText,
-      group: t('spotlight.groups.notes'),
-      action: () => {
-        onNavigate('notes');
-        onClose();
-      },
-      color: 'amber'
-    }));
+  const noteItems: SpotlightItem[] = useMemo(
+    () =>
+      notes
+        .filter((note) => !note.isDeleted)
+        .map((note) => ({
+          id: `note-${note.id}`,
+          label: note.title || t('spotlight.details.untitled_note'),
+          detail: new Date(note.createdAt).toLocaleDateString(
+            i18n.language === 'tr' ? 'tr-TR' : 'en-US'
+          ),
+          searchText: [note.title, stripHtml(note.content)].join(' '),
+          icon: FileText,
+          group: t('spotlight.groups.notes'),
+          action: () => {
+            onNavigate('notes');
+            onClose();
+          },
+          color: 'amber'
+        })),
+    [notes, t, i18n.language, onNavigate, onClose]
+  );
+
+  const recentItems: SpotlightItem[] = useMemo(() => {
+    const recentTasks = taskItems.map((item) => {
+      const task = tasks.find((candidate) => `task-${candidate.id}` === item.id);
+      return {
+        item: { ...item, group: t('spotlight.groups.recent') },
+        date: task?.updatedAt ? new Date(task.updatedAt).getTime() : 0
+      };
+    });
+    const recentNotes = noteItems.map((item) => {
+      const note = notes.find((candidate) => `note-${candidate.id}` === item.id);
+      return {
+        item: { ...item, group: t('spotlight.groups.recent') },
+        date: note?.updatedAt ? new Date(note.updatedAt).getTime() : 0
+      };
+    });
+
+    return [...recentTasks, ...recentNotes]
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 5)
+      .map(({ item }) => item);
+  }, [taskItems, noteItems, tasks, notes, t]);
 
   // Combine all items based on query
   const allItems = useMemo(() => {
-    if (query.length === 0) {
-      return [...quickActions, ...navigationItems];
+    if (!query.trim()) {
+      return [...quickActions, ...navigationItems, ...recentItems];
     }
-    const filteredQuickActions = quickActions.filter(
-      (i) =>
-        i.label.toLowerCase().includes(query.toLowerCase()) ||
-        i.detail?.toLowerCase().includes(query.toLowerCase())
-    );
-    const filteredNavigation = navigationItems.filter(
-      (i) =>
-        i.label.toLowerCase().includes(query.toLowerCase()) ||
-        i.detail?.toLowerCase().includes(query.toLowerCase())
-    );
-    return [...filteredQuickActions, ...filteredNavigation, ...taskItems, ...noteItems];
-  }, [query, quickActions, navigationItems, taskItems, noteItems]);
+
+    return [...quickActions, ...navigationItems, ...taskItems, ...noteItems]
+      .map((item) => ({
+        item,
+        score: Math.max(
+          scoreText(query, item.label),
+          scoreText(query, item.detail ?? ''),
+          scoreText(query, item.searchText ?? '')
+        )
+      }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || a.item.label.localeCompare(b.item.label))
+      .slice(0, 20)
+      .map(({ item }) => item);
+  }, [query, quickActions, navigationItems, recentItems, taskItems, noteItems]);
 
   // Scroll selected item into view
   useEffect(() => {
