@@ -7,6 +7,7 @@ import { NewTaskWindow } from './components/NewTaskWindow';
 import { PomodoroModal } from './components/PomodoroModal';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Dashboard } from './pages/Dashboard';
+import { Stats } from './pages/Stats';
 import { Notes } from './pages/Notes';
 import { TasksWithLists } from './pages/TasksWithLists';
 import { Settings } from './pages/Settings';
@@ -56,7 +57,7 @@ const App: React.FC = () => {
     const hash = window.location.hash.slice(1).split('?')[0];
     if (
       hash &&
-      ['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(hash)
+      ['dashboard', 'stats', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(hash)
     ) {
       return hash;
     }
@@ -120,7 +121,9 @@ const App: React.FC = () => {
       const params = new URLSearchParams(query);
       const modal = params.get('modal');
 
-      if (['dashboard', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(view)) {
+      if (
+        ['dashboard', 'stats', 'notes', 'tasks', 'settings', 'trash', 'note-editor'].includes(view)
+      ) {
         setActiveView(view);
       }
 
@@ -404,6 +407,8 @@ const App: React.FC = () => {
             }}
           />
         );
+      case 'stats':
+        return <Stats onNavigate={handleNavigate} />;
       case 'notes':
         return (
           <Notes

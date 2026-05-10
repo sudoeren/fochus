@@ -4,6 +4,7 @@ import {
   FileText,
   CheckSquare,
   Settings,
+  BarChart3,
   Layout,
   Plus,
   CornerDownLeft,
@@ -163,6 +164,17 @@ export const Spotlight: React.FC<SpotlightProps> = ({
         group: t('spotlight.groups.pages'),
         action: () => {
           onNavigate('dashboard');
+          onClose();
+        }
+      },
+      {
+        id: 'go-stats',
+        label: t('spotlight.pages.stats'),
+        detail: t('spotlight.pages.stats_desc'),
+        icon: BarChart3,
+        group: t('spotlight.groups.pages'),
+        action: () => {
+          onNavigate('stats');
           onClose();
         }
       },

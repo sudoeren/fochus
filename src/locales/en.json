@@ -198,6 +198,7 @@
   },
   "sidebar": {
     "overview": "Overview",
+    "stats": "Dashboard",
     "tasks": "Tasks",
     "notes": "Notes",
     "timer": "Fochus Timer",
@@ -351,6 +352,8 @@
     "pages": {
       "dashboard": "Dashboard",
       "dashboard_desc": "Overview and summary",
+      "stats": "Dashboard",
+      "stats_desc": "Productivity statistics",
       "tasks": "Tasks",
       "tasks_desc": "Manage all your tasks",
       "notes": "Notes",
@@ -365,6 +368,12 @@
       "pending": "Pending",
       "untitled_note": "Untitled Note"
     }
+  },
+  "stats": {
+    "title": "Dashboard",
+    "subtitle": "Review weekly productivity, focus, and task status in one place.",
+    "active_tasks": "Active tasks",
+    "notes_total": "Total notes"
   },
   "pomodoro": {
     "settings_title": "Timer Settings",

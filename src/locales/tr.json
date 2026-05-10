@@ -198,6 +198,7 @@
   },
   "sidebar": {
     "overview": "Genel Bakış",
+    "stats": "Dashboard",
     "tasks": "Görevler",
     "notes": "Notlar",
     "timer": "Fochus Timer",
@@ -351,6 +352,8 @@
     "pages": {
       "dashboard": "Ana Sayfa",
       "dashboard_desc": "Genel bakış ve özet",
+      "stats": "Dashboard",
+      "stats_desc": "Üretkenlik istatistikleri",
       "tasks": "Görevler",
       "tasks_desc": "Tüm görevlerinizi yönetin",
       "notes": "Notlar",
@@ -365,6 +368,12 @@
       "pending": "Bekliyor",
       "untitled_note": "Adsız Not"
     }
+  },
+  "stats": {
+    "title": "Dashboard",
+    "subtitle": "Haftalık üretkenlik, odak ve görev durumunu tek ekranda incele.",
+    "active_tasks": "Aktif görev",
+    "notes_total": "Toplam not"
   },
   "pomodoro": {
     "settings_title": "Zamanlayıcı Ayarları",

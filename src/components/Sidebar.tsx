@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Home,
+  BarChart3,
   FileText,
   CheckSquare,
   Settings,
@@ -92,6 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const mainNav = [
     { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
+    { id: 'stats', label: t('sidebar.stats'), icon: BarChart3 },
     { id: 'tasks', label: t('sidebar.tasks'), icon: CheckSquare },
     { id: 'notes', label: t('sidebar.notes'), icon: FileText },
     { id: 'timer', label: t('sidebar.timer'), icon: Timer }
