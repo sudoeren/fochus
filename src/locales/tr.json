@@ -238,7 +238,15 @@
     "untitled_note": "Adsız Not",
     "no_content": "İçerik yok...",
     "no_tasks": "Her şey tamam!",
-    "no_notes": "Henüz not yok"
+    "no_notes": "Henüz not yok",
+    "weekly_overview": "Haftalık özet",
+    "completed_week": "Bu hafta tamamlanan",
+    "focus_total": "Odak toplamı",
+    "completion_rate": "Tamamlanma",
+    "overdue": "Geciken",
+    "streak_days": "Bu hafta {{count}} {{unit}} aktif tamamlamanız var.",
+    "days": "gün",
+    "review_tasks": "Görevleri İncele"
   },
   "trash": {
     "title": "Çöp Kutusu",

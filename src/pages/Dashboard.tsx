@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -10,7 +10,9 @@ import {
   Zap,
   CheckCircle2,
   Circle,
-  Plus
+  Plus,
+  Flame,
+  AlertTriangle
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
@@ -117,6 +119,46 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const pendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 5);
   const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 5);
+  const dashboardStats = useMemo(() => {
+    const now = currentTime;
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const weekStart = new Date(todayStart);
+    const day = weekStart.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    weekStart.setDate(weekStart.getDate() + mondayOffset);
+
+    const activeTasks = tasks.filter((task) => !task.isDeleted);
+    const completedTasks = activeTasks.filter((task) => task.isCompleted);
+    const completedThisWeek = completedTasks.filter((task) => {
+      const updatedAt = task.updatedAt ? new Date(task.updatedAt) : null;
+      return updatedAt ? updatedAt >= weekStart : false;
+    }).length;
+    const overdueTasks = activeTasks.filter((task) => {
+      if (task.isCompleted || !task.dueDate) return false;
+      const dueDate = new Date(task.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      return dueDate < todayStart;
+    }).length;
+
+    const completedDays = new Set(
+      completedTasks
+        .map((task) => (task.updatedAt ? new Date(task.updatedAt) : null))
+        .filter((date): date is Date => date instanceof Date && date >= weekStart)
+        .map((date) => date.toISOString().slice(0, 10))
+    );
+
+    return {
+      completedThisWeek,
+      overdueTasks,
+      completionRate:
+        activeTasks.length === 0
+          ? 0
+          : Math.round((completedTasks.length / activeTasks.length) * 100),
+      activeDaysThisWeek: completedDays.size
+    };
+  }, [currentTime, tasks]);
 
   const isCustomBg =
     bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
@@ -201,6 +243,76 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       /
                     </kbd>
                   </div>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="rounded-2xl bg-white/50 p-4 border border-white/30 dark:bg-zinc-900/50 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">
+                      {t('dashboard.completed_week')}
+                    </span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div className="text-3xl font-bold text-zinc-900 dark:text-white">
+                    {dashboardStats.completedThisWeek}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/50 p-4 border border-white/30 dark:bg-zinc-900/50 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">
+                      {t('dashboard.focus_total')}
+                    </span>
+                    <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div className="text-3xl font-bold text-zinc-900 dark:text-white">
+                    {formatFocusDuration(weeklyFocusSeconds)}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/50 p-4 border border-white/30 dark:bg-zinc-900/50 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">
+                      {t('dashboard.completion_rate')}
+                    </span>
+                    <Flame className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div className="text-3xl font-bold text-zinc-900 dark:text-white">
+                    %{dashboardStats.completionRate}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/50 p-4 border border-white/30 dark:bg-zinc-900/50 dark:border-white/10">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold uppercase text-zinc-500 dark:text-zinc-400">
+                      {t('dashboard.overdue')}
+                    </span>
+                    <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  </div>
+                  <div className="text-3xl font-bold text-zinc-900 dark:text-white">
+                    {dashboardStats.overdueTasks}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-zinc-900/80 p-4 text-white dark:bg-white/10 border border-white/10 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase text-zinc-300">
+                    {t('dashboard.weekly_overview')}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-100">
+                    {t('dashboard.streak_days', {
+                      count: dashboardStats.activeDaysThisWeek,
+                      unit: t('dashboard.days')
+                    })}
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('tasks')}
+                  className="rounded-full bg-white px-4 py-2 text-xs font-bold text-zinc-900 transition-colors hover:bg-zinc-200"
+                >
+                  {t('dashboard.review_tasks')}
                 </button>
               </div>
 

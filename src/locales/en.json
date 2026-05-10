@@ -238,7 +238,15 @@
     "untitled_note": "Untitled Note",
     "no_content": "No content...",
     "no_tasks": "All done!",
-    "no_notes": "No notes yet"
+    "no_notes": "No notes yet",
+    "weekly_overview": "Weekly overview",
+    "completed_week": "Completed this week",
+    "focus_total": "Focus total",
+    "completion_rate": "Completion",
+    "overdue": "Overdue",
+    "streak_days": "You completed work on {{count}} {{unit}} this week.",
+    "days": "days",
+    "review_tasks": "Review Tasks"
   },
   "trash": {
     "title": "Trash",
