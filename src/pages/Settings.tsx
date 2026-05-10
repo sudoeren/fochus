@@ -40,7 +40,6 @@ import {
   notesAPI,
   pomodoroAPI,
   setAuthToken,
-  taskListsAPI,
   tasksAPI,
   settingsAPI,
   adminAPI
@@ -1170,13 +1169,6 @@ const DataSection = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isBusy, setIsBusy] = useState(false);
 
-  const safeToIso = (value: unknown): string | undefined => {
-    if (!value) return undefined;
-    const date = value instanceof Date ? value : new Date(value as string);
-    if (Number.isNaN(date.getTime())) return undefined;
-    return date.toISOString();
-  };
-
   const handleBackup = async () => {
     try {
       setIsBusy(true);
@@ -1197,230 +1189,14 @@ const DataSection = () => {
     }
   };
 
-  interface BackupPayload {
-    data?: {
-      notes?: unknown[];
-      deletedNotes?: unknown[];
-      tasks?: unknown[];
-      deletedTasks?: unknown[];
-      taskLists?: unknown[];
-      settings?: unknown;
-      pomodoroSessions?: unknown[];
-    };
-    notes?: unknown[];
-    deletedNotes?: unknown[];
-    tasks?: unknown[];
-    deletedTasks?: unknown[];
-    taskLists?: unknown[];
-    settings?: unknown;
-    pomodoroSessions?: unknown[];
-  }
-
-  const extractData = (parsed: BackupPayload) => {
-    if (!parsed) return null;
-    const data = parsed.data ?? parsed;
-    return {
-      notes: Array.isArray(data.notes) ? data.notes : [],
-      deletedNotes: Array.isArray(data.deletedNotes) ? data.deletedNotes : [],
-      tasks: Array.isArray(data.tasks) ? data.tasks : [],
-      deletedTasks: Array.isArray(data.deletedTasks) ? data.deletedTasks : [],
-      taskLists: Array.isArray(data.taskLists) ? data.taskLists : [],
-      settings: data.settings ?? null,
-      pomodoroSessions: Array.isArray(data.pomodoroSessions) ? data.pomodoroSessions : []
-    };
-  };
-
   const handleRestoreFile = async (file: File) => {
     const text = await file.text();
     const parsed = JSON.parse(text);
-    const payload = extractData(parsed);
-    if (!payload) throw new Error('Invalid backup file');
 
     const ok = confirm(t('settings.data.restore_confirm'));
     if (!ok) return;
 
-    // Create task lists first (build ID map)
-    const listIdMap = new Map<string, string>();
-    for (const list of payload.taskLists as {
-      id?: string;
-      title?: string;
-      description?: string;
-      color?: string;
-    }[]) {
-      const created = await taskListsAPI.create({
-        title: (list?.title ?? '').toString() || 'List',
-        description: list?.description ?? undefined,
-        color: list?.color ?? undefined
-      });
-      if (list?.id && created?.id) listIdMap.set(String(list.id), String(created.id));
-    }
-
-    // Create notes (build ID map for linked tasks)
-    const noteIdMap = new Map<string, string>();
-
-    const createNoteAndMaybeDelete = async (
-      note: { id?: string; title?: string; content?: string; isPinned?: boolean },
-      shouldBeDeleted: boolean
-    ) => {
-      const created = await notesAPI.create({
-        title: (note?.title ?? '').toString() || 'Note',
-        content: (note?.content ?? '').toString(),
-        isPinned: Boolean(note?.isPinned ?? false)
-      });
-      if (note?.id && created?.id) noteIdMap.set(String(note.id), String(created.id));
-      if (shouldBeDeleted && created?.id) {
-        await notesAPI.delete(String(created.id));
-      }
-    };
-
-    for (const note of payload.notes as {
-      id?: string;
-      title?: string;
-      content?: string;
-      isPinned?: boolean;
-    }[]) {
-      await createNoteAndMaybeDelete(note, false);
-    }
-    for (const note of payload.deletedNotes as {
-      id?: string;
-      title?: string;
-      content?: string;
-      isPinned?: boolean;
-    }[]) {
-      await createNoteAndMaybeDelete(note, true);
-    }
-
-    // Create tasks
-    const createTaskAndMaybeDelete = async (
-      task: {
-        id?: string;
-        title?: string;
-        description?: string;
-        dueDate?: string;
-        isPinned?: boolean;
-        hasReminder?: boolean;
-        reminderAt?: string;
-        isRecurring?: boolean;
-        listId?: string;
-        linkedNoteId?: string;
-        order?: number;
-        status?: string;
-        isCompleted?: boolean;
-        recurringType?: string;
-        recurringInterval?: number;
-        recurringDays?: string;
-      },
-      shouldBeDeleted: boolean
-    ) => {
-      const oldListId = task?.listId ? String(task.listId) : null;
-      const mappedListId = oldListId ? (listIdMap.get(oldListId) ?? null) : null;
-
-      const oldLinkedNoteId = task?.linkedNoteId ? String(task.linkedNoteId) : null;
-      const mappedLinkedNoteId = oldLinkedNoteId ? (noteIdMap.get(oldLinkedNoteId) ?? null) : null;
-
-      const created = await tasksAPI.create({
-        title: (task?.title ?? '').toString() || 'Task',
-        description: task?.description ?? undefined,
-        dueDate: safeToIso(task?.dueDate),
-        listId: mappedListId ?? undefined,
-        isPinned: Boolean(task?.isPinned ?? false),
-        hasReminder: Boolean(task?.hasReminder ?? false),
-        reminderAt: safeToIso(task?.reminderAt),
-        isRecurring: Boolean(task?.isRecurring ?? false),
-        recurringType: task?.recurringType ?? undefined,
-        recurringInterval:
-          typeof task?.recurringInterval === 'number' ? task.recurringInterval : undefined,
-        recurringDays: Array.isArray(task?.recurringDays)
-          ? JSON.stringify(task.recurringDays)
-          : (task?.recurringDays ?? undefined),
-        linkedNoteId: mappedLinkedNoteId ?? undefined
-      });
-
-      if (created?.id) {
-        const updates: Record<string, unknown> = {};
-        if (typeof task?.order === 'number') updates.order = task.order;
-        if (task?.status !== undefined) updates.status = task.status;
-        if (task?.isCompleted !== undefined) updates.isCompleted = Boolean(task.isCompleted);
-        if (Object.keys(updates).length > 0) {
-          await tasksAPI.update(String(created.id), updates);
-        }
-
-        if (shouldBeDeleted) {
-          await tasksAPI.delete(String(created.id));
-        }
-      }
-    };
-
-    for (const task of payload.tasks as {
-      id?: string;
-      title?: string;
-      description?: string;
-      dueDate?: string;
-      isPinned?: boolean;
-      hasReminder?: boolean;
-      reminderAt?: string;
-      isRecurring?: boolean;
-      listId?: string;
-      linkedNoteId?: string;
-      order?: number;
-      status?: string;
-      isCompleted?: boolean;
-      recurringType?: string;
-      recurringInterval?: number;
-      recurringDays?: string;
-    }[]) {
-      await createTaskAndMaybeDelete(task, false);
-    }
-    for (const task of payload.deletedTasks as {
-      id?: string;
-      title?: string;
-      description?: string;
-      dueDate?: string;
-      isPinned?: boolean;
-      hasReminder?: boolean;
-      reminderAt?: string;
-      isRecurring?: boolean;
-      listId?: string;
-      linkedNoteId?: string;
-      order?: number;
-      status?: string;
-      isCompleted?: boolean;
-      recurringType?: string;
-      recurringInterval?: number;
-      recurringDays?: string;
-    }[]) {
-      await createTaskAndMaybeDelete(task, true);
-    }
-
-    // Restore settings (best-effort)
-    const settingsPayload = payload.settings as { theme?: string; language?: string } | undefined;
-    if (settingsPayload) {
-      await settingsAPI.update({
-        theme: settingsPayload.theme,
-        language: settingsPayload.language
-      });
-    }
-
-    // Restore pomodoro sessions (best-effort)
-    for (const session of payload.pomodoroSessions as {
-      mode?: string;
-      startTime?: string;
-      endTime?: string;
-      duration?: number;
-      completed?: boolean;
-    }[]) {
-      try {
-        await pomodoroAPI.create({
-          startTime: safeToIso(session?.startTime) ?? new Date().toISOString(),
-          endTime: safeToIso(session?.endTime) ?? new Date().toISOString(),
-          duration: Number(session?.duration ?? 0),
-          mode: (session?.mode ?? 'work') as 'work' | 'shortBreak' | 'longBreak',
-          completed: Boolean(session?.completed ?? true)
-        });
-      } catch {
-        // Ignore invalid session rows
-      }
-    }
+    await settingsAPI.importData(parsed);
 
     alert(t('settings.data.restore_success'));
   };

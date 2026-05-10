@@ -300,7 +300,7 @@ const App: React.FC = () => {
       }
     }, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [t]);
 
   const renderView = () => {
     switch (activeView) {

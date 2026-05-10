@@ -295,7 +295,13 @@ export const settingsAPI = {
 
     if (!response.ok) throw new Error('Export failed');
     return response.blob();
-  }
+  },
+
+  importData: async (data: unknown) =>
+    fetchAPI<{ message: string }>('/settings/import', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
 };
 
 // Admin API
