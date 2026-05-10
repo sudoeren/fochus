@@ -1169,10 +1169,31 @@ const SpotlightSection = ({
 };
 
 // 4. Data Section
+const LAST_BACKUP_AT_KEY = 'fochus_last_backup_at';
+
+const countBackupItems = (raw: unknown) => {
+  const data = ((raw as Record<string, unknown>)?.data ?? raw) as Record<string, unknown>;
+  const countArray = (key: string) => {
+    const value = data?.[key];
+    return Array.isArray(value) ? value.length : 0;
+  };
+
+  return {
+    version: String(data?.version ?? '-'),
+    notes: countArray('notes') + countArray('deletedNotes'),
+    tasks: countArray('tasks') + countArray('deletedTasks'),
+    taskLists: countArray('taskLists'),
+    pomodoroSessions: countArray('pomodoroSessions')
+  };
+};
+
 const DataSection = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isBusy, setIsBusy] = useState(false);
+  const [lastBackupAt, setLastBackupAt] = useState<string | null>(() =>
+    localStorage.getItem(LAST_BACKUP_AT_KEY)
+  );
 
   const handleBackup = async () => {
     try {
@@ -1187,6 +1208,10 @@ const DataSection = () => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+
+      const now = new Date().toISOString();
+      localStorage.setItem(LAST_BACKUP_AT_KEY, now);
+      setLastBackupAt(now);
     } catch (error) {
       alert(error instanceof Error ? error.message : t('settings.data.backup_error'));
     } finally {
@@ -1197,8 +1222,18 @@ const DataSection = () => {
   const handleRestoreFile = async (file: File) => {
     const text = await file.text();
     const parsed = JSON.parse(text);
+    const summary = countBackupItems(parsed);
 
-    const ok = confirm(t('settings.data.restore_confirm'));
+    const ok = confirm(
+      t('settings.data.restore_confirm', {
+        file: file.name,
+        version: summary.version,
+        notes: summary.notes,
+        tasks: summary.tasks,
+        lists: summary.taskLists,
+        sessions: summary.pomodoroSessions
+      })
+    );
     if (!ok) return;
 
     await settingsAPI.importData(parsed);
@@ -1209,6 +1244,10 @@ const DataSection = () => {
   const handleRestoreClick = () => {
     fileInputRef.current?.click();
   };
+
+  const lastBackupLabel = lastBackupAt
+    ? new Date(lastBackupAt).toLocaleString(i18n.language === 'tr' ? 'tr-TR' : 'en-US')
+    : t('settings.data.never');
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -1256,6 +1295,30 @@ const DataSection = () => {
           </h3>
           <p className="text-zinc-500">{t('settings.data.restore_desc')}</p>
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-5 border border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-3 mb-2">
+            <Database className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <h4 className="font-bold text-zinc-900 dark:text-white">
+              {t('settings.data.last_backup')}
+            </h4>
+          </div>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{lastBackupLabel}</p>
+        </div>
+
+        <div className="bg-amber-50 dark:bg-amber-500/10 rounded-[2rem] p-5 border border-amber-100 dark:border-amber-500/20">
+          <div className="flex items-center gap-3 mb-2">
+            <Shield className="w-5 h-5 text-amber-700 dark:text-amber-300" />
+            <h4 className="font-bold text-amber-900 dark:text-amber-100">
+              {t('settings.data.restore_warning_title')}
+            </h4>
+          </div>
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            {t('settings.data.restore_warning_desc')}
+          </p>
+        </div>
       </div>
 
       <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-[2rem] p-6 flex items-start gap-4 border border-emerald-100 dark:border-emerald-500/20">
