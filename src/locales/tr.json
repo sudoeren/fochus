@@ -372,6 +372,13 @@
   "stats": {
     "title": "Dashboard",
     "subtitle": "Haftalık üretkenlik, odak ve görev durumunu tek ekranda incele.",
+    "week_progress": "{{count}} aktif gün",
+    "focus_target": "5 saatlik haftalık hedef",
+    "health_clear": "Geciken görev yok",
+    "needs_review": "Öncelik kontrolü gerekli",
+    "open_tasks": "{{count}} açık görev",
+    "weekly_activity": "Haftalık aktivite",
+    "snapshot": "Anlık durum",
     "active_tasks": "Aktif görev",
     "notes_total": "Toplam not"
   },

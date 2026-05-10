@@ -372,6 +372,13 @@
   "stats": {
     "title": "Dashboard",
     "subtitle": "Review weekly productivity, focus, and task status in one place.",
+    "week_progress": "{{count}} active days",
+    "focus_target": "5 hour weekly target",
+    "health_clear": "No overdue tasks",
+    "needs_review": "Priority review needed",
+    "open_tasks": "{{count}} open tasks",
+    "weekly_activity": "Weekly activity",
+    "snapshot": "Snapshot",
     "active_tasks": "Active tasks",
     "notes_total": "Total notes"
   },
