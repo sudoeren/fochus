@@ -159,7 +159,7 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 px-8 py-10 dark:bg-zinc-950 lg:px-12">
+    <div className="min-h-screen px-8 py-10 lg:px-12">
       <div className="mx-auto max-w-6xl space-y-8">
         <header className="flex flex-col justify-between gap-5 border-b border-zinc-200 pb-8 dark:border-zinc-800 lg:flex-row lg:items-end">
           <div>
@@ -189,7 +189,7 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             return (
               <article
                 key={card.label}
-                className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -221,7 +221,7 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
         </section>
 
         <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-zinc-950 dark:text-white">
@@ -264,7 +264,7 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             </div>
           </div>
 
-          <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
             <h2 className="text-lg font-bold text-zinc-950 dark:text-white">
               {t('stats.snapshot')}
             </h2>

@@ -38,8 +38,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenTaskModal,
   onEditTask,
   onOpenSpotlight,
-  onOpenPomodoro,
-  bgImage
+  onOpenPomodoro
 }) => {
   const { t, i18n } = useTranslation();
   const { tasks, toggleTask } = useTasks();
@@ -118,43 +117,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const pendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 5);
   const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 5);
 
-  const isCustomBg =
-    bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
-
   return (
     <div className="h-full w-full relative">
-      {/* BACKGROUND IMAGE - Controlled by bgImage prop */}
-      <div className="fixed inset-0 z-[-1]">
-        {isCustomBg ? (
-          <img
-            src={bgImage}
-            alt="Custom Background"
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
-          />
-        ) : (
-          <>
-            <img
-              src="/light.png"
-              alt="Background"
-              className={cn(
-                'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-                bgImage === 'light' ? 'opacity-100' : 'opacity-0'
-              )}
-            />
-            <img
-              src="/dark.png"
-              alt="Background"
-              className={cn(
-                'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-                bgImage === 'dark' ? 'opacity-100' : 'opacity-0'
-              )}
-            />
-          </>
-        )}
-        {/* Overlay for readability */}
-        <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
-      </div>
-
       <div className="p-8 lg:p-12 pb-24 overflow-y-auto custom-scrollbar h-full flex flex-col justify-center">
         {' '}
         {/* Centered vertically */}

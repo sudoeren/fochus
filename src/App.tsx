@@ -487,7 +487,7 @@ const App: React.FC = () => {
 
   const isCustomBg =
     bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
-  const showBackground = isGlobalBg || activeView === 'dashboard';
+  const showBackground = isGlobalBg || activeView === 'dashboard' || activeView === 'stats';
 
   // Determine which background to show based on theme if default
   const showLightBg = bgImage === 'light' || (bgImage === 'default' && !isDark);
