@@ -1,7 +1,7 @@
 # Backend Dockerfile for Fokus API
 # Coolify compatible
 
-FROM node:25-alpine AS base
+FROM node:20-alpine AS base
 
 # Install OpenSSL for Prisma
 RUN apk add --no-cache openssl

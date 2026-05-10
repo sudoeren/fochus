@@ -171,7 +171,7 @@ A: With the self-hosted Docker setup, data is stored in a SQLite database inside
 A: Yes! You can customize work, short break, and long break durations, enable auto-start for breaks or work sessions, and set the long break interval — all from the settings panel inside the timer.
 
 **Q: Is there a mobile version?**  
-A: Fochus is currently optimized for desktop use, but the interface is responsive. A dedicated mobile view is in our roadmap.
+A: Fochus is intentionally desktop-first. A dedicated mobile experience is not planned for now.
 
 **Q: How do I run tests?**  
 A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for backend tests. Both use Vitest.

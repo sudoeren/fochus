@@ -3,7 +3,7 @@
 # Usage: docker run -p 3000:3000 -v fochus_data:/app/data fochus
 
 # ── Build frontend ──────────────────────────────
-FROM node:25-alpine AS frontend
+FROM node:20-alpine AS frontend
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # ── Build backend ───────────────────────────────
-FROM node:25-alpine AS backend
+FROM node:20-alpine AS backend
 
 WORKDIR /app
 
@@ -26,7 +26,7 @@ RUN npx prisma generate --schema=prisma/schema.prisma
 RUN npm run build
 
 # ── Production image ────────────────────────────
-FROM node:25-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
