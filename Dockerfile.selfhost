@@ -22,7 +22,7 @@ COPY backend/package.json backend/package-lock.json* ./
 RUN npm ci
 
 COPY backend/ .
-RUN npx prisma generate --schema=prisma/schema.sqlite.prisma
+RUN npx prisma generate --schema=prisma/schema.prisma
 RUN npm run build
 
 # ── Production image ────────────────────────────
