@@ -14,6 +14,7 @@ import { Trash } from './pages/Trash';
 import { Login } from './pages/Login';
 import { NoteEditorPage } from './pages/NoteEditorPage';
 import { cn } from './lib/utils';
+import { useTranslation } from 'react-i18next';
 import { authAPI, tasksAPI, getAuthToken, setAuthToken } from './services/api';
 import { useIsMobile } from './hooks/useIsMobile';
 import { MobileRestricted } from './pages/MobileRestricted';
@@ -22,6 +23,7 @@ import type { Task } from './types/index';
 const App: React.FC = () => {
   const isMobile = useIsMobile();
   const { isDark } = useTheme();
+  const { t } = useTranslation();
 
   const [activeView, setActiveView] = useState(() => {
     const hash = window.location.hash.slice(1).split('?')[0];
