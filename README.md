@@ -168,10 +168,13 @@ A: You can open the **Spotlight** with the `/` key to quickly access all feature
 A: With the self-hosted Docker setup, data is stored in a SQLite database inside the `fochus_data` Docker volume. You can back up and restore via the Settings page.
 
 **Q: Can I customize the Pomodoro timer?**  
-A: Yes! You can switch between Work, Short Break, and Long Break modes. Future updates will include custom duration settings.
+A: Yes! You can customize work, short break, and long break durations, enable auto-start for breaks or work sessions, and set the long break interval — all from the settings panel inside the timer.
 
 **Q: Is there a mobile version?**  
 A: Fochus is currently optimized for desktop use, but the interface is responsive. A dedicated mobile view is in our roadmap.
+
+**Q: How do I run tests?**  
+A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for backend tests. Both use Vitest.
 
 ---
 

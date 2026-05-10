@@ -63,7 +63,9 @@ Monorepo with two independent Node.js packages:
 
 ## Testing
 
-**No test framework is configured.** There are no test scripts, no test runner, no test files. CI runs lint + build only.
+- **Frontend:** Vitest (`npm test` in root) — tests in `src/**/*.test.ts`
+- **Backend:** Vitest (`npm test` in `backend/`) — tests in `backend/src/**/*.test.ts`
+- CI runs `npm test` for both frontend and backend
 
 ## Prisma
 
