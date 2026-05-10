@@ -1,0 +1,19 @@
+{
+  "name": "Fochus",
+  "short_name": "Fochus",
+  "description": "Manage your productivity, notes, tasks, and focus sessions.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f5f3ef",
+  "theme_color": "#111827",
+  "orientation": "landscape-primary",
+  "icons": [
+    {
+      "src": "./logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

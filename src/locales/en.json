@@ -110,7 +110,12 @@
       "desc": "Your minimalist, focus-friendly, and fully customizable productivity assistant.",
       "source_code": "Source Code",
       "view_github": "View on GitHub",
-      "website": "Website"
+      "website": "Website",
+      "install_title": "Install as an app",
+      "install_desc": "Open Fochus from your browser as a focused standalone desktop window.",
+      "install_installed": "Fochus is already running in app mode on this device.",
+      "install": "Install",
+      "installed": "Installed"
     }
   },
   "admin": {

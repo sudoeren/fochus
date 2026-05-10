@@ -110,7 +110,12 @@
       "desc": "Minimalist, odaklanma dostu ve tamamen kişiselleştirilebilir üretkenlik asistanınız.",
       "source_code": "Kaynak Kod",
       "view_github": "GitHub'da İncele",
-      "website": "Web Sitesi"
+      "website": "Web Sitesi",
+      "install_title": "Uygulama olarak yükle",
+      "install_desc": "Fochus'u tarayıcınızdan bağımsız bir masaüstü penceresi gibi açın.",
+      "install_installed": "Fochus bu cihazda uygulama modunda çalışıyor.",
+      "install": "Yükle",
+      "installed": "Yüklendi"
     }
   },
   "admin": {
