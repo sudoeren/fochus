@@ -10,6 +10,15 @@ class NotificationService {
     this.permission = this.isSupported ? Notification.permission : 'denied';
   }
 
+  isAvailable(): boolean {
+    return this.isSupported;
+  }
+
+  getPermission(): NotificationPermission {
+    this.permission = this.isSupported ? Notification.permission : 'denied';
+    return this.permission;
+  }
+
   async requestPermission(): Promise<boolean> {
     if (!this.isSupported) {
       console.warn('Bu tarayıcı bildirim desteklemiyor');

@@ -16,9 +16,36 @@ import { NoteEditorPage } from './pages/NoteEditorPage';
 import { cn } from './lib/utils';
 import { useTranslation } from 'react-i18next';
 import { authAPI, tasksAPI, getAuthToken, setAuthToken } from './services/api';
+import { notificationService } from './services/NotificationService';
 import { useIsMobile } from './hooks/useIsMobile';
 import { MobileRestricted } from './pages/MobileRestricted';
 import type { Task } from './types/index';
+
+const NOTIFIED_REMINDERS_KEY = 'fochus_notified_reminders';
+const REMINDER_NOTICE_SNOOZE_UNTIL_KEY = 'fochus_reminder_notice_snooze_until';
+
+const loadNotifiedReminders = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(NOTIFIED_REMINDERS_KEY) || '[]');
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : []);
+  } catch {
+    return new Set<string>();
+  }
+};
+
+const saveNotifiedReminders = (ids: Set<string>) => {
+  localStorage.setItem(NOTIFIED_REMINDERS_KEY, JSON.stringify([...ids].slice(-250)));
+};
+
+const isReminderNoticeSnoozed = () => {
+  const until = Number(localStorage.getItem(REMINDER_NOTICE_SNOOZE_UNTIL_KEY) || 0);
+  return Number.isFinite(until) && Date.now() < until;
+};
+
+interface ReminderNotice {
+  count: number;
+  latestTitle: string;
+}
 
 const App: React.FC = () => {
   const isMobile = useIsMobile();
@@ -120,6 +147,10 @@ const App: React.FC = () => {
   const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [reminderNotice, setReminderNotice] = useState<ReminderNotice | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() =>
+    notificationService.getPermission()
+  );
 
   // Background Image State - Default to 'default' which adapts to theme
   const [bgImage, setBgImage] = useState(() => localStorage.getItem('bgImage') || 'default');
@@ -272,35 +303,80 @@ const App: React.FC = () => {
 
   // Reminder polling
   useEffect(() => {
-    if (!getAuthToken()) return;
-    const notified = new Set<string>();
-    const interval = setInterval(async () => {
+    if (!isAuthenticated || !getAuthToken()) return;
+
+    let cancelled = false;
+    const notified = loadNotifiedReminders();
+
+    const checkReminders = async () => {
       try {
         const tasks = (await tasksAPI.getAll()) as Array<Record<string, unknown>>;
         const now = new Date();
-        for (const task of tasks) {
-          if (
+        const dueTasks = tasks.filter((task) => {
+          const id = typeof task.id === 'string' ? task.id : '';
+          return (
+            id &&
             task.hasReminder &&
             task.reminderAt &&
             !task.isCompleted &&
-            !notified.has(task.id as string) &&
+            !notified.has(id) &&
             new Date(task.reminderAt as string) <= now
-          ) {
-            notified.add(task.id as string);
-            if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification(task.title as string, {
-                body: t('notifications.reminder'),
-                icon: '/logo.svg'
-              });
-            }
+          );
+        });
+
+        if (dueTasks.length === 0 || cancelled) return;
+
+        const permission = notificationService.getPermission();
+        setNotificationPermission(permission);
+
+        if (permission === 'granted') {
+          for (const task of dueTasks) {
+            const id = String(task.id);
+            const title = String(task.title ?? t('notifications.reminder'));
+            const reminderAt = task.reminderAt ? new Date(String(task.reminderAt)) : undefined;
+            await notificationService.showTaskReminder(title, reminderAt);
+            notified.add(id);
           }
+          saveNotifiedReminders(notified);
+          setReminderNotice(null);
+          return;
+        }
+
+        if (!isReminderNoticeSnoozed()) {
+          setReminderNotice({
+            count: dueTasks.length,
+            latestTitle: String(dueTasks[0].title ?? t('notifications.reminder'))
+          });
         }
       } catch {
         // ignore
       }
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [t]);
+    };
+
+    checkReminders();
+    const interval = setInterval(checkReminders, 60000);
+    window.addEventListener('focus', checkReminders);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', checkReminders);
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, t]);
+
+  const handleEnableReminderNotifications = async () => {
+    const granted = await notificationService.requestPermission();
+    setNotificationPermission(notificationService.getPermission());
+    if (granted) {
+      setReminderNotice(null);
+      localStorage.removeItem(REMINDER_NOTICE_SNOOZE_UNTIL_KEY);
+    }
+  };
+
+  const handleDismissReminderNotice = () => {
+    localStorage.setItem(REMINDER_NOTICE_SNOOZE_UNTIL_KEY, String(Date.now() + 10 * 60 * 1000));
+    setReminderNotice(null);
+  };
 
   const renderView = () => {
     switch (activeView) {
@@ -513,6 +589,36 @@ const App: React.FC = () => {
       )}
 
       {showPomodoroModal && <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />}
+
+      {reminderNotice && (
+        <div className="fixed bottom-6 right-6 z-50 w-[min(360px,calc(100vw-32px))] rounded-2xl border border-amber-200 bg-white p-4 shadow-2xl shadow-zinc-900/20 dark:border-amber-500/30 dark:bg-zinc-900">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                {t('notifications.missed_title', { count: reminderNotice.count })}
+              </p>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                {t('notifications.missed_desc', { title: reminderNotice.latestTitle })}
+              </p>
+              {notificationPermission !== 'denied' && notificationService.isAvailable() && (
+                <button
+                  onClick={handleEnableReminderNotifications}
+                  className="mt-3 rounded-full bg-zinc-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                >
+                  {t('notifications.enable')}
+                </button>
+              )}
+            </div>
+            <button
+              onClick={handleDismissReminderNotice}
+              className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-white"
+              aria-label={t('common.close')}
+            >
+              x
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
