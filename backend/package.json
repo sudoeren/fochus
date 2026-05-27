@@ -37,7 +37,7 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^25.9.1",
     "prisma": "^6.19.3",
-    "tsx": "^4.22.2",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   }
