@@ -1,7 +1,7 @@
 # Frontend Dockerfile for Fokus App
 # Coolify compatible - Multi-stage build with nginx
 
-FROM node:20-alpine AS base
+FROM node:26-alpine AS base
 
 # Dependencies stage
 FROM base AS deps
