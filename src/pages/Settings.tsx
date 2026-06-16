@@ -1456,25 +1456,6 @@ const AboutSection = () => {
             </div>
             <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
           </a>
-
-          {/* Website Link */}
-          <a
-            href="https://fochus.pages.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-indigo-600 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-indigo-500/20 text-white"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 rounded-full">
-                <Laptop className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-bold text-lg">{t('settings.about.website')}</h4>
-                <p className="text-xs text-indigo-200">fochus.pages.dev</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
-          </a>
         </div>
       </div>
 
