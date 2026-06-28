@@ -8,10 +8,6 @@
   <strong>Fochus</strong> is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
 </p>
 
-<p align="center">
-  <strong>Developer:</strong> Eren Çakar
-</p>
-
 <div align="center">
 
 [Features](#features) •
@@ -180,10 +176,8 @@ A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` file for more information.
+Distributed under the [MIT License](./LICENSE).
 
 ---
 
-<div align="center">
-  <p>Developed by <strong>Eren Çakar</strong></p>
-</div>
+
