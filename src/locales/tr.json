@@ -550,5 +550,10 @@
     "low": "Düşük",
     "medium": "Orta",
     "high": "Yüksek"
+  },
+  "error_boundary": {
+    "title": "Bir sorun oluştu",
+    "description": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+    "retry": "Tekrar Dene"
   }
 }
