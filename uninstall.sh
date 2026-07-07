@@ -47,9 +47,9 @@ fi
 
 # ── Firewall ───────────────────────────────────
 if command -v ufw >/dev/null 2>&1; then
-  if ufw status | grep -q "3000.*ALLOW"; then
-    info "Closing port 3000 in firewall..."
-    ufw delete allow 3000/tcp >/dev/null 2>&1 || true
+  if ufw status | grep -q "5800.*ALLOW"; then
+    info "Closing port 5800 in firewall..."
+    ufw delete allow 5800/tcp >/dev/null 2>&1 || true
   fi
 fi
 

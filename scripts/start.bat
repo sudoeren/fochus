@@ -27,7 +27,7 @@ call npx prisma db push --skip-generate 2>nul
 if %ERRORLEVEL% NEQ 0 call npx prisma db push
 
 echo.
-echo   Fochus is starting at http://localhost:3001
+echo   Fochus is starting at http://localhost:5800
 echo Press Ctrl+C to stop.
 echo.
 

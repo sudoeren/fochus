@@ -105,9 +105,9 @@ cd fochus
 bash install.sh
 ```
 
-The script will build a single Docker image (backend + frontend + SQLite), start the container with auto-restart, and open port `3000`.
+The script will build a single Docker image (backend + frontend + SQLite), start the container with auto-restart, and open port `5800`.
 
-> **External access:** The app binds to `0.0.0.0:3000`. Access from anywhere on your network via `http://<server-ip>:3000`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
+> **External access:** The app binds to `0.0.0.0:5800`. Access from anywhere on your network via `http://<server-ip>:5800`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
 
 ### Uninstall
 
@@ -126,7 +126,7 @@ cp .env.example .env
 docker-compose up -d --build
 ```
 
-Open **http://localhost:3000**.
+Open **http://localhost:5800**.
 
 #### Node.js (Direct, No Docker)
 
@@ -147,7 +147,7 @@ cd backend
 cp .env.example .env
 npm install
 npx prisma db push
-npm run dev      # http://localhost:3001
+npm run dev      # http://localhost:5800
 
 # Terminal 2: Frontend
 npm install

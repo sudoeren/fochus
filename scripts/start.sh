@@ -24,8 +24,10 @@ cd "$SCRIPT_DIR/backend"
 npx prisma db push --skip-generate 2>/dev/null || npx prisma db push
 
 echo ""
-echo "  Fochus is starting at http://localhost:3001"
+echo ""
+echo "  Fochus is starting at http://localhost:5800"
 echo "Press Ctrl+C to stop."
 echo ""
 
+export PORT=5800
 exec node dist/index.js

@@ -1,5 +1,5 @@
 // API Client for Fokus Backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5800/api';
 
 import i18n from '../i18n';
 
