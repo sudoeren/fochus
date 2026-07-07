@@ -1384,13 +1384,12 @@ const AboutSection = () => {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
       {/* Hero Card */}
-      <div className="bg-zinc-900 dark:bg-black text-white rounded-[2.5rem] p-10 text-center relative overflow-hidden shadow-2xl group">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl group-hover:bg-indigo-500/40 transition-colors duration-700" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl group-hover:bg-purple-500/40 transition-colors duration-700" />
+      <div className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-[2.5rem] p-10 text-center relative overflow-hidden shadow-2xl border border-zinc-200/50 dark:border-zinc-800 group">
+        <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/20 dark:group-hover:bg-indigo-500/30 transition-colors duration-700" />
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-500/30 transition-colors duration-700" />
 
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden p-2">
+          <div className="w-20 h-20 bg-zinc-100 dark:bg-white rounded-3xl flex items-center justify-center shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden p-2">
             <img
               src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
               alt="Fochus Logo"
@@ -1398,10 +1397,10 @@ const AboutSection = () => {
             />
           </div>
           <h2 className="text-4xl font-bold tracking-tight mb-1">FOCHUS</h2>
-          <span className="text-sm font-mono text-zinc-500 dark:text-zinc-500 mb-3 block">
+          <span className="text-sm font-mono text-zinc-400 dark:text-zinc-500 mb-3 block">
             v{APP_VERSION}
           </span>
-          <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
+          <p className="text-lg text-zinc-500 dark:text-zinc-400 max-w-lg mx-auto leading-relaxed">
             {t('settings.about.desc')}
           </p>
         </div>
@@ -1414,26 +1413,26 @@ const AboutSection = () => {
           href="https://erencakar.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="relative overflow-hidden bg-zinc-900 dark:bg-black text-white p-8 rounded-[2.5rem] group hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-zinc-800 flex flex-col justify-between min-h-[180px]"
+          className="relative overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-zinc-900 dark:to-zinc-900 text-zinc-900 dark:text-white p-8 rounded-[2.5rem] group hover:scale-[1.02] transition-all duration-500 shadow-2xl border border-indigo-100 dark:border-zinc-800 flex flex-col justify-between min-h-[180px]"
         >
           {/* Background Effects */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-colors" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/30 dark:from-indigo-600/20 via-purple-200/30 dark:via-purple-600/10 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-indigo-300/30 dark:bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-400/40 dark:group-hover:bg-indigo-500/30 transition-colors" />
 
           <div className="relative z-10 flex justify-between items-start">
-            <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10 text-indigo-300">
+            <div className="p-3 bg-white/80 dark:bg-white/10 rounded-2xl shadow-sm backdrop-blur-sm border border-indigo-200 dark:border-white/10 text-indigo-600 dark:text-indigo-300">
               <Globe className="w-6 h-6" />
             </div>
-            <div className="p-2 bg-white/5 rounded-full text-white/50 group-hover:text-white group-hover:bg-white/20 transition-all">
+            <div className="p-2 bg-white/60 dark:bg-white/5 rounded-full text-indigo-400 dark:text-white/50 group-hover:text-indigo-600 dark:group-hover:text-white group-hover:bg-white dark:group-hover:bg-white/20 transition-all">
               <ChevronRight className="w-5 h-5" />
             </div>
           </div>
 
           <div className="relative z-10 mt-auto">
-            <h4 className="text-3xl font-bold tracking-tight mb-1 group-hover:text-indigo-200 transition-colors">
+            <h4 className="text-3xl font-bold tracking-tight mb-1 group-hover:text-indigo-700 dark:group-hover:text-indigo-200 transition-colors">
               Eren Çakar
             </h4>
-            <p className="text-sm text-zinc-400 font-medium tracking-wide opacity-80">
+            <p className="text-sm text-indigo-600/70 dark:text-zinc-400 font-medium tracking-wide">
               erencakar.com
             </p>
           </div>
@@ -1446,12 +1445,12 @@ const AboutSection = () => {
             href="https://github.com/sudoeren/fochus"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-6 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
+            className="flex-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 p-8 rounded-[2rem] flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 shadow-xl shadow-zinc-900/10"
           >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 dark:bg-black/10 rounded-full">
+            <div className="flex items-center gap-5">
+              <div className="p-4 bg-white/10 dark:bg-black/10 rounded-full">
                 <svg
-                  className="w-6 h-6 fill-current"
+                  className="w-8 h-8 fill-current"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -1459,13 +1458,13 @@ const AboutSection = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="font-bold text-lg">{t('settings.about.source_code')}</h4>
-                <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                <h4 className="font-bold text-xl">{t('settings.about.source_code')}</h4>
+                <p className="text-sm text-zinc-400 dark:text-zinc-500">
                   {t('settings.about.view_github')}
                 </p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 opacity-50 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="w-6 h-6 opacity-50 group-hover:translate-x-1 transition-transform" />
           </a>
         </div>
       </div>
