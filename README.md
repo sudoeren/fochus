@@ -87,7 +87,7 @@ cd fochus-win-x64
 
 No Docker, Node.js, or any other dependency required. The package includes a portable Node.js runtime, the Prisma engine, and everything needed to run Fochus immediately.
 
-> The app starts at **http://localhost:3001**. Data is stored in `data/fochus.db` next to the package.
+> The app opens in your browser. Data is stored in `data/fochus.db` next to the package.
 
 ---
 
