@@ -37,9 +37,9 @@ const calculatePasswordStrength = (
 // Password Strength Indicator Component
 const PasswordStrengthIndicator: React.FC<{
   password: string;
-  theme: string;
   t: (key: string) => string;
-}> = ({ password, theme, t }) => {
+  isDark: boolean;
+}> = ({ password, t, isDark }) => {
   const strength = useMemo(() => calculatePasswordStrength(password), [password]);
 
   if (!password) return null;
@@ -52,11 +52,7 @@ const PasswordStrengthIndicator: React.FC<{
             key={level}
             className={cn(
               'h-1 flex-1 rounded-full transition-colors',
-              level <= strength.score
-                ? strength.color
-                : theme === 'light'
-                  ? 'bg-zinc-200'
-                  : 'bg-zinc-700'
+              level <= strength.score ? strength.color : !isDark ? 'bg-zinc-200' : 'bg-zinc-700'
             )}
           />
         ))}
@@ -88,7 +84,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, isDark } = useTheme();
 
   const [formData, setFormData] = useState({
     username: '',
@@ -184,7 +180,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <span
           className={cn(
             'font-bold text-lg tracking-tight',
-            theme === 'light' ? 'text-zinc-900' : 'text-white'
+            !isDark ? 'text-zinc-900' : 'text-white'
           )}
         >
           FOCHUS
@@ -240,14 +236,14 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div
         className={cn(
           'hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12',
-          theme === 'light' ? 'bg-zinc-50' : 'bg-black'
+          !isDark ? 'bg-zinc-50' : 'bg-black'
         )}
       >
         {/* Decorative Grid Pattern */}
         <div
           className={cn(
             'absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]',
-            theme === 'light' ? 'opacity-100' : 'opacity-20'
+            !isDark ? 'opacity-100' : 'opacity-20'
           )}
         />
 
@@ -257,7 +253,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <h1
               className={cn(
                 'text-7xl font-bold tracking-tighter leading-[0.9] whitespace-pre-line',
-                theme === 'light' ? 'text-zinc-900' : 'text-white'
+                !isDark ? 'text-zinc-900' : 'text-white'
               )}
             >
               {t('login.hero_title')}
@@ -265,7 +261,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <p
               className={cn(
                 'text-xl max-w-md font-medium',
-                theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'
+                !isDark ? 'text-zinc-500' : 'text-zinc-400'
               )}
             >
               {t('login.hero_desc')}
@@ -278,7 +274,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div
               className={cn(
                 'absolute inset-0 rotate-3 rounded-3xl border opacity-50 blur-[1px]',
-                theme === 'light' ? 'bg-zinc-200 border-zinc-300' : 'bg-zinc-900 border-zinc-800'
+                !isDark ? 'bg-zinc-200 border-zinc-300' : 'bg-zinc-900 border-zinc-800'
               )}
             />
 
@@ -286,7 +282,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div
               className={cn(
                 'relative rounded-3xl p-6 border shadow-2xl backdrop-blur-sm',
-                theme === 'light' ? 'bg-white/80 border-zinc-200' : 'bg-zinc-950/80 border-zinc-800'
+                !isDark ? 'bg-white/80 border-zinc-200' : 'bg-zinc-950/80 border-zinc-800'
               )}
             >
               <div className="flex items-center justify-between mb-6">
@@ -294,26 +290,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <div
                     className={cn(
                       'w-10 h-10 rounded-xl flex items-center justify-center',
-                      theme === 'light' ? 'bg-zinc-100 text-zinc-900' : 'bg-zinc-900 text-white'
+                      !isDark ? 'bg-zinc-100 text-zinc-900' : 'bg-zinc-900 text-white'
                     )}
                   >
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
                     <div
-                      className={cn(
-                        'text-sm font-bold',
-                        theme === 'light' ? 'text-zinc-900' : 'text-white'
-                      )}
+                      className={cn('text-sm font-bold', !isDark ? 'text-zinc-900' : 'text-white')}
                     >
                       {t('login.daily_goal')}
                     </div>
-                    <div
-                      className={cn(
-                        'text-xs',
-                        theme === 'light' ? 'text-zinc-500' : 'text-zinc-400'
-                      )}
-                    >
+                    <div className={cn('text-xs', !isDark ? 'text-zinc-500' : 'text-zinc-400')}>
                       %85 {t('login.completed')}
                     </div>
                   </div>
@@ -321,7 +309,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <div
                   className={cn(
                     'text-2xl font-mono font-bold',
-                    theme === 'light' ? 'text-zinc-900' : 'text-white'
+                    !isDark ? 'text-zinc-900' : 'text-white'
                   )}
                 >
                   04:25
@@ -335,10 +323,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     className={cn(
                       'flex items-center gap-3 p-3 rounded-xl border transition-all',
                       i === 1
-                        ? theme === 'light'
+                        ? !isDark
                           ? 'bg-zinc-900 text-white border-zinc-900'
                           : 'bg-white text-zinc-900 border-white'
-                        : theme === 'light'
+                        : !isDark
                           ? 'bg-zinc-50 text-zinc-500 border-zinc-100'
                           : 'bg-zinc-900 text-zinc-500 border-zinc-800'
                     )}
@@ -347,7 +335,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       className={cn(
                         'w-5 h-5 rounded-full border-2 flex items-center justify-center',
                         i === 1
-                          ? theme === 'light'
+                          ? !isDark
                             ? 'border-white/30'
                             : 'border-zinc-900/30'
                           : 'border-current opacity-40'
@@ -369,16 +357,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <div
                 className={cn(
                   'text-3xl font-bold font-mono',
-                  theme === 'light' ? 'text-zinc-900' : 'text-white'
+                  !isDark ? 'text-zinc-900' : 'text-white'
                 )}
               >
                 12+
               </div>
               <div
-                className={cn(
-                  'text-sm font-medium',
-                  theme === 'light' ? 'text-zinc-500' : 'text-zinc-500'
-                )}
+                className={cn('text-sm font-medium', !isDark ? 'text-zinc-500' : 'text-zinc-500')}
               >
                 {t('login.stat_focus')}
               </div>
@@ -388,16 +373,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <div
                 className={cn(
                   'text-3xl font-bold font-mono',
-                  theme === 'light' ? 'text-zinc-900' : 'text-white'
+                  !isDark ? 'text-zinc-900' : 'text-white'
                 )}
               >
                 85%
               </div>
               <div
-                className={cn(
-                  'text-sm font-medium',
-                  theme === 'light' ? 'text-zinc-500' : 'text-zinc-500'
-                )}
+                className={cn('text-sm font-medium', !isDark ? 'text-zinc-500' : 'text-zinc-500')}
               >
                 {t('login.stat_efficiency')}
               </div>
@@ -410,7 +392,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div
         className={cn(
           'flex-1 flex items-center justify-center p-8 lg:p-12 relative transition-colors duration-500',
-          theme === 'light' ? 'bg-zinc-50' : 'bg-black'
+          !isDark ? 'bg-zinc-50' : 'bg-black'
         )}
       >
         {/* Subtle background effects for the form side too */}
@@ -418,13 +400,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <div
             className={cn(
               'absolute top-1/4 left-1/4 w-72 h-72 rounded-full blur-[90px] animate-pulse-slow transition-colors duration-500',
-              theme === 'light' ? 'bg-zinc-200/50' : 'bg-white/5'
+              !isDark ? 'bg-zinc-200/50' : 'bg-white/5'
             )}
           />
           <div
             className={cn(
               'absolute bottom-1/4 right-1/4 w-60 h-60 rounded-full blur-[80px] animate-pulse-slow delay-500 transition-colors duration-500',
-              theme === 'light' ? 'bg-zinc-300/50' : 'bg-zinc-700/5'
+              !isDark ? 'bg-zinc-300/50' : 'bg-zinc-700/5'
             )}
           />
         </div>
@@ -432,7 +414,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div
           className={cn(
             'w-full max-w-md relative z-10 p-6 sm:p-8 rounded-3xl shadow-xl border transition-colors duration-500',
-            theme === 'light' ? 'bg-white border-zinc-200' : 'bg-zinc-900 border-zinc-800'
+            !isDark ? 'bg-white border-zinc-200' : 'bg-zinc-900 border-zinc-800'
           )}
         >
           <div className="text-center mb-10">
@@ -440,20 +422,13 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <div
                 className={cn(
                   'h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg',
-                  theme === 'light'
-                    ? 'bg-white border border-zinc-200'
-                    : 'bg-zinc-900 border border-zinc-800'
+                  !isDark ? 'bg-white border border-zinc-200' : 'bg-zinc-900 border border-zinc-800'
                 )}
               >
                 <img src="/logo.svg" alt="Fokus Logo" className="w-12 h-12 object-contain" />
               </div>
             </div>
-            <h2
-              className={cn(
-                'text-3xl font-bold mb-2',
-                theme === 'light' ? 'text-zinc-900' : 'text-white'
-              )}
-            >
+            <h2 className={cn('text-3xl font-bold mb-2', !isDark ? 'text-zinc-900' : 'text-white')}>
               {isRegister ? t('login.new_beginning') : t('login.welcome_back')}
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400">
@@ -474,7 +449,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <label
                   className={cn(
                     'block text-sm font-medium mb-1.5',
-                    theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'
+                    !isDark ? 'text-zinc-700' : 'text-zinc-300'
                   )}
                 >
                   {t('login.name')}
@@ -487,7 +462,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     autoFocus
                     className={cn(
                       'w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all',
-                      theme === 'light'
+                      !isDark
                         ? 'bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400'
                         : 'bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10'
                     )}
@@ -505,7 +480,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <label
                   className={cn(
                     'block text-sm font-medium mb-1.5',
-                    theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'
+                    !isDark ? 'text-zinc-700' : 'text-zinc-300'
                   )}
                 >
                   {t('login.username')}
@@ -518,7 +493,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     autoFocus={isRegister}
                     className={cn(
                       'w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all',
-                      theme === 'light'
+                      !isDark
                         ? 'bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400'
                         : 'bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10'
                     )}
@@ -537,7 +512,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <label
                     className={cn(
                       'block text-sm font-medium mb-1.5',
-                      theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'
+                      !isDark ? 'text-zinc-700' : 'text-zinc-300'
                     )}
                   >
                     {t('login.password')}
@@ -550,7 +525,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       autoFocus={isRegister}
                       className={cn(
                         'w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all',
-                        theme === 'light'
+                        !isDark
                           ? 'bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400'
                           : 'bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10'
                       )}
@@ -560,7 +535,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     />
                   </div>
                   {isRegister && (
-                    <PasswordStrengthIndicator password={formData.password} theme={theme} t={t} />
+                    <PasswordStrengthIndicator password={formData.password} t={t} isDark={isDark} />
                   )}
                 </div>
 
@@ -569,7 +544,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     <label
                       className={cn(
                         'block text-sm font-medium mb-1.5',
-                        theme === 'light' ? 'text-zinc-700' : 'text-zinc-300'
+                        !isDark ? 'text-zinc-700' : 'text-zinc-300'
                       )}
                     >
                       {t('login.confirm_password')}
@@ -581,7 +556,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         required
                         className={cn(
                           'w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 outline-none transition-all',
-                          theme === 'light'
+                          !isDark
                             ? 'bg-white border-zinc-200 text-zinc-900 focus:ring-zinc-300 focus:border-zinc-400'
                             : 'bg-zinc-800 border-zinc-700 text-white focus:ring-white/20 focus:border-white/10'
                         )}
@@ -604,7 +579,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   onClick={handlePrevStep}
                   className={cn(
                     'px-6 py-3.5 rounded-xl font-medium hover:bg-zinc-300 transition-colors border',
-                    theme === 'light'
+                    !isDark
                       ? 'bg-zinc-200 text-zinc-600 border-zinc-300'
                       : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700'
                   )}
@@ -618,7 +593,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 disabled={isLoading}
                 className={cn(
                   'flex-1 py-3.5 rounded-xl font-bold transition-colors flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed border border-transparent',
-                  theme === 'light'
+                  !isDark
                     ? 'bg-zinc-900 text-white hover:bg-zinc-800 shadow-zinc-900/10'
                     : 'bg-white text-black hover:bg-zinc-200 shadow-white/10'
                 )}
@@ -648,10 +623,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-300',
                     s === step
-                      ? theme === 'light'
+                      ? !isDark
                         ? 'w-8 bg-zinc-900'
                         : 'w-8 bg-white'
-                      : theme === 'light'
+                      : !isDark
                         ? 'w-2 bg-zinc-400'
                         : 'w-2 bg-zinc-800'
                   )}
@@ -661,16 +636,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
           )}
 
           <div className="mt-6 flex items-center gap-4">
-            <div className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')} />
+            <div className={cn('h-px flex-1', !isDark ? 'bg-zinc-200' : 'bg-zinc-800')} />
             <span
               className={cn(
                 'text-xs uppercase font-medium',
-                theme === 'light' ? 'text-zinc-500' : 'text-zinc-500'
+                !isDark ? 'text-zinc-500' : 'text-zinc-500'
               )}
             >
               {t('login.or')}
             </span>
-            <div className={cn('h-px flex-1', theme === 'light' ? 'bg-zinc-200' : 'bg-zinc-800')} />
+            <div className={cn('h-px flex-1', !isDark ? 'bg-zinc-200' : 'bg-zinc-800')} />
           </div>
 
           <div className="mt-6">
@@ -680,7 +655,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 onClick={toggleMode}
                 className={cn(
                   'ml-2 font-medium hover:underline',
-                  theme === 'light' ? 'text-zinc-700' : 'text-white'
+                  !isDark ? 'text-zinc-700' : 'text-white'
                 )}
               >
                 {isRegister ? t('login.login_btn') : t('login.register_btn')}
