@@ -252,7 +252,9 @@
     "streak_days": "Bu hafta {{count}} {{unit}} aktif tamamlamanız var.",
     "days": "gün",
     "review_tasks": "Görevleri İncele",
-    "note_placeholder": "Hızlı bir not al..."
+    "note_placeholder": "Hızlı bir not al...",
+    "show_all": "Tümünü göster",
+    "show_less": "Daralt"
   },
   "trash": {
     "title": "Çöp Kutusu",

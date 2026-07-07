@@ -50,6 +50,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [weeklyFocusSeconds, setWeeklyFocusSeconds] = useState<number>(0);
 
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAllTasks, setShowAllTasks] = useState(false);
+  const [showAllNotes, setShowAllNotes] = useState(false);
 
   const getGreeting = () => {
     const h = currentTime.getHours();
@@ -114,8 +116,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return `${hours}s ${minutes}d`;
   };
 
-  const pendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 5);
-  const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 5);
+  const allPendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted);
+  const allRecentNotes = notes.filter((n) => !n.isDeleted);
+  const TASK_LIMIT = 3;
+  const NOTE_LIMIT = 2;
+  const pendingTasks = showAllTasks ? allPendingTasks : allPendingTasks.slice(0, TASK_LIMIT);
+  const recentNotes = showAllNotes ? allRecentNotes : allRecentNotes.slice(0, NOTE_LIMIT);
 
   return (
     <div className="h-full w-full relative">
@@ -268,17 +274,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     <span>
-                      {tasks.filter((t) => !t.isCompleted && !t.isDeleted).length}{' '}
-                      {t('dashboard.pending')}
+                      {allPendingTasks.length} {t('dashboard.pending')}
                     </span>
-                    <button
-                      onClick={() => onNavigate('tasks')}
-                      className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                    >
-                      {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {allPendingTasks.length > TASK_LIMIT && (
+                        <button
+                          onClick={() => setShowAllTasks(!showAllTasks)}
+                          className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                          {showAllTasks ? t('dashboard.show_less') : t('dashboard.show_all')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onNavigate('tasks')}
+                        className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      >
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -330,16 +345,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     <span>
-                      {notes.length} {t('dashboard.records')}
+                      {allRecentNotes.length} {t('dashboard.records')}
                     </span>
-                    <button
-                      onClick={() => onNavigate('notes')}
-                      className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                    >
-                      {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {allRecentNotes.length > NOTE_LIMIT && (
+                        <button
+                          onClick={() => setShowAllNotes(!showAllNotes)}
+                          className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                          {showAllNotes ? t('dashboard.show_less') : t('dashboard.show_all')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onNavigate('notes')}
+                        className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      >
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

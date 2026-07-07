@@ -252,7 +252,9 @@
     "streak_days": "You completed work on {{count}} {{unit}} this week.",
     "days": "days",
     "review_tasks": "Review Tasks",
-    "note_placeholder": "Quick note..."
+    "note_placeholder": "Quick note...",
+    "show_all": "Show all",
+    "show_less": "Show less"
   },
   "trash": {
     "title": "Trash",
