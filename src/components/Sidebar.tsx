@@ -27,7 +27,7 @@ import { useTheme } from './ThemeProvider';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 
-export type SidebarMode = 'open' | 'closed';
+export type SidebarMode = 'open' | 'hover' | 'closed';
 
 interface SidebarProps {
   activeView: string;
@@ -136,7 +136,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const cycleSidebarMode = () => {
-    onSidebarModeChange(sidebarMode === 'open' ? 'closed' : 'open');
+    const modes: SidebarMode[] = ['open', 'hover', 'closed'];
+    const idx = modes.indexOf(sidebarMode);
+    onSidebarModeChange(modes[(idx + 1) % modes.length]);
   };
 
   const mainNav = [
