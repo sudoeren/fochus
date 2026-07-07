@@ -1,5 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Clock, FileText, Flame, ListChecks } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Flame,
+  ListChecks,
+  ArrowRight
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
@@ -135,93 +143,103 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
     }
   ];
 
-  const toneClasses: Record<string, { icon: string; bar: string; soft: string }> = {
-    emerald: {
-      icon: 'text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-500/10',
-      bar: 'bg-emerald-500',
-      soft: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
-    },
-    sky: {
-      icon: 'text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-500/10',
-      bar: 'bg-sky-500',
-      soft: 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300'
-    },
-    amber: {
-      icon: 'text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-500/10',
-      bar: 'bg-amber-500',
-      soft: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'
-    },
-    rose: {
-      icon: 'text-rose-700 bg-rose-50 dark:text-rose-300 dark:bg-rose-500/10',
-      bar: 'bg-rose-500',
-      soft: 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
-    }
+  const colorMap: Record<string, { dot: string; bar: string }> = {
+    emerald: { dot: 'bg-emerald-500', bar: 'bg-emerald-400' },
+    sky: { dot: 'bg-sky-500', bar: 'bg-sky-400' },
+    amber: { dot: 'bg-amber-500', bar: 'bg-amber-400' },
+    rose: { dot: 'bg-rose-500', bar: 'bg-rose-400' }
   };
+
+  const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 4);
 
   return (
     <div className="min-h-screen px-8 py-10 lg:px-12">
-      <div className="mx-auto max-w-6xl space-y-8">
-        <header className="flex flex-col justify-between gap-5 border-b border-zinc-200 pb-8 dark:border-zinc-800 lg:flex-row lg:items-end">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-400">
-              {t('dashboard.weekly_overview')}
-            </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">
-              {t('stats.title')}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-              {t('stats.subtitle')}
-            </p>
-          </div>
-          <button
-            onClick={() => onNavigate('tasks')}
-            className="inline-flex w-fit items-center rounded-2xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-bold text-zinc-900 shadow-sm transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800"
-          >
-            {t('dashboard.review_tasks')}
-          </button>
+      <div className="mx-auto max-w-6xl space-y-10">
+        {/* Header */}
+        <header>
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-zinc-400">
+            {t('dashboard.weekly_overview')}
+          </p>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-950 dark:text-white">
+            {t('stats.title')}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+            {t('stats.subtitle')}
+          </p>
         </header>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {/* Status Cards */}
+        <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
           {cards.map((card) => {
-            const Icon = card.icon;
-            const tone = toneClasses[card.tone];
+            const color = colorMap[card.tone];
 
             return (
-              <article
+              <div
                 key={card.label}
-                className="rounded-3xl border border-zinc-200 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80"
+                className="rounded-2xl bg-white/80 dark:bg-zinc-900/80 p-5 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-                      {card.label}
-                    </p>
-                    <p className="mt-3 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
-                      {card.value}
-                    </p>
-                  </div>
-                  <div className={cn('rounded-2xl p-3', tone.icon)}>
-                    <Icon className="h-5 w-5" />
-                  </div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                    {card.label}
+                  </span>
                 </div>
-                <div className="mt-5">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+                  {card.value}
+                </div>
+                <div className="mt-4">
+                  <div className="h-1 rounded-full bg-zinc-100 dark:bg-zinc-800">
                     <div
-                      className={cn('h-full rounded-full', tone.bar)}
+                      className={cn('h-full rounded-full transition-all', color.bar)}
                       style={{ width: `${card.progress}%` }}
                     />
                   </div>
-                  <p className="mt-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {card.detail}
-                  </p>
+                  <p className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">{card.detail}</p>
                 </div>
-              </article>
+              </div>
             );
           })}
         </section>
 
+        {/* Quick Notes */}
+        {recentNotes.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                {t('dashboard.notes')}
+              </h2>
+              <button
+                onClick={() => onNavigate('notes')}
+                className="flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+              >
+                {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {recentNotes.map((note) => (
+                <button
+                  key={note.id}
+                  onClick={() => onNavigate('notes')}
+                  className="group text-left rounded-2xl bg-white/80 dark:bg-zinc-900/80 p-4 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all hover:shadow-md"
+                >
+                  <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors">
+                    {note.title || t('dashboard.untitled_note')}
+                  </h3>
+                  {note.content && (
+                    <p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2 leading-relaxed">
+                      {new DOMParser().parseFromString(note.content, 'text/html').body
+                        ?.textContent || ''}
+                    </p>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Weekly Activity + Snapshot */}
         <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">
-          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+          <div className="rounded-2xl bg-white/80 dark:bg-zinc-900/80 p-6 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-lg font-bold text-zinc-950 dark:text-white">
@@ -234,7 +252,7 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
                   })}
                 </p>
               </div>
-              <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+              <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-xs font-bold text-zinc-600 dark:text-zinc-300">
                 {stats.activeDaysThisWeek}/7
               </span>
             </div>
@@ -264,16 +282,14 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             </div>
           </div>
 
-          <div className="rounded-3xl border border-zinc-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/80">
+          <div className="rounded-2xl bg-white/80 dark:bg-zinc-900/80 p-6 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50">
             <h2 className="text-lg font-bold text-zinc-950 dark:text-white">
               {t('stats.snapshot')}
             </h2>
             <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/70">
+              <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/70 p-4">
                 <div className="flex items-center gap-3">
-                  <span className={cn('rounded-xl p-2', toneClasses.sky.soft)}>
-                    <ListChecks className="h-4 w-4" />
-                  </span>
+                  <ListChecks className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                   <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
                     {t('stats.active_tasks')}
                   </span>
@@ -283,11 +299,9 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
                 </span>
               </div>
 
-              <div className="flex items-center justify-between rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/70">
+              <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/70 p-4">
                 <div className="flex items-center gap-3">
-                  <span className={cn('rounded-xl p-2', toneClasses.amber.soft)}>
-                    <FileText className="h-4 w-4" />
-                  </span>
+                  <FileText className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                   <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
                     {t('stats.notes_total')}
                   </span>
