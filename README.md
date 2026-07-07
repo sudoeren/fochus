@@ -153,20 +153,11 @@ fochus/
 
 ## Uninstall
 
-**Portable package** — Simply delete the fochus directory.
+Delete the fochus folder (portable) or run the uninstall script (Docker).
 
-| Platform | Command |
-|----------|---------|
-| Linux / macOS | `rm -rf fochus-linux-x64` |
-| Windows | Delete the folder manually in File Explorer, or use `rmdir /s fochus-win-x64` in Command Prompt |
+**Portable** — Delete the folder you downloaded (`fochus-linux-x64` / `fochus-win-x64`).
 
-**Docker** — Run the uninstall script from a local clone:
-
-```bash
-git clone https://github.com/sudoeren/fochus.git
-cd fochus
-bash uninstall.sh
-```
+**Docker** — Clone the repo and run `bash uninstall.sh`.
 
 The script removes the container, data volume, and Docker image.
 
