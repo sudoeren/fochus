@@ -176,7 +176,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="min-h-screen flex bg-zinc-50 dark:bg-black transition-colors duration-300">
       {/* Top Left Branding */}
       <div className="absolute top-6 left-6 z-50 flex items-center gap-2">
-        <img src="/logo.svg" alt="Fochus" className="w-6 h-6" />
+        <img src={isDark ? '/logo-dark.svg' : '/logo-light.svg'} alt="Fochus" className="w-6 h-6" />
         <span
           className={cn(
             'font-bold text-lg tracking-tight',
@@ -425,7 +425,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   !isDark ? 'bg-white border border-zinc-200' : 'bg-zinc-900 border border-zinc-800'
                 )}
               >
-                <img src="/logo.svg" alt="Fokus Logo" className="w-12 h-12 object-contain" />
+                <img
+                  src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+                  alt="Fokus Logo"
+                  className="w-12 h-12 object-contain"
+                />
               </div>
             </div>
             <h2 className={cn('text-3xl font-bold mb-2', !isDark ? 'text-zinc-900' : 'text-white')}>

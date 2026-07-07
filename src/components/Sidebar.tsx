@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
+import { useTheme } from './ThemeProvider';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -50,6 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSidebarModeChange
 }) => {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -196,7 +198,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* 1. Header (Custom Logo) */}
           <div className="h-24 flex items-center justify-between px-6 shrink-0">
             <div className="flex items-center gap-3">
-              <img src="/logo.svg" alt="Fokus Logo" className="h-10 w-10 object-contain" />
+              <img
+                src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+                alt="Fokus Logo"
+                className="h-10 w-10 object-contain"
+              />
               <span className="font-bold text-xl text-zinc-900 dark:text-white tracking-tight">
                 FOCHUS
               </span>

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.svg" alt="Fochus Logo" width="120">
+  <img src="public/logo-light.svg" alt="Fochus Logo" width="120">
   <h1>Fochus</h1>
   <p>Manage Your Productivity and Focus Time</p>
 </div>

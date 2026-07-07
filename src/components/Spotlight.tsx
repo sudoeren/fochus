@@ -90,7 +90,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const listRef = useRef<HTMLDivElement>(null);
   const { tasks } = useTasks();
   const { notes } = useNotes();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, isDark } = useTheme();
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -526,7 +526,11 @@ export const Spotlight: React.FC<SpotlightProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Fochus" className="w-4 h-4" />
+            <img
+              src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+              alt="Fochus"
+              className="w-4 h-4"
+            />
             <span className="font-semibold">FOCHUS</span>
           </div>
         </div>
