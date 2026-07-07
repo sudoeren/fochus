@@ -171,11 +171,12 @@ A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for
 
 ## Uninstall
 
-**Portable package** — Simply delete the fochus directory:
+**Portable package** — Simply delete the fochus directory.
 
-```bash
-rm -rf fochus-linux-x64   # Linux / macOS
-```
+| Platform | Command |
+|----------|---------|
+| Linux / macOS | `rm -rf fochus-linux-x64` |
+| Windows | Delete the folder manually in File Explorer, or use `rmdir /s fochus-win-x64` in Command Prompt |
 
 **Docker** — Run the uninstall script from a local clone:
 
@@ -183,12 +184,6 @@ rm -rf fochus-linux-x64   # Linux / macOS
 git clone https://github.com/sudoeren/fochus.git
 cd fochus
 bash uninstall.sh
-```
-
-Or download and run it directly:
-
-```bash
-bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
 ```
 
 The script removes the container, data volume, and Docker image.
