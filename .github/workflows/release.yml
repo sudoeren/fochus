@@ -77,7 +77,7 @@ jobs:
 
       - name: Prepare package directory
         run: |
-          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+          PKG_DIR="fochus-${{ matrix.target }}"
           mkdir -p "$PKG_DIR/backend"
           cp -r backend/dist "$PKG_DIR/backend/dist"
           cp -r backend/prisma "$PKG_DIR/backend/prisma"
@@ -93,7 +93,7 @@ jobs:
 
       - name: Download and bundle portable Node.js (${{ matrix.target }})
         run: |
-          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+          PKG_DIR="fochus-${{ matrix.target }}"
           NV="${{ matrix.node_version }}"
 
           case "${{ matrix.target }}" in
@@ -122,10 +122,10 @@ jobs:
 
       - name: Package archive
         run: |
-          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
-          ARCHIVE="fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}"
+          PKG_DIR="fochus-${{ matrix.target }}"
+          ARCHIVE="fochus-${{ matrix.target }}${{ matrix.archive_ext }}"
           if [ "${{ matrix.archive_ext }}" = ".zip" ]; then
-            cd "$PKG_DIR" && zip -r "../$ARCHIVE" . && cd ..
+            zip -r "$ARCHIVE" "$PKG_DIR"
           else
             tar czf "$ARCHIVE" "$PKG_DIR"
           fi
@@ -133,8 +133,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fochus-${{ github.ref_name }}-${{ matrix.target }}
-          path: ./fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
+          name: fochus-${{ matrix.target }}
+          path: ./fochus-${{ matrix.target }}${{ matrix.archive_ext }}
           retention-days: 1
 
   release:
