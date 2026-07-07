@@ -1,6 +1,6 @@
 {
   "name": "fochus",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Kişisel üretkenlik uygulaması - Not alma, görev yönetimi ve haftalık planlama",
   "scripts": {
     "setup": "node setup.js",
