@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TaskList } from '../types';
+import { TaskList } from '../types/index';
 import { taskListsAPI, tasksAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 

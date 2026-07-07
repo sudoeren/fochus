@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check, Trash2, GripVertical } from 'lucide-react';
-import { Task } from '../types';
+import { Task } from '../types/index';
 
 interface SubTaskListProps {
   subtasks: Task[];

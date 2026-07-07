@@ -1,4 +1,4 @@
-import { Task, Note, TaskList, PomodoroSession } from '../types';
+import { Task, Note, TaskList, PomodoroSession } from '../types/index';
 
 const STORAGE_KEYS = {
   TASKS: 'fokus_tasks',
