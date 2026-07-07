@@ -20,17 +20,14 @@
 
 ## Features
 
-**Smart Notes** — Rich text editor with HTML formatting, pinning for quick access, trash system for safe deletion, and direct task linking.
-
-**Task Management** — Custom lists with color coding, recurring tasks (daily, weekly, monthly), drag-and-drop sorting, subtasks, and status tracking (pending, completed, deferred).
-
-**Pomodoro Timer** — Built-in work, short break, and long break modes with automatic session tracking and productivity history.
-
-**Spotlight Search** — Press `/` to instantly search notes, tasks, and navigate the app without lifting your hands from the keyboard.
-
-**Dark Mode** — System-aware theme with eye-friendly dark mode and a clean light mode. Toggle manually or follow system preferences.
-
-**Docker Ready** — Single-command deployment with embedded SQLite. No external database required.
+| | |
+|---|---|
+| **Smart Notes** | Rich text editor with HTML formatting, pinning for quick access, trash system for safe deletion, and direct task linking. |
+| **Task Management** | Custom lists with color coding, recurring tasks, drag-and-drop sorting, subtasks, and status tracking. |
+| **Pomodoro Timer** | Built-in work, short break, and long break modes with automatic session tracking and productivity history. |
+| **Spotlight Search** | Press `/` to instantly search notes, tasks, and navigate the app without leaving the keyboard. |
+| **Dark Mode** | System-aware theme with an eye-friendly dark mode and a clean light mode. Toggle manually or follow system preferences. |
+| **Docker Ready** | Single-command deployment with embedded SQLite. No external database required. |
 
 ---
 
