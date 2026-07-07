@@ -8,11 +8,17 @@ const router = Router();
 // All routes require authentication
 router.use(authenticate);
 
-// Validation Schema
+// Validation Schemas
 const noteSchema = z.object({
   title: z.string().min(1, 'Başlık gerekli'),
   content: z.string().optional().default(''),
   isPinned: z.boolean().optional().default(false)
+});
+
+const noteUpdateSchema = z.object({
+  title: z.string().min(1, 'Başlık gerekli').optional(),
+  content: z.string().optional(),
+  isPinned: z.boolean().optional()
 });
 
 // GET /api/notes - Get all notes
@@ -110,7 +116,14 @@ router.put('/:id', async (req: AuthRequest, res: Response, next: NextFunction) =
       return res.status(404).json({ error: 'Not bulunamadı' });
     }
 
-    const { title, content, isPinned } = req.body;
+    const validation = noteUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: validation.error.issues[0].message 
+      });
+    }
+
+    const { title, content, isPinned } = validation.data;
 
     const note = await prisma.note.update({
       where: { id: req.params.id },
