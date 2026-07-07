@@ -20,18 +20,16 @@ fi
 
 cd "$SCRIPT_DIR/backend"
 
-# Sync database schema (use local Prisma, not npx to avoid pulling latest)
+# Sync database schema (use local Prisma)
 ./node_modules/.bin/prisma db push --skip-generate 2>/dev/null || ./node_modules/.bin/prisma db push
 
-echo ""
-echo ""
-echo "  Fochus is starting at http://localhost:5800"
-echo "Press Ctrl+C to stop."
-echo ""
-
+# Start server in background
 export PORT=5800
-node --env-file="$SCRIPT_DIR/backend/.env" dist/index.js &
-PID=$!
+nohup node --env-file="$SCRIPT_DIR/backend/.env" dist/index.js > "$SCRIPT_DIR/fochus.log" 2>&1 &
+echo $! > "$SCRIPT_DIR/fochus.pid"
+
+echo ""
 echo "  Fochus is running at http://localhost:5800"
-echo "  Press Ctrl+C to stop."
-wait $PID
+echo ""
+echo "  To stop: run ./stop.sh or kill \$(cat $SCRIPT_DIR/fochus.pid)"
+echo ""

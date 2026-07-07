@@ -22,17 +22,16 @@ if not exist "%SCRIPT_DIR%\backend\.env" (
 
 cd /d "%SCRIPT_DIR%\backend"
 
-:: Sync database schema (use local Prisma, not npx to avoid pulling latest)
+:: Sync database schema (use local Prisma)
 call .\node_modules\.bin\prisma db push --skip-generate 2>nul
 if %ERRORLEVEL% NEQ 0 call .\node_modules\.bin\prisma db push
 
-echo.
+:: Start server in background
 set PORT=5800
-start /B "" node dist/index.js
+start /B "" node dist/index.js > "%SCRIPT_DIR%\fochus.log" 2>&1
 
 echo.
 echo   Fochus is running at http://localhost:5800
-echo Press Ctrl+C to stop.
 echo.
-
-pause
+echo   To stop: delete the fochus folder or close the terminal.
+echo.

@@ -100,6 +100,8 @@ jobs:
           cp -r dist/* "$PKG_DIR/backend/public/"
           cp scripts/start.sh "$PKG_DIR/start.sh"
           chmod +x "$PKG_DIR/start.sh"
+          cp scripts/stop.sh "$PKG_DIR/stop.sh"
+          chmod +x "$PKG_DIR/stop.sh"
           cp scripts/uninstall.sh "$PKG_DIR/uninstall.sh"
           chmod +x "$PKG_DIR/uninstall.sh"
           if [ "${{ matrix.target }}" = "win-x64" ]; then
