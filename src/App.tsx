@@ -142,6 +142,7 @@ const App: React.FC = () => {
   }, []);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
+  const [noteEditorPrevView, setNoteEditorPrevView] = useState<string>('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
   const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -396,7 +397,7 @@ const App: React.FC = () => {
             key={editingNoteId}
             noteId={editingNoteId}
             onBack={() => {
-              handleNavigate('dashboard');
+              handleNavigate(noteEditorPrevView);
               setEditingNoteId(undefined);
             }}
           />
@@ -409,6 +410,7 @@ const App: React.FC = () => {
             onOpenNoteModal={() => handleOpenModal('note')}
             onEditNote={(id) => {
               setEditingNoteId(id);
+              setNoteEditorPrevView('notes');
               handleNavigate('note-editor');
             }}
           />
@@ -564,6 +566,7 @@ const App: React.FC = () => {
           onClose={handleCloseModal}
           onExpand={(id) => {
             setEditingNoteId(id);
+            setNoteEditorPrevView('dashboard');
             handleNavigate('note-editor');
           }}
         />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Pin, Calendar, Trash2, FileText } from 'lucide-react';
+import { Plus, Search, Pin, Trash2, FileText } from 'lucide-react';
 import { useNotes } from '../hooks/useNotes';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -25,73 +25,65 @@ export const Notes: React.FC<NotesProps> = ({ onOpenNoteModal, onEditNote }) => 
   const pinnedNotes = filteredNotes.filter((n) => n.isPinned);
   const otherNotes = filteredNotes.filter((n) => !n.isPinned);
 
-  // Masonry Card Component
   const NoteCard = ({ note }: { note: Note }) => (
     <div
       onClick={() => onEditNote(note.id)}
-      className="group relative flex flex-col mb-6 break-inside-avoid bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+      className="group relative flex flex-col mb-4 break-inside-avoid bg-white/80 dark:bg-zinc-900/80 rounded-2xl p-5 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50 hover:shadow-md hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all cursor-pointer"
     >
-      {/* Pin Badge */}
-      {note.isPinned && (
-        <div className="absolute top-4 right-4 text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-1.5 rounded-full">
-          <Pin className="w-3.5 h-3.5 fill-current" />
-        </div>
-      )}
+      {note.isPinned && <Pin className="absolute top-4 right-4 w-3.5 h-3.5 text-amber-500" />}
 
-      {/* Title */}
       <h3
         className={cn(
-          'font-bold text-lg text-zinc-900 dark:text-zinc-100 mb-3 leading-tight',
-          note.isPinned && 'pr-8'
+          'font-bold text-zinc-900 dark:text-zinc-100 mb-2 leading-tight',
+          note.isPinned ? 'pr-8 text-base' : 'text-[15px]'
         )}
       >
         {note.title}
       </h3>
 
-      {/* Content Preview */}
-      <div className="mb-4 relative">
-        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-words font-medium line-clamp-[8]">
-          {note.content}
-        </p>
-        {!note.content && <p className="text-sm text-zinc-400 italic">{t('notes.no_content')}</p>}
+      <div className="mb-3">
+        {note.content ? (
+          <p className="text-sm leading-relaxed text-zinc-500 dark:text-zinc-400 whitespace-pre-wrap break-words line-clamp-[6]">
+            {note.content}
+          </p>
+        ) : (
+          <p className="text-sm text-zinc-300 dark:text-zinc-600 italic">{t('notes.no_content')}</p>
+        )}
       </div>
 
-      {/* Footer */}
-      <div className="mt-auto pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-          <Calendar className="w-3 h-3" />
+      <div className="mt-auto flex items-center justify-between">
+        <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
           {new Date(note.createdAt).toLocaleDateString(i18n.language, {
             day: 'numeric',
             month: 'long'
           })}
-        </div>
+        </span>
 
-        {/* Actions - Visible on Hover */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={(e) => {
               e.stopPropagation();
               pinNote(note.id, !note.isPinned);
             }}
             className={cn(
-              'p-2 rounded-xl transition-colors',
+              'p-1.5 rounded-lg transition-colors',
               note.isPinned
-                ? 'text-amber-500 bg-amber-50 dark:bg-amber-900/20'
-                : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                ? 'text-amber-500'
+                : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300'
             )}
             title={note.isPinned ? t('notes.unpin') : t('notes.pin')}
           >
-            <Pin className="w-4 h-4" />
+            <Pin className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               if (confirm(t('notes.confirm_delete'))) deleteNote(note.id);
             }}
-            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 transition-colors"
             title={t('common.delete')}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
