@@ -88,8 +88,11 @@ jobs:
           cp -r dist/* "$PKG_DIR/backend/public/"
           cp scripts/start.sh "$PKG_DIR/start.sh"
           chmod +x "$PKG_DIR/start.sh"
+          cp scripts/uninstall.sh "$PKG_DIR/uninstall.sh"
+          chmod +x "$PKG_DIR/uninstall.sh"
           if [ "${{ matrix.target }}" = "win-x64" ]; then
             cp scripts/start.bat "$PKG_DIR/start.bat"
+            cp scripts/uninstall.bat "$PKG_DIR/uninstall.bat"
           fi
 
       - name: Download and bundle portable Node.js (${{ matrix.target }})

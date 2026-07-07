@@ -88,16 +88,6 @@ cd fochus-win-x64
 
 ## Other Ways to Run
 
-### Docker (Linux)
-
-```bash
-git clone https://github.com/sudoeren/fochus.git
-cd fochus
-bash install.sh
-```
-
-This builds a single Docker image and starts the container with auto-restart on port `5800`.
-
 ### Docker Compose
 
 ```bash
@@ -153,13 +143,24 @@ fochus/
 
 ## Uninstall
 
-Delete the fochus folder (portable) or run the uninstall script (Docker).
+Delete everything with a single command.
 
-**Portable** — Delete the folder you downloaded (`fochus-linux-x64` / `fochus-win-x64`).
+**Portable** — Inside the fochus folder, run:
 
-**Docker** — Clone the repo and run `bash uninstall.sh`.
+```bash
+./uninstall.sh      # Linux / macOS
+.\uninstall.bat     # Windows
+```
 
-The script removes the container, data volume, and Docker image.
+This removes your data and the entire folder.
+
+**Docker Compose** — Inside your repo clone, run:
+
+```bash
+bash uninstall.sh
+```
+
+This stops the container, removes the image, and deletes the data volume.
 
 ---
 
