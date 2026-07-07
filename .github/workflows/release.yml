@@ -50,7 +50,7 @@ jobs:
           VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Install backend dependencies
-        run: cd backend && npm ci
+        run: cd backend && npm ci --omit=optional
 
       - name: Build backend
         run: cd backend && npm run build
@@ -63,16 +63,30 @@ jobs:
 
       - name: Prune unnecessary files
         run: |
-          # Remove Prisma engines for other platforms (keep only linux for the runner)
+          # Remove Prisma engines for other platforms
           rm -rf backend/node_modules/@prisma/engines/*darwin* \
                  backend/node_modules/@prisma/engines/*windows* \
-                 backend/node_modules/@prisma/engines/*freebsd* 2>/dev/null || true
-          # Remove documentation and unnecessary files from node_modules
+                 backend/node_modules/@prisma/engines/*freebsd* \
+                 backend/node_modules/@prisma/engines/*debian* 2>/dev/null || true
+          # Remove TypeScript source files, source maps, and tests from node_modules
+          find backend/node_modules -type f -name "*.ts" -not -path "*.d.ts" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "*.map" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "*.spec.*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "*.test.*" -delete 2>/dev/null || true
+          find backend/node_modules -type d -name "test" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type d -name "__tests__" -exec rm -rf {} + 2>/dev/null || true
+          # Remove docs and metadata
           find backend/node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
           find backend/node_modules -type d -name "doc" -exec rm -rf {} + 2>/dev/null || true
           find backend/node_modules -type f -name "*.md" -delete 2>/dev/null || true
           find backend/node_modules -type f -name "CHANGELOG*" -delete 2>/dev/null || true
           find backend/node_modules -type f -name "LICENSE*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "AUTHORS*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "PATENTS*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "NOTICE*" -delete 2>/dev/null || true
+          # Remove empty directories
+          find backend/node_modules -type d -empty -delete 2>/dev/null || true
 
       - name: Prepare package directory
         run: |
