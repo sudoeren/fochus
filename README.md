@@ -20,8 +20,7 @@
 
 ## Features
 
-| | |
-|---|---|
+| --- | --- |
 | **Smart Notes** | Rich text editor with HTML formatting, pinning for quick access, trash system for safe deletion, and direct task linking. |
 | **Task Management** | Custom lists with color coding, recurring tasks, drag-and-drop sorting, subtasks, and status tracking. |
 | **Pomodoro Timer** | Built-in work, short break, and long break modes with automatic session tracking and productivity history. |
