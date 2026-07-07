@@ -30,4 +30,4 @@ echo "Press Ctrl+C to stop."
 echo ""
 
 export PORT=5800
-exec node dist/index.js
+exec node --env-file="$SCRIPT_DIR/backend/.env" dist/index.js

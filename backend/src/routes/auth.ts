@@ -31,10 +31,10 @@ const loginSchema = z.object({
 
 // Generate JWT
 const generateToken = (userId: string, username: string): string => {
-  if (!process.env.JWT_SECRET) {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
     throw new Error('JWT_SECRET ortam değişkeni tanımlanmamış!');
   }
-  const secret = process.env.JWT_SECRET;
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   return jwt.sign({ userId, username }, secret, { expiresIn: expiresIn as any });
 };
