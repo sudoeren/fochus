@@ -57,6 +57,24 @@ jobs:
       - name: Generate Prisma client
         run: cd backend && npx prisma generate
 
+      - name: Strip dev dependencies
+        run: cd backend && npm prune --omit=dev
+
+      - name: Prune unnecessary files
+        run: |
+          # Remove Prisma engines for other platforms (keep only linux for the runner)
+          rm -rf backend/node_modules/@prisma/engines/*darwin* \
+                 backend/node_modules/@prisma/engines/*windows* \
+                 backend/node_modules/@prisma/engines/*freebsd* 2>/dev/null || true
+          # Remove Prisma CLI (not needed at runtime)
+          rm -rf backend/node_modules/prisma 2>/dev/null || true
+          # Remove documentation and unnecessary files from node_modules
+          find backend/node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type d -name "doc" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type f -name "*.md" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "CHANGELOG*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "LICENSE*" -delete 2>/dev/null || true
+
       - name: Prepare package directory
         run: |
           PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
