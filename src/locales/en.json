@@ -251,7 +251,8 @@
     "overdue": "Overdue",
     "streak_days": "You completed work on {{count}} {{unit}} this week.",
     "days": "days",
-    "review_tasks": "Review Tasks"
+    "review_tasks": "Review Tasks",
+    "note_placeholder": "Quick note..."
   },
   "trash": {
     "title": "Trash",

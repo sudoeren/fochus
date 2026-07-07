@@ -1,13 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  FileText,
-  Flame,
-  ListChecks,
-  ArrowRight
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, FileText, Flame, ListChecks } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTasks } from '../hooks/useTasks';
 import { useNotes } from '../hooks/useNotes';
@@ -28,7 +20,9 @@ const formatFocusDuration = (seconds: number, language: string) => {
   return `${hours}${hourSuffix} ${minutes}${minuteSuffix}`;
 };
 
-export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavigate }) => {
+export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({
+  onNavigate: _onNavigate
+}) => {
   const { t, i18n } = useTranslation();
   const { tasks } = useTasks();
   const { notes } = useNotes();
@@ -150,8 +144,6 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
     rose: { dot: 'bg-rose-500', bar: 'bg-rose-400' }
   };
 
-  const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 4);
-
   return (
     <div className="min-h-screen px-8 py-10 lg:px-12">
       <div className="mx-auto max-w-6xl space-y-10">
@@ -199,43 +191,6 @@ export const Stats: React.FC<{ onNavigate: (view: string) => void }> = ({ onNavi
             );
           })}
         </section>
-
-        {/* Quick Notes */}
-        {recentNotes.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                {t('dashboard.notes')}
-              </h2>
-              <button
-                onClick={() => onNavigate('notes')}
-                className="flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-              >
-                {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {recentNotes.map((note) => (
-                <button
-                  key={note.id}
-                  onClick={() => onNavigate('notes')}
-                  className="group text-left rounded-2xl bg-white/80 dark:bg-zinc-900/80 p-4 shadow-sm ring-1 ring-zinc-200/50 dark:ring-zinc-800/50 hover:ring-zinc-300 dark:hover:ring-zinc-700 transition-all hover:shadow-md"
-                >
-                  <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate group-hover:text-zinc-950 dark:group-hover:text-white transition-colors">
-                    {note.title || t('dashboard.untitled_note')}
-                  </h3>
-                  {note.content && (
-                    <p className="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500 line-clamp-2 leading-relaxed">
-                      {new DOMParser().parseFromString(note.content, 'text/html').body
-                        ?.textContent || ''}
-                    </p>
-                  )}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Weekly Activity + Snapshot */}
         <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.4fr_0.8fr]">

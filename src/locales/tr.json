@@ -251,7 +251,8 @@
     "overdue": "Geciken",
     "streak_days": "Bu hafta {{count}} {{unit}} aktif tamamlamanız var.",
     "days": "gün",
-    "review_tasks": "Görevleri İncele"
+    "review_tasks": "Görevleri İncele",
+    "note_placeholder": "Hızlı bir not al..."
   },
   "trash": {
     "title": "Çöp Kutusu",
