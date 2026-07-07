@@ -1339,6 +1339,8 @@ const DataSection = () => {
 };
 
 // 5. About Section (Restored - Colorful & Vibrant)
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.1.9';
+
 const AboutSection = () => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
@@ -1394,7 +1396,10 @@ const AboutSection = () => {
               className="w-full h-full object-contain"
             />
           </div>
-          <h2 className="text-4xl font-bold tracking-tight mb-3">FOCHUS</h2>
+          <h2 className="text-4xl font-bold tracking-tight mb-1">FOCHUS</h2>
+          <span className="text-sm font-mono text-zinc-500 dark:text-zinc-500 mb-3 block">
+            v{APP_VERSION}
+          </span>
           <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
             {t('settings.about.desc')}
           </p>

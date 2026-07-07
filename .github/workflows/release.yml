@@ -47,6 +47,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: /api
+          VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Install backend dependencies
         run: cd backend && npm ci
