@@ -20,8 +20,8 @@ fi
 
 cd "$SCRIPT_DIR/backend"
 
-# Sync database schema
-npx prisma db push --skip-generate 2>/dev/null || npx prisma db push
+# Sync database schema (use local Prisma, not npx to avoid pulling latest)
+./node_modules/.bin/prisma db push --skip-generate 2>/dev/null || ./node_modules/.bin/prisma db push
 
 echo ""
 echo ""

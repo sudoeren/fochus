@@ -22,9 +22,9 @@ if not exist "%SCRIPT_DIR%\backend\.env" (
 
 cd /d "%SCRIPT_DIR%\backend"
 
-:: Sync database schema
-call npx prisma db push --skip-generate 2>nul
-if %ERRORLEVEL% NEQ 0 call npx prisma db push
+:: Sync database schema (use local Prisma, not npx to avoid pulling latest)
+call .\node_modules\.bin\prisma db push --skip-generate 2>nul
+if %ERRORLEVEL% NEQ 0 call .\node_modules\.bin\prisma db push
 
 echo.
 echo   Fochus is starting at http://localhost:5800
