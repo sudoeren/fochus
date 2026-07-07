@@ -207,6 +207,8 @@
     "settings": "Ayarlar",
     "trash": "Çöp Kutusu",
     "up_next": "Sırada",
+    "completed": "Tamamlanan",
+    "completed_empty": "Henüz tamamlanan görev yok",
     "all_done": "Her şey tamam!",
     "focus_timer": "FOCUS TIMER",
     "start": "Başlat",

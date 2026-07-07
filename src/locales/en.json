@@ -207,6 +207,8 @@
     "settings": "Settings",
     "trash": "Trash",
     "up_next": "Up Next",
+    "completed": "Completed",
+    "completed_empty": "No completed tasks yet",
     "all_done": "All done!",
     "focus_timer": "FOCUS TIMER",
     "start": "Start",

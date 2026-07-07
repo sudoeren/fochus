@@ -14,7 +14,9 @@ import {
   Briefcase,
   ChevronRight,
   CheckCircle2,
+  Check,
   Circle,
+  X,
   Zap,
   PanelLeftClose,
   PanelLeft,
@@ -55,6 +57,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [dismissedCompleted, setDismissedCompleted] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('sidebar_dismissed_completed');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const dismissCompleted = (id: string) => {
+    setDismissedCompleted((prev) => {
+      const next = [...prev, id];
+      localStorage.setItem('sidebar_dismissed_completed', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const completedTasks = tasks
+    .filter((t) => t.isCompleted && !t.isDeleted && !dismissedCompleted.includes(t.id))
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt || b.createdAt).getTime() -
+        new Date(a.updatedAt || a.createdAt).getTime()
+    )
+    .slice(0, 2);
 
   // On mobile we don't have true hover; always show the full sidebar when opened.
   const isCompact = sidebarMode === 'hover' && !isHovered && !mobileOpen;
@@ -97,8 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'notes', label: t('sidebar.notes'), icon: FileText }
   ];
 
-  // Filter pending tasks for the widget (Show top 4)
-  const currentTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 4);
+  const pendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 5);
 
   const renderModeIcon = (className: string) => {
     switch (sidebarMode) {
@@ -437,25 +463,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  {currentTasks.length > 0 ? (
+
+                  {pendingTasks.length > 0 ? (
+                    <>
+                      <ul className="space-y-2">
+                        {pendingTasks.map((task) => (
+                          <li key={task.id} className="flex items-start gap-3 group">
+                            <button
+                              onClick={() => toggleTask(task.id)}
+                              className="mt-0.5 text-zinc-300 hover:text-indigo-500 transition-colors shrink-0"
+                            >
+                              <Circle className="w-4 h-4" />
+                            </button>
+                            <span
+                              className={cn(
+                                'text-xs font-medium text-zinc-700 dark:text-zinc-300 line-clamp-2 leading-relaxed cursor-pointer transition-all hover:text-indigo-600 dark:hover:text-indigo-400',
+                                task.isCompleted && 'line-through text-zinc-400'
+                              )}
+                              onClick={() => toggleTask(task.id)}
+                            >
+                              {task.title}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {completedTasks.length > 0 && (
+                        <>
+                          <div className="border-t border-zinc-100 dark:border-zinc-800" />
+                          <ul className="space-y-2">
+                            {completedTasks.map((task) => (
+                              <li key={task.id} className="flex items-center gap-3 group">
+                                <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                                <span className="flex-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 line-through truncate">
+                                  {task.title}
+                                </span>
+                                <button
+                                  onClick={() => dismissCompleted(task.id)}
+                                  className="p-1 rounded-md text-zinc-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
+                    </>
+                  ) : completedTasks.length > 0 ? (
                     <ul className="space-y-2">
-                      {currentTasks.map((task) => (
-                        <li key={task.id} className="flex items-start gap-3 group">
-                          <button
-                            onClick={() => toggleTask(task.id)}
-                            className="mt-0.5 text-zinc-300 hover:text-indigo-500 transition-colors"
-                          >
-                            <Circle className="w-4 h-4" />
-                          </button>
-                          <span
-                            className={cn(
-                              'text-xs font-medium text-zinc-700 dark:text-zinc-300 line-clamp-2 leading-relaxed cursor-pointer transition-all hover:text-indigo-600 dark:hover:text-indigo-400',
-                              task.isCompleted && 'line-through text-zinc-400'
-                            )}
-                            onClick={() => toggleTask(task.id)}
-                          >
+                      {completedTasks.map((task) => (
+                        <li key={task.id} className="flex items-center gap-3 group">
+                          <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                          <span className="flex-1 text-xs font-medium text-zinc-400 dark:text-zinc-500 line-through truncate">
                             {task.title}
                           </span>
+                          <button
+                            onClick={() => dismissCompleted(task.id)}
+                            className="p-1 rounded-md text-zinc-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
                         </li>
                       ))}
                     </ul>
