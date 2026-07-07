@@ -185,6 +185,35 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// PUT /api/tasks/reorder - Reorder tasks
+router.put('/reorder', async (req: AuthRequest, res: Response) => {
+  try {
+    const { taskIds } = req.body;
+
+    if (!Array.isArray(taskIds)) {
+      return res.status(400).json({ error: 'taskIds dizisi gerekli' });
+    }
+
+    // Update order for each task
+    await Promise.all(
+      taskIds.map((id: string, index: number) =>
+        prisma.task.updateMany({
+          where: {
+            id,
+            userId: req.user!.id
+          },
+          data: { order: index }
+        })
+      )
+    );
+
+    res.json({ message: 'Sıralama güncellendi' });
+  } catch (error) {
+    console.error('Reorder tasks error:', error);
+    res.status(500).json({ error: 'Sıralama güncellenirken bir hata oluştu' });
+  }
+});
+
 // PUT /api/tasks/:id - Update task
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
@@ -383,35 +412,6 @@ router.post('/:id/subtasks', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Create subtask error:', error);
     res.status(500).json({ error: 'Alt görev oluşturulurken bir hata oluştu' });
-  }
-});
-
-// PUT /api/tasks/reorder - Reorder tasks
-router.put('/reorder', async (req: AuthRequest, res: Response) => {
-  try {
-    const { taskIds } = req.body;
-
-    if (!Array.isArray(taskIds)) {
-      return res.status(400).json({ error: 'taskIds dizisi gerekli' });
-    }
-
-    // Update order for each task
-    await Promise.all(
-      taskIds.map((id: string, index: number) =>
-        prisma.task.updateMany({
-          where: {
-            id,
-            userId: req.user!.id
-          },
-          data: { order: index }
-        })
-      )
-    );
-
-    res.json({ message: 'Sıralama güncellendi' });
-  } catch (error) {
-    console.error('Reorder tasks error:', error);
-    res.status(500).json({ error: 'Sıralama güncellenirken bir hata oluştu' });
   }
 });
 

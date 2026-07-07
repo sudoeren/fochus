@@ -110,6 +110,34 @@ router.post('/', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// PUT /api/task-lists/reorder - Reorder lists
+router.put('/reorder', async (req: AuthRequest, res: Response) => {
+  try {
+    const { listIds } = req.body;
+
+    if (!Array.isArray(listIds)) {
+      return res.status(400).json({ error: 'listIds dizisi gerekli' });
+    }
+
+    await Promise.all(
+      listIds.map((id: string, index: number) =>
+        prisma.taskList.updateMany({
+          where: {
+            id,
+            userId: req.user!.id
+          },
+          data: { order: index }
+        })
+      )
+    );
+
+    res.json({ message: 'Sıralama güncellendi' });
+  } catch (error) {
+    console.error('Reorder lists error:', error);
+    res.status(500).json({ error: 'Sıralama güncellenirken bir hata oluştu' });
+  }
+});
+
 // PUT /api/task-lists/:id - Update task list
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
@@ -147,34 +175,6 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   } catch (error) {
     console.error('Update task list error:', error);
     res.status(500).json({ error: 'Liste güncellenirken bir hata oluştu' });
-  }
-});
-
-// PUT /api/task-lists/reorder - Reorder lists
-router.put('/reorder', async (req: AuthRequest, res: Response) => {
-  try {
-    const { listIds } = req.body;
-
-    if (!Array.isArray(listIds)) {
-      return res.status(400).json({ error: 'listIds dizisi gerekli' });
-    }
-
-    await Promise.all(
-      listIds.map((id: string, index: number) =>
-        prisma.taskList.updateMany({
-          where: {
-            id,
-            userId: req.user!.id
-          },
-          data: { order: index }
-        })
-      )
-    );
-
-    res.json({ message: 'Sıralama güncellendi' });
-  } catch (error) {
-    console.error('Reorder lists error:', error);
-    res.status(500).json({ error: 'Sıralama güncellenirken bir hata oluştu' });
   }
 });
 
