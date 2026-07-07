@@ -364,7 +364,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       className={cn(
                         'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                         active
-                          ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/40 font-semibold'
+                          ? 'text-zinc-900 dark:text-white bg-zinc-200/80 dark:bg-zinc-800/80 font-semibold'
                           : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
                       )}
                     >
@@ -372,7 +372,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         className={cn(
                           'w-5 h-5 shrink-0 transition-all',
                           active
-                            ? 'text-indigo-500 dark:text-indigo-400'
+                            ? 'text-zinc-900 dark:text-white'
                             : 'text-zinc-400 group-hover:text-zinc-600'
                         )}
                       />
@@ -393,7 +393,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                     activeView === 'settings'
-                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/40 font-semibold'
+                      ? 'text-zinc-900 dark:text-white bg-zinc-200/80 dark:bg-zinc-800/80 font-semibold'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
                   )}
                 >
@@ -401,7 +401,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       'w-5 h-5 shrink-0 transition-all',
                       activeView === 'settings'
-                        ? 'text-indigo-500 dark:text-indigo-400'
+                        ? 'text-zinc-900 dark:text-white'
                         : 'text-zinc-400 group-hover:text-zinc-600'
                     )}
                   />
@@ -416,7 +416,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden',
                     activeView === 'trash'
-                      ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/40 font-semibold'
+                      ? 'text-zinc-900 dark:text-white bg-zinc-200/80 dark:bg-zinc-800/80 font-semibold'
                       : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-900/50'
                   )}
                 >
@@ -424,7 +424,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     className={cn(
                       'w-5 h-5 shrink-0 transition-all',
                       activeView === 'trash'
-                        ? 'text-indigo-500 dark:text-indigo-400'
+                        ? 'text-zinc-900 dark:text-white'
                         : 'text-zinc-400 group-hover:text-zinc-600'
                     )}
                   />
