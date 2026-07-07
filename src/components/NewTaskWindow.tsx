@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Calendar, Flag, CheckCircle2, ListTodo, Clock } from 'lucide-react';
+import { X, Calendar, Flag, ListTodo } from 'lucide-react';
 import { Task } from '../types/index';
 import { useTasks } from '../hooks/useTasks';
 import { useTaskLists } from '../hooks/useTaskLists';
@@ -27,7 +27,6 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
   const [isPinned, setIsPinned] = useState(initialData?.isPinned || false);
   const [listId, setListId] = useState<string | null>(initialData?.listId || null);
 
-  // Focus title on open
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
@@ -62,7 +61,6 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
     }
   }, [title, description, dueDate, isPinned, listId, initialData, updateTask, addTask, onClose]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -92,37 +90,34 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
       aria-labelledby="task-modal-title"
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-lg transform rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl transition-all flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-lg transform rounded-2xl bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl shadow-xl shadow-black/5 dark:shadow-black/20 transition-all flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+        <div className="flex items-center justify-between px-6 pt-6 pb-2">
           <h2
             id="task-modal-title"
-            className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2"
+            className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2.5"
           >
-            <div className="w-2 h-2 rounded-full bg-blue-500" aria-hidden="true" />
+            <span className="w-2 h-2 rounded-full bg-blue-500" aria-hidden="true" />
             {initialData?.id ? t('tasks.edit_task') : t('tasks.new_task')}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label={t('common.close')}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6">
+        <div className="px-6 pt-4 pb-2 space-y-5">
           {/* Title Input */}
-          <div className="space-y-2">
-            <label htmlFor="task-title" className="sr-only">
-              {t('tasks.title_placeholder')}
-            </label>
+          <div>
             <input
               ref={titleInputRef}
               id="task-title"
@@ -130,39 +125,36 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
               placeholder={t('tasks.title_placeholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-2xl font-semibold bg-transparent border-none placeholder-zinc-400 dark:placeholder-zinc-600 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 px-0 py-1"
+              className="w-full text-[28px] font-semibold bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-600 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-0 px-0 py-1 tracking-tight"
             />
           </div>
 
           {/* Description Input */}
-          <div className="space-y-2">
-            <label htmlFor="task-desc" className="sr-only">
-              {t('tasks.desc_placeholder')}
-            </label>
+          <div>
             <textarea
               id="task-desc"
               placeholder={t('tasks.desc_placeholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full min-h-[100px] text-base resize-none bg-transparent border-none placeholder-zinc-400 dark:placeholder-zinc-600 text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-0 px-0 py-1"
+              className="w-full min-h-[80px] text-sm resize-none bg-transparent border-none placeholder-zinc-300 dark:placeholder-zinc-600 text-zinc-500 dark:text-zinc-400 focus:outline-none focus:ring-0 px-0 py-1 leading-relaxed"
             />
           </div>
 
           {/* Metadata Toolbar */}
-          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex flex-wrap items-center gap-2 pt-3">
             {/* Date Picker */}
             <div className="relative">
               <button
                 onClick={() => dateInputRef.current?.showPicker()}
                 className={clsx(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
                   dueDate
-                    ? 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
-                    : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 ring-1 ring-blue-200 dark:ring-blue-800/50'
+                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 )}
                 aria-label={t('tasks.date')}
               >
-                <Calendar size={16} aria-hidden="true" />
+                <Calendar size={14} />
                 {dueDate
                   ? new Date(dueDate).toLocaleDateString(
                       i18n.language === 'tr' ? 'tr-TR' : 'en-US',
@@ -187,29 +179,27 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
             <button
               onClick={() => setIsPinned(!isPinned)}
               className={clsx(
-                'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500',
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
                 isPinned
-                  ? 'bg-yellow-50 text-yellow-600 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
-                  : 'bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                  ? 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/40 ring-1 ring-yellow-200 dark:ring-yellow-800/50'
+                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800'
               )}
               aria-pressed={isPinned}
               aria-label={t('tasks.priority')}
             >
-              <Flag size={16} className={isPinned ? 'fill-current' : ''} aria-hidden="true" />
+              <Flag size={14} className={isPinned ? 'fill-current' : ''} />
               {isPinned ? t('tasks.prioritized') : t('tasks.priority')}
             </button>
 
-            <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700 mx-1" aria-hidden="true" />
-
             {/* List Selector */}
-            <div className="relative flex-1 sm:flex-none">
+            <div className="relative ml-auto">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <ListTodo size={16} className="text-zinc-400" />
+                <ListTodo size={14} className="text-zinc-400" />
               </div>
               <select
                 value={listId || ''}
                 onChange={(e) => setListId(e.target.value || null)}
-                className="w-full pl-9 pr-8 py-2 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none appearance-none cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                className="pl-8 pr-7 py-1.5 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 rounded-full text-xs font-medium ring-1 ring-transparent hover:ring-zinc-200 dark:hover:ring-zinc-700 focus:ring-1 focus:ring-zinc-300 dark:focus:ring-zinc-600 outline-none appearance-none cursor-pointer transition-all"
                 aria-label={t('tasks.select_list')}
               >
                 <option value="">{t('tasks.select_list')}</option>
@@ -224,27 +214,20 @@ export const NewTaskWindow: React.FC<NewTaskWindowProps> = ({ isOpen, onClose, i
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800">
-          <div className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1">
-            <Clock size={12} />
-            <span>Ctrl + Enter to save</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500 rounded-lg"
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!title.trim()}
-              className="flex items-center gap-2 px-5 py-2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-lg text-sm font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900 shadow-lg shadow-zinc-500/20 dark:shadow-none"
-            >
-              <CheckCircle2 size={16} aria-hidden="true" />
-              {initialData?.id ? t('common.save_changes') : t('common.save_task')}
-            </button>
-          </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4">
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+          >
+            {t('common.cancel')}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!title.trim()}
+            className="flex items-center gap-2 px-4 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-full text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm shadow-zinc-900/10 dark:shadow-none"
+          >
+            {initialData?.id ? t('common.save_changes') : t('common.save_task')}
+          </button>
         </div>
       </div>
     </div>
