@@ -218,7 +218,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                             : t('onboarding.background_minimal')}
                         </div>
                         <div className="text-zinc-500 text-sm">
-                          {isGlobalBg ? t('onboarding.rich_visual_experience') : t('onboarding.clean_distraction_free')}
+                          {isGlobalBg
+                            ? t('onboarding.rich_visual_experience')
+                            : t('onboarding.clean_distraction_free')}
                         </div>
                       </div>
                     </div>
