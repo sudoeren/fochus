@@ -11,7 +11,7 @@ const router = Router();
 // Rate limiter for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
+  max: 20, // Limit each IP to 20 requests per windowMs
   message: { error: 'Çok fazla başarısız giriş denemesi, lütfen 15 dakika sonra tekrar deneyin' },
   standardHeaders: true,
   legacyHeaders: false,
