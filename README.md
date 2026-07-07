@@ -52,7 +52,7 @@
     </tr>
   </table>
   <br>
-  <img src="spotlight.png" alt="Spotlight Search" width="80%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+  <img src="spotlight.png" alt="Spotlight Search" width="60%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
   <br>
   <em>Spotlight search — everything at your fingertips</em>
 </div>
