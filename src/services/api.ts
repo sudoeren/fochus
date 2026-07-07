@@ -62,8 +62,8 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Bir hata oluştu' }));
 
-    // Handle 401 - Unauthorized
-    if (response.status === 401) {
+    // Handle 401 - Unauthorized (skip for auth endpoints like login/register)
+    if (response.status === 401 && !endpoint.startsWith('/auth')) {
       setAuthToken(null);
       window.dispatchEvent(new Event('auth:logout'));
     }
