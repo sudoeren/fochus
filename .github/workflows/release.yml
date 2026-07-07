@@ -168,10 +168,14 @@ jobs:
         run: |
           shopt -s globstar
           ASSETS=$(find . -type f \( -name '*.tar.gz' -o -name '*.zip' \) | tr '\n' ' ')
-          gh release create "${{ github.ref_name }}" \
-            --title "${{ github.ref_name }}" \
-            --notes "See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details." \
-            --repo "${{ github.repository }}" \
-            $ASSETS
+          if gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release upload "${{ github.ref_name }}" --repo "${{ github.repository }}" $ASSETS
+          else
+            gh release create "${{ github.ref_name }}" \
+              --title "${{ github.ref_name }}" \
+              --notes "See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details." \
+              --repo "${{ github.repository }}" \
+              $ASSETS
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
