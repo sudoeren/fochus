@@ -40,7 +40,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSpotlight,
   onOpenPomodoro
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
@@ -49,22 +49,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const [weeklyFocusSeconds, setWeeklyFocusSeconds] = useState<number>(0);
 
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [showAllTasks, setShowAllTasks] = useState(false);
   const [showAllNotes, setShowAllNotes] = useState(false);
-
-  const getGreeting = () => {
-    const h = currentTime.getHours();
-    if (h < 6) return t('dashboard.night_shift');
-    if (h < 12) return t('dashboard.good_morning');
-    if (h < 18) return t('dashboard.good_afternoon');
-    return t('dashboard.good_evening');
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,22 +117,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="max-w-[1000px] mx-auto flex flex-col gap-16 w-full">
           {' '}
           {/* Reduced max-width */}
-          {/* Header Section - Clock & Greeting */}
-          <div className="flex flex-col items-start gap-4 animate-in slide-in-from-left duration-700 mt-10">
-            {' '}
-            {/* Added margin-top */}
-            <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
-              {currentTime.toLocaleTimeString(i18n.language, {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </h1>
-            <div className="flex items-center ml-2">
-              <span className="text-3xl font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.25em]">
-                {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
-              </span>
-            </div>
-          </div>
+          <ClockWidget displayName={displayName} />
           {/* Main Unified Glass Frame (Bento Grid Container) */}
           <div className="w-full bg-white/85 dark:bg-zinc-950/85 backdrop-blur-3xl border border-zinc-200/60 dark:border-zinc-700/60 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
             <div className="flex flex-col gap-8">
@@ -371,6 +342,42 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// ClockWidget - isolated to prevent Dashboard-wide re-renders every second
+const ClockWidget: React.FC<{ displayName: string }> = ({ displayName }) => {
+  const { t, i18n } = useTranslation();
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const getGreeting = () => {
+    const h = currentTime.getHours();
+    if (h < 6) return t('dashboard.night_shift');
+    if (h < 12) return t('dashboard.good_morning');
+    if (h < 18) return t('dashboard.good_afternoon');
+    return t('dashboard.good_evening');
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-start gap-4 animate-in slide-in-from-left duration-700 mt-10">
+      <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
+        {currentTime.toLocaleTimeString(i18n.language, {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </h1>
+      <div className="flex items-center ml-2">
+        <span className="text-3xl font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.25em]">
+          {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
+        </span>
       </div>
     </div>
   );
