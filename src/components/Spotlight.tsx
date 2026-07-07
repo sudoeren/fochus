@@ -339,13 +339,11 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (allItems[selectedIndex]) allItems[selectedIndex].action();
-      } else if (e.key === 'Escape') {
-        onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, allItems, selectedIndex, onClose]);
+  }, [isOpen, allItems, selectedIndex]);
 
   // Group items for rendering
   const groupedItems = allItems.reduce(
