@@ -26,7 +26,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
   onGlobalBgChange
 }) => {
   const { t, i18n } = useTranslation();
-  const { setTheme, theme } = useTheme();
+  const { setTheme, theme, isDark } = useTheme();
   const [step, setStep] = useState(1);
   const [isGlobalBg, setIsGlobalBg] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -59,7 +59,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
         <div className="relative w-full lg:w-5/12 h-64 lg:h-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 transition-colors duration-500">
           {step === 1 && <LanguagePreview mounted={mounted} language={i18n.language} />}
           {step === 2 && <ThemePreview />}
-          {step === 3 && <BackgroundPreview isGlobalBg={isGlobalBg} theme={theme} />}
+          {step === 3 && <BackgroundPreview isGlobalBg={isGlobalBg} isDark={isDark} />}
 
           {/* Step Number Indicator */}
           <div className="absolute top-6 left-6 font-mono text-xs font-bold text-zinc-400 tracking-widest">
@@ -69,6 +69,24 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
         {/* RIGHT SIDE: CONTROLS */}
         <div className="flex-1 flex flex-col p-8 lg:p-16 relative">
+          {/* Top Right Controls */}
+          <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+            <button
+              onClick={() =>
+                setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')
+              }
+              className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
+            >
+              {theme === 'dark' ? (
+                <Moon className="w-4 h-4" />
+              ) : theme === 'system' ? (
+                <Monitor className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+
           <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
             {/* HEADLINES */}
             <div className="mb-10 space-y-3">
@@ -200,7 +218,9 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
                             : t('onboarding.background_minimal')}
                         </div>
                         <div className="text-zinc-500 text-sm">
-                          {isGlobalBg ? 'Rich visual experience' : 'Clean, distraction-free'}
+                          {isGlobalBg
+                            ? t('onboarding.rich_visual_experience')
+                            : t('onboarding.clean_distraction_free')}
                         </div>
                       </div>
                     </div>
@@ -233,7 +253,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
               onClick={handleNext}
               className={cn(
                 'group flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 active:translate-y-0',
-                theme === 'light'
+                !isDark
                   ? 'bg-zinc-900 text-white hover:bg-zinc-800'
                   : 'bg-white text-black hover:bg-zinc-200'
               )}
@@ -333,17 +353,17 @@ const ThemePreview: React.FC = () => (
 
 interface BackgroundPreviewProps {
   isGlobalBg: boolean;
-  theme: string;
+  isDark: boolean;
 }
 
-const BackgroundPreview: React.FC<BackgroundPreviewProps> = ({ isGlobalBg, theme }) => (
+const BackgroundPreview: React.FC<BackgroundPreviewProps> = ({ isGlobalBg, isDark }) => (
   <div className="relative w-full h-full overflow-hidden">
     <div
       className={cn(
         'absolute inset-0 bg-cover bg-center transition-all duration-700',
         isGlobalBg ? 'scale-100 blur-0' : 'scale-110 blur-sm opacity-50'
       )}
-      style={{ backgroundImage: `url(${theme === 'dark' ? '/dark.png' : '/light.png'})` }}
+      style={{ backgroundImage: `url(${isDark ? '/dark.png' : '/light.png'})` }}
     />
 
     <div

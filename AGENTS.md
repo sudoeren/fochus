@@ -6,9 +6,9 @@ Monorepo with two independent Node.js packages:
 
 | Directory | Role | Tech | Dev port |
 |-----------|------|------|----------|
-| root `./` | Frontend SPA | React 19 + Vite 8 + Tailwind 4 + React Query | `:5173` |
+| root `./` | Frontend SPA | React 19 + Vite 8 + Tailwind 4 + React Query | `:5800` |
 | `backend/` | REST API | Express 5 + Prisma + SQLite | `:3001` |
-| Docker Compose | Full stack | nginx → backend | `:3000` → `:3001` |
+| Docker Compose | Full stack | nginx → backend | `:5800` |
 
 ## Commands
 
@@ -35,7 +35,7 @@ Monorepo with two independent Node.js packages:
 - Builds and runs single Docker image with SQLite
 
 ### Docker Compose
-- `docker-compose up -d --build` — full stack at `localhost:3000`
+- `docker-compose up -d --build` — full stack at `localhost:5800`
 - Copy `.env.example` → `.env` (root) first
 
 ## Architecture notes

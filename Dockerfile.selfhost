@@ -47,9 +47,9 @@ COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=5800
 ENV DATABASE_URL=file:./data/fokus.db
 
-EXPOSE 3000
+EXPOSE 5800
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

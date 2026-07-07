@@ -33,6 +33,8 @@
     "background_desc": "Choose between an immersive wallpaper experience or a clean, minimal look.",
     "background_immersive": "Immersive",
     "background_minimal": "Minimal",
+    "rich_visual_experience": "Rich visual experience",
+    "clean_distraction_free": "Clean, distraction-free",
     "finish": "Start Fochus"
   },
   "settings": {
@@ -207,13 +209,14 @@
     "settings": "Settings",
     "trash": "Trash",
     "up_next": "Up Next",
+    "completed": "Completed",
+    "completed_empty": "No completed tasks yet",
     "all_done": "All done!",
     "focus_timer": "FOCUS TIMER",
     "start": "Start",
     "pause": "Pause",
-    "mode_open": "Open",
-    "mode_closed": "Closed",
-    "mode_hover": "Hover"
+    "open_sidebar": "Open sidebar",
+    "close_sidebar": "Close sidebar"
   },
   "navbar": {
     "dashboard": "Dashboard",
@@ -250,7 +253,10 @@
     "overdue": "Overdue",
     "streak_days": "You completed work on {{count}} {{unit}} this week.",
     "days": "days",
-    "review_tasks": "Review Tasks"
+    "review_tasks": "Review Tasks",
+    "note_placeholder": "Quick note...",
+    "show_all": "Show all",
+    "show_less": "Show less"
   },
   "trash": {
     "title": "Trash",
@@ -322,6 +328,16 @@
     "reset": "Reset",
     "settings": "Settings",
     "close": "Close"
+  },
+  "subtasks": {
+    "placeholder": "Subtask name...",
+    "add": "Add",
+    "add_subtask": "Add subtask"
+  },
+  "mobile_restricted": {
+    "title": "Desktop Experience",
+    "description": "Fochus is designed for large screens and keyboard shortcuts to maximize your productivity.",
+    "instruction": "Please access from your computer"
   },
   "spotlight": {
     "placeholder": "Type a command or search...",
@@ -534,5 +550,10 @@
     "low": "Low",
     "medium": "Medium",
     "high": "High"
+  },
+  "error_boundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try Again"
   }
 }

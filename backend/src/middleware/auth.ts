@@ -7,6 +7,7 @@ export interface AuthRequest extends Request<ParamsFlatDictionary> {
   user?: {
     id: string;
     username: string;
+    role: string;
   };
 }
 

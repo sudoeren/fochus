@@ -1,6 +1,6 @@
 {
   "name": "fochus",
-  "version": "1.1.4",
+  "version": "1.1.9",
   "description": "Kişisel üretkenlik uygulaması - Not alma, görev yönetimi ve haftalık planlama",
   "scripts": {
     "setup": "node setup.js",
@@ -29,12 +29,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/postcss": "^4.3.1",
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/dompurify": "^3.2.0",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
-    "@typescript-eslint/parser": "^8.61.0",
+    "@typescript-eslint/parser": "^8.62.1",
     "@vitejs/plugin-react": "^6.0.3",
-    "autoprefixer": "^10.5.0",
+    "autoprefixer": "^10.5.2",
     "concurrently": "^10.0.3",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
@@ -44,11 +44,11 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.6.0",
     "postcss": "^8.5.16",
-    "prettier": "^3.9.3",
+    "prettier": "^3.9.4",
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
-    "vitest": "^4.1.10"
+    "vite": "^8.1.3",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -57,11 +57,11 @@
     "@types/react-dom": "^19.2.3",
     "clsx": "^2.1.1",
     "dompurify": "^3.4.11",
-    "i18next": "^26.3.1",
+    "i18next": "^26.3.4",
     "i18next-browser-languagedetector": "^8.2.1",
-    "lucide-react": "^1.22.0",
+    "lucide-react": "^1.23.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.6",
+    "react-dom": "^19.2.7",
     "react-i18next": "^17.0.8"
   }
 }

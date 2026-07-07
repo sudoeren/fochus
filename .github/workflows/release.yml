@@ -3,78 +3,163 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
+
+permissions:
+  contents: write
 
 jobs:
-  release:
+  build:
+    name: Build and package (${{ matrix.target }})
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
+    strategy:
+      matrix:
+        include:
+          - target: linux-x64
+            node_version: 22.14.0
+            archive_ext: .tar.gz
+
+          - target: linux-arm64
+            node_version: 22.14.0
+            archive_ext: .tar.gz
+
+          - target: macos-arm64
+            node_version: 22.14.0
+            archive_ext: .tar.gz
+
+          - target: win-x64
+            node_version: 22.14.0
+            archive_ext: .zip
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: ${{ matrix.node_version }}
 
       - name: Install frontend dependencies
         run: npm ci
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_URL: /api
+          VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: backend
-        run: npx prisma generate
+        run: cd backend && npm ci
 
       - name: Build backend
-        working-directory: backend
-        run: npm run build
+        run: cd backend && npm run build
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+      - name: Strip dev dependencies
+        run: cd backend && npm prune --omit=dev
+
+      - name: Prune unnecessary files
+        run: |
+          # Remove Prisma engines for other platforms (keep only linux for the runner)
+          rm -rf backend/node_modules/@prisma/engines/*darwin* \
+                 backend/node_modules/@prisma/engines/*windows* \
+                 backend/node_modules/@prisma/engines/*freebsd* 2>/dev/null || true
+          # Remove Prisma CLI (not needed at runtime)
+          rm -rf backend/node_modules/prisma 2>/dev/null || true
+          # Remove documentation and unnecessary files from node_modules
+          find backend/node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type d -name "doc" -exec rm -rf {} + 2>/dev/null || true
+          find backend/node_modules -type f -name "*.md" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "CHANGELOG*" -delete 2>/dev/null || true
+          find backend/node_modules -type f -name "LICENSE*" -delete 2>/dev/null || true
+
+      - name: Prepare package directory
+        run: |
+          PKG_DIR="fochus-${{ matrix.target }}"
+          mkdir -p "$PKG_DIR/backend"
+          cp -r backend/dist "$PKG_DIR/backend/dist"
+          cp -r backend/prisma "$PKG_DIR/backend/prisma"
+          cp backend/package.json "$PKG_DIR/backend/package.json"
+          cp -r backend/node_modules "$PKG_DIR/backend/node_modules"
+          mkdir -p "$PKG_DIR/backend/public"
+          cp -r dist/* "$PKG_DIR/backend/public/"
+          cp scripts/start.sh "$PKG_DIR/start.sh"
+          chmod +x "$PKG_DIR/start.sh"
+          cp scripts/uninstall.sh "$PKG_DIR/uninstall.sh"
+          chmod +x "$PKG_DIR/uninstall.sh"
+          if [ "${{ matrix.target }}" = "win-x64" ]; then
+            cp scripts/start.bat "$PKG_DIR/start.bat"
+            cp scripts/uninstall.bat "$PKG_DIR/uninstall.bat"
+          fi
+
+      - name: Download and bundle portable Node.js (${{ matrix.target }})
+        run: |
+          PKG_DIR="fochus-${{ matrix.target }}"
+          NV="${{ matrix.node_version }}"
+
+          case "${{ matrix.target }}" in
+            win-x64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-win-x64.zip" -o node.zip
+              unzip -q node.zip
+              mv "node-v${NV}-win-x64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/node_modules" "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            macos-arm64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-darwin-arm64.tar.gz" | tar xzf -
+              mv "node-v${NV}-darwin-arm64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            linux-x64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-linux-x64.tar.xz" | tar xJf -
+              mv "node-v${NV}-linux-x64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            linux-arm64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-linux-arm64.tar.xz" | tar xJf -
+              mv "node-v${NV}-linux-arm64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+          esac
+
+      - name: Package archive
+        run: |
+          PKG_DIR="fochus-${{ matrix.target }}"
+          ARCHIVE="fochus-${{ matrix.target }}${{ matrix.archive_ext }}"
+          if [ "${{ matrix.archive_ext }}" = ".zip" ]; then
+            zip -r "$ARCHIVE" "$PKG_DIR"
+          else
+            tar czf "$ARCHIVE" "$PKG_DIR"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          name: fochus-${{ matrix.target }}
+          path: ./fochus-${{ matrix.target }}${{ matrix.archive_ext }}
+          retention-days: 1
 
-      - name: Extract metadata for Docker images
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository }}
+  release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/frontend:${{ github.ref_name }},ghcr.io/${{ github.repository }}/frontend:latest
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
 
-      - name: Build and push backend image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./backend
-          file: backend/Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/backend:${{ github.ref_name }},ghcr.io/${{ github.repository }}/backend:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          generate_release_notes: true
-          name: Fochus ${{ github.ref_name }}
+      - name: Create release and upload assets
+        run: |
+          shopt -s globstar
+          ASSETS=$(find . -type f \( -name '*.tar.gz' -o -name '*.zip' \) | tr '\n' ' ')
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes "See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details." \
+            --repo "${{ github.repository }}" \
+            $ASSETS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -54,8 +54,8 @@ RUN chown -R fokus:nodejs /app
 
 USER fokus
 
-EXPOSE 3001
+EXPOSE 5800
 
-ENV PORT=3001
+ENV PORT=5800
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

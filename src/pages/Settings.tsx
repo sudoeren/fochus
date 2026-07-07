@@ -1339,8 +1339,12 @@ const DataSection = () => {
 };
 
 // 5. About Section (Restored - Colorful & Vibrant)
+import pkg from '../../package.json';
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || pkg.version;
+
 const AboutSection = () => {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -1387,9 +1391,16 @@ const AboutSection = () => {
 
         <div className="relative z-10 flex flex-col items-center">
           <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden p-2">
-            <img src="/logo.svg" alt="Fochus Logo" className="w-full h-full object-contain" />
+            <img
+              src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+              alt="Fochus Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h2 className="text-4xl font-bold tracking-tight mb-3">FOCHUS</h2>
+          <h2 className="text-4xl font-bold tracking-tight mb-1">FOCHUS</h2>
+          <span className="text-sm font-mono text-zinc-500 dark:text-zinc-500 mb-3 block">
+            v{APP_VERSION}
+          </span>
           <p className="text-lg text-zinc-400 max-w-lg mx-auto leading-relaxed">
             {t('settings.about.desc')}
           </p>

@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 
@@ -7,7 +7,7 @@ const router = Router();
 router.use(authenticate);
 
 // GET /api/settings - Get user settings
-router.get('/', async (req: AuthRequest, res: Response) => {
+router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     let settings = await prisma.userSettings.findUnique({
       where: { userId: req.user!.id }
@@ -25,13 +25,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
     res.json(settings);
   } catch (error) {
-    console.error('Get settings error:', error);
-    res.status(500).json({ error: 'Ayarlar yüklenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // PUT /api/settings - Update user settings
-router.put('/', async (req: AuthRequest, res: Response) => {
+router.put('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { theme, language } = req.body;
 
@@ -56,8 +55,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
 
     res.json(settings);
   } catch (error) {
-    console.error('Update settings error:', error);
-    res.status(500).json({ error: 'Ayarlar güncellenirken bir hata oluştu' });
+    next(error);
   }
 });
 
@@ -88,7 +86,7 @@ function normalizePayload(raw: unknown): {
 }
 
 // POST /api/settings/import - Import all user data (atomic)
-router.post('/import', async (req: AuthRequest, res: Response) => {
+router.post('/import', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const payload = normalizePayload(req.body);
@@ -222,13 +220,12 @@ router.post('/import', async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Veriler başarıyla geri yüklendi' });
   } catch (error) {
-    console.error('Import error:', error);
-    res.status(500).json({ error: 'Veri içe aktarılırken bir hata oluştu. Değişiklikler geri alındı.' });
+    next(error);
   }
 });
 
 // GET /api/settings/export - Export all user data
-router.get('/export', async (req: AuthRequest, res: Response) => {
+router.get('/export', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
 
@@ -265,8 +262,7 @@ router.get('/export', async (req: AuthRequest, res: Response) => {
     );
     res.json(exportData);
   } catch (error) {
-    console.error('Export error:', error);
-    res.status(500).json({ error: 'Veri dışa aktarılırken bir hata oluştu' });
+    next(error);
   }
 });
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Sidebar, SidebarMode } from './components/Sidebar';
 import { useTheme } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
@@ -101,16 +102,12 @@ const App: React.FC = () => {
   );
 
   const handleCloseModal = useCallback(() => {
-    if (window.history.state?.modal) {
-      window.history.back();
-    } else {
-      const hash = window.location.hash.slice(1).split('?')[0] || activeView;
-      window.history.replaceState(null, '', `#${hash}`);
-      setShowNoteModal(false);
-      setShowTaskModal(false);
-      setShowPomodoroModal(false);
-      setIsSpotlightOpen(false);
-    }
+    const hash = window.location.hash.slice(1).split('?')[0] || activeView;
+    window.history.replaceState(null, '', `#${hash}`);
+    setShowNoteModal(false);
+    setShowTaskModal(false);
+    setShowPomodoroModal(false);
+    setIsSpotlightOpen(false);
   }, [activeView]);
 
   // Sync Effect
@@ -146,6 +143,7 @@ const App: React.FC = () => {
   }, []);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [editingNoteId, setEditingNoteId] = useState<string | undefined>(undefined);
+  const [noteEditorPrevView, setNoteEditorPrevView] = useState<string>('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(getAuthToken()));
   const [authChecked, setAuthChecked] = useState(() => !getAuthToken());
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -170,8 +168,6 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('sidebarMode');
     return (saved as SidebarMode) || 'open';
   });
-
-  const [sidebarHoverExpanded, setSidebarHoverExpanded] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('sidebarMode', sidebarMode);
@@ -402,7 +398,7 @@ const App: React.FC = () => {
             key={editingNoteId}
             noteId={editingNoteId}
             onBack={() => {
-              handleNavigate('dashboard');
+              handleNavigate(noteEditorPrevView);
               setEditingNoteId(undefined);
             }}
           />
@@ -415,6 +411,7 @@ const App: React.FC = () => {
             onOpenNoteModal={() => handleOpenModal('note')}
             onEditNote={(id) => {
               setEditingNoteId(id);
+              setNoteEditorPrevView('notes');
               handleNavigate('note-editor');
             }}
           />
@@ -487,144 +484,139 @@ const App: React.FC = () => {
 
   const isCustomBg =
     bgImage.startsWith('data:') || bgImage.startsWith('http') || bgImage.startsWith('blob:');
-  const showBackground = isGlobalBg || activeView === 'dashboard' || activeView === 'stats';
+  const showBackground = isGlobalBg;
 
   // Determine which background to show based on theme if default
   const showLightBg = bgImage === 'light' || (bgImage === 'default' && !isDark);
   const showDarkBg = bgImage === 'dark' || (bgImage === 'default' && isDark);
 
   return (
-    <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
-      {/* GLOBAL BACKGROUND IMAGE */}
-      {showBackground && (
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          {isCustomBg ? (
-            <img
-              src={bgImage}
-              alt="Custom Background"
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
-            />
-          ) : (
-            <>
+    <ErrorBoundary>
+      <div className="relative min-h-screen bg-gray-50 dark:bg-black text-zinc-900 dark:text-zinc-100 flex overflow-hidden">
+        {/* GLOBAL BACKGROUND IMAGE */}
+        {showBackground && (
+          <div className="fixed inset-0 z-0 pointer-events-none">
+            {isCustomBg ? (
               <img
-                src="/light.png"
-                alt="Background"
-                className={cn(
-                  'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-                  showLightBg ? 'opacity-100' : 'opacity-0'
-                )}
+                src={bgImage}
+                alt="Custom Background"
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100"
               />
-              <img
-                src="/dark.png"
-                alt="Background"
-                className={cn(
-                  'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
-                  showDarkBg ? 'opacity-100' : 'opacity-0'
-                )}
-              />
-            </>
-          )}
-          {/* Overlay for readability */}
-          <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
-        </div>
-      )}
-
-      {/* Floating Sidebar (Fixed Position) */}
-      <Sidebar
-        activeView={activeView}
-        onViewChange={handleNavigate}
-        onOpenSpotlight={() => handleOpenModal('spotlight')}
-        onOpenNoteModal={() => handleOpenModal('note')}
-        onOpenTaskModal={() => handleOpenModal('task')}
-        onOpenPomodoro={() => handleOpenModal('pomodoro')}
-        sidebarMode={sidebarMode}
-        onSidebarModeChange={(mode) => {
-          setSidebarMode(mode);
-          if (mode !== 'hover') setSidebarHoverExpanded(false);
-        }}
-        onSidebarHoverExpandedChange={setSidebarHoverExpanded}
-      />
-
-      {/* Main Content Area - With Padding for Sidebar */}
-      <main
-        className={cn(
-          'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
-          sidebarMode === 'open'
-            ? 'lg:pl-[320px]'
-            : sidebarMode === 'hover'
-              ? sidebarHoverExpanded
-                ? 'lg:pl-[320px]'
-                : 'lg:pl-[96px]'
-              : 'lg:pl-4'
+            ) : (
+              <>
+                <img
+                  src="/light.png"
+                  alt="Background"
+                  className={cn(
+                    'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
+                    showLightBg ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                <img
+                  src="/dark.png"
+                  alt="Background"
+                  className={cn(
+                    'absolute inset-0 w-full h-full object-cover transition-opacity duration-500',
+                    showDarkBg ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+              </>
+            )}
+            {/* Overlay for readability */}
+            <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-[2px]" />
+          </div>
         )}
-      >
-        {renderView()}
-      </main>
 
-      {/* Spotlight */}
-      {isSpotlightOpen && (
-        <Spotlight
-          isOpen={isSpotlightOpen}
-          onClose={handleCloseModal}
-          onNavigate={handleNavigate}
+        {/* Floating Sidebar (Fixed Position) */}
+        <Sidebar
+          activeView={activeView}
+          onViewChange={handleNavigate}
+          onOpenSpotlight={() => handleOpenModal('spotlight')}
           onOpenNoteModal={() => handleOpenModal('note')}
           onOpenTaskModal={() => handleOpenModal('task')}
           onOpenPomodoro={() => handleOpenModal('pomodoro')}
+          sidebarMode={sidebarMode}
+          onSidebarModeChange={setSidebarMode}
         />
-      )}
 
-      {/* Modals */}
-      {showNoteModal && (
-        <NewNoteWindow
-          isOpen={showNoteModal}
-          onClose={handleCloseModal}
-          onExpand={(id) => {
-            setEditingNoteId(id);
-            handleNavigate('note-editor');
-          }}
-        />
-      )}
+        {/* Main Content Area - With Padding for Sidebar */}
+        <main
+          className={cn(
+            'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
+            sidebarMode === 'open' ? 'lg:pl-[320px]' : 'lg:pl-4'
+          )}
+        >
+          {renderView()}
+        </main>
 
-      {showTaskModal && (
-        <NewTaskWindow
-          isOpen={showTaskModal}
-          onClose={handleCloseModal}
-          initialData={editingTask as Partial<Task>}
-        />
-      )}
+        {/* Spotlight */}
+        {isSpotlightOpen && (
+          <Spotlight
+            isOpen={isSpotlightOpen}
+            onClose={handleCloseModal}
+            onNavigate={handleNavigate}
+            onOpenNoteModal={() => handleOpenModal('note')}
+            onOpenTaskModal={() => handleOpenModal('task')}
+            onOpenPomodoro={() => handleOpenModal('pomodoro')}
+          />
+        )}
 
-      {showPomodoroModal && <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />}
+        {/* Modals */}
+        {showNoteModal && (
+          <NewNoteWindow
+            isOpen={showNoteModal}
+            onClose={handleCloseModal}
+            onExpand={(id) => {
+              setEditingNoteId(id);
+              setNoteEditorPrevView('dashboard');
+              handleNavigate('note-editor');
+            }}
+          />
+        )}
 
-      {reminderNotice && (
-        <div className="fixed bottom-6 right-6 z-50 w-[min(360px,calc(100vw-32px))] rounded-2xl border border-amber-200 bg-white p-4 shadow-2xl shadow-zinc-900/20 dark:border-amber-500/30 dark:bg-zinc-900">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-sm font-bold text-zinc-900 dark:text-white">
-                {t('notifications.missed_title', { count: reminderNotice.count })}
-              </p>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                {t('notifications.missed_desc', { title: reminderNotice.latestTitle })}
-              </p>
-              {notificationPermission !== 'denied' && notificationService.isAvailable() && (
-                <button
-                  onClick={handleEnableReminderNotifications}
-                  className="mt-3 rounded-full bg-zinc-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                >
-                  {t('notifications.enable')}
-                </button>
-              )}
+        {showTaskModal && (
+          <NewTaskWindow
+            isOpen={showTaskModal}
+            onClose={handleCloseModal}
+            initialData={editingTask as Partial<Task>}
+          />
+        )}
+
+        {showPomodoroModal && (
+          <PomodoroModal isOpen={showPomodoroModal} onClose={handleCloseModal} />
+        )}
+
+        {reminderNotice && (
+          <div className="fixed bottom-6 right-6 z-50 w-[min(360px,calc(100vw-32px))] rounded-2xl border border-amber-200 bg-white p-4 shadow-2xl shadow-zinc-900/20 dark:border-amber-500/30 dark:bg-zinc-900">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-bold text-zinc-900 dark:text-white">
+                  {t('notifications.missed_title', { count: reminderNotice.count })}
+                </p>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+                  {t('notifications.missed_desc', { title: reminderNotice.latestTitle })}
+                </p>
+                {notificationPermission !== 'denied' && notificationService.isAvailable() && (
+                  <button
+                    onClick={handleEnableReminderNotifications}
+                    className="mt-3 rounded-full bg-zinc-900 px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  >
+                    {t('notifications.enable')}
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={handleDismissReminderNotice}
+                className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-white"
+                aria-label={t('common.close')}
+              >
+                x
+              </button>
             </div>
-            <button
-              onClick={handleDismissReminderNotice}
-              className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-white"
-              aria-label={t('common.close')}
-            >
-              x
-            </button>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ErrorBoundary>
   );
 };
 

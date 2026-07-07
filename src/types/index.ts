@@ -10,6 +10,7 @@ export interface Note {
   updatedAt: Date;
   isPinned: boolean;
   isDeleted: boolean;
+  deletedAt?: Date;
   reminderAt?: Date;
   hasReminder: boolean;
 }
