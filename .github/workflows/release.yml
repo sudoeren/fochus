@@ -5,43 +5,48 @@ on:
     tags:
       - 'v*.*.*'
 
-env:
-  NODE_VERSION: '22.14.0'
-
 jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: |
+            See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details.
+          draft: false
+          prerelease: false
+
   build:
-    name: Build and package
+    name: Build and package (${{ matrix.target }})
+    needs: release
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
           - target: linux-x64
-            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-linux-x64.tar.xz
-            node_dir: node-v${{ env.NODE_VERSION }}-linux-x64
+            node_version: 22.14.0
             archive_ext: .tar.gz
-            archive_cmd: tar czf
-            binary_ext: ""
 
           - target: linux-arm64
-            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-linux-arm64.tar.xz
-            node_dir: node-v${{ env.NODE_VERSION }}-linux-arm64
+            node_version: 22.14.0
             archive_ext: .tar.gz
-            archive_cmd: tar czf
-            binary_ext: ""
 
           - target: macos-arm64
-            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-darwin-arm64.tar.gz
-            node_dir: node-v${{ env.NODE_VERSION }}-darwin-arm64
+            node_version: 22.14.0
             archive_ext: .tar.gz
-            archive_cmd: tar czf
-            binary_ext: ""
 
           - target: win-x64
-            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-win-x64.zip
-            node_dir: node-v${{ env.NODE_VERSION }}-win-x64
+            node_version: 22.14.0
             archive_ext: .zip
-            archive_cmd: zip -r
-            binary_ext: .exe
 
     steps:
       - name: Checkout
@@ -50,7 +55,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.node_version }}
 
       - name: Install frontend dependencies
         run: npm ci
@@ -73,71 +78,63 @@ jobs:
         run: |
           PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
           mkdir -p "$PKG_DIR/backend"
-
-          # Copy backend files
           cp -r backend/dist "$PKG_DIR/backend/dist"
           cp -r backend/prisma "$PKG_DIR/backend/prisma"
           cp backend/package.json "$PKG_DIR/backend/package.json"
           cp -r backend/node_modules "$PKG_DIR/backend/node_modules"
-
-          # Copy frontend build to backend/public/
           mkdir -p "$PKG_DIR/backend/public"
           cp -r dist/* "$PKG_DIR/backend/public/"
-
-          # Copy start scripts
           cp scripts/start.sh "$PKG_DIR/start.sh"
           chmod +x "$PKG_DIR/start.sh"
+          if [ "${{ matrix.target }}" = "win-x64" ]; then
+            cp scripts/start.bat "$PKG_DIR/start.bat"
+          fi
 
       - name: Download and bundle portable Node.js (${{ matrix.target }})
         run: |
           PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+          NV="${{ matrix.node_version }}"
 
-          if [ "${{ matrix.archive_ext }}" = ".zip" ]; then
-            # Windows: download zip
-            curl -L "${{ matrix.node_url }}" -o node.zip
-            unzip -q node.zip
-            mv "${{ matrix.node_dir }}" "$PKG_DIR/node"
-            # Remove unnecessary files to reduce size
-            rm -rf "$PKG_DIR/node/node_modules" "$PKG_DIR/node/include" "$PKG_DIR/node/share"
-          else
-            # Linux/macOS: download tar
-            curl -L "${{ matrix.node_url }}" | tar xJf - 2>/dev/null || curl -L "${{ matrix.node_url }}" | tar xzf -
-            mv "${{ matrix.node_dir }}" "$PKG_DIR/node"
-            # Remove unnecessary files
-            rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
-          fi
+          case "${{ matrix.target }}" in
+            win-x64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-win-x64.zip" -o node.zip
+              unzip -q node.zip
+              mv "node-v${NV}-win-x64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/node_modules" "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            macos-arm64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-darwin-arm64.tar.gz" | tar xzf -
+              mv "node-v${NV}-darwin-arm64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            linux-x64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-linux-x64.tar.xz" | tar xJf -
+              mv "node-v${NV}-linux-x64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+            linux-arm64)
+              curl -L "https://nodejs.org/dist/v${NV}/node-v${NV}-linux-arm64.tar.xz" | tar xJf -
+              mv "node-v${NV}-linux-arm64" "$PKG_DIR/node"
+              rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+              ;;
+          esac
 
       - name: Package archive
         run: |
           PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
           ARCHIVE="fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}"
-          ${{ matrix.archive_cmd }} "$ARCHIVE" "$PKG_DIR"
+          if [ "${{ matrix.archive_ext }}" = ".zip" ]; then
+            cd "$PKG_DIR" && zip -r "../$ARCHIVE" . && cd ..
+          else
+            tar czf "$ARCHIVE" "$PKG_DIR"
+          fi
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ./fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
           asset_name: fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
           asset_content_type: application/octet-stream
-
-  create-release:
-    name: Create release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body: |
-            See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details.
-          draft: false
-          prerelease: false
