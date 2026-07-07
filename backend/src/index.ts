@@ -18,7 +18,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5800;
+const PORT = process.env.PORT || 3001;
 
 // Global Rate Limiter
 const limiter = rateLimit({

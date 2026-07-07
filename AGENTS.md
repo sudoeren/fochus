@@ -6,8 +6,8 @@ Monorepo with two independent Node.js packages:
 
 | Directory | Role | Tech | Dev port |
 |-----------|------|------|----------|
-| root `./` | Frontend SPA | React 19 + Vite 8 + Tailwind 4 + React Query | `:5173` |
-| `backend/` | REST API | Express 5 + Prisma + SQLite | `:5800` |
+| root `./` | Frontend SPA | React 19 + Vite 8 + Tailwind 4 + React Query | `:5800` |
+| `backend/` | REST API | Express 5 + Prisma + SQLite | `:3001` |
 | Docker Compose | Full stack | nginx → backend | `:5800` |
 
 ## Commands

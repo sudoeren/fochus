@@ -116,11 +116,11 @@ cd backend
 cp .env.example .env
 npm install
 npx prisma db push
-npm run dev      # http://localhost:5800
+npm run dev      # http://localhost:3001
 
 # Terminal 2: Frontend
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5800
 ```
 
 ---

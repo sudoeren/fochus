@@ -31,5 +31,6 @@ echo   Fochus is starting at http://localhost:5800
 echo Press Ctrl+C to stop.
 echo.
 
+set PORT=5800
 node dist/index.js
 pause
