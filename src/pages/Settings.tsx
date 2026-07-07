@@ -48,11 +48,6 @@ import { deserializeApiDates } from '../utils/apiTransforms';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-}
-
 // ... (Password Strength Code remains same)
 
 // 6. Admin Section
@@ -1345,41 +1340,6 @@ const APP_VERSION = import.meta.env.VITE_APP_VERSION || pkg.version;
 const AboutSection = () => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    const updateStandalone = () => setIsStandalone(mediaQuery.matches);
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-    const handleInstalled = () => {
-      setInstallPrompt(null);
-      setIsStandalone(true);
-    };
-
-    updateStandalone();
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleInstalled);
-    mediaQuery.addEventListener('change', updateStandalone);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleInstalled);
-      mediaQuery.removeEventListener('change', updateStandalone);
-    };
-  }, []);
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
-    await installPrompt.prompt();
-    const choice = await installPrompt.userChoice;
-    if (choice.outcome !== 'dismissed') {
-      setInstallPrompt(null);
-    }
-  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
@@ -1472,31 +1432,7 @@ const AboutSection = () => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-[2rem] p-6 border border-zinc-100 dark:border-zinc-800 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl text-indigo-600 dark:text-indigo-300">
-            <Laptop className="w-6 h-6" />
-          </div>
-          <div>
-            <h4 className="font-bold text-zinc-900 dark:text-white">
-              {t('settings.about.install_title')}
-            </h4>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {isStandalone
-                ? t('settings.about.install_installed')
-                : t('settings.about.install_desc')}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleInstall}
-          disabled={!installPrompt || isStandalone}
-          className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
-        >
-          <Download className="w-4 h-4" />
-          {isStandalone ? t('settings.about.installed') : t('settings.about.install')}
-        </button>
-      </div>
+
     </div>
   );
 };
