@@ -65,34 +65,25 @@ Access your notes, tasks, and settings in seconds without lifting your hands fro
 
 ---
 
-## Quick Start (No Docker)
+## Quick Start
 
-Download the portable package for your platform from the [latest release](https://github.com/sudoeren/fochus/releases/latest), extract it, and run:
+Download the portable package for your platform from the [latest release](https://github.com/sudoeren/fochus/releases/latest) and run:
 
-<table>
-<tr>
-<th>Linux / macOS</th>
-<th>Windows</th>
-</tr>
-<tr>
-<td>
+### Linux / macOS
 
 ```bash
-curl -L https://github.com/sudoeren/fochus/releases/download/v1.1.7/fochus-v1.1.7-linux-x64.tar.gz | tar xz
-cd fochus-v1.1.7
+curl -L https://github.com/sudoeren/fochus/releases/latest/download/fochus-linux-x64.tar.gz | tar xz
+cd fochus-linux-x64
 ./start.sh
 ```
-</td>
-<td>
+
+### Windows
 
 ```powershell
-# Download and extract fochus-v1.1.7-win-x64.zip
-cd fochus-v1.1.7
+# Download fochus-win-x64.zip from the latest release and extract
+cd fochus-win-x64
 .\start.bat
 ```
-</td>
-</tr>
-</table>
 
 No Docker, Node.js, or any other dependency required. The package includes a portable Node.js runtime, the Prisma engine, and everything needed to run Fochus immediately.
 
