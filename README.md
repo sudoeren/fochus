@@ -51,10 +51,16 @@
       </td>
     </tr>
   </table>
-  <br>
+</div>
+
+---
+
+## Spotlight
+
+Access your notes, tasks, and settings in seconds without lifting your hands from the keyboard. Spotlight is a command palette that lets you search, create, and navigate the entire app with just the `/` key.
+
+<div align="center">
   <img src="spotlight.png" alt="Spotlight Search" width="60%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-  <br>
-  <em>Spotlight search — everything at your fingertips</em>
 </div>
 
 ---
