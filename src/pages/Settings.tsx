@@ -1339,7 +1339,8 @@ const DataSection = () => {
 };
 
 // 5. About Section (Restored - Colorful & Vibrant)
-const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.1.9';
+import pkg from '../../package.json';
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || pkg.version;
 
 const AboutSection = () => {
   const { t } = useTranslation();
