@@ -1,16 +1,9 @@
-<div align="left">
-  <table>
-    <tr>
-      <td width="80">
-        <img src="public/logo-light.svg" alt="Fochus Logo" width="72">
-      </td>
-      <td>
-        <h1 style="margin: 0;">Fochus</h1>
-        <p style="margin: 4px 0 0 0; color: #666;">Manage Your Productivity and Focus Time</p>
-      </td>
-    </tr>
-  </table>
-</div>
+<p align="center">
+  <img src="public/logo-light.svg" alt="Fochus Logo" width="100">
+  <br><br>
+  <strong style="font-size: 2em;">Fochus</strong><br>
+  <span style="color: #666;">Manage Your Productivity and Focus Time</span>
+</p>
 
 <br>
 
@@ -34,20 +27,13 @@
 ## App Preview
 
 <div align="center">
-  <table>
-    <tr>
-      <td width="50%" align="center">
-        <img src="screenshot_light.png" alt="Fochus Light Mode" width="100%" style="border-radius: 12px;">
-        <br>
-        <em>Clean and spacious Light Mode</em>
-      </td>
-      <td width="50%" align="center">
-        <img src="screenshot_dark.png" alt="Fochus Dark Mode" width="100%" style="border-radius: 12px;">
-        <br>
-        <em>Stylish and focus-enhancing Dark Mode</em>
-      </td>
-    </tr>
-  </table>
+  <img src="screenshot_light.png" alt="Fochus Light Mode" width="80%" style="border-radius: 12px;">
+  <br>
+  <em>Clean and spacious Light Mode</em>
+  <br><br>
+  <img src="screenshot_dark.png" alt="Fochus Dark Mode" width="80%" style="border-radius: 12px;">
+  <br>
+  <em>Stylish and focus-enhancing Dark Mode</em>
 </div>
 
 ---
