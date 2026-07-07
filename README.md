@@ -85,19 +85,9 @@ cd fochus-win-x64
 .\start.bat
 ```
 
-No Docker, Node.js, or any other dependency required. The package includes a portable Node.js runtime, the Prisma engine, and everything needed to run Fochus immediately.
+> Once started, open **http://localhost:5800** in your browser. Data is stored in `data/fochus.db` next to the package.
 
-> The app opens in your browser. Data is stored in `data/fochus.db` next to the package.
-
----
-
-## One-Line Install (Linux — Docker)
-
-```bash
-curl -sSL https://github.com/sudoeren/fochus/raw/main/install.sh | bash
-```
-
-Or from a local clone:
+### Docker
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -105,19 +95,9 @@ cd fochus
 bash install.sh
 ```
 
-The script will build a single Docker image (backend + frontend + SQLite), start the container with auto-restart, and open port `5800`.
+This builds a single Docker image and starts the container with auto-restart on port `5800`.
 
-> **External access:** The app binds to `0.0.0.0:5800`. Access from anywhere on your network via `http://<server-ip>:5800`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
-
-### Uninstall
-
-```bash
-bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
-```
-
-### Other Setup Methods
-
-#### Docker Compose
+### Docker Compose
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -128,18 +108,7 @@ docker-compose up -d --build
 
 Open **http://localhost:5800**.
 
-#### Node.js (Direct, No Docker)
-
-```bash
-git clone https://github.com/sudoeren/fochus.git
-cd fochus
-npm run setup    # installs deps, creates SQLite DB, generates Prisma
-npm start        # runs backend + frontend simultaneously
-```
-
-Open **http://localhost:5173**.
-
-#### Development
+### Development
 
 ```bash
 # Terminal 1: Backend
@@ -197,6 +166,32 @@ A: Fochus is intentionally desktop-first. A dedicated mobile experience is not p
 
 **Q: How do I run tests?**  
 A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for backend tests. Both use Vitest.
+
+---
+
+## Uninstall
+
+**Portable package** — Simply delete the fochus directory:
+
+```bash
+rm -rf fochus-linux-x64   # Linux / macOS
+```
+
+**Docker** — Run the uninstall script from a local clone:
+
+```bash
+git clone https://github.com/sudoeren/fochus.git
+cd fochus
+bash uninstall.sh
+```
+
+Or download and run it directly:
+
+```bash
+bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
+```
+
+The script removes the container, data volume, and Docker image.
 
 ---
 
