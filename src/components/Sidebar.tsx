@@ -173,7 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div
           className={cn(
-            'h-full flex flex-col bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl rounded-[24px] border border-white/20 dark:border-zinc-800/50 shadow-2xl shadow-zinc-200/20 dark:shadow-black/50 overflow-hidden relative'
+            'h-full flex flex-col bg-white/85 dark:bg-zinc-950/85 backdrop-blur-2xl rounded-[24px] border border-zinc-200/60 dark:border-zinc-700/60 shadow-2xl shadow-zinc-300/30 dark:shadow-black/60 overflow-hidden relative'
           )}
         >
           {isCompact ? (
