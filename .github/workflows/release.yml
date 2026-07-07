@@ -5,29 +5,12 @@ on:
     tags:
       - 'v*.*.*'
 
-jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          body: |
-            See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details.
-          draft: false
-          prerelease: false
+permissions:
+  contents: write
 
+jobs:
   build:
     name: Build and package (${{ matrix.target }})
-    needs: release
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -129,12 +112,32 @@ jobs:
             tar czf "$ARCHIVE" "$PKG_DIR"
           fi
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fochus-${{ github.ref_name }}-${{ matrix.target }}
+          path: ./fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
+          retention-days: 1
+
+  release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create release and upload assets
+        run: |
+          shopt -s globstar
+          ASSETS=$(find . -type f \( -name '*.tar.gz' -o -name '*.zip' \) | tr '\n' ' ')
+          gh release create "${{ github.ref_name }}" \
+            --title "${{ github.ref_name }}" \
+            --notes "See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details." \
+            --repo "${{ github.repository }}" \
+            $ASSETS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: ./fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
-          asset_name: fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
-          asset_content_type: application/octet-stream
