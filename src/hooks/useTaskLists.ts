@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TaskList } from '../types/index';
 import { taskListsAPI, tasksAPI } from '../services/api';
 import { deserializeApiDates } from '../utils/apiTransforms';
 
 export const useTaskLists = () => {
-  const [taskLists, setTaskLists] = useState<TaskList[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const normalizeList = (raw: Record<string, unknown>): TaskList => {
     const list = deserializeApiDates(raw) as Record<string, unknown>;
@@ -21,118 +20,89 @@ export const useTaskLists = () => {
     } as TaskList;
   };
 
-  const fetchTaskLists = async (silent: boolean = false) => {
-    try {
-      if (!silent) setLoading(true);
+  const { data: taskLists = [], isLoading: loading } = useQuery({
+    queryKey: ['taskLists'],
+    queryFn: async () => {
       const lists = await taskListsAPI.getAll();
-      setTaskLists(lists.map(normalizeList));
-    } catch (error) {
-      console.error('Error fetching task lists:', error);
-    } finally {
-      if (!silent) setLoading(false);
+      return lists.map(normalizeList);
     }
-  };
+  });
 
-  const addTaskList = async (data: { title: string; description?: string; color?: string }) => {
-    try {
+  const addTaskListMutation = useMutation({
+    mutationFn: async (data: { title: string; description?: string; color?: string }) => {
       const newListRaw = await taskListsAPI.create({
         title: data.title,
         description: data.description,
         color: data.color || '#3B82F6'
       });
-      const newList = normalizeList(newListRaw);
-
-      await fetchTaskLists(true); // Silent refresh
-      return newList;
-    } catch (error) {
-      console.error('Error adding task list:', error);
-      throw error;
+      return normalizeList(newListRaw);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
     }
-  };
+  });
 
-  const updateTaskList = async (id: string, data: Partial<TaskList>) => {
-    try {
+  const updateTaskListMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<TaskList> }) => {
       const updatedRaw = await taskListsAPI.update(id, {
         title: data.title ?? undefined,
         description: data.description ?? undefined,
         color: data.color ?? undefined,
         order: data.order ?? undefined
       });
-      const updatedList = normalizeList(updatedRaw);
-      await fetchTaskLists(true); // Silent refresh
-      return updatedList;
-    } catch (error) {
-      console.error('Error updating task list:', error);
-      throw error;
+      return normalizeList(updatedRaw);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
     }
-  };
+  });
 
-  const deleteTaskList = async (id: string) => {
-    try {
+  const deleteTaskListMutation = useMutation({
+    mutationFn: async (id: string) => {
       await taskListsAPI.delete(id);
-      await fetchTaskLists(true); // Silent refresh
-    } catch (error) {
-      console.error('Error deleting task list:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
     }
-  };
+  });
 
-  const reorderTaskLists = async (reorderedLists: TaskList[]) => {
-    try {
+  const reorderTaskListsMutation = useMutation({
+    mutationFn: async (reorderedLists: TaskList[]) => {
       await taskListsAPI.reorder(reorderedLists.map((l) => l.id));
-      await fetchTaskLists(true); // Silent refresh
-    } catch (error) {
-      console.error('Error reordering task lists:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
     }
-  };
+  });
 
-  const moveTaskToList = async (
-    taskId: string,
-    targetListId: string | null,
-    options?: { skipRefresh?: boolean }
-  ) => {
-    try {
+  const moveTaskToListMutation = useMutation({
+    mutationFn: async ({
+      taskId,
+      targetListId
+    }: {
+      taskId: string;
+      targetListId: string | null;
+    }) => {
       await tasksAPI.update(taskId, { listId: targetListId });
-
-      if (!options?.skipRefresh) {
-        await fetchTaskLists(true);
-      }
-    } catch (error) {
-      console.error('Error moving task to list:', error);
-      throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taskLists'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
     }
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-        const lists = await taskListsAPI.getAll();
-        if (!cancelled) setTaskLists(lists.map(normalizeList));
-      } catch (error) {
-        console.error('Error fetching task lists:', error);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  });
 
   return {
     taskLists,
     loading,
-    addTaskList,
-    updateTaskList,
-    deleteTaskList,
-    reorderTaskLists,
-    moveTaskToList,
-    refetch: fetchTaskLists
+    addTaskList: (data: { title: string; description?: string; color?: string }) =>
+      addTaskListMutation.mutateAsync(data),
+    updateTaskList: (id: string, data: Partial<TaskList>) =>
+      updateTaskListMutation.mutateAsync({ id, data }),
+    deleteTaskList: (id: string) => deleteTaskListMutation.mutateAsync(id),
+    reorderTaskLists: (reorderedLists: TaskList[]) =>
+      reorderTaskListsMutation.mutateAsync(reorderedLists),
+    moveTaskToList: (taskId: string, targetListId: string | null) =>
+      moveTaskToListMutation.mutateAsync({ taskId, targetListId }),
+    refetch: () => queryClient.invalidateQueries({ queryKey: ['taskLists'] })
   };
 };
