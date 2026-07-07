@@ -148,23 +148,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <div className="w-full">
                 <button
                   onClick={onOpenSpotlight}
-                  className="w-full flex items-center justify-between p-5 bg-white/50 dark:bg-zinc-900/50 hover:bg-white/70 dark:hover:bg-zinc-900/70 border border-white/40 dark:border-white/10 rounded-3xl transition-all duration-300 group cursor-text text-left shadow-lg"
+                  className="w-full flex items-center gap-4 p-5 bg-zinc-100/80 dark:bg-zinc-900/80 hover:bg-zinc-200/80 dark:hover:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 rounded-2xl transition-all duration-300 group cursor-text text-left shadow-sm"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-zinc-900 dark:bg-white rounded-2xl text-white dark:text-zinc-900 shadow-lg group-hover:scale-110 transition-transform">
-                      <SearchIcon className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xl font-semibold text-zinc-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {t('dashboard.search_placeholder')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 pr-4">
-                    <kbd className="hidden md:flex h-8 items-center gap-1 rounded border border-zinc-300 dark:border-zinc-700 bg-white/50 dark:bg-zinc-800 px-2 font-mono text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      /
-                    </kbd>
-                  </div>
+                  <SearchIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors shrink-0" />
+                  <span className="flex-1 text-base text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors">
+                    {t('dashboard.search_placeholder')}
+                  </span>
+                  <kbd className="hidden md:flex h-7 items-center rounded-md border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-800/60 px-2 font-mono text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    /
+                  </kbd>
                 </button>
               </div>
 
