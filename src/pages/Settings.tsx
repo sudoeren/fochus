@@ -1389,11 +1389,11 @@ const AboutSection = () => {
         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-500/30 transition-colors duration-700" />
 
         <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-zinc-100 dark:bg-white rounded-3xl flex items-center justify-center shadow-xl mb-6 rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden p-2">
+          <div className="mb-6">
             <img
               src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
               alt="Fochus Logo"
-              className="w-full h-full object-contain"
+              className="w-24 h-24 object-contain mx-auto"
             />
           </div>
           <h2 className="text-4xl font-bold tracking-tight mb-1">FOCHUS</h2>
