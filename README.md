@@ -84,7 +84,11 @@ cd fochus-win-x64
 
 > Once started, open **http://localhost:5800** in your browser. Data is stored in `data/fochus.db` next to the package.
 
-### Docker
+---
+
+## Other Ways to Run
+
+### Docker (Linux)
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
