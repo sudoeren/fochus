@@ -213,9 +213,8 @@
     "focus_timer": "FOCUS TIMER",
     "start": "Başlat",
     "pause": "Duraklat",
-    "mode_open": "Açık",
-    "mode_closed": "Kapalı",
-    "mode_hover": "Hover"
+    "open_sidebar": "Kenar çubuğunu aç",
+    "close_sidebar": "Kenar çubuğunu kapat"
   },
   "navbar": {
     "dashboard": "Dashboard",

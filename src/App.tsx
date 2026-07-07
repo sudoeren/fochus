@@ -167,8 +167,6 @@ const App: React.FC = () => {
     return (saved as SidebarMode) || 'open';
   });
 
-  const [sidebarHoverExpanded, setSidebarHoverExpanded] = useState(false);
-
   useEffect(() => {
     localStorage.setItem('sidebarMode', sidebarMode);
   }, [sidebarMode]);
@@ -534,24 +532,14 @@ const App: React.FC = () => {
         onOpenTaskModal={() => handleOpenModal('task')}
         onOpenPomodoro={() => handleOpenModal('pomodoro')}
         sidebarMode={sidebarMode}
-        onSidebarModeChange={(mode) => {
-          setSidebarMode(mode);
-          if (mode !== 'hover') setSidebarHoverExpanded(false);
-        }}
-        onSidebarHoverExpandedChange={setSidebarHoverExpanded}
+        onSidebarModeChange={setSidebarMode}
       />
 
       {/* Main Content Area - With Padding for Sidebar */}
       <main
         className={cn(
           'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
-          sidebarMode === 'open'
-            ? 'lg:pl-[320px]'
-            : sidebarMode === 'hover'
-              ? sidebarHoverExpanded
-                ? 'lg:pl-[320px]'
-                : 'lg:pl-[96px]'
-              : 'lg:pl-4'
+          sidebarMode === 'open' ? 'lg:pl-[320px]' : 'lg:pl-4'
         )}
       >
         {renderView()}

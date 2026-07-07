@@ -213,9 +213,8 @@
     "focus_timer": "FOCUS TIMER",
     "start": "Start",
     "pause": "Pause",
-    "mode_open": "Open",
-    "mode_closed": "Closed",
-    "mode_hover": "Hover"
+    "open_sidebar": "Open sidebar",
+    "close_sidebar": "Close sidebar"
   },
   "navbar": {
     "dashboard": "Dashboard",
