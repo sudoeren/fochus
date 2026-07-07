@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Check, Trash2, GripVertical } from 'lucide-react';
 import { Task } from '../types/index';
+import { useTranslation } from 'react-i18next';
 
 interface SubTaskListProps {
   subtasks: Task[];
@@ -19,6 +20,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
   onReorder,
   className = ''
 }) => {
+  const { t } = useTranslation();
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -158,7 +160,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
             value={newSubtaskTitle}
             onChange={(e) => setNewSubtaskTitle(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder="Alt görev adı..."
+            placeholder={t('subtasks.placeholder')}
             className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500"
             autoFocus
           />
@@ -167,7 +169,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
             disabled={!newSubtaskTitle.trim()}
             className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Ekle
+            {t('subtasks.add')}
           </button>
           <button
             onClick={() => {
@@ -176,7 +178,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
             }}
             className="px-3 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
           >
-            İptal
+            {t('common.cancel')}
           </button>
         </div>
       ) : (
@@ -185,7 +187,7 @@ export const SubTaskList: React.FC<SubTaskListProps> = ({
           className="flex items-center gap-2 w-full p-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span className="text-sm">Alt görev ekle</span>
+          <span className="text-sm">{t('subtasks.add_subtask')}</span>
         </button>
       )}
     </div>

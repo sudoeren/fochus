@@ -33,6 +33,8 @@
     "background_desc": "Sürükleyici bir duvar kağıdı deneyimi veya temiz, minimal bir görünüm arasında seçim yapın.",
     "background_immersive": "Sürükleyici",
     "background_minimal": "Minimal",
+    "rich_visual_experience": "Zengin görsel deneyim",
+    "clean_distraction_free": "Temiz, dikkat dağıtmayan",
     "finish": "Fochus'a Başla"
   },
   "settings": {
@@ -326,6 +328,16 @@
     "reset": "Sıfırla",
     "settings": "Ayarlar",
     "close": "Kapat"
+  },
+  "subtasks": {
+    "placeholder": "Alt görev adı...",
+    "add": "Ekle",
+    "add_subtask": "Alt görev ekle"
+  },
+  "mobile_restricted": {
+    "title": "Masaüstü Deneyimi",
+    "description": "Fochus, üretkenliğinizi en üst düzeye çıkarmak için geniş ekranlar ve klavye kısayolları düşünülerek tasarlandı.",
+    "instruction": "Lütfen bilgisayarınızdan erişin"
   },
   "spotlight": {
     "placeholder": "Arama yapın veya komut yazın...",

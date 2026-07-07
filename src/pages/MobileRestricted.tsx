@@ -1,7 +1,9 @@
 import React from 'react';
 import { Laptop, Smartphone, ArrowRight, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const MobileRestricted: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 font-sans">
       {/* Background Effects */}
@@ -54,13 +56,12 @@ export const MobileRestricted: React.FC = () => {
           <div className="text-center space-y-4">
             <h1 className="text-2xl font-bold tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 dark:from-white dark:via-zinc-200 dark:to-zinc-400">
-                Masaüstü Deneyimi
+                {t('mobile_restricted.title')}
               </span>
             </h1>
 
             <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm">
-              Fochus, üretkenliğinizi en üst düzeye çıkarmak için geniş ekranlar ve klavye
-              kısayolları düşünülerek tasarlandı.
+              {t('mobile_restricted.description')}
             </p>
 
             <div className="pt-6">
@@ -70,7 +71,7 @@ export const MobileRestricted: React.FC = () => {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                 </span>
                 <span className="text-xs font-medium text-indigo-600 dark:text-indigo-300">
-                  Lütfen bilgisayarınızdan erişin
+                  {t('mobile_restricted.instruction')}
                 </span>
               </div>
             </div>
