@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
-import {} from // Icons removed
-'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
