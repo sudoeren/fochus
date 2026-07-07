@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/admin.js';
@@ -9,7 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 // GET /api/admin/users - List all users
-router.get('/users', requireAdmin, async (req: AuthRequest, res: Response) => {
+router.get('/users', requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -30,12 +30,12 @@ router.get('/users', requireAdmin, async (req: AuthRequest, res: Response) => {
 
     res.json(users);
   } catch (error) {
-    res.status(500).json({ error: 'Kullanıcılar listelenirken hata oluştu' });
+    next(error);
   }
 });
 
 // DELETE /api/admin/users/:id - Delete a user
-router.delete('/users/:id', requireAdmin, async (req: AuthRequest, res: Response) => {
+router.delete('/users/:id', requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -50,12 +50,12 @@ router.delete('/users/:id', requireAdmin, async (req: AuthRequest, res: Response
 
     res.json({ message: 'Kullanıcı başarıyla silindi' });
   } catch (error) {
-    res.status(500).json({ error: 'Kullanıcı silinirken hata oluştu' });
+    next(error);
   }
 });
 
 // GET /api/admin/settings - Get system settings
-router.get('/settings', requireAdmin, async (req: AuthRequest, res: Response) => {
+router.get('/settings', requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     let settings = await prisma.systemSettings.findFirst();
 
@@ -69,12 +69,12 @@ router.get('/settings', requireAdmin, async (req: AuthRequest, res: Response) =>
 
     res.json(settings);
   } catch (error) {
-    res.status(500).json({ error: 'Sistem ayarları yüklenemedi' });
+    next(error);
   }
 });
 
 // PUT /api/admin/settings - Update system settings
-router.put('/settings', requireAdmin, async (req: AuthRequest, res: Response) => {
+router.put('/settings', requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { allowRegistration } = req.body;
 
@@ -93,12 +93,12 @@ router.put('/settings', requireAdmin, async (req: AuthRequest, res: Response) =>
 
     res.json({ message: 'Ayarlar güncellendi', allowRegistration });
   } catch (error) {
-    res.status(500).json({ error: 'Sistem ayarları güncellenemedi' });
+    next(error);
   }
 });
 
 // POST /api/admin/promote/:id - Promote user to admin (Only accessible by other admins)
-router.post('/promote/:id', requireAdmin, async (req: AuthRequest, res: Response) => {
+router.post('/promote/:id', requireAdmin, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     
@@ -109,7 +109,7 @@ router.post('/promote/:id', requireAdmin, async (req: AuthRequest, res: Response
 
     res.json({ message: 'Kullanıcı yönetici yapıldı' });
   } catch (error) {
-    res.status(500).json({ error: 'İşlem başarısız' });
+    next(error);
   }
 });
 

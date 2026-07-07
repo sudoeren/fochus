@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
@@ -22,7 +22,7 @@ const taskListUpdateSchema = z.object({
 });
 
 // GET /api/task-lists - Get all task lists
-router.get('/', async (req: AuthRequest, res: Response) => {
+router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const lists = await prisma.taskList.findMany({
       where: {
@@ -43,13 +43,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
     res.json(lists);
   } catch (error) {
-    console.error('Get task lists error:', error);
-    res.status(500).json({ error: 'Listeler yüklenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // GET /api/task-lists/:id - Get single task list with tasks
-router.get('/:id', async (req: AuthRequest, res: Response) => {
+router.get('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const list = await prisma.taskList.findFirst({
       where: {
@@ -73,13 +72,12 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 
     res.json(list);
   } catch (error) {
-    console.error('Get task list error:', error);
-    res.status(500).json({ error: 'Liste yüklenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // POST /api/task-lists - Create task list
-router.post('/', async (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const validation = taskListSchema.safeParse(req.body);
     
@@ -105,13 +103,12 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(list);
   } catch (error) {
-    console.error('Create task list error:', error);
-    res.status(500).json({ error: 'Liste oluşturulurken bir hata oluştu' });
+    next(error);
   }
 });
 
 // PUT /api/task-lists/reorder - Reorder lists
-router.put('/reorder', async (req: AuthRequest, res: Response) => {
+router.put('/reorder', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { listIds } = req.body;
 
@@ -133,13 +130,12 @@ router.put('/reorder', async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Sıralama güncellendi' });
   } catch (error) {
-    console.error('Reorder lists error:', error);
-    res.status(500).json({ error: 'Sıralama güncellenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // PUT /api/task-lists/:id - Update task list
-router.put('/:id', async (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const validation = taskListUpdateSchema.safeParse(req.body);
     if (!validation.success) {
@@ -173,13 +169,12 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     res.json(list);
   } catch (error) {
-    console.error('Update task list error:', error);
-    res.status(500).json({ error: 'Liste güncellenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // DELETE /api/task-lists/:id - Delete task list
-router.delete('/:id', async (req: AuthRequest, res: Response) => {
+router.delete('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const existingList = await prisma.taskList.findFirst({
       where: {
@@ -206,8 +201,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Liste silindi' });
   } catch (error) {
-    console.error('Delete task list error:', error);
-    res.status(500).json({ error: 'Liste silinirken bir hata oluştu' });
+    next(error);
   }
 });
 
