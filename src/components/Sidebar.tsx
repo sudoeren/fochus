@@ -7,7 +7,6 @@ import {
   Settings,
   Trash2,
   Search,
-  Timer,
   Plus,
   Play,
   Pause,
@@ -95,8 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
     { id: 'stats', label: t('sidebar.stats'), icon: BarChart3 },
     { id: 'tasks', label: t('sidebar.tasks'), icon: CheckSquare },
-    { id: 'notes', label: t('sidebar.notes'), icon: FileText },
-    { id: 'timer', label: t('sidebar.timer'), icon: Timer }
+    { id: 'notes', label: t('sidebar.notes'), icon: FileText }
   ];
 
   // Filter pending tasks for the widget (Show top 4)
@@ -211,11 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (item.id === 'timer') {
-                          onOpenPomodoro();
-                        } else {
-                          onViewChange(item.id);
-                        }
+                        onViewChange(item.id);
                         setMobileOpen(false);
                       }}
                       title={item.label}
@@ -353,11 +347,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => {
-                        if (item.id === 'timer') {
-                          onOpenPomodoro();
-                        } else {
-                          onViewChange(item.id);
-                        }
+                        onViewChange(item.id);
                         setMobileOpen(false);
                       }}
                       title={isCompact ? item.label : undefined}
@@ -478,7 +468,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
 
                 {/* BIG Pomodoro Widget */}
-                <div className="bg-zinc-900 dark:bg-black rounded-2xl p-5 text-white shadow-xl relative overflow-hidden group">
+                <div
+                  onClick={onOpenPomodoro}
+                  className="bg-zinc-900 dark:bg-black rounded-2xl p-5 text-white shadow-xl relative overflow-hidden group cursor-pointer"
+                >
                   {/* Subtle Animated Background */}
                   <div className="absolute inset-0 bg-indigo-500/10 blur-2xl opacity-30 pointer-events-none group-hover:opacity-50 transition-opacity duration-700" />
 
@@ -501,7 +494,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                     <div className="flex gap-2 w-full">
                       <button
-                        onClick={toggleTimer}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTimer();
+                        }}
                         className="flex-1 h-10 bg-white text-zinc-900 rounded-xl flex items-center justify-center font-bold text-sm hover:bg-zinc-200 transition-all active:scale-95 shadow-none"
                       >
                         {isActive ? (
@@ -512,7 +508,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {isActive ? t('sidebar.pause') : t('sidebar.start')}
                       </button>
                       <button
-                        onClick={resetTimer}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          resetTimer();
+                        }}
                         className="w-10 h-10 bg-zinc-800 rounded-xl flex items-center justify-center hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white active:scale-95 shadow-none"
                       >
                         <RotateCcw className="w-4 h-4" />
