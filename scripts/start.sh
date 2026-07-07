@@ -30,4 +30,8 @@ echo "Press Ctrl+C to stop."
 echo ""
 
 export PORT=5800
-exec node --env-file="$SCRIPT_DIR/backend/.env" dist/index.js
+node --env-file="$SCRIPT_DIR/backend/.env" dist/index.js &
+PID=$!
+echo "  Fochus is running at http://localhost:5800"
+echo "  Press Ctrl+C to stop."
+wait $PID

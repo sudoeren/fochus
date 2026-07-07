@@ -27,10 +27,12 @@ call .\node_modules\.bin\prisma db push --skip-generate 2>nul
 if %ERRORLEVEL% NEQ 0 call .\node_modules\.bin\prisma db push
 
 echo.
-echo   Fochus is starting at http://localhost:5800
+set PORT=5800
+start /B "" node dist/index.js
+
+echo.
+echo   Fochus is running at http://localhost:5800
 echo Press Ctrl+C to stop.
 echo.
 
-set PORT=5800
-node dist/index.js
 pause

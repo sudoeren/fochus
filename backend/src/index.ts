@@ -15,7 +15,7 @@ import pomodoroRoutes from './routes/pomodoro.js';
 import settingsRoutes from './routes/settings.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -66,7 +66,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Fokus API running on http://localhost:${PORT}`);
+  console.log(`🚀 Fochus is running at http://localhost:${PORT}`);
 });
 
 export default app;
