@@ -101,16 +101,12 @@ const App: React.FC = () => {
   );
 
   const handleCloseModal = useCallback(() => {
-    if (window.history.state?.modal) {
-      window.history.back();
-    } else {
-      const hash = window.location.hash.slice(1).split('?')[0] || activeView;
-      window.history.replaceState(null, '', `#${hash}`);
-      setShowNoteModal(false);
-      setShowTaskModal(false);
-      setShowPomodoroModal(false);
-      setIsSpotlightOpen(false);
-    }
+    const hash = window.location.hash.slice(1).split('?')[0] || activeView;
+    window.history.replaceState(null, '', `#${hash}`);
+    setShowNoteModal(false);
+    setShowTaskModal(false);
+    setShowPomodoroModal(false);
+    setIsSpotlightOpen(false);
   }, [activeView]);
 
   // Sync Effect
