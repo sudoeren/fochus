@@ -4,7 +4,7 @@ set -e
 REPO="https://github.com/sudoeren/fochus.git"
 CONTAINER="fochus"
 IMAGE="fochus"
-PORT=3000
+PORT=5800
 VOLUME="fochus_data"
 
 # Colors
@@ -44,7 +44,7 @@ docker stop "$CONTAINER" >/dev/null 2>&1 && docker rm "$CONTAINER" >/dev/null 2>
 docker run -d \
   --name "$CONTAINER" \
   --restart unless-stopped \
-  -p "$PORT:3000" \
+  -p "$PORT:5800" \
   -v "$VOLUME:/app/data" \
   "$IMAGE" >/dev/null || err "Failed to start container"
 

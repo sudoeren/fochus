@@ -121,10 +121,9 @@ export const TasksWithLists: React.FC<TasksNewProps> = ({ onOpenTaskModal, onEdi
       destination.droppableId === 'uncategorized' ? null : destination.droppableId;
 
     try {
-      await moveTaskToList(draggableId, targetListId, { skipRefresh: true });
+      await moveTaskToList(draggableId, targetListId);
       await new Promise((resolve) => setTimeout(resolve, 100));
-      await refetchTaskLists(true);
-      await loadTasks();
+      await refetchTaskLists();
     } catch (error) {
       console.error('Failed to move task:', error);
       await loadTasks();

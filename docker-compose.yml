@@ -16,14 +16,14 @@ services:
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
       PORT: 3001
       NODE_ENV: ${NODE_ENV:-production}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5800}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-    ports:
-      - "${BACKEND_HOST_PORT:-3001}:3001"
+    expose:
+      - 5800
     volumes:
       - fokus_data:/app/data
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+        test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,12 +37,12 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+        VITE_API_URL: ${VITE_API_URL:-/api}
         VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
     container_name: fokus-frontend
     restart: unless-stopped
     ports:
-      - "${FRONTEND_HOST_PORT:-3000}:80"
+      - "${FRONTEND_HOST_PORT:-5800}:80"
     depends_on:
       backend:
         condition: service_healthy

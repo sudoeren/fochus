@@ -90,7 +90,7 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   const listRef = useRef<HTMLDivElement>(null);
   const { tasks } = useTasks();
   const { notes } = useNotes();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, isDark } = useTheme();
 
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -339,13 +339,11 @@ export const Spotlight: React.FC<SpotlightProps> = ({
       } else if (e.key === 'Enter') {
         e.preventDefault();
         if (allItems[selectedIndex]) allItems[selectedIndex].action();
-      } else if (e.key === 'Escape') {
-        onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, allItems, selectedIndex, onClose]);
+  }, [isOpen, allItems, selectedIndex]);
 
   // Group items for rendering
   const groupedItems = allItems.reduce(
@@ -528,7 +526,11 @@ export const Spotlight: React.FC<SpotlightProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Fochus" className="w-4 h-4" />
+            <img
+              src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+              alt="Fochus"
+              className="w-4 h-4"
+            />
             <span className="font-semibold">FOCHUS</span>
           </div>
         </div>

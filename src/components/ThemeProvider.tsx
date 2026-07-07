@@ -9,14 +9,21 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const getInitialTheme = (): 'light' | 'dark' | 'system' => {
+  const stored = localStorage.getItem('theme');
+  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+  return 'system';
+};
+
+const getInitialIsDark = (theme: 'light' | 'dark' | 'system'): boolean => {
+  if (theme === 'dark') return true;
+  if (theme === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>(() => {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-    // First launch (no saved preference): follow device theme.
-    return 'system';
-  });
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>(getInitialTheme);
+  const [isDark, setIsDark] = useState<boolean>(() => getInitialIsDark(getInitialTheme()));
 
   // Removed useEffect that was just syncing from localStorage on mount
 

@@ -1,7 +1,7 @@
 /* global self, caches, URL, fetch */
 
 const CACHE_NAME = 'fochus-app-v1';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo.svg', '/light.png', '/dark.png'];
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/logo-light.svg', '/logo-dark.svg', '/light.png', '/dark.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

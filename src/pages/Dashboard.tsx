@@ -40,7 +40,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSpotlight,
   onOpenPomodoro
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { tasks, toggleTask } = useTasks();
   const { notes } = useNotes();
   const { timeLeft, isActive, toggleTimer, formatTime } = usePomodoro();
@@ -49,20 +49,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const [weeklyFocusSeconds, setWeeklyFocusSeconds] = useState<number>(0);
 
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  const getGreeting = () => {
-    const h = currentTime.getHours();
-    if (h < 6) return t('dashboard.night_shift');
-    if (h < 12) return t('dashboard.good_morning');
-    if (h < 18) return t('dashboard.good_afternoon');
-    return t('dashboard.good_evening');
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const [showAllTasks, setShowAllTasks] = useState(false);
+  const [showAllNotes, setShowAllNotes] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,8 +102,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return `${hours}s ${minutes}d`;
   };
 
-  const pendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted).slice(0, 5);
-  const recentNotes = notes.filter((n) => !n.isDeleted).slice(0, 5);
+  const allPendingTasks = tasks.filter((t) => !t.isCompleted && !t.isDeleted);
+  const allRecentNotes = notes.filter((n) => !n.isDeleted);
+  const TASK_LIMIT = 3;
+  const NOTE_LIMIT = 2;
+  const pendingTasks = showAllTasks ? allPendingTasks : allPendingTasks.slice(0, TASK_LIMIT);
+  const recentNotes = showAllNotes ? allRecentNotes : allRecentNotes.slice(0, NOTE_LIMIT);
 
   return (
     <div className="h-full w-full relative">
@@ -125,46 +117,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="max-w-[1000px] mx-auto flex flex-col gap-16 w-full">
           {' '}
           {/* Reduced max-width */}
-          {/* Header Section - Clock & Greeting */}
-          <div className="flex flex-col items-start gap-4 animate-in slide-in-from-left duration-700 mt-10">
-            {' '}
-            {/* Added margin-top */}
-            <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
-              {currentTime.toLocaleTimeString(i18n.language, {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </h1>
-            <div className="flex items-center ml-2">
-              <span className="text-3xl font-light text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.2em]">
-                {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
-              </span>
-            </div>
-          </div>
+          <ClockWidget displayName={displayName} />
           {/* Main Unified Glass Frame (Bento Grid Container) */}
-          <div className="w-full bg-white/40 dark:bg-black/40 backdrop-blur-3xl border border-white/30 dark:border-white/10 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
+          <div className="w-full bg-white/85 dark:bg-zinc-950/85 backdrop-blur-3xl border border-zinc-200/60 dark:border-zinc-700/60 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
             <div className="flex flex-col gap-8">
               {/* 1. Search Section - Integrated into the top */}
               <div className="w-full">
                 <button
                   onClick={onOpenSpotlight}
-                  className="w-full flex items-center justify-between p-5 bg-white/50 dark:bg-zinc-900/50 hover:bg-white/70 dark:hover:bg-zinc-900/70 border border-white/40 dark:border-white/10 rounded-3xl transition-all duration-300 group cursor-text text-left shadow-lg"
+                  className="w-full flex items-center gap-4 p-5 bg-zinc-100/80 dark:bg-zinc-900/80 hover:bg-zinc-200/80 dark:hover:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60 rounded-2xl transition-all duration-300 group cursor-text text-left shadow-sm"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-zinc-900 dark:bg-white rounded-2xl text-white dark:text-zinc-900 shadow-lg group-hover:scale-110 transition-transform">
-                      <SearchIcon className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xl font-semibold text-zinc-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {t('dashboard.search_placeholder')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 pr-4">
-                    <kbd className="hidden md:flex h-8 items-center gap-1 rounded border border-zinc-300 dark:border-zinc-700 bg-white/50 dark:bg-zinc-800 px-2 font-mono text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                      /
-                    </kbd>
-                  </div>
+                  <SearchIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors shrink-0" />
+                  <span className="flex-1 text-base text-zinc-400 group-hover:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors">
+                    {t('dashboard.search_placeholder')}
+                  </span>
+                  <kbd className="hidden md:flex h-7 items-center rounded-md border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-800/60 px-2 font-mono text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    /
+                  </kbd>
                 </button>
               </div>
 
@@ -227,7 +196,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 {/* Tasks Card (Functional) */}
-                <div className="group relative overflow-hidden bg-white/50 dark:bg-zinc-900/50 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:bg-white/70 dark:hover:bg-zinc-900/70 hover:scale-[1.02] hover:shadow-xl flex flex-col">
+                <div className="group relative overflow-hidden bg-white/85 dark:bg-zinc-950/85 border border-zinc-200/60 dark:border-zinc-700/60 rounded-3xl p-6 transition-all hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:scale-[1.02] hover:shadow-xl flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl text-emerald-700 dark:text-emerald-300">
@@ -276,22 +245,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     <span>
-                      {tasks.filter((t) => !t.isCompleted && !t.isDeleted).length}{' '}
-                      {t('dashboard.pending')}
+                      {allPendingTasks.length} {t('dashboard.pending')}
                     </span>
-                    <button
-                      onClick={() => onNavigate('tasks')}
-                      className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                    >
-                      {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {allPendingTasks.length > TASK_LIMIT && (
+                        <button
+                          onClick={() => setShowAllTasks(!showAllTasks)}
+                          className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                          {showAllTasks ? t('dashboard.show_less') : t('dashboard.show_all')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onNavigate('tasks')}
+                        className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      >
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Notes Card (Functional) */}
-                <div className="group relative overflow-hidden bg-white/50 dark:bg-zinc-900/50 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:bg-white/70 dark:hover:bg-zinc-900/70 hover:scale-[1.02] hover:shadow-xl flex flex-col">
+                <div className="group relative overflow-hidden bg-white/85 dark:bg-zinc-950/85 border border-zinc-200/60 dark:border-zinc-700/60 rounded-3xl p-6 transition-all hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:scale-[1.02] hover:shadow-xl flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 rounded-xl text-amber-700 dark:text-amber-300">
@@ -315,7 +293,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {recentNotes.map((note) => (
                           <li
                             key={note.id}
-                            className="group/item p-3 bg-white/50 dark:bg-black/20 rounded-xl border border-white/50 dark:border-white/5 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer"
+                            className="group/item p-3 bg-white/80 dark:bg-black/50 rounded-xl border border-zinc-200/40 dark:border-zinc-700/40 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer"
                             onClick={() => onNavigate('notes')} // Ideally open specific note
                           >
                             <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate mb-1 group-hover/item:text-amber-700 dark:group-hover/item:text-amber-400 transition-colors">
@@ -338,22 +316,68 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex justify-between items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  <div className="mt-4 pt-4 border-t border-zinc-200/50 dark:border-white/5 flex items-center justify-between text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     <span>
-                      {notes.length} {t('dashboard.records')}
+                      {allRecentNotes.length} {t('dashboard.records')}
                     </span>
-                    <button
-                      onClick={() => onNavigate('notes')}
-                      className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                    >
-                      {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {allRecentNotes.length > NOTE_LIMIT && (
+                        <button
+                          onClick={() => setShowAllNotes(!showAllNotes)}
+                          className="hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                          {showAllNotes ? t('dashboard.show_less') : t('dashboard.show_all')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onNavigate('notes')}
+                        className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                      >
+                        {t('dashboard.all')} <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// ClockWidget - isolated to prevent Dashboard-wide re-renders every second
+const ClockWidget: React.FC<{ displayName: string }> = ({ displayName }) => {
+  const { t, i18n } = useTranslation();
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  const getGreeting = () => {
+    const h = currentTime.getHours();
+    if (h < 6) return t('dashboard.night_shift');
+    if (h < 12) return t('dashboard.good_morning');
+    if (h < 18) return t('dashboard.good_afternoon');
+    return t('dashboard.good_evening');
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-start gap-4 animate-in slide-in-from-left duration-700 mt-10">
+      <h1 className="text-9xl lg:text-[10rem] font-bold tracking-tighter text-zinc-900 dark:text-white drop-shadow-sm font-mono leading-none">
+        {currentTime.toLocaleTimeString(i18n.language, {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </h1>
+      <div className="flex items-center ml-2">
+        <span className="text-3xl font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.25em]">
+          {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
+        </span>
       </div>
     </div>
   );

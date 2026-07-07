@@ -1,107 +1,105 @@
-<div align="center">
-  <img src="public/logo.svg" alt="Fochus Logo" width="120">
-  <h1>Fochus</h1>
-  <p>Manage Your Productivity and Focus Time</p>
+<div align="left">
+  <table>
+    <tr>
+      <td width="80">
+        <img src="public/logo-light.svg" alt="Fochus Logo" width="72">
+      </td>
+      <td>
+        <h1 style="margin: 0;">Fochus</h1>
+        <p style="margin: 4px 0 0 0; color: #666;">Manage Your Productivity and Focus Time</p>
+      </td>
+    </tr>
+  </table>
 </div>
 
-<p align="center">
-  <strong>Fochus</strong> is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
-</p>
+<br>
 
-<div align="center">
+**Fochus** is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
 
-[Features](#features) •
-[Installation](#installation) •
-[FAQ](#faq) •
-[License](#license)
+---
 
-</div>
+## Features
+
+| Feature | Description |
+| --- | --- |
+| **Smart Notes** | Rich text editor with HTML formatting, pinning for quick access, trash system for safe deletion, and direct task linking. |
+| **Task Management** | Custom lists with color coding, recurring tasks, drag-and-drop sorting, subtasks, and status tracking. |
+| **Pomodoro Timer** | Built-in work, short break, and long break modes with automatic session tracking and productivity history. |
+| **Spotlight Search** | Press `/` to instantly search notes, tasks, and navigate the app without leaving the keyboard. |
+| **Dark Mode** | System-aware theme with an eye-friendly dark mode and a clean light mode. Toggle manually or follow system preferences. |
+| **Docker Ready** | Single-command deployment with embedded SQLite. No external database required. |
 
 ---
 
 ## App Preview
 
-Fochus comes with an eye-friendly dark mode and a spacious light mode. You can use the system theme or select manually according to your preference.
-
-### Light and Dark Mode
-
 <div align="center">
-  <img src="screenshot_dark.png" alt="Fochus Dark Mode" width="100%" style="border-radius: 10px; margin-bottom: 20px;">
-  <br>
-  <em>Stylish and focus-enhancing Dark Mode</em>
-  <br><br>
-  <img src="screenshot_light.png" alt="Fochus Light Mode" width="100%" style="border-radius: 10px;">
-  <br>
-  <em>Clean and spacious Light Mode</em>
+  <table>
+    <tr>
+      <td width="50%" align="center">
+        <img src="screenshot_light.png" alt="Fochus Light Mode" width="100%" style="border-radius: 12px;">
+        <br>
+        <em>Clean and spacious Light Mode</em>
+      </td>
+      <td width="50%" align="center">
+        <img src="screenshot_dark.png" alt="Fochus Dark Mode" width="100%" style="border-radius: 12px;">
+        <br>
+        <em>Stylish and focus-enhancing Dark Mode</em>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ---
 
-## One-Line Install (Linux)
+## Spotlight
 
-Any Linux machine with Docker — one command, zero configuration:
+Access your notes, tasks, and settings in seconds without lifting your hands from the keyboard. Spotlight is a command palette that lets you search, create, and navigate the entire app with just the `/` key.
 
-```bash
-curl -sSL https://github.com/sudoeren/fochus/raw/main/install.sh | bash
-```
-
-Or if you prefer to review first:
-
-```bash
-git clone https://github.com/sudoeren/fochus.git
-cd fochus
-bash install.sh
-```
-
-The script will:
-- Clone the repository
-- Build a single Docker image (backend + frontend + SQLite)
-- Start the container with auto-restart
-- Open port `3000` in the firewall (if using `ufw`)
-- Show your local and network access URLs
-
-> **External access:** The app binds to `0.0.0.0:3000`. Access from anywhere on your network via `http://<server-ip>:3000`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
-
-### Uninstall
-
-```bash
-bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
-```
-
-Or from a local clone:
-
-```bash
-bash uninstall.sh
-```
-
-This stops the container, removes it, deletes the data volume and Docker image.
+<div align="center">
+  <img src="spotlight.png" alt="Spotlight Search" width="60%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+</div>
 
 ---
 
-### Other Setup Methods
+## Quick Start
 
-#### Node.js (Direct, No Docker)
+Download the portable package for your platform from the [latest release](https://github.com/sudoeren/fochus/releases/latest) and run:
+
+### Linux / macOS
 
 ```bash
-git clone https://github.com/sudoeren/fochus.git
-cd fochus
-npm run setup    # installs deps, creates SQLite DB, generates Prisma
-npm start        # runs backend + frontend simultaneously
+curl -L https://github.com/sudoeren/fochus/releases/latest/download/fochus-linux-x64.tar.gz | tar xz
+cd fochus-linux-x64
+./start.sh
 ```
 
-Open **http://localhost:5173**.
+### Windows
 
-#### Docker Compose
+```powershell
+# Download fochus-win-x64.zip from the latest release and extract
+cd fochus-win-x64
+.\start.bat
+```
+
+> Once started, open **http://localhost:5800** in your browser. Data is stored in `data/fochus.db` next to the package.
+
+---
+
+## Other Ways to Run
+
+### Docker Compose
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
 cd fochus
+cp .env.example .env
 docker-compose up -d --build
 ```
 
-Open **http://localhost:3000**.
+Open **http://localhost:5800**.
 
-#### Development
+### Development
 
 ```bash
 # Terminal 1: Backend
@@ -113,64 +111,56 @@ npm run dev      # http://localhost:3001
 
 # Terminal 2: Frontend
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:5800
 ```
 
 ---
 
-## Spotlight: Everything at Your Fingertips
+## Project Structure
 
-Don't get lost in the app! Access your notes, tasks, and settings in seconds with the **Spotlight** feature (`/` key).
-
-<div align="center">
-  <img src="spotlight.png" alt="Spotlight Search Feature" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-</div>
-
----
-
-## Features
-
-Fochus is developed with user experience and efficiency in mind.
-
-### Smart Notes
-
-- **Rich Text Editor:** Format and detail your notes.
-- **Pinning & Organization:** Keep important notes at the top.
-- **Trash System:** Safely restore deleted notes or delete them permanently.
-- **Task Integration:** Link your notes directly with your tasks.
-
-### Advanced Task Management
-
-- **Custom Lists:** Separate tasks into project-based lists and use color codes.
-- **Recurring Tasks:** Create daily, weekly, or monthly routines.
-- **Drag & Drop:** Easily sort tasks with `@hello-pangea/dnd`.
-- **Subtasks:** Break down complex jobs into manageable small parts.
-- **Smart Statuses:** Track Pending, Completed, or Deferred jobs.
-
-### Integrated Pomodoro Timer
-
-- **Focus Modes:** Built-in timer for Work, Short Break, and Long Break.
-- **Session Tracking:** Automatically save sessions to track your productivity history.
-- **Distraction-Free Interface:** Simplified view to help you stay in the flow.
+```
+fochus/
+├── src/              React 19 SPA with Vite, Tailwind 4, TanStack Query
+│   ├── components/   Reusable UI components
+│   ├── pages/        View pages (Dashboard, Notes, Tasks, Settings, etc.)
+│   ├── hooks/        Custom hooks (useTasks, useNotes, usePomodoro, etc.)
+│   ├── services/     API client and external service integrations
+│   ├── locales/      i18n translations (Turkish, English)
+│   └── lib/          Utility functions
+├── backend/          Express 5 REST API
+│   ├── src/
+│   │   ├── routes/   API route handlers
+│   │   ├── middleware/  Auth, admin, error handler
+│   │   └── lib/      Prisma client
+│   └── prisma/       SQLite schema and migrations
+├── public/           Static assets and service worker
+├── docker-compose.yml  Full-stack deployment
+├── Dockerfile        Single image (backend + frontend)
+└── install.sh        One-line setup script
+```
 
 ---
 
-## FAQ
+## Uninstall
 
-**Q: What are the main keyboard shortcuts?**  
-A: You can open the **Spotlight** with the `/` key to quickly access all features and search your data.
+Delete everything with a single command.
 
-**Q: Where is my data stored?**  
-A: With the self-hosted Docker setup, data is stored in a SQLite database inside the `fochus_data` Docker volume. You can back up and restore via the Settings page.
+**Portable** — Inside the fochus folder, run:
 
-**Q: Can I customize the Pomodoro timer?**  
-A: Yes! You can customize work, short break, and long break durations, enable auto-start for breaks or work sessions, and set the long break interval — all from the settings panel inside the timer.
+```bash
+./uninstall.sh      # Linux / macOS
+.\uninstall.bat     # Windows
+```
 
-**Q: Is there a mobile version?**  
-A: Fochus is intentionally desktop-first. A dedicated mobile experience is not planned for now.
+This removes your data and the entire folder.
 
-**Q: How do I run tests?**  
-A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for backend tests. Both use Vitest.
+**Docker Compose** — Inside your repo clone, run:
+
+```bash
+bash uninstall.sh
+```
+
+This stops the container, removes the image, and deletes the data volume.
 
 ---
 
@@ -180,4 +170,6 @@ Distributed under the [MIT License](./LICENSE).
 
 ---
 
-
+<div align="center">
+  <sub>Built with React, Express, Prisma, SQLite — and a lot of focus.</sub>
+</div>

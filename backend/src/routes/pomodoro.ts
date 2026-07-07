@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
@@ -17,7 +17,7 @@ const sessionSchema = z.object({
 });
 
 // GET /api/pomodoro - Get all sessions
-router.get('/', async (req: AuthRequest, res: Response) => {
+router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { startDate, endDate, limit } = req.query;
 
@@ -44,13 +44,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
     res.json(sessions);
   } catch (error) {
-    console.error('Get sessions error:', error);
-    res.status(500).json({ error: 'Oturumlar yüklenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // GET /api/pomodoro/stats - Get statistics
-router.get('/stats', async (req: AuthRequest, res: Response) => {
+router.get('/stats', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { period } = req.query; // week, month, all
 
@@ -132,13 +131,12 @@ router.get('/stats', async (req: AuthRequest, res: Response) => {
       daily: dailyStats
     });
   } catch (error) {
-    console.error('Get stats error:', error);
-    res.status(500).json({ error: 'İstatistikler yüklenirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // POST /api/pomodoro - Create session
-router.post('/', async (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const validation = sessionSchema.safeParse(req.body);
     
@@ -163,13 +161,12 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(session);
   } catch (error) {
-    console.error('Create session error:', error);
-    res.status(500).json({ error: 'Oturum kaydedilirken bir hata oluştu' });
+    next(error);
   }
 });
 
 // DELETE /api/pomodoro/:id - Delete session
-router.delete('/:id', async (req: AuthRequest, res: Response) => {
+router.delete('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const existingSession = await prisma.pomodoroSession.findFirst({
       where: {
@@ -188,8 +185,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 
     res.json({ message: 'Oturum silindi' });
   } catch (error) {
-    console.error('Delete session error:', error);
-    res.status(500).json({ error: 'Oturum silinirken bir hata oluştu' });
+    next(error);
   }
 });
 
