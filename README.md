@@ -65,15 +65,48 @@ Access your notes, tasks, and settings in seconds without lifting your hands fro
 
 ---
 
-## One-Line Install (Linux)
+## Quick Start (No Docker)
 
-Any Linux machine with Docker — one command, zero configuration:
+Download the portable package for your platform from the [latest release](https://github.com/sudoeren/fochus/releases/latest), extract it, and run:
+
+<table>
+<tr>
+<th>Linux / macOS</th>
+<th>Windows</th>
+</tr>
+<tr>
+<td>
+
+```bash
+curl -L https://github.com/sudoeren/fochus/releases/download/v1.1.7/fochus-v1.1.7-linux-x64.tar.gz | tar xz
+cd fochus-v1.1.7
+./start.sh
+```
+</td>
+<td>
+
+```powershell
+# Download and extract fochus-v1.1.7-win-x64.zip
+cd fochus-v1.1.7
+.\start.bat
+```
+</td>
+</tr>
+</table>
+
+No Docker, Node.js, or any other dependency required. The package includes a portable Node.js runtime, the Prisma engine, and everything needed to run Fochus immediately.
+
+> The app starts at **http://localhost:3001**. Data is stored in `data/fochus.db` next to the package.
+
+---
+
+## One-Line Install (Linux — Docker)
 
 ```bash
 curl -sSL https://github.com/sudoeren/fochus/raw/main/install.sh | bash
 ```
 
-Or if you prefer to review first:
+Or from a local clone:
 
 ```bash
 git clone https://github.com/sudoeren/fochus.git
@@ -81,12 +114,7 @@ cd fochus
 bash install.sh
 ```
 
-The script will:
-- Clone the repository
-- Build a single Docker image (backend + frontend + SQLite)
-- Start the container with auto-restart
-- Open port `3000` in the firewall (if using `ufw`)
-- Show your local and network access URLs
+The script will build a single Docker image (backend + frontend + SQLite), start the container with auto-restart, and open port `3000`.
 
 > **External access:** The app binds to `0.0.0.0:3000`. Access from anywhere on your network via `http://<server-ip>:3000`. For internet access, set up a reverse proxy (nginx, Caddy) or a tunnel (ngrok, Cloudflare Tunnel).
 
@@ -95,16 +123,6 @@ The script will:
 ```bash
 bash <(curl -sSL https://github.com/sudoeren/fochus/raw/main/uninstall.sh)
 ```
-
-Or from a local clone:
-
-```bash
-bash uninstall.sh
-```
-
-This stops the container, removes it, deletes the data volume and Docker image.
-
----
 
 ### Other Setup Methods
 

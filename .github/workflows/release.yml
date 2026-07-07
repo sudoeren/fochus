@@ -3,78 +3,141 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
+
+env:
+  NODE_VERSION: '22.14.0'
 
 jobs:
-  release:
+  build:
+    name: Build and package
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
+    strategy:
+      matrix:
+        include:
+          - target: linux-x64
+            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-linux-x64.tar.xz
+            node_dir: node-v${{ env.NODE_VERSION }}-linux-x64
+            archive_ext: .tar.gz
+            archive_cmd: tar czf
+            binary_ext: ""
+
+          - target: linux-arm64
+            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-linux-arm64.tar.xz
+            node_dir: node-v${{ env.NODE_VERSION }}-linux-arm64
+            archive_ext: .tar.gz
+            archive_cmd: tar czf
+            binary_ext: ""
+
+          - target: macos-arm64
+            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-darwin-arm64.tar.gz
+            node_dir: node-v${{ env.NODE_VERSION }}-darwin-arm64
+            archive_ext: .tar.gz
+            archive_cmd: tar czf
+            binary_ext: ""
+
+          - target: win-x64
+            node_url: https://nodejs.org/dist/v${{ env.NODE_VERSION }}/node-v${{ env.NODE_VERSION }}-win-x64.zip
+            node_dir: node-v${{ env.NODE_VERSION }}-win-x64
+            archive_ext: .zip
+            archive_cmd: zip -r
+            binary_ext: .exe
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install frontend dependencies
         run: npm ci
 
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_API_URL: /api
 
       - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: backend
-        run: npx prisma generate
+        run: cd backend && npm ci
 
       - name: Build backend
-        working-directory: backend
-        run: npm run build
+        run: cd backend && npm run build
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Generate Prisma client
+        run: cd backend && npx prisma generate
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+      - name: Prepare package directory
+        run: |
+          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+          mkdir -p "$PKG_DIR/backend"
+
+          # Copy backend files
+          cp -r backend/dist "$PKG_DIR/backend/dist"
+          cp -r backend/prisma "$PKG_DIR/backend/prisma"
+          cp backend/package.json "$PKG_DIR/backend/package.json"
+          cp -r backend/node_modules "$PKG_DIR/backend/node_modules"
+
+          # Copy frontend build to backend/public/
+          mkdir -p "$PKG_DIR/backend/public"
+          cp -r dist/* "$PKG_DIR/backend/public/"
+
+          # Copy start scripts
+          cp scripts/start.sh "$PKG_DIR/start.sh"
+          chmod +x "$PKG_DIR/start.sh"
+
+      - name: Download and bundle portable Node.js (${{ matrix.target }})
+        run: |
+          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+
+          if [ "${{ matrix.archive_ext }}" = ".zip" ]; then
+            # Windows: download zip
+            curl -L "${{ matrix.node_url }}" -o node.zip
+            unzip -q node.zip
+            mv "${{ matrix.node_dir }}" "$PKG_DIR/node"
+            # Remove unnecessary files to reduce size
+            rm -rf "$PKG_DIR/node/node_modules" "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+          else
+            # Linux/macOS: download tar
+            curl -L "${{ matrix.node_url }}" | tar xJf - 2>/dev/null || curl -L "${{ matrix.node_url }}" | tar xzf -
+            mv "${{ matrix.node_dir }}" "$PKG_DIR/node"
+            # Remove unnecessary files
+            rm -rf "$PKG_DIR/node/include" "$PKG_DIR/node/share"
+          fi
+
+      - name: Package archive
+        run: |
+          PKG_DIR="fochus-${{ github.ref_name }}-${{ matrix.target }}"
+          ARCHIVE="fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}"
+          ${{ matrix.archive_cmd }} "$ARCHIVE" "$PKG_DIR"
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
+          asset_name: fochus-${{ github.ref_name }}-${{ matrix.target }}${{ matrix.archive_ext }}
+          asset_content_type: application/octet-stream
 
-      - name: Extract metadata for Docker images
-        id: meta
-        uses: docker/metadata-action@v6
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          images: ghcr.io/${{ github.repository }}
-
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/frontend:${{ github.ref_name }},ghcr.io/${{ github.repository }}/frontend:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Build and push backend image
-        uses: docker/build-push-action@v7
-        with:
-          context: ./backend
-          file: backend/Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/backend:${{ github.ref_name }},ghcr.io/${{ github.repository }}/backend:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          generate_release_notes: true
-          name: Fochus ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
+          body: |
+            See the [commit log](https://github.com/${{ github.repository }}/compare/${{ github.ref_name }}) for details.
+          draft: false
+          prerelease: false
