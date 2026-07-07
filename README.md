@@ -147,25 +147,6 @@ fochus/
 
 ---
 
-## FAQ
-
-**Q: What are the main keyboard shortcuts?**  
-A: Press `/` to open Spotlight for instant search and navigation.
-
-**Q: Where is my data stored?**  
-A: With the self-hosted Docker setup, data is stored in a SQLite database inside the `fochus_data` Docker volume. You can back up and restore via the Settings page.
-
-**Q: Can I customize the Pomodoro timer?**  
-A: Yes — customize work, short break, and long break durations, enable auto-start, and set the long break interval from the settings panel.
-
-**Q: Is there a mobile version?**  
-A: Fochus is intentionally desktop-first. A dedicated mobile experience is not planned for now.
-
-**Q: How do I run tests?**  
-A: Run `npm test` in the root for frontend tests or `cd backend && npm test` for backend tests. Both use Vitest.
-
----
-
 ## Uninstall
 
 **Portable package** — Simply delete the fochus directory.
