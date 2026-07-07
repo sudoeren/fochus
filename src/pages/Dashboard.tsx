@@ -227,7 +227,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 {/* Tasks Card (Functional) */}
-                <div className="group relative overflow-hidden bg-white/50 dark:bg-zinc-900/50 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:bg-white/70 dark:hover:bg-zinc-900/70 hover:scale-[1.02] hover:shadow-xl flex flex-col">
+                <div className="group relative overflow-hidden bg-white/85 dark:bg-zinc-950/85 border border-zinc-200/60 dark:border-zinc-700/60 rounded-3xl p-6 transition-all hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:scale-[1.02] hover:shadow-xl flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl text-emerald-700 dark:text-emerald-300">
@@ -291,7 +291,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 {/* Notes Card (Functional) */}
-                <div className="group relative overflow-hidden bg-white/50 dark:bg-zinc-900/50 border border-white/30 dark:border-white/10 rounded-3xl p-6 transition-all hover:bg-white/70 dark:hover:bg-zinc-900/70 hover:scale-[1.02] hover:shadow-xl flex flex-col">
+                <div className="group relative overflow-hidden bg-white/85 dark:bg-zinc-950/85 border border-zinc-200/60 dark:border-zinc-700/60 rounded-3xl p-6 transition-all hover:bg-white/95 dark:hover:bg-zinc-950/95 hover:scale-[1.02] hover:shadow-xl flex flex-col">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 bg-amber-100 dark:bg-amber-500/20 rounded-xl text-amber-700 dark:text-amber-300">
@@ -315,7 +315,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {recentNotes.map((note) => (
                           <li
                             key={note.id}
-                            className="group/item p-3 bg-white/50 dark:bg-black/20 rounded-xl border border-white/50 dark:border-white/5 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer"
+                            className="group/item p-3 bg-white/80 dark:bg-black/50 rounded-xl border border-zinc-200/40 dark:border-zinc-700/40 hover:border-amber-200 dark:hover:border-amber-500/30 transition-all cursor-pointer"
                             onClick={() => onNavigate('notes')} // Ideally open specific note
                           >
                             <h4 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 truncate mb-1 group-hover/item:text-amber-700 dark:group-hover/item:text-amber-400 transition-colors">
