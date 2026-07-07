@@ -136,13 +136,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })}
             </h1>
             <div className="flex items-center ml-2">
-              <span className="text-3xl font-light text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.2em]">
+              <span className="text-3xl font-semibold text-zinc-800 dark:text-zinc-100 uppercase tracking-[0.25em]">
                 {displayName ? `${getGreeting()}, ${displayName}` : getGreeting()}
               </span>
             </div>
           </div>
           {/* Main Unified Glass Frame (Bento Grid Container) */}
-          <div className="w-full bg-white/40 dark:bg-black/40 backdrop-blur-3xl border border-white/30 dark:border-white/10 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
+          <div className="w-full bg-white/85 dark:bg-zinc-950/85 backdrop-blur-3xl border border-zinc-200/60 dark:border-zinc-700/60 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-700 delay-200">
             <div className="flex flex-col gap-8">
               {/* 1. Search Section - Integrated into the top */}
               <div className="w-full">
