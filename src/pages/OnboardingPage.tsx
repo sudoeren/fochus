@@ -69,6 +69,24 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({
 
         {/* RIGHT SIDE: CONTROLS */}
         <div className="flex-1 flex flex-col p-8 lg:p-16 relative">
+          {/* Top Right Controls */}
+          <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+            <button
+              onClick={() =>
+                setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')
+              }
+              className="p-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
+            >
+              {theme === 'dark' ? (
+                <Moon className="w-4 h-4" />
+              ) : theme === 'system' ? (
+                <Monitor className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+
           <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
             {/* HEADLINES */}
             <div className="mb-10 space-y-3">

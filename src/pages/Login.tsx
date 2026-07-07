@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Moon,
   Sun,
+  Monitor,
   Check,
   Shield
 } from 'lucide-react';
@@ -220,10 +221,18 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         {/* Theme Switcher */}
         <button
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() =>
+            setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')
+          }
           className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-zinc-500 dark:text-white hover:bg-white/20 transition-all shadow-lg"
         >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {theme === 'dark' ? (
+            <Moon className="w-5 h-5" />
+          ) : theme === 'system' ? (
+            <Monitor className="w-5 h-5" />
+          ) : (
+            <Sun className="w-5 h-5" />
+          )}
         </button>
       </div>
 
