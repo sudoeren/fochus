@@ -117,6 +117,7 @@
       "source_code": "Source Code",
       "view_github": "View on GitHub",
       "install_title": "Install as an app",
+      "star": "Star on GitHub",
       "install_desc": "Open Fochus from your browser as a focused standalone desktop window.",
       "install_installed": "Fochus is already running in app mode on this device.",
       "install": "Install",

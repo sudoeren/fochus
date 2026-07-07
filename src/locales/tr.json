@@ -117,6 +117,7 @@
       "source_code": "Kaynak Kod",
       "view_github": "GitHub'da İncele",
       "install_title": "Uygulama olarak yükle",
+      "star": "GitHub'da yıldız verin",
       "install_desc": "Fochus'u tarayıcınızdan bağımsız bir masaüstü penceresi gibi açın.",
       "install_installed": "Fochus bu cihazda uygulama modunda çalışıyor.",
       "install": "Yükle",

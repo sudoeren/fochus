@@ -1462,6 +1462,9 @@ const AboutSection = () => {
                 <p className="text-sm text-zinc-400 dark:text-zinc-500">
                   {t('settings.about.view_github')}
                 </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                  {t('settings.about.star')}
+                </p>
               </div>
             </div>
             <ChevronRight className="w-6 h-6 opacity-50 group-hover:translate-x-1 transition-transform" />
