@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Home,
   BarChart3,
@@ -17,17 +17,13 @@ import {
   Check,
   Circle,
   X,
-  Zap,
-  PanelLeft,
-  PanelLeftClose
+  Zap
 } from 'lucide-react';
 import { usePomodoro } from '../hooks/usePomodoro';
 import { useTasks } from '../hooks/useTasks';
 import { useTheme } from './ThemeProvider';
 import { cn } from '../lib/utils';
 import { useTranslation } from 'react-i18next';
-
-export type SidebarMode = 'open' | 'hover' | 'closed';
 
 interface SidebarProps {
   activeView: string;
@@ -36,8 +32,6 @@ interface SidebarProps {
   onOpenNoteModal: () => void;
   onOpenTaskModal: () => void;
   onOpenPomodoro: () => void;
-  sidebarMode: SidebarMode;
-  onSidebarModeChange: (mode: SidebarMode) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,18 +40,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSpotlight,
   onOpenNoteModal,
   onOpenTaskModal,
-  onOpenPomodoro,
-  sidebarMode,
-  onSidebarModeChange
+  onOpenPomodoro
 }) => {
   const { t } = useTranslation();
   const { isDark } = useTheme();
   const { isActive, timeLeft, formatTime, toggleTimer, resetTimer, progress } = usePomodoro();
   const { tasks, toggleTask } = useTasks();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isPeeking, setIsPeeking] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const peekCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [dismissedCompleted, setDismissedCompleted] = useState<string[]>(() => {
     try {
@@ -85,62 +75,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     )
     .slice(0, 2);
 
-  // Auto-peek on left edge when closed
-  useEffect(() => {
-    if (sidebarMode !== 'closed') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsPeeking(false);
-      return;
-    }
-
-    let frameId: number | null = null;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (frameId !== null) return;
-      frameId = requestAnimationFrame(() => {
-        frameId = null;
-        if (e.clientX <= 15) {
-          setIsPeeking(true);
-        }
-      });
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      if (frameId !== null) cancelAnimationFrame(frameId);
-    };
-  }, [sidebarMode]);
-
-  const schedulePeekClose = () => {
-    peekCloseTimerRef.current = setTimeout(() => {
-      setIsPeeking(false);
-    }, 300);
-  };
-
-  const cancelPeekClose = () => {
-    if (peekCloseTimerRef.current) {
-      clearTimeout(peekCloseTimerRef.current);
-      peekCloseTimerRef.current = null;
-    }
-  };
-
-  const handleMouseEnter = () => {
-    cancelPeekClose();
-  };
-
-  const handleMouseLeave = () => {
-    if (sidebarMode === 'closed') {
-      schedulePeekClose();
-    }
-  };
-
-  const cycleSidebarMode = () => {
-    const modes: SidebarMode[] = ['open', 'hover', 'closed'];
-    const idx = modes.indexOf(sidebarMode);
-    onSidebarModeChange(modes[(idx + 1) % modes.length]);
-  };
-
   const mainNav = [
     { id: 'dashboard', label: t('sidebar.overview'), icon: Home },
     { id: 'stats', label: t('sidebar.stats'), icon: BarChart3 },
@@ -162,19 +96,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-3 h-0.5 bg-zinc-800 dark:bg-zinc-200" />
       </button>
 
-      {/* Desktop reopen button when closed */}
-      {sidebarMode === 'closed' && !isPeeking && (
-        <div className="hidden lg:block fixed top-6 left-6 z-50">
-          <button
-            onClick={cycleSidebarMode}
-            className="p-2.5 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-xl shadow-lg border border-zinc-200/60 dark:border-zinc-700/60 hover:bg-white dark:hover:bg-zinc-900 transition-all group"
-            title={t('sidebar.open_sidebar')}
-          >
-            <PanelLeftClose className="w-4 h-4 text-zinc-500 group-hover:text-zinc-800 dark:group-hover:text-zinc-200 transition-colors" />
-          </button>
-        </div>
-      )}
-
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
@@ -190,11 +111,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           'fixed top-4 bottom-4 z-40 w-[300px] flex flex-col transition-all duration-300 ease-spring',
           // Mobile: slide in/out
           mobileOpen ? 'left-4 translate-x-0' : '-left-[316px]',
-          // Desktop
-          sidebarMode === 'open' || isPeeking ? 'lg:left-4 lg:translate-x-0' : 'lg:-left-[316px]'
+          // Desktop: always visible
+          'lg:left-4 lg:translate-x-0'
         )}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
       >
         <div className="h-full flex flex-col bg-white/85 dark:bg-zinc-950/85 backdrop-blur-2xl rounded-[24px] border border-zinc-200/60 dark:border-zinc-700/60 shadow-2xl shadow-zinc-300/30 dark:shadow-black/60 overflow-hidden relative">
           {/* 1. Header (Custom Logo) */}
@@ -209,14 +128,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 FOCHUS
               </span>
             </div>
-            {/* Sidebar Mode Toggle Button */}
-            <button
-              onClick={cycleSidebarMode}
-              className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
-              title={t('sidebar.close_sidebar')}
-            >
-              <PanelLeft className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors" />
-            </button>
           </div>
 
           {/* 2. Quick Actions */}

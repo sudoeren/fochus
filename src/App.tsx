@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Sidebar, SidebarMode } from './components/Sidebar';
+import { Sidebar } from './components/Sidebar';
 import { useTheme } from './components/ThemeProvider';
 import { Spotlight } from './components/Spotlight';
 import { NewNoteWindow } from './components/NewNoteWindow';
@@ -162,16 +162,6 @@ const App: React.FC = () => {
     const stored = localStorage.getItem('isSpotlightEnabled');
     return stored === null ? true : stored === 'true';
   });
-
-  // Sidebar mode state for main content adjustment
-  const [sidebarMode, setSidebarMode] = useState<SidebarMode>(() => {
-    const saved = localStorage.getItem('sidebarMode');
-    return (saved as SidebarMode) || 'open';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('sidebarMode', sidebarMode);
-  }, [sidebarMode]);
 
   // Persist background choice
   const handleBgChange = (newBg: string) => {
@@ -535,17 +525,10 @@ const App: React.FC = () => {
           onOpenNoteModal={() => handleOpenModal('note')}
           onOpenTaskModal={() => handleOpenModal('task')}
           onOpenPomodoro={() => handleOpenModal('pomodoro')}
-          sidebarMode={sidebarMode}
-          onSidebarModeChange={setSidebarMode}
         />
 
         {/* Main Content Area - With Padding for Sidebar */}
-        <main
-          className={cn(
-            'relative z-10 flex-1 min-h-screen transition-all duration-300 overflow-y-auto',
-            sidebarMode === 'open' ? 'lg:pl-[320px]' : 'lg:pl-4'
-          )}
-        >
+        <main className={cn('relative z-10 flex-1 min-h-screen overflow-y-auto', 'lg:pl-[320px]')}>
           {renderView()}
         </main>
 
