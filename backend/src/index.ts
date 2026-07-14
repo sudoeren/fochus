@@ -31,8 +31,12 @@ const limiter = rateLimit({
 
 // Middleware
 app.use(helmet());
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5800')
+  .split(',')
+  .map((s) => s.trim());
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5800',
+  origin: corsOrigins,
   credentials: true
 }));
 app.use(limiter);
