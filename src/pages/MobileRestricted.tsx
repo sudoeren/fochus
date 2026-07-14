@@ -1,52 +1,55 @@
 import React from 'react';
 import { Laptop, Smartphone, ArrowRight, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../components/ThemeProvider';
 
 export const MobileRestricted: React.FC = () => {
   const { t } = useTranslation();
+  const { isDark } = useTheme();
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 font-sans">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans">
       {/* Background Effects */}
       <div className="absolute inset-0 z-0">
-        {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-
-        {/* Gradient Orbs */}
         <div className="absolute top-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-purple-500/10 rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-md px-6">
-        {/* Main Card */}
-        <div className="backdrop-blur-xl bg-white/70 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 shadow-2xl rounded-3xl p-8 transform transition-all hover:scale-[1.02] duration-500">
-          {/* Icon Composition */}
-          <div className="relative flex justify-center items-center mb-10 h-32">
-            {/* Connection Line */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-1 bg-gradient-to-r from-rose-500/20 to-indigo-500/20 rounded-full" />
+      <div className="relative z-10 w-full max-w-sm px-5">
+        <div className="backdrop-blur-2xl bg-white/85 dark:bg-zinc-950/85 border border-zinc-200/60 dark:border-zinc-700/60 shadow-2xl shadow-zinc-300/30 dark:shadow-black/60 rounded-[24px] p-8 transform transition-all duration-500">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <img
+              src={isDark ? '/logo-dark.svg' : '/logo-light.svg'}
+              alt="Fokus Logo"
+              className="h-12 w-12 object-contain"
+            />
+          </div>
 
-            {/* Mobile Icon (Dimmed & Left) */}
-            <div className="absolute left-10 top-1/2 -translate-y-1/2 transform -rotate-12 opacity-50 blur-[1px] scale-90">
-              <div className="relative p-3 bg-rose-50 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/50">
-                <Smartphone className="w-8 h-8 text-rose-400 dark:text-rose-500/50" />
-                <div className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1 shadow-lg">
-                  <X className="w-3 h-3 text-white" strokeWidth={3} />
+          {/* Icon Composition */}
+          <div className="relative flex justify-center items-center mb-8 h-28">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-0.5 bg-gradient-to-r from-rose-500/20 to-indigo-500/20 rounded-full" />
+
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 transform -rotate-12 opacity-50 blur-[1px] scale-90">
+              <div className="relative p-2.5 bg-rose-50 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/50">
+                <Smartphone className="w-7 h-7 text-rose-400 dark:text-rose-500/50" />
+                <div className="absolute -top-1.5 -right-1.5 bg-rose-500 rounded-full p-0.5 shadow-lg">
+                  <X className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                 </div>
               </div>
             </div>
 
-            {/* Arrow */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-              <ArrowRight className="w-5 h-5 text-zinc-300 dark:text-zinc-600 animate-pulse" />
+              <ArrowRight className="w-4 h-4 text-zinc-300 dark:text-zinc-600 animate-pulse" />
             </div>
 
-            {/* Desktop Icon (Highlighted & Right) */}
-            <div className="absolute right-8 top-1/2 -translate-y-1/2 transform rotate-6 z-10">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 transform rotate-6 z-10">
               <div className="relative p-5 bg-gradient-to-br from-white to-indigo-50 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl border border-indigo-100 dark:border-indigo-500/30 shadow-[0_0_30px_-10px_rgba(79,70,229,0.3)] animate-[float_6s_ease-in-out_infinite]">
                 <Laptop
-                  className="w-12 h-12 text-indigo-600 dark:text-indigo-400"
+                  className="w-11 h-11 text-indigo-600 dark:text-indigo-400"
                   strokeWidth={1.5}
                 />
-                {/* Screen Glow */}
                 <div className="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-400/10 blur-xl rounded-full" />
               </div>
             </div>
@@ -60,15 +63,15 @@ export const MobileRestricted: React.FC = () => {
               </span>
             </h1>
 
-            <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-sm">
+            <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed text-sm">
               {t('mobile_restricted.description')}
             </p>
 
-            <div className="pt-6">
+            <div className="pt-4">
               <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-full">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
                 </span>
                 <span className="text-xs font-medium text-indigo-600 dark:text-indigo-300">
                   {t('mobile_restricted.instruction')}
