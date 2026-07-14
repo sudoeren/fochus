@@ -67,13 +67,10 @@ export const MobileRestricted: React.FC = () => {
               {t('mobile_restricted.description')}
             </p>
 
-            <div className="pt-4">
-              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 rounded-full">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
-                </span>
-                <span className="text-xs font-medium text-indigo-600 dark:text-indigo-300">
+            <div className="pt-6">
+              <div className="flex items-center justify-center gap-3 px-5 py-3.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl shadow-lg shadow-zinc-900/10 transition-all active:scale-[0.98]">
+                <Laptop className="w-4 h-4" />
+                <span className="text-xs font-bold tracking-wide">
                   {t('mobile_restricted.instruction')}
                 </span>
               </div>
