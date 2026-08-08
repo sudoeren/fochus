@@ -33,7 +33,7 @@
     "@types/dompurify": "^3.2.0",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.64.0",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.5",
     "autoprefixer": "^10.5.2",
     "concurrently": "^10.0.4",
     "eslint": "^10.8.0",
