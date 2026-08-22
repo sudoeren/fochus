@@ -16,6 +16,9 @@
     "test": "vitest run",
     "db:studio": "prisma studio"
   },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2"
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
