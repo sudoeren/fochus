@@ -5,7 +5,15 @@
   <span style="color: #666;">Manage Your Productivity and Focus Time</span>
 </p>
 
-<br>
+<p align="center">
+  <a href="https://fochus.erencakar.com"><strong>🌐 fochus.erencakar.com</strong></a> &nbsp;•&nbsp;
+  <a href="https://github.com/sudoeren/fochus">GitHub</a> &nbsp;•&nbsp;
+  <a href="https://github.com/sudoeren/fochus/releases/latest">Download</a>
+  <br>
+  <a href="https://fochus.erencakar.com"><img src="https://img.shields.io/badge/Website-Live-brightgreen?style=flat-square" alt="Website"></a>
+  <a href="https://github.com/sudoeren/fochus/releases/latest"><img src="https://img.shields.io/github/v/release/sudoeren/fochus?style=flat-square" alt="Release"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License"></a>
+</p>
 
 **Fochus** is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
 
