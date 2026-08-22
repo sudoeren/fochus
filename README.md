@@ -6,13 +6,14 @@
 </p>
 
 <p align="center">
-  <a href="https://fochus.erencakar.com"><strong>🌐 fochus.erencakar.com</strong></a> &nbsp;•&nbsp;
-  <a href="https://github.com/sudoeren/fochus">GitHub</a> &nbsp;•&nbsp;
-  <a href="https://github.com/sudoeren/fochus/releases/latest">Download</a>
-  <br>
-  <a href="https://fochus.erencakar.com"><img src="https://img.shields.io/badge/Website-Live-brightgreen?style=flat-square" alt="Website"></a>
-  <a href="https://github.com/sudoeren/fochus/releases/latest"><img src="https://img.shields.io/github/v/release/sudoeren/fochus?style=flat-square" alt="Release"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License"></a>
+  <a href="https://fochus.erencakar.com"><img src="https://img.shields.io/badge/Website-fochus.erencakar.com-111827?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website"></a>
+  <a href="https://github.com/sudoeren/fochus"><img src="https://img.shields.io/badge/GitHub-sudoeren%2Ffochus-24292f?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+  <a href="https://github.com/sudoeren/fochus/releases/latest"><img src="https://img.shields.io/badge/Download-Latest_Release-0ea5e9?style=for-the-badge&logo=download&logoColor=white" alt="Download"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/sudoeren/fochus/releases/latest"><img src="https://img.shields.io/github/v/release/sudoeren/fochus?display_name=release&style=flat-square&color=0ea5e9" alt="Release"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-10b981?style=flat-square" alt="License"></a>
 </p>
 
 **Fochus** is a modern, all-in-one personal productivity suite designed to help you stay organized and focused. It combines task management, note-taking, and a Pomodoro timer into a single, sleek, and intuitive interface.
