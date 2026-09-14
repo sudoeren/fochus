@@ -30,7 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.11.0",
     "prisma": "^6.19.3",
-    "zod": "^4.4.3"
+    "zod": "^4.6.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
