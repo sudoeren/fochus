@@ -46,7 +46,7 @@
     "globals": "^17.13.0",
     "postcss": "^8.5.16",
     "prettier": "^3.9.10",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
