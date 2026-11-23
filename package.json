@@ -49,7 +49,7 @@
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.1"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
